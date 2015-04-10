@@ -35,9 +35,8 @@ main() async {
   final Directory installDir2 = await Directory.systemTemp.createTemp();
   print(installDir2);
 
-  final GitDir gitDir2 = await clone(Uri.parse(p.join(installDir.path, 'shelf_path')),
-  installDir2);
-
+  final GitDir gitDir2 = await clone(
+      Uri.parse(p.join(installDir.path, 'shelf_path')), installDir2);
 }
 
 mainX() async {
