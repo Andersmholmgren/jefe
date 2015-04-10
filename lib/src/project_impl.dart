@@ -1,22 +1,23 @@
 library devops.project.impl;
+
 import 'dart:async';
 import 'project.dart';
 import 'dart:io';
 import 'package:git/git.dart';
 
 class ProjectRefImpl implements ProjectRef {
-  @override
+  final String name;
   final Uri gitUri;
 
-  ProjectRefImpl(this.gitUri);
+  ProjectRefImpl(this.name, this.gitUri);
 
-  @override
-  Future<Project> fetch() {
 
     // TODO: implement fetch
+
+  @override
+  Future<Project> install(Directory parentDir, {bool recursive: true}) {
+    // TODO: implement install
   }
-
-
 
 }
 
@@ -48,9 +49,14 @@ class ProjectImpl implements Project {
   Future update({bool recursive: true}) {
     // TODO: implement update
   }
-
 }
 
-class ModuleImpl implements Module {
+class ModuleImpl implements Module {}
 
+class ProjectMetaDataImpl implements ProjectMetaData {
+  final String name;
+  final Iterable<ProjectRef> childProjects;
+  final Iterable<ModuleRef> modules;
+
+  ProjectMetaDataImpl(this.name, this.childProjects, this.modules);
 }

@@ -1,5 +1,7 @@
 #url: https://bitbucket.org/andersmholmgren/test_devops_top.git
-url: https://bitbucket.org/andersmholmgren/gitbacklog2.git # is this where the grind scripts will live
+#url: https://bitbucket.org/andersmholmgren/gitbacklog2.git # is this where the grind scripts will live
+
+name: gitbacklog
 
 projects:
   child1: https://bitbucket.org/andersmholmgren/gissue2.git

@@ -8,6 +8,14 @@ import 'dart:async';
 import 'package:git/git.dart';
 
 main() async {
+  final ProjectMetaData metadata =
+      await ProjectMetaData.fromProjectYaml(p.absolute('project.yaml'));
+
+  print(metadata.name);
+  print(metadata.childProjects);
+}
+
+mainA() async {
   final Directory installDir = await Directory.systemTemp.createTemp();
 
   print(installDir);
@@ -28,11 +36,12 @@ main() async {
 mainX() async {
   ProjectRef ref = new ProjectRef.fromGitUrl(Uri.parse(''));
 
-  final Project project = await ref.fetch();
-
   final Directory installDir = await Directory.systemTemp.createTemp();
 
   print(installDir);
-  await project.install(installDir);
+
+  final Project project = await ref.install(installDir);
+
+//  await project.install(installDir);
   await project.setupForDev();
 }
