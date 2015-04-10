@@ -7,7 +7,7 @@ import 'package:path/path.dart' as p;
 import 'dart:async';
 import 'package:git/git.dart';
 
-main() async {
+mainB() async {
   final ProjectMetaData metadata =
       await ProjectMetaData.fromProjectYaml(p.absolute('project.yaml'));
 
@@ -15,7 +15,7 @@ main() async {
   print(metadata.childProjects);
 }
 
-mainA() async {
+main() async {
   final Directory installDir = await Directory.systemTemp.createTemp();
 
   print(installDir);
@@ -31,6 +31,13 @@ mainA() async {
       installDir);
 
   print(await gitDir.isWorkingTreeClean());
+
+  final Directory installDir2 = await Directory.systemTemp.createTemp();
+  print(installDir2);
+
+  final GitDir gitDir2 = await clone(Uri.parse(p.join(installDir.path, 'shelf_path')),
+  installDir2);
+
 }
 
 mainX() async {
