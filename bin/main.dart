@@ -98,10 +98,13 @@ Note: needs to figure out dependency graph for that (of project / modules only) 
 ---
 Commands
 
-devops install
-devops dev
-devops release
-devops update  // to update the project.yaml files
+jefe install gitUrl
+jefe dev
+jefe release [major | minor | patch]
+jefe update  // git update (recursive)
+
+jefe feature start
+jefe feature finish
 
 Maybe export grinder tasks too
 
