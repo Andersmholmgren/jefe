@@ -4,8 +4,9 @@ description: A minimal command-line application.
 #author: <your name> <email@example.com>
 #homepage: https://www.example.com
 environment:
-  sdk: '>=1.0.0 <2.0.0'
-#dependencies:
-#  foo_bar: '>=1.0.0 <2.0.0'
-dev_dependencies:
-  unittest: any
+  sdk: '>=1.9.0 <2.0.0'
+dependencies:
+  git: '^0.4.1+1'
+  grinder: '^0.6.2'
+  pub_semver: '^1.1.0'
+  yaml: "^2.0.1+1"

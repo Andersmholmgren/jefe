@@ -83,7 +83,7 @@ run> devops dev
 
   dep_overrides:
   	  gissue_common:
-  	  	path: ../gissue_common in relavent pubspecs
+  	  	path: ../gissue_common in relevant pubspecs
 
 
 run> devops release
@@ -98,9 +98,17 @@ Note: needs to figure out dependency graph for that (of project / modules only) 
 ---
 Commands
 
+devops install
 devops dev
 devops release
+devops update  // to update the project.yaml files
 
 Maybe export grinder tasks too
+
+
+
+---
+backlog project layout
+
 
  */
