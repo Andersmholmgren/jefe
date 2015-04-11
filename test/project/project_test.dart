@@ -4,12 +4,11 @@ import 'package:devops/src/project.dart';
 import 'dart:io';
 import 'package:devops/src/git.dart';
 import 'package:path/path.dart' as p;
-import 'dart:async';
 import 'package:git/git.dart';
 import 'package:logging/logging.dart';
 import 'package:den_api/den_api.dart';
 import 'package:yaml/yaml.dart';
-import 'dart:isolate';
+import 'package:devops/src/yaml/yaml_writer.dart';
 
 mainB() async {
   final ProjectGroupMetaData metadata = await ProjectGroupMetaData
@@ -101,66 +100,3 @@ main() async {
 //  print(toYamlString(doc.contents));
   writeYamlString(doc.contents, stdout);
 }
-
-String toYamlString(YamlNode node) {
-  var sb = new StringBuffer();
-  _writeYamlString(node, 0, sb);
-  return sb.toString();
-}
-
-//String toYamlString(YamlNode node, int indent) {
-//  if (node is YamlMap) {
-//    return mapToYamlString(node, indent);
-//  }
-//}
-//
-//String mapToYamlString(YamlMap node, int indent) {
-//  node.forEach()
-//}
-
-writeYamlString(node, StringSink ss) {
-  _writeYamlString(node, 0, ss, true);
-}
-
-_writeYamlString(node, int indent, StringSink ss, bool isTopLevel) {
-  if (node is YamlMap) {
-    mapToYamlString(node, indent, ss, isTopLevel);
-  } else if (node is YamlList) {
-    listToYamlString(node, indent, ss, isTopLevel);
-  } else {
-//    ss..writeln(_indented(node, indent));
-    ss..writeln(node);
-  }
-}
-
-mapToYamlString(YamlMap node, int indent, StringSink ss, bool isTopLevel) {
-  if (!isTopLevel) {
-    ss.writeln();
-    indent += 2;
-  }
-
-  node.forEach((k, v) {
-    ss
-      ..write(_indent(indent))
-      ..write(k)
-      ..write(': ');
-    _writeYamlString(v, indent, ss, false);
-  });
-}
-
-listToYamlString(YamlList node, int indent, StringSink ss, bool isTopLevel) {
-  if (!isTopLevel) {
-    ss.writeln();
-    indent += 2;
-  }
-
-  node.forEach((v) {
-    ss
-      ..write(_indent(indent))
-      ..write('- ');
-    _writeYamlString(v, indent, ss, false);
-  });
-}
-
-String _indent(int indent) => new List.filled(indent, ' ').join();
-//  (value.toString() as String).padLeft(indent);
