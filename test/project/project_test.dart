@@ -9,11 +9,11 @@ import 'package:git/git.dart';
 import 'package:logging/logging.dart';
 
 mainB() async {
-  final ProjectGroupMetaData metadata =
-      await ProjectGroupMetaData.fromProjectGroupYamlFile(p.absolute('project.yaml'));
+  final ProjectGroupMetaData metadata = await ProjectGroupMetaData
+      .fromProjectGroupYamlFile(p.absolute('project.yaml'));
 
   print(metadata.name);
-  print(metadata.childProjectGroups);
+  print(metadata.childGroups);
 }
 
 mainA() async {

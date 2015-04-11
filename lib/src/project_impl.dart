@@ -9,6 +9,7 @@ import 'project_yaml.dart';
 import 'package:path/path.dart' as p;
 import 'package:quiver/iterables.dart';
 import 'package:logging/logging.dart';
+import 'package:den_api/den_api.dart';
 
 Logger _log = new Logger('devops.project.impl');
 
@@ -23,7 +24,8 @@ class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupRef {
   ProjectGroupRefImpl(String name, Uri gitUri) : super(name, gitUri);
 
   @override
-  Future<ProjectGroup> install(Directory parentDir, {bool recursive: true}) async {
+  Future<ProjectGroup> install(Directory parentDir,
+      {bool recursive: true}) async {
     _log.info('installing group $name from $gitUri into $parentDir');
 
     final Directory projectGroupRoot =
@@ -32,17 +34,19 @@ class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupRef {
 
     final GitDir gitDir = await clone(gitUri, projectGroupRoot);
 
-    final ProjectGroupMetaData metaData = await ProjectGroupMetaData
-        .fromDefaultProjectGroupYamlFile(gitDir.path);
+    final ProjectGroupMetaData metaData =
+        await ProjectGroupMetaData.fromDefaultProjectGroupYamlFile(gitDir.path);
 
     final projectGroupDir = new Directory(gitDir.path);
-    final projectGroup = new ProjectGroupImpl(gitUri, metaData, projectGroupDir);
+    final projectGroup =
+        new ProjectGroupImpl(gitUri, metaData, projectGroupDir);
     if (recursive) {
-      final projectGroupInstallFutures = metaData.childProjectGroups
+      final projectGroupInstallFutures = metaData.childGroups
           .map((ref) => ref.install(projectGroupRoot, recursive: true));
       final projectInstallFutures = metaData.projects
           .map((ref) => ref.install(projectGroupRoot, recursive: true));
-      await Future.wait(concat([projectGroupInstallFutures, projectInstallFutures]));
+      await Future
+          .wait(concat([projectGroupInstallFutures, projectInstallFutures]));
     }
     return projectGroup;
   }
@@ -108,22 +112,24 @@ class ProjectImpl implements Project {
 
   final Directory installDirectory;
 
+  Future<Pubspec> get pubspec => Pubspec.load(installDirectory.path);
+
   ProjectImpl(this.gitUri, this.installDirectory);
 }
 
 class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {
   final String name;
-  final Iterable<ProjectGroupRef> childProjectGroups;
+  final Iterable<ProjectGroupRef> childGroups;
   final Iterable<ProjectRef> projects;
 
-  ProjectGroupMetaDataImpl(this.name, this.childProjectGroups, this.projects);
+  ProjectGroupMetaDataImpl(this.name, this.childGroups, this.projects);
 }
 
-
-
-Future<ProjectGroup> loadProjectGroupFromInstallDirectory(Directory installDirectory) async {
+Future<ProjectGroup> loadProjectGroupFromInstallDirectory(
+    Directory installDirectory) async {
   final gitDirFuture = GitDir.fromExisting(installDirectory.path);
-  final metaDataFuture = ProjectGroupMetaData.fromDefaultProjectGroupYamlFile(installDirectory.path);
+  final metaDataFuture = ProjectGroupMetaData
+      .fromDefaultProjectGroupYamlFile(installDirectory.path);
   final results = await Future.wait([gitDirFuture, metaDataFuture]);
 
   final GitDir gitDir = results.first;

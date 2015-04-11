@@ -5,6 +5,7 @@ import 'dart:io';
 import 'project_impl.dart';
 import 'project_yaml.dart';
 import 'package:path/path.dart' as p;
+import 'package:den_api/den_api.dart';
 
 abstract class Ref<T> {
   String get name;
@@ -14,7 +15,8 @@ abstract class Ref<T> {
 }
 
 abstract class ProjectGroupRef implements Ref<ProjectGroup> {
-  factory ProjectGroupRef.fromGitUrl(String name, Uri gitUri) = ProjectGroupRefImpl;
+  factory ProjectGroupRef.fromGitUrl(
+      String name, Uri gitUri) = ProjectGroupRefImpl;
 }
 
 abstract class ProjectRef implements Ref<Project> {
@@ -26,7 +28,8 @@ abstract class ProjectGroup {
   ProjectGroupMetaData get metaData;
   Directory get installDirectory;
 
-  static Future<ProjectGroup> fromInstallDirectory(Directory installDirectory) =>
+  static Future<ProjectGroup> fromInstallDirectory(
+          Directory installDirectory) =>
       loadProjectGroupFromInstallDirectory(installDirectory);
 
 //  factory ProjectGroup.fromGitUrl(Uri gitUri);
@@ -51,19 +54,21 @@ abstract class ProjectGroup {
 abstract class Project {
   Uri get gitUri;
   Directory get installDirectory;
+  Future<Pubspec> get pubspec;
 }
 
 abstract class ProjectGroupMetaData {
 //  Uri get gitUri;
   String get name;
-  Iterable<ProjectGroupRef> get childProjectGroups;
+  Iterable<ProjectGroupRef> get childGroups;
   Iterable<ProjectRef> get projects;
 
   static Future<ProjectGroupMetaData> fromDefaultProjectGroupYamlFile(
           String projectGroupDirectory) =>
       fromProjectGroupYamlFile(p.join(projectGroupDirectory, 'project.yaml'));
 
-  static Future<ProjectGroupMetaData> fromProjectGroupYamlFile(String projectGroupFile) =>
+  static Future<ProjectGroupMetaData> fromProjectGroupYamlFile(
+          String projectGroupFile) =>
       readProjectGroupYaml(new File(projectGroupFile));
 }
 
