@@ -17,8 +17,8 @@ abstract class ProjectGroupRef implements Ref<ProjectGroup> {
   factory ProjectGroupRef.fromGitUrl(String name, Uri gitUri) = ProjectGroupRefImpl;
 }
 
-abstract class ModuleRef implements Ref<Module> {
-//  factory ModuleRef.fromGitUrl(Uri gitUri);
+abstract class ProjectRef implements Ref<Project> {
+//  factory ProjectRef.fromGitUrl(Uri gitUri);
 }
 
 abstract class ProjectGroup {
@@ -48,7 +48,7 @@ abstract class ProjectGroup {
   //  e.g Future checkout(String version, {bool recursive: true});
 }
 
-abstract class Module {
+abstract class Project {
   Uri get gitUri;
   Directory get installDirectory;
 }
@@ -57,7 +57,7 @@ abstract class ProjectGroupMetaData {
 //  Uri get gitUri;
   String get name;
   Iterable<ProjectGroupRef> get childProjectGroups;
-  Iterable<ModuleRef> get modules;
+  Iterable<ProjectRef> get projects;
 
   static Future<ProjectGroupMetaData> fromDefaultProjectGroupYamlFile(
           String projectgroupDirectory) =>

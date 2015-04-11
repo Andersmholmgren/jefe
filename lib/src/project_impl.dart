@@ -40,23 +40,23 @@ class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupRef {
     if (recursive) {
       final projectgroupInstallFutures = metaData.childProjectGroups
           .map((ref) => ref.install(projectgroupRoot, recursive: true));
-      final moduleInstallFutures = metaData.modules
+      final projectInstallFutures = metaData.projects
           .map((ref) => ref.install(projectgroupRoot, recursive: true));
-      await Future.wait(concat([projectgroupInstallFutures, moduleInstallFutures]));
+      await Future.wait(concat([projectgroupInstallFutures, projectInstallFutures]));
     }
     return projectgroup;
   }
 }
 
-class ModuleRefImpl extends _BaseRef implements ModuleRef {
-  ModuleRefImpl(String name, Uri gitUri) : super(name, gitUri);
+class ProjectRefImpl extends _BaseRef implements ProjectRef {
+  ProjectRefImpl(String name, Uri gitUri) : super(name, gitUri);
 
   @override
-  Future<Module> install(Directory parentDir, {bool recursive: true}) async {
-    _log.info('installing module $name from $gitUri into $parentDir');
+  Future<Project> install(Directory parentDir, {bool recursive: true}) async {
+    _log.info('installing project $name from $gitUri into $parentDir');
 
     final GitDir gitDir = await clone(gitUri, parentDir);
-    return new ModuleImpl(gitUri, new Directory(gitUri.path));
+    return new ProjectImpl(gitUri, new Directory(gitUri.path));
   }
 }
 
@@ -103,20 +103,20 @@ class ProjectGroupImpl implements ProjectGroup {
   }
 }
 
-class ModuleImpl implements Module {
+class ProjectImpl implements Project {
   final Uri gitUri;
 
   final Directory installDirectory;
 
-  ModuleImpl(this.gitUri, this.installDirectory);
+  ProjectImpl(this.gitUri, this.installDirectory);
 }
 
 class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {
   final String name;
   final Iterable<ProjectGroupRef> childProjectGroups;
-  final Iterable<ModuleRef> modules;
+  final Iterable<ProjectRef> projects;
 
-  ProjectGroupMetaDataImpl(this.name, this.childProjectGroups, this.modules);
+  ProjectGroupMetaDataImpl(this.name, this.childProjectGroups, this.projects);
 }
 
 

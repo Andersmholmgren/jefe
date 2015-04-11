@@ -6,6 +6,6 @@ name: gitbacklog
 projectgroups:
   child1: https://bitbucket.org/andersmholmgren/gissue2.git
 
-modules:
+projects:
   gitbacklog_client: https://bitbucket.org/andersmholmgren/gitbacklog_client.git
   gitbacklog_server: https://bitbucket.org/andersmholmgren/gitbacklog_server.git

@@ -12,17 +12,17 @@ Future<ProjectGroupMetaData> readProjectGroupYaml(File projectgroupFile) async {
 
   print(yaml);
 
-  final Map projectgroupsMap = yaml['projectgroups'] != null ? yaml['projectgroups'] : {};
+  final Map projectgroupsMap = yaml['groups'] != null ? yaml['groups'] : {};
   print(projectgroupsMap);
 
-  final Map modulesMap = yaml['modules'] != null ? yaml['modules'] : {};
-  print(modulesMap);
+  final Map projectsMap = yaml['projects'] != null ? yaml['projects'] : {};
+  print(projectsMap);
 
   final childProjectGroups = projectgroupsMap.keys
       .map((k) => new ProjectGroupRefImpl(k, Uri.parse(projectgroupsMap[k])));
 
-  final childModules = modulesMap.keys
-      .map((k) => new ModuleRefImpl(k, Uri.parse(modulesMap[k])));
+  final childProjects = projectsMap.keys
+      .map((k) => new ProjectRefImpl(k, Uri.parse(projectsMap[k])));
 
-  return new ProjectGroupMetaDataImpl(yaml['name'], childProjectGroups, childModules);
+  return new ProjectGroupMetaDataImpl(yaml['name'], childProjectGroups, childProjects);
 }
