@@ -13,7 +13,7 @@ import 'package:den_api/den_api.dart';
 
 Logger _log = new Logger('devops.project.impl');
 
-abstract class _BaseRef<T> implements Ref<T> {
+abstract class _BaseRef<T> implements _Ref<T> {
   final String name;
   final Uri gitUri;
 

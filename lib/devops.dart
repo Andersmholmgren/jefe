@@ -4,6 +4,4 @@
 /// The devops library.
 library devops;
 
-int calculate() {
-  return 6 * 7;
-}
+export 'src/project.dart';

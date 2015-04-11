@@ -7,19 +7,19 @@ import 'project_yaml.dart';
 import 'package:path/path.dart' as p;
 import 'package:den_api/den_api.dart';
 
-abstract class Ref<T> {
+abstract class _Ref<T> {
   String get name;
   Uri get gitUri;
 
   Future<T> install(Directory parentDir, {bool recursive: true});
 }
 
-abstract class ProjectGroupRef implements Ref<ProjectGroup> {
+abstract class ProjectGroupRef implements _Ref<ProjectGroup> {
   factory ProjectGroupRef.fromGitUrl(
       String name, Uri gitUri) = ProjectGroupRefImpl;
 }
 
-abstract class ProjectRef implements Ref<Project> {
+abstract class ProjectRef implements _Ref<Project> {
 //  factory ProjectRef.fromGitUrl(Uri gitUri);
 }
 
@@ -28,13 +28,14 @@ abstract class ProjectGroup {
   ProjectGroupMetaData get metaData;
   Directory get installDirectory;
 
+  static Future<ProjectGroup> install(
+      String name, Uri gitUri, Directory parentDir,
+      {bool recursive: true}) => new ProjectGroupRef.fromGitUrl(name, gitUri)
+      .install(parentDir, recursive: recursive);
+
   static Future<ProjectGroup> fromInstallDirectory(
           Directory installDirectory) =>
       loadProjectGroupFromInstallDirectory(installDirectory);
-
-//  factory ProjectGroup.fromGitUrl(Uri gitUri);
-
-//  Future install(Directory parentDir, {bool recursive: true});
 
   Future<ProjectGroup> childProjectGroup(ProjectGroupRef ref);
 
