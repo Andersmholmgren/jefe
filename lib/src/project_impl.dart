@@ -129,16 +129,15 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   }
 
   @override
-  Future featureStart(String name, {bool recursive: true}) {
-    // TODO: implement featureStart
+  Future featureStart(String name, {bool recursive: true}) async {
+    _log.info('git flow feature start $name for group ${metaData.name}');
+    await Future.wait((await allProjects).map((p) => p.featureStart(name)));
   }
 
   @override
   Future initFlow({bool recursive: true}) async {
     _log.info('Initialising git flow for group ${metaData.name}');
-    final Set<Project> projects = await allProjects;
-
-    await Future.wait(projects.map((p) => p.initFlow()));
+    await Future.wait((await allProjects).map((p) => p.initFlow()));
   }
 
   @override
@@ -175,9 +174,11 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
       : super(gitUri, installDirectory);
 
   @override
-  Future initFlow() async {
-    initGitFlow(await gitDir);
-  }
+  Future initFlow() async => initGitFlow(await gitDir);
+
+  @override
+  Future featureStart(String featureName) async =>
+      gitFlowFeatureStart(await gitDir, featureName);
 }
 
 class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {

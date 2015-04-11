@@ -40,3 +40,6 @@ Future<Uri> getFirstRemote(GitDir gitDir) async {
 
 Future initGitFlow(GitDir gitDir) async =>
     await gitDir.runCommand(['flow', 'init', '-d']);
+
+Future gitFlowFeatureStart(GitDir gitDir, String featureName) async =>
+    await gitDir.runCommand(['flow', 'feature', 'start', featureName]);

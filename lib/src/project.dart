@@ -75,6 +75,8 @@ abstract class Project extends ProjectEntity {
       loadProjectFromInstallDirectory(installDirectory);
 
   Future initFlow();
+
+  Future featureStart(String featureName);
 }
 
 abstract class ProjectGroupMetaData {
