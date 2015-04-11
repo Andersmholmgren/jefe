@@ -9,6 +9,7 @@ import 'package:quiver/iterables.dart';
 import 'package:logging/logging.dart';
 import 'package:den_api/den_api.dart';
 import 'package:path/path.dart' as p;
+import 'dependency_graph.dart';
 
 Logger _log = new Logger('devops.project.impl');
 
@@ -118,18 +119,25 @@ class ProjectGroupImpl implements ProjectGroup {
   }
 
   @override
-  Future<Set<Project>> get allProjects {
-//    metaData.projects
+  Future<Set<Project>> get allProjects async {
+    final List<Future<Project>> projectFutures = [];
+    _addAll(projectFutures, this);
+    return (await Future.wait(projectFutures)).toSet();
   }
 
-  static Future _addAll(Set<Project> projects, ProjectGroup group) {
-    projects.addAll(group.metaData.projects);
+  static void _addAll(List<Future<Project>> projects, ProjectGroup group) {
+    projects.addAll(
+        group.metaData.projects.map((p) => p.load(group.installDirectory)));
+
+    group.metaData.childGroups.forEach((g) => _addAll(projects, g));
   }
 
   @override
   Future processDependenciesDepthFirst(
-      process(Project project, Iterable<Project> dependencies)) {
-    // TODO: implement processDependenciesDepthFirst
+      process(Project project, Iterable<Project> dependencies)) async {
+    final projects = await allProjects;
+    final DependencyGraph graph = await getDependencyGraph(projects);
+    graph.depthFirst(process);
   }
 }
 

@@ -22,7 +22,7 @@ abstract class ProjectGroupRef implements Ref<ProjectGroup> {
 }
 
 abstract class ProjectRef implements Ref<Project> {
-  factory ProjectRef.fromGitUrl(String name, Uri gitUri) = ProjectImpl;
+  factory ProjectRef.fromGitUrl(String name, Uri gitUri) = ProjectRefImpl;
 }
 
 abstract class ProjectGroup {
