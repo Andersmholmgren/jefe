@@ -13,7 +13,7 @@ abstract class Ref<T> {
 }
 
 abstract class ProjectRef implements Ref<Project> {
-  factory ProjectRef.fromGitUrl(Uri gitUri) = ProjectRefImpl;
+  factory ProjectRef.fromGitUrl(String name, Uri gitUri) = ProjectRefImpl;
 }
 
 abstract class ModuleRef implements Ref<Module> {

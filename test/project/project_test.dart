@@ -15,7 +15,7 @@ mainB() async {
   print(metadata.childProjects);
 }
 
-main() async {
+mainA() async {
   final Directory installDir = await Directory.systemTemp.createTemp();
 
   print(installDir);
@@ -39,8 +39,9 @@ main() async {
       Uri.parse(p.join(installDir.path, 'shelf_path')), installDir2);
 }
 
-mainX() async {
-  ProjectRef ref = new ProjectRef.fromGitUrl(Uri.parse(''));
+main() async {
+  ProjectRef ref = new ProjectRef.fromGitUrl(
+      'top', Uri.parse('/Users/blah/dart/jefe_jefe/jefe_test_projects/top'));
 
   final Directory installDir = await Directory.systemTemp.createTemp();
 
