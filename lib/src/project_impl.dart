@@ -108,10 +108,12 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     // TODO: implement release
   }
 
+  // TODO: this is likely problematic as the process method returns a Future
+  // but this is not catered for!&^*&!^*!^!
   @override
-  Future setupForDev({bool recursive: true}) {
-    // TODO: implement setupForDev
-  }
+  Future setupForDev({bool recursive: true}) => processDependenciesDepthFirst(
+      (Project project, Iterable<Project> dependencies) =>
+          project.setDevDependencies(dependencies));
 
   @override
   Future update({bool recursive: true}) {
@@ -179,6 +181,13 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   @override
   Future featureStart(String featureName) async =>
       gitFlowFeatureStart(await gitDir, featureName);
+
+  @override
+  Future setDevDependencies(Iterable<Project> dependencies) async {
+    final Pubspec _pubspec = await pubspec;
+
+//    _pubspec.dependencyOverrides
+  }
 }
 
 class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {

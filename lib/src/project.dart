@@ -77,6 +77,8 @@ abstract class Project extends ProjectEntity {
   Future initFlow();
 
   Future featureStart(String featureName);
+
+  Future setDevDependencies(Iterable<Project> dependencies);
 }
 
 abstract class ProjectGroupMetaData {

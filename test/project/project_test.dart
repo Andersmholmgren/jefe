@@ -7,6 +7,9 @@ import 'package:path/path.dart' as p;
 import 'dart:async';
 import 'package:git/git.dart';
 import 'package:logging/logging.dart';
+import 'package:den_api/den_api.dart';
+import 'package:yaml/yaml.dart';
+import 'dart:isolate';
 
 mainB() async {
   final ProjectGroupMetaData metadata = await ProjectGroupMetaData
@@ -44,7 +47,7 @@ mainA() async {
 //  getRemotes(await GitDir.fromExisting('/Users/blah/dart/shelf/shelf_route'));
 //}
 
-main() async {
+main99() async {
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen(print);
   hierarchicalLoggingEnabled = true;
@@ -70,3 +73,94 @@ main() async {
   await projectGroup2.initFlow();
   await projectGroup2.featureStart('blah');
 }
+
+mainVV() async {
+  var pubspecPath = '/Users/blah/dart/backlogio/gissue/gissue_client';
+  print(pubspecPath);
+  final Pubspec pubspec = await Pubspec.load(pubspecPath);
+//  pubspec.name = 'something much longer than the original';
+  print(pubspec.contents);
+  print(pubspec.dependencies);
+//  pubspec.addDependency(new PackageDep('quiver', 'path', null, '../quiver'));
+//  pubspec.addDependency(new PackageDep('ah_polymer_stuff', 'path', null, '../ah_polymer_stuff'));
+  pubspec.addDependency(new PackageDep('quiver', 'git', null, 'quiver'));
+
+  print(pubspec.dependencies);
+  print(pubspec.contents);
+}
+
+main() async {
+  var pubspecPath =
+      '/Users/blah/dart/backlogio/gissue/gissue_client/pubspec.yaml';
+  print(pubspecPath);
+//  final Pubspec pubspec = await Pubspec.load(pubspecPath);
+  var pubspecStr = await new File(pubspecPath).readAsString();
+  print(pubspecStr);
+  final YamlDocument doc = loadYamlDocument(pubspecStr);
+  print(doc.toString());
+//  print(toYamlString(doc.contents));
+  writeYamlString(doc.contents, stdout);
+}
+
+String toYamlString(YamlNode node) {
+  var sb = new StringBuffer();
+  _writeYamlString(node, 0, sb);
+  return sb.toString();
+}
+
+//String toYamlString(YamlNode node, int indent) {
+//  if (node is YamlMap) {
+//    return mapToYamlString(node, indent);
+//  }
+//}
+//
+//String mapToYamlString(YamlMap node, int indent) {
+//  node.forEach()
+//}
+
+writeYamlString(node, StringSink ss) {
+  _writeYamlString(node, 0, ss, true);
+}
+
+_writeYamlString(node, int indent, StringSink ss, bool isTopLevel) {
+  if (node is YamlMap) {
+    mapToYamlString(node, indent, ss, isTopLevel);
+  } else if (node is YamlList) {
+    listToYamlString(node, indent, ss, isTopLevel);
+  } else {
+//    ss..writeln(_indented(node, indent));
+    ss..writeln(node);
+  }
+}
+
+mapToYamlString(YamlMap node, int indent, StringSink ss, bool isTopLevel) {
+  if (!isTopLevel) {
+    ss.writeln();
+    indent += 2;
+  }
+
+  node.forEach((k, v) {
+    ss
+      ..write(_indent(indent))
+      ..write(k)
+      ..write(': ');
+    _writeYamlString(v, indent, ss, false);
+  });
+}
+
+listToYamlString(YamlList node, int indent, StringSink ss, bool isTopLevel) {
+  if (!isTopLevel) {
+    ss.writeln();
+    indent += 2;
+  }
+
+  node.forEach((v) {
+    ss
+      ..write(_indent(indent))
+      ..write('- ');
+    _writeYamlString(v, indent, ss, false);
+  });
+}
+
+String _indent(int indent) => new List.filled(indent, ' ').join();
+//  (value.toString() as String).padLeft(indent);
