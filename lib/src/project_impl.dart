@@ -5,6 +5,7 @@ import 'project.dart';
 import 'dart:io';
 import 'package:git/git.dart';
 import 'package:devops/src/git.dart';
+import 'project_yaml.dart';
 import 'package:path/path.dart' as p;
 import 'package:quiver/iterables.dart';
 import 'package:logging/logging.dart';
@@ -32,7 +33,7 @@ class ProjectRefImpl extends _BaseRef implements ProjectRef {
     final GitDir gitDir = await clone(gitUri, projectRoot);
 
     final ProjectMetaData metaData = await ProjectMetaData
-        .fromProjectYaml(p.join(gitDir.path, 'project.yaml'));
+        .fromDefaultProjectYamlFile(gitDir.path);
 
     final projectDir = new Directory(gitDir.path);
     final project = new ProjectImpl(gitUri, metaData, projectDir);
@@ -53,7 +54,7 @@ class ModuleRefImpl extends _BaseRef implements ModuleRef {
   @override
   Future<Module> install(Directory parentDir, {bool recursive: true}) async {
     _log.info('installing module $name from $gitUri into $parentDir');
-    
+
     final GitDir gitDir = await clone(gitUri, parentDir);
     return new ModuleImpl(gitUri, new Directory(gitUri.path));
   }
@@ -116,4 +117,17 @@ class ProjectMetaDataImpl implements ProjectMetaData {
   final Iterable<ModuleRef> modules;
 
   ProjectMetaDataImpl(this.name, this.childProjects, this.modules);
+}
+
+
+
+Future<Project> loadProjectFromInstallDirectory(Directory installDirectory) async {
+  final gitDirFuture = GitDir.fromExisting(installDirectory.path);
+  final metaDataFuture = ProjectMetaData.fromDefaultProjectYamlFile(installDirectory.path);
+  final results = await Future.wait([gitDirFuture, metaDataFuture]);
+
+  final GitDir gitDir = results.first;
+
+  final Uri gitUri = await getFirstRemote(gitDir);
+  return new ProjectImpl(gitUri, results.elementAt(1), installDirectory);
 }

@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'project_impl.dart';
 import 'project_yaml.dart';
+import 'package:path/path.dart' as p;
 
 abstract class Ref<T> {
   String get name;
@@ -25,7 +26,9 @@ abstract class Project {
   ProjectMetaData get metaData;
   Directory get installDirectory;
 
-//  factory Project.fromProjectYaml(String projectFile);
+  static Future<Project> fromInstallDirectory(Directory installDirectory) =>
+      loadProjectFromInstallDirectory(installDirectory);
+
 //  factory Project.fromGitUrl(Uri gitUri);
 
 //  Future install(Directory parentDir, {bool recursive: true});
@@ -48,7 +51,6 @@ abstract class Project {
 abstract class Module {
   Uri get gitUri;
   Directory get installDirectory;
-
 }
 
 abstract class ProjectMetaData {
@@ -57,7 +59,11 @@ abstract class ProjectMetaData {
   Iterable<ProjectRef> get childProjects;
   Iterable<ModuleRef> get modules;
 
-  static Future<ProjectMetaData> fromProjectYaml(String projectFile) =>
+  static Future<ProjectMetaData> fromDefaultProjectYamlFile(
+          String projectDirectory) =>
+      fromProjectYamlFile(p.join(projectDirectory, 'project.yaml'));
+
+  static Future<ProjectMetaData> fromProjectYamlFile(String projectFile) =>
       readProjectYaml(new File(projectFile));
 }
 

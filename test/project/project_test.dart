@@ -8,11 +8,9 @@ import 'dart:async';
 import 'package:git/git.dart';
 import 'package:logging/logging.dart';
 
-
-
 mainB() async {
   final ProjectMetaData metadata =
-      await ProjectMetaData.fromProjectYaml(p.absolute('project.yaml'));
+      await ProjectMetaData.fromProjectYamlFile(p.absolute('project.yaml'));
 
   print(metadata.name);
   print(metadata.childProjects);
@@ -42,10 +40,14 @@ mainA() async {
       Uri.parse(p.join(installDir.path, 'shelf_path')), installDir2);
 }
 
+//main() async {
+//  getRemotes(await GitDir.fromExisting('/Users/blah/dart/shelf/shelf_route'));
+//}
+
 main() async {
-  Logger.root.level=Level.ALL;
+  Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen(print);
-  hierarchicalLoggingEnabled=true;
+  hierarchicalLoggingEnabled = true;
 
   ProjectRef ref = new ProjectRef.fromGitUrl(
       'top', Uri.parse('/Users/blah/dart/jefe_jefe/jefe_test_projects/top'));
@@ -57,5 +59,11 @@ main() async {
   final Project project = await ref.install(installDir);
 
 //  await project.install(installDir);
-  await project.setupForDev();
+//  await project.setupForDev();
+
+  final Project project2 =
+      await Project.fromInstallDirectory(project.installDirectory);
+  print(project2.gitUri);
+  print(project2.installDirectory);
+  print(project2.metaData);
 }
