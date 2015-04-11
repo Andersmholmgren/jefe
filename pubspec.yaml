@@ -10,3 +10,4 @@ dependencies:
   grinder: '^0.6.2'
   pub_semver: '^1.1.0'
   yaml: "^2.0.1+1"
+  quiver: any

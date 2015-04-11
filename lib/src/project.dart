@@ -36,6 +36,7 @@ abstract class Project {
   Future setupForDev({bool recursive: true});
   Future release({bool recursive: true, ReleaseType type: ReleaseType.minor});
 
+  Future initFlow({bool recursive: true});
   Future featureStart(String name, {bool recursive: true});
   Future featureEnd(String name, {bool recursive: true});
 
@@ -44,7 +45,11 @@ abstract class Project {
   //  e.g Future checkout(String version, {bool recursive: true});
 }
 
-class Module {}
+abstract class Module {
+  Uri get gitUri;
+  Directory get installDirectory;
+
+}
 
 abstract class ProjectMetaData {
 //  Uri get gitUri;

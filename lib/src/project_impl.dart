@@ -6,21 +6,23 @@ import 'dart:io';
 import 'package:git/git.dart';
 import 'package:devops/src/git.dart';
 import 'package:path/path.dart' as p;
+import 'package:quiver/iterables.dart';
 
-class ProjectRefImpl implements ProjectRef {
+abstract class _BaseRef<T> implements Ref<T> {
   final String name;
   final Uri gitUri;
 
-  ProjectRefImpl(this.name, this.gitUri);
+  _BaseRef(this.name, this.gitUri);
+}
 
-  // TODO: implement fetch
+class ProjectRefImpl extends _BaseRef implements ProjectRef {
+  ProjectRefImpl(String name, Uri gitUri) : super(name, gitUri);
 
   @override
   Future<Project> install(Directory parentDir, {bool recursive: true}) async {
     final Directory projectRoot =
-        new Directory(gitWorkspacePath(gitUri, parentDir) + '_root');
-
-    await projectRoot.create(recursive: true);
+        await new Directory(gitWorkspacePath(gitUri, parentDir) + '_root')
+            .create(recursive: true);
 
     final GitDir gitDir = await clone(gitUri, projectRoot);
 
@@ -30,10 +32,23 @@ class ProjectRefImpl implements ProjectRef {
     final projectDir = new Directory(gitDir.path);
     final project = new ProjectImpl(gitUri, metaData, projectDir);
     if (recursive) {
-      await Future.wait(metaData.childProjects
-          .map((ref) => ref.install(projectRoot, recursive: true)));
+      final projectInstallFutures = metaData.childProjects
+          .map((ref) => ref.install(projectRoot, recursive: true));
+      final moduleInstallFutures = metaData.modules
+          .map((ref) => ref.install(projectRoot, recursive: true));
+      await Future.wait(concat([projectInstallFutures, moduleInstallFutures]));
     }
     return project;
+  }
+}
+
+class ModuleRefImpl extends _BaseRef implements ModuleRef {
+  ModuleRefImpl(String name, Uri gitUri) : super(name, gitUri);
+
+  @override
+  Future<Module> install(Directory parentDir, {bool recursive: true}) async {
+    final GitDir gitDir = await clone(gitUri, parentDir);
+    return new ModuleImpl(gitUri, new Directory(gitUri.path));
   }
 }
 
@@ -73,9 +88,20 @@ class ProjectImpl implements Project {
   Future featureStart(String name, {bool recursive: true}) {
     // TODO: implement featureStart
   }
+
+  @override
+  Future initFlow({bool recursive: true}) {
+    // TODO: implement initFlow
+  }
 }
 
-class ModuleImpl implements Module {}
+class ModuleImpl implements Module {
+  final Uri gitUri;
+
+  final Directory installDirectory;
+
+  ModuleImpl(this.gitUri, this.installDirectory);
+}
 
 class ProjectMetaDataImpl implements ProjectMetaData {
   final String name;
