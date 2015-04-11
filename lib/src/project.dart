@@ -38,6 +38,11 @@ abstract class ProjectGroup {
 
   Future<ProjectGroup> childProjectGroup(ProjectGroupRef ref);
 
+  Future<Set<Project>> get allProjects;
+
+  Future processDependenciesDepthFirst(
+      process(Project project, Iterable<Project> dependencies));
+
   Future update({bool recursive: true});
   Future setupForDev({bool recursive: true});
   Future release({bool recursive: true, ReleaseType type: ReleaseType.minor});

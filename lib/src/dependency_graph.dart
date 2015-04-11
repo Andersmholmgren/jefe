@@ -4,19 +4,15 @@ import 'package:devops/src/project.dart';
 import 'dart:async';
 import 'package:den_api/den_api.dart';
 
-class ProjectDependencies {
-  final Project project;
-  final Set<Project> dependencies;
+Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>
+    new DependencyGraph(await _determineDependencies(projects));
 
-  ProjectDependencies(this.project, this.dependencies);
-}
-
-Future<Set<ProjectDependencies>> determineDependencies(
+Future<Set<_ProjectDependencies>> _determineDependencies(
         Set<Project> projects) async =>
     (await Future.wait(projects.map((p) => _resolveDependencies(
         p, new Map.fromIterable(projects, key: (p) => p.name))))).toSet();
 
-Future<ProjectDependencies> _resolveDependencies(
+Future<_ProjectDependencies> _resolveDependencies(
     Project project, Map<String, Project> projects) async {
   final Pubspec pubspec = await project.pubspec;
   final dependencies = pubspec.dependencies.keys
@@ -24,28 +20,36 @@ Future<ProjectDependencies> _resolveDependencies(
       .where((v) => v != null)
       .toSet();
 
-  return new ProjectDependencies(project, dependencies);
+  return new _ProjectDependencies(project, dependencies);
 }
 
 class DependencyGraph {
   // root nodes are those that nothing else depends on
-  Set<DependencyNode> get rootNodes => _rootNodeMap.values.toSet();
-  Map<Project, DependencyNode> _rootNodeMap = {};
+  Set<_DependencyNode> get _rootNodes => _rootNodeMap.values.toSet();
+  Map<Project, _DependencyNode> _rootNodeMap = {};
 
-  Map<Project, DependencyNode> _nodeMap = {};
+  Map<Project, _DependencyNode> _nodeMap = {};
 
-  void add(Project project, Set<Project> dependencies) {
+  DependencyGraph(Set<_ProjectDependencies> dependencySet) {
+    dependencySet.forEach((ds) => _add(ds.project, ds.dependencies));
+  }
+
+  void _add(Project project, Set<Project> dependencies) {
     final node = _getOrCreateNode(project);
 
-    node.dependencies.addAll(dependencies.map(_getOrCreateNode));
+    node._dependencies.addAll(dependencies.map(_getOrCreateNode));
 
     dependencies.forEach((p) => _rootNodeMap.remove(p));
   }
 
-  DependencyNode _getOrCreateNode(Project project) {
+  void depthFirst(process(Project project, Iterable<Project> dependencies)) {
+    _rootNodes.forEach((n) => n.depthFirst(process));
+  }
+
+  _DependencyNode _getOrCreateNode(Project project) {
     var node = _nodeMap[project]; // TODO: is this possible?
     if (node == null) {
-      node = new DependencyNode(project);
+      node = new _DependencyNode(project);
       _nodeMap[project] = node;
       _rootNodeMap[project] = node;
     }
@@ -53,9 +57,23 @@ class DependencyGraph {
     return node;
   }
 }
-class DependencyNode {
-  final Project project;
-  final List<DependencyNode> dependencies = [];
 
-  DependencyNode(this.project);
+class _DependencyNode {
+  final Project project;
+  final Set<_DependencyNode> _dependencies = new Set();
+  Iterable<Project> get dependencies => _dependencies.map((n) => n.project);
+
+  _DependencyNode(this.project);
+
+  void depthFirst(process(Project project, Iterable<Project> dependencies)) {
+    _dependencies.forEach((n) => n.depthFirst(process));
+    process(project, dependencies);
+  }
+}
+
+class _ProjectDependencies {
+  final Project project;
+  final Set<Project> dependencies;
+
+  _ProjectDependencies(this.project, this.dependencies);
 }
