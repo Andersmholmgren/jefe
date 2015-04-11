@@ -26,25 +26,25 @@ class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupRef {
   Future<ProjectGroup> install(Directory parentDir, {bool recursive: true}) async {
     _log.info('installing group $name from $gitUri into $parentDir');
 
-    final Directory projectgroupRoot =
+    final Directory projectGroupRoot =
         await new Directory(gitWorkspacePath(gitUri, parentDir) + '_root')
             .create(recursive: true);
 
-    final GitDir gitDir = await clone(gitUri, projectgroupRoot);
+    final GitDir gitDir = await clone(gitUri, projectGroupRoot);
 
     final ProjectGroupMetaData metaData = await ProjectGroupMetaData
         .fromDefaultProjectGroupYamlFile(gitDir.path);
 
-    final projectgroupDir = new Directory(gitDir.path);
-    final projectgroup = new ProjectGroupImpl(gitUri, metaData, projectgroupDir);
+    final projectGroupDir = new Directory(gitDir.path);
+    final projectGroup = new ProjectGroupImpl(gitUri, metaData, projectGroupDir);
     if (recursive) {
-      final projectgroupInstallFutures = metaData.childProjectGroups
-          .map((ref) => ref.install(projectgroupRoot, recursive: true));
+      final projectGroupInstallFutures = metaData.childProjectGroups
+          .map((ref) => ref.install(projectGroupRoot, recursive: true));
       final projectInstallFutures = metaData.projects
-          .map((ref) => ref.install(projectgroupRoot, recursive: true));
-      await Future.wait(concat([projectgroupInstallFutures, projectInstallFutures]));
+          .map((ref) => ref.install(projectGroupRoot, recursive: true));
+      await Future.wait(concat([projectGroupInstallFutures, projectInstallFutures]));
     }
-    return projectgroup;
+    return projectGroup;
   }
 }
 

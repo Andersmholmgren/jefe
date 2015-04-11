@@ -60,11 +60,11 @@ abstract class ProjectGroupMetaData {
   Iterable<ProjectRef> get projects;
 
   static Future<ProjectGroupMetaData> fromDefaultProjectGroupYamlFile(
-          String projectgroupDirectory) =>
-      fromProjectGroupYamlFile(p.join(projectgroupDirectory, 'project.yaml'));
+          String projectGroupDirectory) =>
+      fromProjectGroupYamlFile(p.join(projectGroupDirectory, 'project.yaml'));
 
-  static Future<ProjectGroupMetaData> fromProjectGroupYamlFile(String projectgroupFile) =>
-      readProjectGroupYaml(new File(projectgroupFile));
+  static Future<ProjectGroupMetaData> fromProjectGroupYamlFile(String projectGroupFile) =>
+      readProjectGroupYaml(new File(projectGroupFile));
 }
 
 enum ReleaseType { major, minor, patch }

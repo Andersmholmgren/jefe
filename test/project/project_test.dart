@@ -56,14 +56,14 @@ main() async {
 
   print(installDir);
 
-  final ProjectGroup projectgroup = await ref.install(installDir);
+  final ProjectGroup projectGroup = await ref.install(installDir);
 
-//  await projectgroup.install(installDir);
-//  await projectgroup.setupForDev();
+//  await projectGroup.install(installDir);
+//  await projectGroup.setupForDev();
 
-  final ProjectGroup projectgroup2 =
-      await ProjectGroup.fromInstallDirectory(projectgroup.installDirectory);
-  print(projectgroup2.gitUri);
-  print(projectgroup2.installDirectory);
-  print(projectgroup2.metaData);
+  final ProjectGroup projectGroup2 =
+      await ProjectGroup.fromInstallDirectory(projectGroup.installDirectory);
+  print(projectGroup2.gitUri);
+  print(projectGroup2.installDirectory);
+  print(projectGroup2.metaData);
 }

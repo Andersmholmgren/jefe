@@ -3,7 +3,7 @@
 
 name: gitbacklog
 
-projectgroups:
+groups:
   child1: https://bitbucket.org/andersmholmgren/gissue2.git
 
 projects:
