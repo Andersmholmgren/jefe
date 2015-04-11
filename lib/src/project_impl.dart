@@ -24,7 +24,7 @@ class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupRef {
 
   @override
   Future<ProjectGroup> install(Directory parentDir, {bool recursive: true}) async {
-    _log.info('installing projectgroup $name from $gitUri into $parentDir');
+    _log.info('installing group $name from $gitUri into $parentDir');
 
     final Directory projectgroupRoot =
         await new Directory(gitWorkspacePath(gitUri, parentDir) + '_root')
