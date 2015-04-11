@@ -9,11 +9,11 @@ import 'package:git/git.dart';
 import 'package:logging/logging.dart';
 
 mainB() async {
-  final ProjectMetaData metadata =
-      await ProjectMetaData.fromProjectYamlFile(p.absolute('project.yaml'));
+  final ProjectGroupMetaData metadata =
+      await ProjectGroupMetaData.fromProjectGroupYamlFile(p.absolute('project.yaml'));
 
   print(metadata.name);
-  print(metadata.childProjects);
+  print(metadata.childProjectGroups);
 }
 
 mainA() async {
@@ -49,21 +49,21 @@ main() async {
   Logger.root.onRecord.listen(print);
   hierarchicalLoggingEnabled = true;
 
-  ProjectRef ref = new ProjectRef.fromGitUrl(
+  ProjectGroupRef ref = new ProjectGroupRef.fromGitUrl(
       'top', Uri.parse('/Users/blah/dart/jefe_jefe/jefe_test_projects/top'));
 
   final Directory installDir = await Directory.systemTemp.createTemp();
 
   print(installDir);
 
-  final Project project = await ref.install(installDir);
+  final ProjectGroup projectgroup = await ref.install(installDir);
 
-//  await project.install(installDir);
-//  await project.setupForDev();
+//  await projectgroup.install(installDir);
+//  await projectgroup.setupForDev();
 
-  final Project project2 =
-      await Project.fromInstallDirectory(project.installDirectory);
-  print(project2.gitUri);
-  print(project2.installDirectory);
-  print(project2.metaData);
+  final ProjectGroup projectgroup2 =
+      await ProjectGroup.fromInstallDirectory(projectgroup.installDirectory);
+  print(projectgroup2.gitUri);
+  print(projectgroup2.installDirectory);
+  print(projectgroup2.metaData);
 }

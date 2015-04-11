@@ -19,32 +19,32 @@ abstract class _BaseRef<T> implements Ref<T> {
   _BaseRef(this.name, this.gitUri);
 }
 
-class ProjectRefImpl extends _BaseRef implements ProjectRef {
-  ProjectRefImpl(String name, Uri gitUri) : super(name, gitUri);
+class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupRef {
+  ProjectGroupRefImpl(String name, Uri gitUri) : super(name, gitUri);
 
   @override
-  Future<Project> install(Directory parentDir, {bool recursive: true}) async {
-    _log.info('installing project $name from $gitUri into $parentDir');
+  Future<ProjectGroup> install(Directory parentDir, {bool recursive: true}) async {
+    _log.info('installing projectgroup $name from $gitUri into $parentDir');
 
-    final Directory projectRoot =
+    final Directory projectgroupRoot =
         await new Directory(gitWorkspacePath(gitUri, parentDir) + '_root')
             .create(recursive: true);
 
-    final GitDir gitDir = await clone(gitUri, projectRoot);
+    final GitDir gitDir = await clone(gitUri, projectgroupRoot);
 
-    final ProjectMetaData metaData = await ProjectMetaData
-        .fromDefaultProjectYamlFile(gitDir.path);
+    final ProjectGroupMetaData metaData = await ProjectGroupMetaData
+        .fromDefaultProjectGroupYamlFile(gitDir.path);
 
-    final projectDir = new Directory(gitDir.path);
-    final project = new ProjectImpl(gitUri, metaData, projectDir);
+    final projectgroupDir = new Directory(gitDir.path);
+    final projectgroup = new ProjectGroupImpl(gitUri, metaData, projectgroupDir);
     if (recursive) {
-      final projectInstallFutures = metaData.childProjects
-          .map((ref) => ref.install(projectRoot, recursive: true));
+      final projectgroupInstallFutures = metaData.childProjectGroups
+          .map((ref) => ref.install(projectgroupRoot, recursive: true));
       final moduleInstallFutures = metaData.modules
-          .map((ref) => ref.install(projectRoot, recursive: true));
-      await Future.wait(concat([projectInstallFutures, moduleInstallFutures]));
+          .map((ref) => ref.install(projectgroupRoot, recursive: true));
+      await Future.wait(concat([projectgroupInstallFutures, moduleInstallFutures]));
     }
-    return project;
+    return projectgroup;
   }
 }
 
@@ -60,12 +60,12 @@ class ModuleRefImpl extends _BaseRef implements ModuleRef {
   }
 }
 
-class ProjectImpl implements Project {
+class ProjectGroupImpl implements ProjectGroup {
   final Uri gitUri;
-  final ProjectMetaData metaData;
+  final ProjectGroupMetaData metaData;
   final Directory installDirectory;
 
-  ProjectImpl(this.gitUri, this.metaData, this.installDirectory);
+  ProjectGroupImpl(this.gitUri, this.metaData, this.installDirectory);
 
   @override
   Future release({bool recursive: true, ReleaseType type: ReleaseType.minor}) {
@@ -83,7 +83,7 @@ class ProjectImpl implements Project {
   }
 
   @override
-  Future<Project> childProject(ProjectRef ref) {
+  Future<ProjectGroup> childProjectGroup(ProjectGroupRef ref) {
     // TODO: implement childProject
   }
 
@@ -111,23 +111,23 @@ class ModuleImpl implements Module {
   ModuleImpl(this.gitUri, this.installDirectory);
 }
 
-class ProjectMetaDataImpl implements ProjectMetaData {
+class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {
   final String name;
-  final Iterable<ProjectRef> childProjects;
+  final Iterable<ProjectGroupRef> childProjectGroups;
   final Iterable<ModuleRef> modules;
 
-  ProjectMetaDataImpl(this.name, this.childProjects, this.modules);
+  ProjectGroupMetaDataImpl(this.name, this.childProjectGroups, this.modules);
 }
 
 
 
-Future<Project> loadProjectFromInstallDirectory(Directory installDirectory) async {
+Future<ProjectGroup> loadProjectGroupFromInstallDirectory(Directory installDirectory) async {
   final gitDirFuture = GitDir.fromExisting(installDirectory.path);
-  final metaDataFuture = ProjectMetaData.fromDefaultProjectYamlFile(installDirectory.path);
+  final metaDataFuture = ProjectGroupMetaData.fromDefaultProjectGroupYamlFile(installDirectory.path);
   final results = await Future.wait([gitDirFuture, metaDataFuture]);
 
   final GitDir gitDir = results.first;
 
   final Uri gitUri = await getFirstRemote(gitDir);
-  return new ProjectImpl(gitUri, results.elementAt(1), installDirectory);
+  return new ProjectGroupImpl(gitUri, results.elementAt(1), installDirectory);
 }

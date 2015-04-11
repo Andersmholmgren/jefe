@@ -13,27 +13,27 @@ abstract class Ref<T> {
   Future<T> install(Directory parentDir, {bool recursive: true});
 }
 
-abstract class ProjectRef implements Ref<Project> {
-  factory ProjectRef.fromGitUrl(String name, Uri gitUri) = ProjectRefImpl;
+abstract class ProjectGroupRef implements Ref<ProjectGroup> {
+  factory ProjectGroupRef.fromGitUrl(String name, Uri gitUri) = ProjectGroupRefImpl;
 }
 
 abstract class ModuleRef implements Ref<Module> {
 //  factory ModuleRef.fromGitUrl(Uri gitUri);
 }
 
-abstract class Project {
+abstract class ProjectGroup {
   Uri get gitUri;
-  ProjectMetaData get metaData;
+  ProjectGroupMetaData get metaData;
   Directory get installDirectory;
 
-  static Future<Project> fromInstallDirectory(Directory installDirectory) =>
-      loadProjectFromInstallDirectory(installDirectory);
+  static Future<ProjectGroup> fromInstallDirectory(Directory installDirectory) =>
+      loadProjectGroupFromInstallDirectory(installDirectory);
 
-//  factory Project.fromGitUrl(Uri gitUri);
+//  factory ProjectGroup.fromGitUrl(Uri gitUri);
 
 //  Future install(Directory parentDir, {bool recursive: true});
 
-  Future<Project> childProject(ProjectRef ref);
+  Future<ProjectGroup> childProjectGroup(ProjectGroupRef ref);
 
   Future update({bool recursive: true});
   Future setupForDev({bool recursive: true});
@@ -53,18 +53,18 @@ abstract class Module {
   Directory get installDirectory;
 }
 
-abstract class ProjectMetaData {
+abstract class ProjectGroupMetaData {
 //  Uri get gitUri;
   String get name;
-  Iterable<ProjectRef> get childProjects;
+  Iterable<ProjectGroupRef> get childProjectGroups;
   Iterable<ModuleRef> get modules;
 
-  static Future<ProjectMetaData> fromDefaultProjectYamlFile(
-          String projectDirectory) =>
-      fromProjectYamlFile(p.join(projectDirectory, 'project.yaml'));
+  static Future<ProjectGroupMetaData> fromDefaultProjectGroupYamlFile(
+          String projectgroupDirectory) =>
+      fromProjectGroupYamlFile(p.join(projectgroupDirectory, 'project.yaml'));
 
-  static Future<ProjectMetaData> fromProjectYamlFile(String projectFile) =>
-      readProjectYaml(new File(projectFile));
+  static Future<ProjectGroupMetaData> fromProjectGroupYamlFile(String projectgroupFile) =>
+      readProjectGroupYaml(new File(projectgroupFile));
 }
 
 enum ReleaseType { major, minor, patch }

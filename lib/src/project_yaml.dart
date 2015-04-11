@@ -7,22 +7,22 @@ import 'package:yaml/yaml.dart';
 import 'dart:io';
 import 'dart:async';
 
-Future<ProjectMetaData> readProjectYaml(File projectFile) async {
-  final Map yaml = loadYaml(await projectFile.readAsString());
+Future<ProjectGroupMetaData> readProjectGroupYaml(File projectgroupFile) async {
+  final Map yaml = loadYaml(await projectgroupFile.readAsString());
 
   print(yaml);
 
-  final Map projectsMap = yaml['projects'] != null ? yaml['projects'] : {};
-  print(projectsMap);
+  final Map projectgroupsMap = yaml['projectgroups'] != null ? yaml['projectgroups'] : {};
+  print(projectgroupsMap);
 
   final Map modulesMap = yaml['modules'] != null ? yaml['modules'] : {};
   print(modulesMap);
 
-  final childProjects = projectsMap.keys
-      .map((k) => new ProjectRefImpl(k, Uri.parse(projectsMap[k])));
+  final childProjectGroups = projectgroupsMap.keys
+      .map((k) => new ProjectGroupRefImpl(k, Uri.parse(projectgroupsMap[k])));
 
   final childModules = modulesMap.keys
       .map((k) => new ModuleRefImpl(k, Uri.parse(modulesMap[k])));
 
-  return new ProjectMetaDataImpl(yaml['name'], childProjects, childModules);
+  return new ProjectGroupMetaDataImpl(yaml['name'], childProjectGroups, childModules);
 }
