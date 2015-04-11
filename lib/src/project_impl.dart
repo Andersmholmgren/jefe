@@ -5,19 +5,21 @@ import 'project.dart';
 import 'dart:io';
 import 'package:git/git.dart';
 import 'package:devops/src/git.dart';
-import 'project_yaml.dart';
-import 'package:path/path.dart' as p;
 import 'package:quiver/iterables.dart';
 import 'package:logging/logging.dart';
 import 'package:den_api/den_api.dart';
+import 'package:path/path.dart' as p;
 
 Logger _log = new Logger('devops.project.impl');
 
-abstract class _BaseRef<T> implements _Ref<T> {
+abstract class _BaseRef<T> implements Ref<T> {
   final String name;
   final Uri gitUri;
 
   _BaseRef(this.name, this.gitUri);
+
+  Directory installDirectory(Directory parent) =>
+      new Directory(p.join(parent.path, name));
 }
 
 class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupRef {
@@ -50,6 +52,11 @@ class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupRef {
     }
     return projectGroup;
   }
+
+  @override
+  Future<ProjectGroup> load(Directory parentDirectory,
+          {bool recursive: true}) =>
+      ProjectGroup.fromInstallDirectory(installDirectory(parentDirectory));
 }
 
 class ProjectRefImpl extends _BaseRef implements ProjectRef {
@@ -62,6 +69,10 @@ class ProjectRefImpl extends _BaseRef implements ProjectRef {
     final GitDir gitDir = await clone(gitUri, parentDir);
     return new ProjectImpl(gitUri, new Directory(gitUri.path));
   }
+
+  @override
+  Future<Project> load(Directory parentDirectory, {bool recursive: true}) =>
+      Project.fromInstallDirectory(installDirectory(parentDirectory));
 }
 
 class ProjectGroupImpl implements ProjectGroup {
@@ -105,6 +116,21 @@ class ProjectGroupImpl implements ProjectGroup {
   Future initFlow({bool recursive: true}) {
     // TODO: implement initFlow
   }
+
+  @override
+  Future<Set<Project>> get allProjects {
+//    metaData.projects
+  }
+
+  static Future _addAll(Set<Project> projects, ProjectGroup group) {
+    projects.addAll(group.metaData.projects);
+  }
+
+  @override
+  Future processDependenciesDepthFirst(
+      process(Project project, Iterable<Project> dependencies)) {
+    // TODO: implement processDependenciesDepthFirst
+  }
 }
 
 class ProjectImpl implements Project {
@@ -136,4 +162,12 @@ Future<ProjectGroup> loadProjectGroupFromInstallDirectory(
 
   final Uri gitUri = await getFirstRemote(gitDir);
   return new ProjectGroupImpl(gitUri, results.elementAt(1), installDirectory);
+}
+
+Future<Project> loadProjectFromInstallDirectory(
+    Directory installDirectory) async {
+  final GitDir gitDir = await GitDir.fromExisting(installDirectory.path);
+
+  final Uri gitUri = await getFirstRemote(gitDir);
+  return new ProjectImpl(gitUri, installDirectory);
 }

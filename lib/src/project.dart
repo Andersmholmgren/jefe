@@ -7,20 +7,22 @@ import 'project_yaml.dart';
 import 'package:path/path.dart' as p;
 import 'package:den_api/den_api.dart';
 
-abstract class _Ref<T> {
+abstract class Ref<T> {
   String get name;
   Uri get gitUri;
 
-  Future<T> install(Directory parentDir, {bool recursive: true});
+  Future<T> install(Directory parentDirectory, {bool recursive: true});
+
+  Future<T> load(Directory parentDirectory, {bool recursive: true});
 }
 
-abstract class ProjectGroupRef implements _Ref<ProjectGroup> {
+abstract class ProjectGroupRef implements Ref<ProjectGroup> {
   factory ProjectGroupRef.fromGitUrl(
       String name, Uri gitUri) = ProjectGroupRefImpl;
 }
 
-abstract class ProjectRef implements _Ref<Project> {
-//  factory ProjectRef.fromGitUrl(Uri gitUri);
+abstract class ProjectRef implements Ref<Project> {
+  factory ProjectRef.fromGitUrl(String name, Uri gitUri) = ProjectImpl;
 }
 
 abstract class ProjectGroup {
@@ -61,10 +63,16 @@ abstract class Project {
   Uri get gitUri;
   Directory get installDirectory;
   Future<Pubspec> get pubspec;
+
+  static Future<Project> install(String name, Uri gitUri, Directory parentDir,
+      {bool recursive: true}) => new ProjectRef.fromGitUrl(name, gitUri)
+      .install(parentDir, recursive: recursive);
+
+  static Future<Project> fromInstallDirectory(Directory installDirectory) =>
+      loadProjectFromInstallDirectory(installDirectory);
 }
 
 abstract class ProjectGroupMetaData {
-//  Uri get gitUri;
   String get name;
   Iterable<ProjectGroupRef> get childGroups;
   Iterable<ProjectRef> get projects;
@@ -77,5 +85,3 @@ abstract class ProjectGroupMetaData {
           String projectGroupFile) =>
       readProjectGroupYaml(new File(projectGroupFile));
 }
-
-enum ReleaseType { major, minor, patch }
