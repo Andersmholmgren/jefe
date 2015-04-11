@@ -12,7 +12,7 @@ Future<ProjectMetaData> readProjectYaml(File projectFile) async {
 
   print(yaml);
 
-  final Map projectsMap = yaml['projects'];
+  final Map projectsMap = yaml['projects'] != null ? yaml['projects'] : {};
 
   print(projectsMap);
 
