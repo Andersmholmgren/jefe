@@ -17,7 +17,12 @@ class ProjectRefImpl implements ProjectRef {
 
   @override
   Future<Project> install(Directory parentDir, {bool recursive: true}) async {
-    final GitDir gitDir = await clone(gitUri, parentDir);
+    final Directory projectRoot =
+        new Directory(gitWorkspacePath(gitUri, parentDir) + '_root');
+
+    await projectRoot.create(recursive: true);
+
+    final GitDir gitDir = await clone(gitUri, projectRoot);
 
     final ProjectMetaData metaData = await ProjectMetaData
         .fromProjectYaml(p.join(gitDir.path, 'project.yaml'));
@@ -26,7 +31,7 @@ class ProjectRefImpl implements ProjectRef {
     final project = new ProjectImpl(gitUri, metaData, projectDir);
     if (recursive) {
       await Future.wait(metaData.childProjects
-          .map((ref) => ref.install(projectDir, recursive: true)));
+          .map((ref) => ref.install(projectRoot, recursive: true)));
     }
     return project;
   }
