@@ -67,5 +67,5 @@ main() async {
   print(projectGroup2.installDirectory);
   print(projectGroup2.metaData);
 
-//  projectGroup2
+  await projectGroup2.initFlow();
 }

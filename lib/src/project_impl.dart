@@ -32,8 +32,7 @@ class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupRef {
     _log.info('installing group $name from $gitUri into $parentDir');
 
     final Directory projectGroupRoot =
-        await new Directory(gitWorkspacePath(gitUri, parentDir) + '_root')
-            .create(recursive: true);
+        await _containerDirectory(parentDir).create(recursive: true);
 
     final GitDir gitDir = await clone(gitUri, projectGroupRoot);
 
@@ -53,6 +52,15 @@ class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupRef {
     }
     return projectGroup;
   }
+
+  Directory installDirectory(Directory parent) =>
+      super.installDirectory(_containerDirectory(parent));
+
+  Directory _containerDirectory(Directory parentDir) =>
+      new Directory(gitWorkspacePath(gitUri, parentDir) + '_root');
+
+//  Directory _installDirectory(Directory parentDir) =>
+//      new Directory(p.join(_containerDirectory(parentDir).path, name));
 
   @override
   Future<ProjectGroup> load(Directory parentDirectory,
@@ -76,12 +84,24 @@ class ProjectRefImpl extends _BaseRef implements ProjectRef {
       Project.fromInstallDirectory(installDirectory(parentDirectory));
 }
 
-class ProjectGroupImpl implements ProjectGroup {
+abstract class ProjectEntityImpl implements ProjectEntity {
   final Uri gitUri;
-  final ProjectGroupMetaData metaData;
   final Directory installDirectory;
 
-  ProjectGroupImpl(this.gitUri, this.metaData, this.installDirectory);
+  ProjectEntityImpl(this.gitUri, this.installDirectory);
+
+  @override
+  Future<GitDir> get gitDir {
+    print('--- $installDirectory');
+    return GitDir.fromExisting(installDirectory.path);
+  }
+}
+
+class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
+  final ProjectGroupMetaData metaData;
+
+  ProjectGroupImpl(Uri gitUri, this.metaData, Directory installDirectory)
+      : super(gitUri, installDirectory);
 
   @override
   Future release({bool recursive: true, ReleaseType type: ReleaseType.minor}) {
@@ -114,8 +134,11 @@ class ProjectGroupImpl implements ProjectGroup {
   }
 
   @override
-  Future initFlow({bool recursive: true}) {
-    // TODO: implement initFlow
+  Future initFlow({bool recursive: true}) async {
+    _log.info('Initialising git flow for group ${metaData.name}');
+    final Set<Project> projects = await allProjects;
+
+    await Future.wait(projects.map((p) => p.initFlow()));
   }
 
   @override
@@ -126,10 +149,14 @@ class ProjectGroupImpl implements ProjectGroup {
   }
 
   static void _addAll(List<Future<Project>> projects, ProjectGroup group) {
-    projects.addAll(
-        group.metaData.projects.map((p) => p.load(group.installDirectory)));
+    projects.addAll(group.metaData.projects
+        .map((p) => p.load(group.installDirectory.parent)));
 
-    group.metaData.childGroups.forEach((g) => _addAll(projects, g));
+    _addFromGroup(ProjectGroupRef ref) async {
+      final g = await ref.load(group.installDirectory.parent);
+      _addAll(projects, g);
+    }
+    group.metaData.childGroups.forEach(_addFromGroup);
   }
 
   @override
@@ -141,14 +168,16 @@ class ProjectGroupImpl implements ProjectGroup {
   }
 }
 
-class ProjectImpl implements Project {
-  final Uri gitUri;
-
-  final Directory installDirectory;
-
+class ProjectImpl extends ProjectEntityImpl implements Project {
   Future<Pubspec> get pubspec => Pubspec.load(installDirectory.path);
 
-  ProjectImpl(this.gitUri, this.installDirectory);
+  ProjectImpl(Uri gitUri, Directory installDirectory)
+      : super(gitUri, installDirectory);
+
+  @override
+  Future initFlow() async {
+    initGitFlow(await gitDir);
+  }
 }
 
 class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {
@@ -161,6 +190,7 @@ class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {
 
 Future<ProjectGroup> loadProjectGroupFromInstallDirectory(
     Directory installDirectory) async {
+  print('========= $installDirectory');
   final gitDirFuture = GitDir.fromExisting(installDirectory.path);
   final metaDataFuture = ProjectGroupMetaData
       .fromDefaultProjectGroupYamlFile(installDirectory.path);
@@ -174,6 +204,7 @@ Future<ProjectGroup> loadProjectGroupFromInstallDirectory(
 
 Future<Project> loadProjectFromInstallDirectory(
     Directory installDirectory) async {
+  print('=====+==== $installDirectory');
   final GitDir gitDir = await GitDir.fromExisting(installDirectory.path);
 
   final Uri gitUri = await getFirstRemote(gitDir);

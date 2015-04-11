@@ -6,6 +6,7 @@ import 'project_impl.dart';
 import 'project_yaml.dart';
 import 'package:path/path.dart' as p;
 import 'package:den_api/den_api.dart';
+import 'package:git/git.dart';
 
 abstract class Ref<T> {
   String get name;
@@ -25,10 +26,14 @@ abstract class ProjectRef implements Ref<Project> {
   factory ProjectRef.fromGitUrl(String name, Uri gitUri) = ProjectRefImpl;
 }
 
-abstract class ProjectGroup {
+abstract class ProjectEntity {
   Uri get gitUri;
-  ProjectGroupMetaData get metaData;
+  Future<GitDir> get gitDir;
   Directory get installDirectory;
+}
+
+abstract class ProjectGroup extends ProjectEntity {
+  ProjectGroupMetaData get metaData;
 
   static Future<ProjectGroup> install(
       String name, Uri gitUri, Directory parentDir,
@@ -59,9 +64,7 @@ abstract class ProjectGroup {
   //  e.g Future checkout(String version, {bool recursive: true});
 }
 
-abstract class Project {
-  Uri get gitUri;
-  Directory get installDirectory;
+abstract class Project extends ProjectEntity {
   Future<Pubspec> get pubspec;
 
   static Future<Project> install(String name, Uri gitUri, Directory parentDir,
@@ -70,6 +73,8 @@ abstract class Project {
 
   static Future<Project> fromInstallDirectory(Directory installDirectory) =>
       loadProjectFromInstallDirectory(installDirectory);
+
+  Future initFlow();
 }
 
 abstract class ProjectGroupMetaData {
