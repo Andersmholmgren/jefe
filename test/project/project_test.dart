@@ -66,4 +66,6 @@ main() async {
   print(projectGroup2.gitUri);
   print(projectGroup2.installDirectory);
   print(projectGroup2.metaData);
+
+//  projectGroup2
 }
