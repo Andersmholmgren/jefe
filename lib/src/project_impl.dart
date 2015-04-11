@@ -7,6 +7,9 @@ import 'package:git/git.dart';
 import 'package:devops/src/git.dart';
 import 'package:path/path.dart' as p;
 import 'package:quiver/iterables.dart';
+import 'package:logging/logging.dart';
+
+Logger _log = new Logger('devops.project.impl');
 
 abstract class _BaseRef<T> implements Ref<T> {
   final String name;
@@ -20,6 +23,8 @@ class ProjectRefImpl extends _BaseRef implements ProjectRef {
 
   @override
   Future<Project> install(Directory parentDir, {bool recursive: true}) async {
+    _log.info('installing project $name from $gitUri into $parentDir');
+
     final Directory projectRoot =
         await new Directory(gitWorkspacePath(gitUri, parentDir) + '_root')
             .create(recursive: true);
@@ -47,6 +52,8 @@ class ModuleRefImpl extends _BaseRef implements ModuleRef {
 
   @override
   Future<Module> install(Directory parentDir, {bool recursive: true}) async {
+    _log.info('installing module $name from $gitUri into $parentDir');
+    
     final GitDir gitDir = await clone(gitUri, parentDir);
     return new ModuleImpl(gitUri, new Directory(gitUri.path));
   }

@@ -13,11 +13,16 @@ Future<ProjectMetaData> readProjectYaml(File projectFile) async {
   print(yaml);
 
   final Map projectsMap = yaml['projects'] != null ? yaml['projects'] : {};
-
   print(projectsMap);
+
+  final Map modulesMap = yaml['modules'] != null ? yaml['modules'] : {};
+  print(modulesMap);
 
   final childProjects = projectsMap.keys
       .map((k) => new ProjectRefImpl(k, Uri.parse(projectsMap[k])));
 
-  return new ProjectMetaDataImpl(yaml['name'], childProjects, []);
+  final childModules = modulesMap.keys
+      .map((k) => new ModuleRefImpl(k, Uri.parse(modulesMap[k])));
+
+  return new ProjectMetaDataImpl(yaml['name'], childProjects, childModules);
 }

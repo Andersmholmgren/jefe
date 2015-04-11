@@ -6,6 +6,9 @@ import 'package:devops/src/git.dart';
 import 'package:path/path.dart' as p;
 import 'dart:async';
 import 'package:git/git.dart';
+import 'package:logging/logging.dart';
+
+
 
 mainB() async {
   final ProjectMetaData metadata =
@@ -40,6 +43,10 @@ mainA() async {
 }
 
 main() async {
+  Logger.root.level=Level.ALL;
+  Logger.root.onRecord.listen(print);
+  hierarchicalLoggingEnabled=true;
+
   ProjectRef ref = new ProjectRef.fromGitUrl(
       'top', Uri.parse('/Users/blah/dart/jefe_jefe/jefe_test_projects/top'));
 
