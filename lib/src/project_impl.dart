@@ -109,7 +109,10 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 
   @override
   Future release({bool recursive: true, ReleaseType type: ReleaseType.minor}) {
-    // TODO: implement release
+    _log.info(
+        'Releasing all projects for group ${metaData.name} with release type $type');
+    return processDependenciesDepthFirst((Project project,
+        Iterable<Project> dependencies) => project.release(dependencies));
   }
 
   @override
@@ -242,6 +245,18 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
       : super(gitUri, installDirectory);
 
   @override
+  Future release(Iterable<Project> dependencies,
+      {ReleaseType type: ReleaseType.minor}) async {
+    final newVersion = type.bump(pubspec.version);
+    await releaseStart(newVersion.toString());
+    await updatePubspec(pubspec.copy(version: newVersion));
+    await setToGitDependencies(dependencies);
+    await commit('releasing version $newVersion');
+    await releaseFinish(newVersion.toString());
+    await push();
+  }
+
+  @override
   Future updatePubspec(PubSpec newSpec) async {
     _log.info('Updating pubspec for project ${name}');
     await newSpec.save(installDirectory);
@@ -277,28 +292,28 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   Future releaseFinish(String version) async {
     _log.info('git flow release finish $version for project ${name}');
     await gitFlowReleaseFinish(await gitDir, version);
+    _log.finest(
+        'completed git flow release finish $version for project ${name}');
   }
 
   @override
   Future setToPathDependencies(Iterable<Project> dependencies) async {
-    _log.info('Setting up path dependencies for project ${name}');
-    return _setDependencies(dependencies,
-        (Project p) async => await new PathReference(p.installDirectory.path));
+    await _setDependencies('path', dependencies, (Project p) =>
+        new Future.value(new PathReference(p.installDirectory.path)));
   }
 
   @override
   Future setToGitDependencies(Iterable<Project> dependencies) async {
-    _log.info('Setting up git dependencies for project ${name}');
-    return _setDependencies(dependencies, (Project p) async =>
-        new GitReference(gitUri, await currentGitCommitHash));
+    await _setDependencies('git', dependencies, (Project p) async =>
+        await new GitReference(gitUri, await currentGitCommitHash));
   }
 
   Future<String> get currentGitCommitHash async =>
       currentCommitHash(await gitDir);
 
-  Future _setDependencies(Iterable<Project> dependencies,
+  Future _setDependencies(String type, Iterable<Project> dependencies,
       Future<DependencyReference> createReferenceTo(Project p)) async {
-    _log.info('Setting up dev dependencies for project ${name}');
+    _log.info('Setting up $type dependencies for project ${name}');
     if (dependencies.isEmpty) {
       return;
     }
@@ -306,9 +321,9 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
     final PubSpec _pubspec = await pubspec;
     final newDependencies = new Map.from(_pubspec.dependencies);
 
-    dependencies.forEach((p) async {
-      newDependencies[p.name] = createReferenceTo(p);
-    });
+    await Future.wait(dependencies.map((p) async {
+      newDependencies[p.name] = await createReferenceTo(p);
+    }));
 
     final newPubspec = _pubspec.copy(dependencies: newDependencies);
     await updatePubspec(newPubspec);
@@ -323,7 +338,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   @override
   Future push() async {
     _log.info('Pushing project ${name}');
-    return gitPush(await gitDir);
+//    return gitPush(await gitDir);
   }
 
   @override

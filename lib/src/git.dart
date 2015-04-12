@@ -58,5 +58,12 @@ Future gitFlowFeatureFinish(GitDir gitDir, String featureName) async =>
 Future gitFlowReleaseStart(GitDir gitDir, String version) async =>
     await gitDir.runCommand(['flow', 'release', 'start', version]);
 
-Future gitFlowReleaseFinish(GitDir gitDir, String version) async =>
-    await gitDir.runCommand(['flow', 'release', 'finish', version]);
+Future gitFlowReleaseFinish(GitDir gitDir, String version) async => await gitDir
+    .runCommand([
+  'flow',
+  'release',
+  'finish',
+  version,
+  '-m',
+  'released version $version'
+]);

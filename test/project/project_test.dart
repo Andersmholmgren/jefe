@@ -9,6 +9,7 @@ import 'package:logging/logging.dart';
 import 'package:yaml/yaml.dart';
 import 'package:devops/src/yaml/yaml_writer.dart';
 import 'package:devops/src/pubspec/pubspec_model.dart';
+import 'dart:async';
 
 mainB() async {
   final ProjectGroupMetaData metadata = await ProjectGroupMetaData
@@ -73,6 +74,12 @@ main() async {
 //  await projectGroup2.featureStart('blah');
 
   await projectGroup2.setupForNewFeature('awesomeness');
+
+//  await new Future.delayed(const Duration(minutes: 2));
+
+  await projectGroup2.featureFinish('awesomeness');
+
+  await projectGroup2.release();
 }
 
 //mainVV() async {
