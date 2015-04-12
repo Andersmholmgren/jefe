@@ -53,7 +53,7 @@ main() async {
   hierarchicalLoggingEnabled = true;
 
   ProjectGroupRef ref = new ProjectGroupRef.fromGitUrl(
-      'top', '/Users/blah/dart/jefe_jefe/jefe_test_projects/gissue');
+      'top', '/Users/blah/dart/jefe_jefe/jefe_test_projects/gitbacklog');
 
   final Directory installDir = await Directory.systemTemp.createTemp();
 
