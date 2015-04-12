@@ -3,6 +3,10 @@ library devops.pubspec;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:devops/src/pubspec/dependency.dart';
 import 'package:devops/src/jsonyaml/json_utils.dart';
+import 'dart:async';
+import 'dart:io';
+import 'package:yaml/yaml.dart';
+import 'package:path/path.dart' as p;
 
 class PubSpec implements Jsonable {
   final String name;
@@ -32,7 +36,7 @@ class PubSpec implements Jsonable {
       this.devDependencies, this.dependencyOverrides, this.unParsedYaml});
 
   factory PubSpec.fromJson(Map json) {
-    final p = parseJson(json);
+    final p = parseJson(json, consumeMap: true);
     return new PubSpec(
         name: p.single('name'),
         author: p.single('author'),
@@ -43,11 +47,16 @@ class PubSpec implements Jsonable {
         dependencies: p.mapValues(
             'dependencies', (v) => new DependencyReference.fromJson(v)),
         devDependencies: p.mapValues(
-            'devDependencies', (v) => new DependencyReference.fromJson(v)),
+            'dev_dependencies', (v) => new DependencyReference.fromJson(v)),
         dependencyOverrides: p.mapValues(
-            'dependencyOverrides', (v) => new DependencyReference.fromJson(v)),
+            'dependency_overrides', (v) => new DependencyReference.fromJson(v)),
         unParsedYaml: p.unconsumed);
   }
+
+  static Future<PubSpec> load(Directory parentDir) async =>
+      new PubSpec.fromJson(loadYaml(
+          await new File(p.join(parentDir.path, 'pubspec.yaml'))
+              .readAsString()));
 
   PubSpec copy({String name, String author, Version version, String homepage,
       String documentation, String description,
@@ -83,8 +92,8 @@ class PubSpec implements Jsonable {
       ..add('documentation', documentation)
       ..add('description', description)
       ..add('dependencies', dependencies)
-      ..add('devDependencies', devDependencies)
-      ..add('dependencyOverrides', dependencyOverrides)
-      ..add('unParsedYaml', unParsedYaml)).json;
+      ..add('dev_dependencies', devDependencies)
+      ..add('dependency_overrides', dependencyOverrides)
+      ..addAll(unParsedYaml)).json;
   }
 }

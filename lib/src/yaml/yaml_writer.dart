@@ -1,8 +1,6 @@
 library devops.yaml;
 
-import 'package:yaml/yaml.dart';
-
-String toYamlString(YamlNode node) {
+String toYamlString(node) {
   var sb = new StringBuffer();
   writeYamlString(node, sb);
   return sb.toString();
@@ -13,16 +11,16 @@ void writeYamlString(node, StringSink ss) {
 }
 
 _writeYamlString(node, int indent, StringSink ss, bool isTopLevel) {
-  if (node is YamlMap) {
+  if (node is Map) {
     _mapToYamlString(node, indent, ss, isTopLevel);
-  } else if (node is YamlList) {
+  } else if (node is Iterable) {
     _listToYamlString(node, indent, ss, isTopLevel);
   } else {
     ss..writeln(node);
   }
 }
 
-_mapToYamlString(YamlMap node, int indent, StringSink ss, bool isTopLevel) {
+_mapToYamlString(Map node, int indent, StringSink ss, bool isTopLevel) {
   if (!isTopLevel) {
     ss.writeln();
     indent += 2;
@@ -37,7 +35,7 @@ _mapToYamlString(YamlMap node, int indent, StringSink ss, bool isTopLevel) {
   });
 }
 
-_listToYamlString(YamlList node, int indent, StringSink ss, bool isTopLevel) {
+_listToYamlString(Iterable node, int indent, StringSink ss, bool isTopLevel) {
   if (!isTopLevel) {
     ss.writeln();
     indent += 2;

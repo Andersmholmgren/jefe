@@ -6,9 +6,9 @@ import 'package:devops/src/git.dart';
 import 'package:path/path.dart' as p;
 import 'package:git/git.dart';
 import 'package:logging/logging.dart';
-import 'package:den_api/den_api.dart';
 import 'package:yaml/yaml.dart';
 import 'package:devops/src/yaml/yaml_writer.dart';
+import 'package:devops/src/pubspec/pubspec_model.dart';
 
 mainB() async {
   final ProjectGroupMetaData metadata = await ProjectGroupMetaData
@@ -73,22 +73,22 @@ main99() async {
   await projectGroup2.featureStart('blah');
 }
 
-mainVV() async {
-  var pubspecPath = '/Users/blah/dart/backlogio/gissue/gissue_client';
-  print(pubspecPath);
-  final Pubspec pubspec = await Pubspec.load(pubspecPath);
-//  pubspec.name = 'something much longer than the original';
-  print(pubspec.contents);
-  print(pubspec.dependencies);
-//  pubspec.addDependency(new PackageDep('quiver', 'path', null, '../quiver'));
-//  pubspec.addDependency(new PackageDep('ah_polymer_stuff', 'path', null, '../ah_polymer_stuff'));
-  pubspec.addDependency(new PackageDep('quiver', 'git', null, 'quiver'));
+//mainVV() async {
+//  var pubspecPath = '/Users/blah/dart/backlogio/gissue/gissue_client';
+//  print(pubspecPath);
+//  final Pubspec pubspec = await Pubspec.load(pubspecPath);
+////  pubspec.name = 'something much longer than the original';
+//  print(pubspec.contents);
+//  print(pubspec.dependencies);
+////  pubspec.addDependency(new PackageDep('quiver', 'path', null, '../quiver'));
+////  pubspec.addDependency(new PackageDep('ah_polymer_stuff', 'path', null, '../ah_polymer_stuff'));
+//  pubspec.addDependency(new PackageDep('quiver', 'git', null, 'quiver'));
+//
+//  print(pubspec.dependencies);
+//  print(pubspec.contents);
+//}
 
-  print(pubspec.dependencies);
-  print(pubspec.contents);
-}
-
-main() async {
+mainxxxx() async {
   var pubspecPath =
       '/Users/blah/dart/backlogio/gissue/gissue_client/pubspec.yaml';
   print(pubspecPath);
@@ -99,4 +99,17 @@ main() async {
   print(doc.toString());
 //  print(toYamlString(doc.contents));
   writeYamlString(doc.contents, stdout);
+}
+
+main() async {
+  var pubspecParentPath = '/Users/blah/dart/backlogio/gissue/gissue_client';
+  var pubspecPath = '$pubspecParentPath/pubspec.yaml';
+  print(pubspecPath);
+//  final Pubspec pubspec = await Pubspec.load(pubspecPath);
+  var pubspecStr = await new File(pubspecPath).readAsString();
+  print(pubspecStr);
+
+  final pubspec = await PubSpec.load(new Directory(pubspecParentPath));
+  print(pubspec.toJson());
+  writeYamlString(pubspec.toJson(), stdout);
 }

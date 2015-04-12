@@ -2,7 +2,8 @@ library devops.project.dependency;
 
 import 'package:devops/src/project.dart';
 import 'dart:async';
-import 'package:den_api/den_api.dart';
+import 'package:devops/src/pubspec/pubspec_model.dart';
+//import 'package:den_api/den_api.dart';
 
 Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>
     new DependencyGraph(await _determineDependencies(projects));
@@ -14,7 +15,7 @@ Future<Set<_ProjectDependencies>> _determineDependencies(
 
 Future<_ProjectDependencies> _resolveDependencies(
     Project project, Map<String, Project> projects) async {
-  final Pubspec pubspec = await project.pubspec;
+  final PubSpec pubspec = await project.pubspec;
   final dependencies = pubspec.dependencies.keys
       .map((name) => projects[name])
       .where((v) => v != null)

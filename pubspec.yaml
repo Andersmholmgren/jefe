@@ -14,3 +14,5 @@ dependencies:
   quiver: any
   logging: any
 #  den_api: any
+dev_dependencies:
+  unittest: any

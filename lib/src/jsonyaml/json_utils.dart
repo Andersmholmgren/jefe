@@ -30,7 +30,8 @@ abstract class Jsonable {
 //}
 
 JsonBuilder get buildJson => new JsonBuilder();
-JsonParser parseJson(Map j) => new JsonParser(j);
+JsonParser parseJson(Map j, {bool consumeMap: false}) =>
+    new JsonParser(j, consumeMap);
 
 class JsonBuilder {
   final Map json = {};
@@ -53,6 +54,10 @@ class JsonBuilder {
     }
   }
 
+  void addAll(Map map) {
+    json.addAll(map);
+  }
+
   _transformValue(value, [transform(v)]) {
     if (transform != null) {
       return transform(value);
@@ -63,7 +68,7 @@ class JsonBuilder {
     if (value is Map) {
       final result = {};
       (value as Map).forEach((k, v) {
-        result[k] = _transformValue(value, null);
+        result[k] = _transformValue(v, null);
       });
       return result;
     }
@@ -80,7 +85,7 @@ class JsonParser {
   final Map _json;
   final bool _consumeMap;
 
-  JsonParser(Map json, {bool consumeMap: false})
+  JsonParser(Map json, bool consumeMap)
       : this._json = consumeMap ? new Map.from(json) : json,
         this._consumeMap = consumeMap;
 
@@ -95,9 +100,13 @@ class JsonParser {
   }
 
   Map mapValues(String fieldName, [create(i) = _identity]) {
-    Map result = {};
     final Map m = _getField(fieldName);
 
+    if (m == null) {
+      return null;
+    }
+
+    Map result = {};
     m.forEach((k, v) {
       result[k] = create(v);
     });

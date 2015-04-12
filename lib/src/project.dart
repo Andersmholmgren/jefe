@@ -5,8 +5,8 @@ import 'dart:io';
 import 'project_impl.dart';
 import 'project_yaml.dart';
 import 'package:path/path.dart' as p;
-import 'package:den_api/den_api.dart';
 import 'package:git/git.dart';
+import 'package:devops/src/pubspec/pubspec_model.dart';
 
 abstract class Ref<T> {
   String get name;
@@ -65,7 +65,7 @@ abstract class ProjectGroup extends ProjectEntity {
 }
 
 abstract class Project extends ProjectEntity {
-  Future<Pubspec> get pubspec;
+  Future<PubSpec> get pubspec;
 
   static Future<Project> install(String name, Uri gitUri, Directory parentDir,
       {bool recursive: true}) => new ProjectRef.fromGitUrl(name, gitUri)
@@ -94,3 +94,5 @@ abstract class ProjectGroupMetaData {
           String projectGroupFile) =>
       readProjectGroupYaml(new File(projectGroupFile));
 }
+
+enum ReleaseType { major, minor, patch }

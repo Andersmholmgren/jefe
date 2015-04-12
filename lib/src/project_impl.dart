@@ -7,9 +7,9 @@ import 'package:git/git.dart';
 import 'package:devops/src/git.dart';
 import 'package:quiver/iterables.dart';
 import 'package:logging/logging.dart';
-import 'package:den_api/den_api.dart';
 import 'package:path/path.dart' as p;
 import 'dependency_graph.dart';
+import 'package:devops/src/pubspec/pubspec_model.dart';
 
 Logger _log = new Logger('devops.project.impl');
 
@@ -170,7 +170,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 }
 
 class ProjectImpl extends ProjectEntityImpl implements Project {
-  Future<Pubspec> get pubspec => Pubspec.load(installDirectory.path);
+  Future<PubSpec> get pubspec => PubSpec.load(installDirectory);
 
   ProjectImpl(Uri gitUri, Directory installDirectory)
       : super(gitUri, installDirectory);
@@ -184,7 +184,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   @override
   Future setDevDependencies(Iterable<Project> dependencies) async {
-    final Pubspec _pubspec = await pubspec;
+    final PubSpec _pubspec = await pubspec;
 
 //    _pubspec.dependencyOverrides
   }
