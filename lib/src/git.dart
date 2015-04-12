@@ -30,6 +30,9 @@ Future gitCommit(GitDir gitDir, String message) async {
   }
 }
 
+Future gitTag(GitDir gitDir, String tag) async =>
+    await gitDir.runCommand(['tag', tag]);
+
 Future gitPush(GitDir gitDir) async => await gitDir.runCommand(['push']);
 
 Future<String> currentCommitHash(GitDir gitDir) async =>
@@ -63,7 +66,8 @@ Future gitFlowReleaseFinish(GitDir gitDir, String version) async => await gitDir
   'flow',
   'release',
   'finish',
-  version,
-  '-m',
-  'released version $version'
+//  '-m',
+//  '"released version $version"',
+  '-n',
+  version
 ]);

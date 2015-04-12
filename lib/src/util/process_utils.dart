@@ -25,6 +25,6 @@ ${pr.stdout}
 stderr:
 ${pr.stderr}''';
 
-    throw new ProcessException('git', args, message, pr.exitCode);
+    throw new ProcessException(process, args, message, pr.exitCode);
   }
 }

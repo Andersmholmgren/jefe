@@ -291,7 +291,11 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   @override
   Future releaseFinish(String version) async {
     _log.info('git flow release finish $version for project ${name}');
-    await gitFlowReleaseFinish(await gitDir, version);
+    var _gitDir = await gitDir;
+    await gitFlowReleaseFinish(_gitDir, version);
+    // bug in git flow prevents tagging with -m working so run with -n
+    // and tag manually
+    await gitTag(_gitDir, version);
     _log.finest(
         'completed git flow release finish $version for project ${name}');
   }
