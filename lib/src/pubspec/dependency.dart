@@ -3,17 +3,6 @@ library devops.pubspec.dependency;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:devops/src/jsonyaml/json_utils.dart';
 
-@deprecated
-class Dependency extends Jsonable {
-  final String name;
-  final DependencyReference reference;
-
-  Dependency(this.name, this.reference);
-
-  @override
-  Map toJson() => {name: reference.toJson()};
-}
-
 abstract class DependencyReference extends Jsonable {
   DependencyReference();
 
@@ -56,7 +45,9 @@ class GitReference extends DependencyReference {
   }
 
   @override
-  Map toJson() => {'url': url.toString(), 'ref': ref};
+  Map toJson() => ref != null
+      ? {'git': {'url': url.toString(), 'ref': ref}}
+      : {'git': url.toString()};
 }
 
 class PathReference extends DependencyReference {
@@ -93,3 +84,13 @@ class HostedReference extends DependencyReference {
     path: ../gissue_common
 
  */
+
+//class Dependency extends Jsonable {
+//  final String name;
+//  final DependencyReference reference;
+//
+//  Dependency(this.name, this.reference);
+//
+//  @override
+//  Map toJson() => {name: reference.toJson()};
+//}
