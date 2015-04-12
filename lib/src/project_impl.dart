@@ -10,6 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'dependency_graph.dart';
 import 'package:devops/src/pubspec/pubspec_model.dart';
+import 'package:devops/src/pubspec/dependency.dart';
 
 Logger _log = new Logger('devops.project.impl');
 
@@ -172,6 +173,8 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 class ProjectImpl extends ProjectEntityImpl implements Project {
   Future<PubSpec> get pubspec => PubSpec.load(installDirectory);
 
+  Future updatePubspec(PubSpec newSpec) => newSpec.save(installDirectory);
+
   ProjectImpl(Uri gitUri, Directory installDirectory)
       : super(gitUri, installDirectory);
 
@@ -185,8 +188,15 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   @override
   Future setDevDependencies(Iterable<Project> dependencies) async {
     final PubSpec _pubspec = await pubspec;
+    final newDependencies = new Map.from(_pubspec.dependencies);
 
-//    _pubspec.dependencyOverrides
+    dependencies.forEach((p) async {
+      newDependencies[(await p.pubspec).name] =
+          new PathReference(p.installDirectory.path);
+    });
+
+    final newPubspec = _pubspec.copy(dependencies: newDependencies);
+    await updatePubspec(newPubspec);
   }
 }
 

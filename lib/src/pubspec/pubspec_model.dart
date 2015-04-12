@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:yaml/yaml.dart';
 import 'package:path/path.dart' as p;
+import 'package:devops/src/yaml/yaml_writer.dart';
 
 class PubSpec implements Jsonable {
   final String name;
@@ -95,5 +96,14 @@ class PubSpec implements Jsonable {
       ..add('dev_dependencies', devDependencies)
       ..add('dependency_overrides', dependencyOverrides)
       ..addAll(unParsedYaml)).json;
+  }
+
+  Future save(Directory parentDir) {
+    final ioSink = new File(p.join(parentDir.path, 'pubspec.yaml')).openWrite();
+    try {
+      writeYamlString(toJson(), ioSink);
+    } finally {
+      return ioSink.close();
+    }
   }
 }

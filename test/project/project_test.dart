@@ -46,7 +46,7 @@ mainA() async {
 //  getRemotes(await GitDir.fromExisting('/Users/blah/dart/shelf/shelf_route'));
 //}
 
-main99() async {
+main() async {
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen(print);
   hierarchicalLoggingEnabled = true;
@@ -71,6 +71,8 @@ main99() async {
 
   await projectGroup2.initFlow();
   await projectGroup2.featureStart('blah');
+
+  await projectGroup2.setupForDev();
 }
 
 //mainVV() async {
@@ -101,7 +103,7 @@ mainxxxx() async {
   writeYamlString(doc.contents, stdout);
 }
 
-main() async {
+mainbbbb() async {
   var pubspecParentPath = '/Users/blah/dart/backlogio/gissue/gissue_client';
   var pubspecPath = '$pubspecParentPath/pubspec.yaml';
   print(pubspecPath);
