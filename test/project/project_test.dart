@@ -8,7 +8,7 @@ import 'package:git/git.dart';
 import 'package:logging/logging.dart';
 import 'package:yaml/yaml.dart';
 import 'package:devops/src/yaml/yaml_writer.dart';
-import 'package:devops/src/pubspec/pubspec_model.dart';
+import 'package:devops/src/pubspec/pubspec.dart';
 import 'dart:async';
 
 mainB() async {

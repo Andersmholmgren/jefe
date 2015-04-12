@@ -9,7 +9,7 @@ import 'package:quiver/iterables.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'dependency_graph.dart';
-import 'package:devops/src/pubspec/pubspec_model.dart';
+import 'package:devops/src/pubspec/pubspec.dart';
 import 'package:devops/src/pubspec/dependency.dart';
 import 'pub.dart' as pub;
 

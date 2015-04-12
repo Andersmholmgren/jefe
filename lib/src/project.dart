@@ -6,7 +6,7 @@ import 'project_impl.dart';
 import 'project_yaml.dart';
 import 'package:path/path.dart' as p;
 import 'package:git/git.dart';
-import 'package:devops/src/pubspec/pubspec_model.dart';
+import 'package:devops/src/pubspec/pubspec.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 abstract class Ref<T> {
