@@ -13,8 +13,10 @@ abstract class Ref<T> {
   String get name;
   String get gitUri;
 
+  @deprecated // unless we can find a way to encapsulate folder layout
   Future<T> install(Directory parentDirectory, {bool recursive: true});
 
+  @deprecated // unless we can find a way to encapsulate folder layout
   Future<T> load(Directory parentDirectory, {bool recursive: true});
 }
 
@@ -25,6 +27,24 @@ abstract class ProjectGroupRef implements Ref<ProjectGroup> {
 
 abstract class ProjectRef implements Ref<Project> {
   factory ProjectRef.fromGitUrl(String name, String gitUri) = ProjectRefImpl;
+}
+
+abstract class ProjectEntityRef<T extends ProjectEntity> {
+  String get name;
+  String get gitUri;
+
+//  Future<T> install();
+
+  Future<T> get();
+}
+
+abstract class ProjectGroupRef2 implements ProjectEntityRef<ProjectGroup> {
+//  factory ProjectGroupRef.fromGitUrl(
+//      String name, String gitUri) = ProjectGroupRefImpl;
+}
+
+abstract class ProjectRef2 implements ProjectEntityRef<Project> {
+//  factory ProjectRef.fromGitUrl(String name, String gitUri) = ProjectRefImpl;
 }
 
 abstract class ProjectEntity {
@@ -43,7 +63,7 @@ abstract class ProjectGroup extends ProjectEntity {
 
   static Future<ProjectGroup> fromInstallDirectory(
           Directory installDirectory) =>
-      loadProjectGroupFromInstallDirectory(installDirectory);
+      ProjectGroupImpl.fromInstallDirectory(installDirectory);
 
   Future<ProjectGroup> childProjectGroup(ProjectGroupRef ref);
 
@@ -79,7 +99,7 @@ abstract class Project extends ProjectEntity {
   PubSpec get pubspec;
 
   static Future<Project> install(
-      String name, String gitUri, Directory parentDir,
+      Directory parentDir, String name, String gitUri,
       {bool recursive: true}) => new ProjectRef.fromGitUrl(name, gitUri)
       .install(parentDir, recursive: recursive);
 
@@ -110,7 +130,9 @@ abstract class Project extends ProjectEntity {
 
 abstract class ProjectGroupMetaData {
   String get name;
+  @deprecated
   Iterable<ProjectGroupRef> get childGroups;
+  @deprecated
   Iterable<ProjectRef> get projects;
 
   static Future<ProjectGroupMetaData> fromDefaultProjectGroupYamlFile(
