@@ -22,7 +22,7 @@ class PubSpec implements Jsonable {
 
   final String description;
 
-//  VersionConstraint sdkConstraint;
+  final Environment environment;
 
   final Map<String, DependencyReference> dependencies;
 
@@ -33,7 +33,7 @@ class PubSpec implements Jsonable {
   final Map unParsedYaml;
 
   PubSpec({this.name, this.author, this.version, this.homepage,
-      this.documentation, this.description, this.dependencies,
+      this.documentation, this.description, this.environment, this.dependencies,
       this.devDependencies, this.dependencyOverrides, this.unParsedYaml});
 
   factory PubSpec.fromJson(Map json) {
@@ -45,6 +45,8 @@ class PubSpec implements Jsonable {
         homepage: p.single('homepage'),
         documentation: p.single('documentation'),
         description: p.single('description'),
+        environment: p.single(
+            'environment', (v) => new Environment.fromJson(v)),
         dependencies: p.mapValues(
             'dependencies', (v) => new DependencyReference.fromJson(v)),
         devDependencies: p.mapValues(
@@ -105,5 +107,25 @@ class PubSpec implements Jsonable {
     } finally {
       return ioSink.close();
     }
+  }
+}
+
+class Environment implements Jsonable {
+  final VersionConstraint sdkConstraint;
+  final Map unParsedYaml;
+
+  Environment(this.sdkConstraint, this.unParsedYaml);
+
+  factory Environment.fromJson(Map json) {
+    final p = parseJson(json, consumeMap: true);
+    return new Environment(
+        p.single('sdk', (v) => new VersionConstraint.parse(v)), p.unconsumed);
+  }
+
+  @override
+  Map toJson() {
+    return (buildJson
+      ..add('sdk', sdkConstraint)
+      ..addAll(unParsedYaml)).json;
   }
 }

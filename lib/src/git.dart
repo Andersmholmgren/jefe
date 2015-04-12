@@ -26,7 +26,7 @@ Future<GitDir> clone(Uri gitUri, Directory parentDirectory) async {
 
 Future gitCommit(GitDir gitDir, String message) async {
   if (!(await gitDir.isWorkingTreeClean())) {
-    return gitDir.runCommand(['commit', '-am', "'$message'"]);
+    return gitDir.runCommand(['commit', '-am', message]);
   }
 }
 
