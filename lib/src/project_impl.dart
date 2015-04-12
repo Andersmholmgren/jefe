@@ -102,6 +102,7 @@ abstract class ProjectEntityImpl implements ProjectEntity {
 
 class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   final ProjectGroupMetaData metaData;
+  String get name => metaData.name;
 
   ProjectGroupImpl(Uri gitUri, this.metaData, Directory installDirectory)
       : super(gitUri, installDirectory);
@@ -111,14 +112,16 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     // TODO: implement release
   }
 
-  // TODO: this is likely problematic as the process method returns a Future
-  // but this is not catered for!&^*&!^*!^!
   @override
-  Future setupForNewFeature(String featureName, {bool recursive: true}) async {
+  Future setupForNewFeature(String featureName,
+      {bool doPush: false, bool recursive: true}) async {
     await featureStart(featureName, recursive: recursive);
     await setProjectsToPathDependencies(recursive: recursive);
     await commit('set path dependencies for start of feature $featureName');
-//    await push();
+    if (doPush) {
+      await push();
+    }
+    await pubGet();
   }
 
   @override
@@ -171,6 +174,15 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   Future initFlow({bool recursive: true}) async {
     _log.info('Initialising git flow for group ${metaData.name}');
     await Future.wait((await allProjects).map((p) => p.initFlow()));
+  }
+
+  @override
+  Future pubGet() async {
+    _log.info('Running pub get for group ${name}');
+    final stopWatch = new Stopwatch();
+    await Future.wait((await allProjects).map((p) => p.pubGet()));
+    _log.finest('Completed pub get for group ${name} in ${stopWatch.elapsed}');
+    stopWatch.stop();
   }
 
   @override
@@ -229,6 +241,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
     _log.info('Starting feature $featureName for project ${name}');
     return gitFlowFeatureStart(await gitDir, featureName);
   }
+
   @override
   Future setDevDependencies(Iterable<Project> dependencies) async {
     _log.info('Setting up dev dependencies for project ${name}');
@@ -257,6 +270,16 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   Future push() async {
     _log.info('Pushing project ${name}');
     return gitPush(await gitDir);
+  }
+
+  @override
+  Future pubGet() async {
+    _log.info('Running pub get for project ${name}');
+    final stopWatch = new Stopwatch();
+    await pubspec.get(installDirectory);
+    _log.finest(
+        'Completed pub get for project ${name} in ${stopWatch.elapsed}');
+    stopWatch.stop();
   }
 }
 

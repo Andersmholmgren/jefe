@@ -64,6 +64,8 @@ abstract class ProjectGroup extends ProjectEntity {
   Future featureStart(String name, {bool recursive: true});
   Future featureEnd(String name, {bool recursive: true});
 
+  Future pubGet();
+
   // May also be possible to checkout a particular version and create a bugfix
   // branch off it
   //  e.g Future checkout(String version, {bool recursive: true});
@@ -90,6 +92,8 @@ abstract class Project extends ProjectEntity {
   Future featureStart(String featureName);
 
   Future setDevDependencies(Iterable<Project> dependencies);
+
+  Future pubGet();
 }
 
 abstract class ProjectGroupMetaData {
