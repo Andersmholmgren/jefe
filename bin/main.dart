@@ -3,9 +3,7 @@
 
 import 'package:devops/devops.dart' as devops;
 
-main() {
-  print('Hello world: ${devops.calculate()}!');
-}
+main() {}
 
 /*
 release process

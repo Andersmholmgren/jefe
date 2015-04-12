@@ -64,6 +64,8 @@ abstract class ProjectGroup extends ProjectEntity {
   Future initFlow({bool recursive: true});
   Future featureStart(String name, {bool recursive: true});
   Future featureFinish(String name, {bool recursive: true});
+  Future releaseStart(String version, {bool recursive: true});
+  Future releaseFinish(String version, {bool recursive: true});
 
   Future pubGet();
 
@@ -89,10 +91,10 @@ abstract class Project extends ProjectEntity {
   Future push();
 
   Future initFlow();
-
   Future featureStart(String featureName);
-
   Future featureFinish(String featureName);
+  Future releaseStart(String version);
+  Future releaseFinish(String version);
 
   Future setToPathDependencies(Iterable<Project> dependencies);
 

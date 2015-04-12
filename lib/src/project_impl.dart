@@ -168,21 +168,30 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   }
 
   @override
-  Future initFlow({bool recursive: true}) async {
-    _log.info('Initialising git flow for group ${metaData.name}');
-    await Future.wait((await allProjects).map((p) => p.initFlow()));
-  }
+  Future initFlow({bool recursive: true}) =>
+      _visitAllProjects('Initialising git flow', (p) => p.initFlow());
 
   @override
-  Future featureStart(String name, {bool recursive: true}) async {
-    _log.info('git flow feature start $name for group ${metaData.name}');
-    await Future.wait((await allProjects).map((p) => p.featureStart(name)));
-  }
+  Future featureStart(String name, {bool recursive: true}) => _visitAllProjects(
+      'git flow feature start $name', (p) => p.featureStart(name));
 
   @override
-  Future featureFinish(String name, {bool recursive: true}) async {
-    _log.info('git flow feature finish $name for group ${metaData.name}');
-    await Future.wait((await allProjects).map((p) => p.featureFinish(name)));
+  Future featureFinish(String name, {bool recursive: true}) =>
+      _visitAllProjects(
+          'git flow feature finish $name', (p) => p.featureFinish(name));
+
+  @override
+  Future releaseStart(String name, {bool recursive: true}) => _visitAllProjects(
+      'git flow release start $name', (p) => p.releaseStart(name));
+
+  @override
+  Future releaseFinish(String name, {bool recursive: true}) =>
+      _visitAllProjects(
+          'git flow release finish $name', (p) => p.releaseFinish(name));
+
+  Future _visitAllProjects(String taskDescription, process(Project p)) async {
+    _log.info('$taskDescription for group ${metaData.name}');
+    await Future.wait((await allProjects).map((p) => process(p)));
   }
 
   @override
@@ -253,9 +262,21 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   }
 
   @override
-  Future featureFinish(String featureName, {bool recursive: true}) async {
-    _log.info('git flow feature finish $name for project ${name}');
+  Future featureFinish(String featureName) async {
+    _log.info('git flow feature finish $featureName for project ${name}');
     await gitFlowFeatureFinish(await gitDir, featureName);
+  }
+
+  @override
+  Future releaseStart(String version) async {
+    _log.info('git flow release start $version for project ${name}');
+    await gitFlowReleaseStart(await gitDir, version);
+  }
+
+  @override
+  Future releaseFinish(String version) async {
+    _log.info('git flow release finish $version for project ${name}');
+    await gitFlowReleaseFinish(await gitDir, version);
   }
 
   @override
