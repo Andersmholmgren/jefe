@@ -32,16 +32,16 @@ Future gitCommit(GitDir gitDir, String message) async {
 
 Future gitPush(GitDir gitDir) async => await gitDir.runCommand(['push']);
 
+Future<String> currentCommitHash(GitDir gitDir) async =>
+    (await gitDir.runCommand(['rev-parse', 'HEAD'])).stdout.trim();
+
 // TODO: should generalise into fetching all remotes if any etc
 Future<Uri> getFirstRemote(GitDir gitDir) async {
   final ProcessResult result = await gitDir.runCommand(['remote', '-v']);
 
   final String remotesStr = result.stdout;
-//  print(remotesStr);
 
   final firstLine = remotesStr.split('\n').first;
-//  print(firstLine);
-//  print(firstLine.split(new RegExp(r'\s+')));
 
   return Uri.parse(firstLine.split(new RegExp(r'\s+')).elementAt(1));
 }
@@ -51,3 +51,6 @@ Future initGitFlow(GitDir gitDir) async =>
 
 Future gitFlowFeatureStart(GitDir gitDir, String featureName) async =>
     await gitDir.runCommand(['flow', 'feature', 'start', featureName]);
+
+Future gitFlowFeatureFinish(GitDir gitDir, String featureName) async =>
+    await gitDir.runCommand(['flow', 'feature', 'finish', featureName]);

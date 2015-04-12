@@ -116,7 +116,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   Future setupForNewFeature(String featureName,
       {bool doPush: false, bool recursive: true}) async {
     await featureStart(featureName, recursive: recursive);
-    await setProjectsToPathDependencies(recursive: recursive);
+    await setToPathDependencies(recursive: recursive);
     await commit('set path dependencies for start of feature $featureName');
     if (doPush) {
       await push();
@@ -152,16 +152,25 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   }
 
   @override
-  Future featureEnd(String name, {bool recursive: true}) {
-    // TODO: implement featureEnd
+  Future setToPathDependencies({bool recursive: true}) {
+    _log.info('Setting up path dependencies for group ${metaData.name}');
+    return processDependenciesDepthFirst(
+        (Project project, Iterable<Project> dependencies) =>
+            project.setToPathDependencies(dependencies));
   }
 
   @override
-  Future setProjectsToPathDependencies({bool recursive: true}) {
-    _log.info('Setting up dev dependencies for group ${metaData.name}');
+  Future setToGitDependencies({bool recursive: true}) {
+    _log.info('Setting up git dependencies for group ${metaData.name}');
     return processDependenciesDepthFirst(
         (Project project, Iterable<Project> dependencies) =>
-            project.setDevDependencies(dependencies));
+            project.setToGitDependencies(dependencies));
+  }
+
+  @override
+  Future initFlow({bool recursive: true}) async {
+    _log.info('Initialising git flow for group ${metaData.name}');
+    await Future.wait((await allProjects).map((p) => p.initFlow()));
   }
 
   @override
@@ -171,9 +180,9 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   }
 
   @override
-  Future initFlow({bool recursive: true}) async {
-    _log.info('Initialising git flow for group ${metaData.name}');
-    await Future.wait((await allProjects).map((p) => p.initFlow()));
+  Future featureFinish(String name, {bool recursive: true}) async {
+    _log.info('git flow feature finish $name for group ${metaData.name}');
+    await Future.wait((await allProjects).map((p) => p.featureFinish(name)));
   }
 
   @override
@@ -244,7 +253,30 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   }
 
   @override
-  Future setDevDependencies(Iterable<Project> dependencies) async {
+  Future featureFinish(String featureName, {bool recursive: true}) async {
+    _log.info('git flow feature finish $name for project ${name}');
+    await gitFlowFeatureFinish(await gitDir, featureName);
+  }
+
+  @override
+  Future setToPathDependencies(Iterable<Project> dependencies) async {
+    _log.info('Setting up path dependencies for project ${name}');
+    return _setDependencies(dependencies,
+        (Project p) async => await new PathReference(p.installDirectory.path));
+  }
+
+  @override
+  Future setToGitDependencies(Iterable<Project> dependencies) async {
+    _log.info('Setting up git dependencies for project ${name}');
+    return _setDependencies(dependencies, (Project p) async =>
+        new GitReference(gitUri, await currentGitCommitHash));
+  }
+
+  Future<String> get currentGitCommitHash async =>
+      currentCommitHash(await gitDir);
+
+  Future _setDependencies(Iterable<Project> dependencies,
+      Future<DependencyReference> createReferenceTo(Project p)) async {
     _log.info('Setting up dev dependencies for project ${name}');
     if (dependencies.isEmpty) {
       return;
@@ -254,7 +286,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
     final newDependencies = new Map.from(_pubspec.dependencies);
 
     dependencies.forEach((p) async {
-      newDependencies[p.name] = new PathReference(p.installDirectory.path);
+      newDependencies[p.name] = createReferenceTo(p);
     });
 
     final newPubspec = _pubspec.copy(dependencies: newDependencies);
@@ -294,7 +326,7 @@ class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {
 
 Future<ProjectGroup> loadProjectGroupFromInstallDirectory(
     Directory installDirectory) async {
-  print('========= $installDirectory');
+//  print('========= $installDirectory');
   final gitDirFuture = GitDir.fromExisting(installDirectory.path);
   final metaDataFuture = ProjectGroupMetaData
       .fromDefaultProjectGroupYamlFile(installDirectory.path);
@@ -308,7 +340,7 @@ Future<ProjectGroup> loadProjectGroupFromInstallDirectory(
 
 Future<Project> loadProjectFromInstallDirectory(
     Directory installDirectory) async {
-  print('=====+==== $installDirectory');
+//  print('=====+==== $installDirectory');
   final GitDir gitDir = await GitDir.fromExisting(installDirectory.path);
 
   final PubSpec pubspec = await PubSpec.load(installDirectory);
