@@ -179,7 +179,8 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   @override
   Future pubGet() async {
     _log.info('Running pub get for group ${name}');
-    final stopWatch = new Stopwatch();
+    final stopWatch = new Stopwatch()..start();
+
     await Future.wait((await allProjects).map((p) => p.pubGet()));
     _log.finest('Completed pub get for group ${name} in ${stopWatch.elapsed}');
     stopWatch.stop();
@@ -275,7 +276,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   @override
   Future pubGet() async {
     _log.info('Running pub get for project ${name}');
-    final stopWatch = new Stopwatch();
+    final stopWatch = new Stopwatch()..start();
     await pubspec.get(installDirectory);
     _log.finest(
         'Completed pub get for project ${name} in ${stopWatch.elapsed}');
