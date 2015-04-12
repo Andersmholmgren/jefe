@@ -2,9 +2,9 @@ library devops.pubspec;
 
 import 'package:pub_semver/pub_semver.dart';
 import 'package:devops/src/pubspec/dependency.dart';
-import 'package:devops/src/pubspec/core.dart';
+import 'package:devops/src/jsonyaml/json_utils.dart';
 
-class PubSpec implements Yamlable {
+class PubSpec implements Jsonable {
   final String name;
 
   final String author;
@@ -31,6 +31,20 @@ class PubSpec implements Yamlable {
       this.documentation, this.description, this.dependencies,
       this.devDependencies, this.dependencyOverrides, this.unParsedYaml});
 
+  factory PubSpec.fromJson(Map json) {
+    final p = parseJson(json);
+    return new PubSpec(
+        name: p.single('name'),
+        author: p.single('author'),
+        version: p.single('version', (v) => new Version.parse(v)),
+        homepage: p.single('homepage'),
+        documentation: p.single('documentation'),
+        description: p.single('description'),
+        dependencies: p.mapValues(
+            'dependencies', (v) => new Dependency.fromJson(v)),
+        unParsedYaml: p.unconsumed);
+  }
+
   PubSpec copy({String name, String author, Version version, String homepage,
       String documentation, String description,
       Map<String, Dependency> dependencies,
@@ -56,44 +70,17 @@ class PubSpec implements Yamlable {
   }
 
   @override
-  Map toYaml() {
-    final map = {};
-    _add(map, 'name', name);
-    _add(map, 'author', author);
-    _add(map, 'version', version);
-    _add(map, 'homepage', homepage);
-    _add(map, 'documentation', documentation);
-    _add(map, 'description', description);
-    _add(map, 'dependencies', dependencies);
-    _add(map, 'devDependencies', devDependencies);
-    _add(map, 'dependencyOverrides', dependencyOverrides);
-    _add(map, 'unParsedYaml', unParsedYaml);
-    return map;
+  Map toJson() {
+    return (buildJson
+      ..add('name', name)
+      ..add('author', author)
+      ..add('version', version)
+      ..add('homepage', homepage)
+      ..add('documentation', documentation)
+      ..add('description', description)
+      ..add('dependencies', dependencies)
+      ..add('devDependencies', devDependencies)
+      ..add('dependencyOverrides', dependencyOverrides)
+      ..add('unParsedYaml', unParsedYaml)).json;
   }
-}
-
-void _add(Map yaml, String key, value, [transform(v)]) {
-  if (value != null) {
-    yaml[key] = _transformValue(value, transform);
-  }
-}
-
-_transformValue(value, transform(v)) {
-  if (transform != null) {
-    return transform(value);
-  }
-  if (value is Yamlable) {
-    return value.toYaml();
-  }
-  if (value is Map) {
-    final result = {};
-    (value as Map).forEach((k, v) {
-      result[k] = _transformValue(value, null);
-    });
-    return result;
-  }
-  if (value is Iterable) {
-    return (value as Iterable).map((v) => _transformValue(v, null)).toList();
-  }
-  return value;
 }

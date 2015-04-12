@@ -1,19 +1,23 @@
 library devops.pubspec.dependency;
 
 import 'package:pub_semver/pub_semver.dart';
-import 'package:devops/src/pubspec/core.dart';
+import 'package:devops/src/jsonyaml/json_utils.dart';
 
-class Dependency extends Yamlable {
+class Dependency extends Jsonable {
   final String name;
   final DependencyReference reference;
 
   Dependency(this.name, this.reference);
+  factory Dependency.fromJson(Map json) {
+    final p = parseJson(json);
+    return new Dependency(p.single('name'), p.single('ref'));
+  }
 
   @override
-  Map toYaml() => {name: reference.toYaml()};
+  Map toJson() => {name: reference.toJson()};
 }
 
-abstract class DependencyReference extends Yamlable {}
+abstract class DependencyReference extends Jsonable {}
 
 class GitReference extends DependencyReference {
   final Uri url;
@@ -22,7 +26,7 @@ class GitReference extends DependencyReference {
   GitReference(this.url, this.ref);
 
   @override
-  Map toYaml() => {'url': url.toString(), 'ref': ref};
+  Map toJson() => {'url': url.toString(), 'ref': ref};
 }
 
 class PathReference extends DependencyReference {
@@ -31,7 +35,7 @@ class PathReference extends DependencyReference {
   PathReference(this.path);
 
   @override
-  Map toYaml() => {'path': path};
+  Map toJson() => {'path': path};
 }
 
 class HostedReference extends DependencyReference {
@@ -40,7 +44,7 @@ class HostedReference extends DependencyReference {
   HostedReference(this.versionConstraint);
 
   @override
-  String toYaml() => versionConstraint.toString();
+  String toJson() => versionConstraint.toString();
 }
 
 //VersionConstraint
