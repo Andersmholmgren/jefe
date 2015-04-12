@@ -1,5 +1,7 @@
 library devops.yaml;
 
+import 'package:quiver/iterables.dart';
+
 String toYamlString(node) {
   var sb = new StringBuffer();
   writeYamlString(node, sb);
@@ -26,13 +28,34 @@ _mapToYamlString(Map node, int indent, StringSink ss, bool isTopLevel) {
     indent += 2;
   }
 
-  node.forEach((k, v) {
+  final keys = _sortKeys(node);
+
+  keys.forEach((k) {
+    final v = node[k];
     _writeIndent(indent, ss);
     ss
       ..write(k)
       ..write(': ');
     _writeYamlString(v, indent, ss, false);
   });
+}
+
+Iterable<String> _sortKeys(Map m) {
+  final simple = [];
+  final maps = [];
+  final other = [];
+
+  m.forEach((k, v) {
+    if (v is String) {
+      simple.add(k);
+    } else if (v is Map) {
+      maps.add(k);
+    } else {
+      other.add(k);
+    }
+  });
+
+  return concat([simple..sort(), maps..sort(), other..sort()]);
 }
 
 _listToYamlString(Iterable node, int indent, StringSink ss, bool isTopLevel) {
