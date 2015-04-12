@@ -37,9 +37,9 @@ abstract class ProjectGroup extends ProjectEntity {
   ProjectGroupMetaData get metaData;
 
   static Future<ProjectGroup> install(
-      String name, String gitUri, Directory parentDir,
-      {bool recursive: true}) => new ProjectGroupRef.fromGitUrl(name, gitUri)
-      .install(parentDir, recursive: recursive);
+          Directory parentDir, String name, String gitUri,
+          {bool recursive: true}) =>
+      ProjectGroupImpl.install(parentDir, name, gitUri, recursive: recursive);
 
   static Future<ProjectGroup> fromInstallDirectory(
           Directory installDirectory) =>

@@ -21,6 +21,7 @@ abstract class _BaseRef<T> implements Ref<T> {
 
   _BaseRef(this.name, this.gitUri);
 
+  @deprecated
   Directory installDirectory(Directory parent) =>
       new Directory(p.join(parent.path, name));
 }
@@ -29,40 +30,14 @@ class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupRef {
   ProjectGroupRefImpl(String name, String gitUri) : super(name, gitUri);
 
   @override
-  Future<ProjectGroup> install(Directory parentDir,
-      {bool recursive: true}) async {
-    _log.info('installing group $name from $gitUri into $parentDir');
-
-    final Directory projectGroupRoot =
-        await _containerDirectory(parentDir).create(recursive: true);
-
-    final GitDir gitDir = await clone(gitUri, projectGroupRoot);
-
-    final ProjectGroupMetaData metaData =
-        await ProjectGroupMetaData.fromDefaultProjectGroupYamlFile(gitDir.path);
-
-    final projectGroupDir = new Directory(gitDir.path);
-    final projectGroup =
-        new ProjectGroupImpl(gitUri, metaData, projectGroupDir);
-    if (recursive) {
-      final projectGroupInstallFutures = metaData.childGroups
-          .map((ref) => ref.install(projectGroupRoot, recursive: true));
-      final projectInstallFutures = metaData.projects
-          .map((ref) => ref.install(projectGroupRoot, recursive: true));
-      await Future
-          .wait(concat([projectGroupInstallFutures, projectInstallFutures]));
-    }
-    return projectGroup;
-  }
+  Future<ProjectGroup> install(Directory parentDir, {bool recursive: true}) =>
+      ProjectGroup.install(parentDir, name, gitUri, recursive: recursive);
 
   Directory installDirectory(Directory parent) =>
       super.installDirectory(_containerDirectory(parent));
 
   Directory _containerDirectory(Directory parentDir) =>
       new Directory(gitWorkspacePath(gitUri, parentDir) + '_root');
-
-//  Directory _installDirectory(Directory parentDir) =>
-//      new Directory(p.join(_containerDirectory(parentDir).path, name));
 
   @override
   Future<ProjectGroup> load(Directory parentDirectory,
@@ -107,6 +82,36 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 
   ProjectGroupImpl(String gitUri, this.metaData, Directory installDirectory)
       : super(gitUri, installDirectory);
+
+  static Future<ProjectGroup> install(
+      Directory parentDir, String name, String gitUri,
+      {bool recursive: true}) async {
+    _log.info('installing group $name from $gitUri into $parentDir');
+
+    final Directory projectGroupRoot =
+        await _containerDirectory(gitUri, parentDir).create(recursive: true);
+
+    final GitDir gitDir = await clone(gitUri, projectGroupRoot);
+
+    final ProjectGroupMetaData metaData =
+        await ProjectGroupMetaData.fromDefaultProjectGroupYamlFile(gitDir.path);
+
+    final projectGroupDir = new Directory(gitDir.path);
+    final projectGroup =
+        new ProjectGroupImpl(gitUri, metaData, projectGroupDir);
+    if (recursive) {
+      final projectGroupInstallFutures = metaData.childGroups
+          .map((ref) => ref.install(projectGroupRoot, recursive: true));
+      final projectInstallFutures = metaData.projects
+          .map((ref) => ref.install(projectGroupRoot, recursive: true));
+      await Future
+          .wait(concat([projectGroupInstallFutures, projectInstallFutures]));
+    }
+    return projectGroup;
+  }
+
+  static Directory _containerDirectory(String gitUri, Directory parentDir) =>
+      new Directory(gitWorkspacePath(gitUri, parentDir) + '_root');
 
   @override
   Future release({bool recursive: true, ReleaseType type: ReleaseType.minor}) {
