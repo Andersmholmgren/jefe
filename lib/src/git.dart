@@ -24,6 +24,14 @@ Future<GitDir> clone(Uri gitUri, Directory parentDirectory) async {
   return gitWorkspaceDir(gitUri, parentDirectory);
 }
 
+Future gitCommit(GitDir gitDir, String message) async {
+  if (!(await gitDir.isWorkingTreeClean())) {
+    return gitDir.runCommand(['commit', '-am', "'$message'"]);
+  }
+}
+
+Future gitPush(GitDir gitDir) async => await gitDir.runCommand(['push']);
+
 // TODO: should generalise into fetching all remotes if any etc
 Future<Uri> getFirstRemote(GitDir gitDir) async {
   final ProcessResult result = await gitDir.runCommand(['remote', '-v']);

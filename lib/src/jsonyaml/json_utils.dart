@@ -103,7 +103,7 @@ class JsonParser {
     final Map m = _getField(fieldName);
 
     if (m == null) {
-      return null;
+      return {};
     }
 
     Map result = {};

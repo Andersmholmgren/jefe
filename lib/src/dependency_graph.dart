@@ -43,9 +43,9 @@ class DependencyGraph {
     dependencies.forEach((p) => _rootNodeMap.remove(p));
   }
 
-  void depthFirst(process(Project project, Iterable<Project> dependencies)) {
+  Future depthFirst(process(Project project, Iterable<Project> dependencies)) {
     Set<Project> visited = new Set();
-    _rootNodes.forEach((n) => n.depthFirst(process, visited));
+    return Future.forEach(_rootNodes, (n) => n.depthFirst(process, visited));
   }
 
   _DependencyNode _getOrCreateNode(Project project) {
@@ -67,12 +67,12 @@ class _DependencyNode {
 
   _DependencyNode(this.project);
 
-  void depthFirst(process(Project project, Iterable<Project> dependencies),
-      Set<Project> visited) {
-    _dependencies.forEach((n) => n.depthFirst(process, visited));
+  Future depthFirst(process(Project project, Iterable<Project> dependencies),
+      Set<Project> visited) async {
+    await Future.forEach(_dependencies, (n) => n.depthFirst(process, visited));
     if (!visited.contains((project))) {
       visited.add(project);
-      process(project, dependencies);
+      await process(project, dependencies);
     }
   }
 }

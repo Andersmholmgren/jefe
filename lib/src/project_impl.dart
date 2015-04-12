@@ -114,11 +114,11 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   // TODO: this is likely problematic as the process method returns a Future
   // but this is not catered for!&^*&!^*!^!
   @override
-  Future setupForDev({bool recursive: true}) {
-    _log.info('Setting up dev dependencies for group ${metaData.name}');
-    return processDependenciesDepthFirst(
-        (Project project, Iterable<Project> dependencies) =>
-            project.setDevDependencies(dependencies));
+  Future setupForNewFeature(String featureName, {bool recursive: true}) async {
+    await featureStart(featureName, recursive: recursive);
+    await setProjectsToPathDependencies(recursive: recursive);
+    await commit('set path dependencies for start of feature $featureName');
+//    await push();
   }
 
   @override
@@ -132,8 +132,33 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   }
 
   @override
+  Future commit(String message) {
+    // TODO: don't really need the graph traversal here
+    _log.info(
+        'Commiting all projects for group ${metaData.name} with message $message');
+    return processDependenciesDepthFirst((Project project,
+        Iterable<Project> dependencies) => project.commit(message));
+  }
+
+  @override
+  Future push() {
+    // TODO: don't really need the graph traversal here
+    _log.info('Pushing all projects for group ${metaData.name}');
+    return processDependenciesDepthFirst(
+        (Project project, Iterable<Project> dependencies) => project.push());
+  }
+
+  @override
   Future featureEnd(String name, {bool recursive: true}) {
     // TODO: implement featureEnd
+  }
+
+  @override
+  Future setProjectsToPathDependencies({bool recursive: true}) {
+    _log.info('Setting up dev dependencies for group ${metaData.name}');
+    return processDependenciesDepthFirst(
+        (Project project, Iterable<Project> dependencies) =>
+            project.setDevDependencies(dependencies));
   }
 
   @override
@@ -171,7 +196,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
       process(Project project, Iterable<Project> dependencies)) async {
     final projects = await allProjects;
     final DependencyGraph graph = await getDependencyGraph(projects);
-    graph.depthFirst(process);
+    return graph.depthFirst(process);
   }
 }
 
@@ -187,17 +212,23 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   @override
   Future updatePubspec(PubSpec newSpec) async {
+    _log.info('Updating pubspec for project ${name}');
     await newSpec.save(installDirectory);
     _pubspec = newSpec;
+    _log.finest('Finished Updating pubspec for project ${name}');
   }
 
   @override
-  Future initFlow() async => initGitFlow(await gitDir);
+  Future initFlow() async {
+    _log.info('Initializing git flow for project ${name}');
+    return initGitFlow(await gitDir);
+  }
 
   @override
-  Future featureStart(String featureName) async =>
-      gitFlowFeatureStart(await gitDir, featureName);
-
+  Future featureStart(String featureName) async {
+    _log.info('Starting feature $featureName for project ${name}');
+    return gitFlowFeatureStart(await gitDir, featureName);
+  }
   @override
   Future setDevDependencies(Iterable<Project> dependencies) async {
     _log.info('Setting up dev dependencies for project ${name}');
@@ -214,6 +245,18 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
     final newPubspec = _pubspec.copy(dependencies: newDependencies);
     await updatePubspec(newPubspec);
+  }
+
+  @override
+  Future commit(String message) async {
+    _log.info('Commiting project ${name} with message $message');
+    return gitCommit(await gitDir, message);
+  }
+
+  @override
+  Future push() async {
+    _log.info('Pushing project ${name}');
+    return gitPush(await gitDir);
   }
 }
 

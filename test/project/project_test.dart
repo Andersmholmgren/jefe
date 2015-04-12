@@ -70,9 +70,9 @@ main() async {
   print(projectGroup2.metaData);
 
   await projectGroup2.initFlow();
-  await projectGroup2.featureStart('blah');
+//  await projectGroup2.featureStart('blah');
 
-  await projectGroup2.setupForDev();
+  await projectGroup2.setupForNewFeature('awesomeness');
 }
 
 //mainVV() async {
