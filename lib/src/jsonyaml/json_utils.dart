@@ -6,7 +6,7 @@ import 'package:option/option.dart';
 final _p = path.url;
 
 abstract class Jsonable {
-  Map toJson();
+  toJson();
 }
 
 //List fromJsonList(List l, create(i)) =>

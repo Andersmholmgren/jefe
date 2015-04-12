@@ -19,11 +19,11 @@ class PubSpec implements Jsonable {
 
 //  VersionConstraint sdkConstraint;
 
-  final Map<String, Dependency> dependencies;
+  final Map<String, DependencyReference> dependencies;
 
-  final Map<String, Dependency> devDependencies;
+  final Map<String, DependencyReference> devDependencies;
 
-  final Map<String, Dependency> dependencyOverrides;
+  final Map<String, DependencyReference> dependencyOverrides;
 
   final Map unParsedYaml;
 
@@ -41,15 +41,19 @@ class PubSpec implements Jsonable {
         documentation: p.single('documentation'),
         description: p.single('description'),
         dependencies: p.mapValues(
-            'dependencies', (v) => new Dependency.fromJson(v)),
+            'dependencies', (v) => new DependencyReference.fromJson(v)),
+        devDependencies: p.mapValues(
+            'devDependencies', (v) => new DependencyReference.fromJson(v)),
+        dependencyOverrides: p.mapValues(
+            'dependencyOverrides', (v) => new DependencyReference.fromJson(v)),
         unParsedYaml: p.unconsumed);
   }
 
   PubSpec copy({String name, String author, Version version, String homepage,
       String documentation, String description,
-      Map<String, Dependency> dependencies,
-      Map<String, Dependency> devDependencies,
-      Map<String, Dependency> dependencyOverrides, Map unParsedYaml}) {
+      Map<String, DependencyReference> dependencies,
+      Map<String, DependencyReference> devDependencies,
+      Map<String, DependencyReference> dependencyOverrides, Map unParsedYaml}) {
     return new PubSpec(
         name: name != null ? name : this.name,
         author: author != null ? author : this.author,
