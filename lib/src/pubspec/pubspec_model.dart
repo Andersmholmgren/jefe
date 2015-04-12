@@ -62,7 +62,7 @@ class PubSpec implements Jsonable {
               .readAsString()));
 
   PubSpec copy({String name, String author, Version version, String homepage,
-      String documentation, String description,
+      String documentation, String description, Environment environment,
       Map<String, DependencyReference> dependencies,
       Map<String, DependencyReference> devDependencies,
       Map<String, DependencyReference> dependencyOverrides, Map unParsedYaml}) {
@@ -75,6 +75,7 @@ class PubSpec implements Jsonable {
             ? documentation
             : this.documentation,
         description: description != null ? description : this.description,
+        environment: environment != null ? environment : this.environment,
         dependencies: dependencies != null ? dependencies : this.dependencies,
         devDependencies: devDependencies != null
             ? devDependencies
@@ -93,6 +94,7 @@ class PubSpec implements Jsonable {
       ..add('version', version)
       ..add('homepage', homepage)
       ..add('documentation', documentation)
+      ..add('environment', environment)
       ..add('description', description)
       ..add('dependencies', dependencies)
       ..add('dev_dependencies', devDependencies)
@@ -125,7 +127,7 @@ class Environment implements Jsonable {
   @override
   Map toJson() {
     return (buildJson
-      ..add('sdk', sdkConstraint)
+      ..add('sdk', "'${sdkConstraint.toString()}'")
       ..addAll(unParsedYaml)).json;
   }
 }
