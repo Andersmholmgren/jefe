@@ -1,12 +1,9 @@
-library devops.pubspec;
+library devops.pubspec.dependency;
 
 import 'package:pub_semver/pub_semver.dart';
+import 'package:devops/src/pubspec/core.dart';
 
-abstract class _Yamlable {
-  toYaml();
-}
-
-class Dependency extends _Yamlable {
+class Dependency extends Yamlable {
   final String name;
   final DependencyReference reference;
 
@@ -16,7 +13,7 @@ class Dependency extends _Yamlable {
   Map toYaml() => {name: reference.toYaml()};
 }
 
-abstract class DependencyReference extends _Yamlable {}
+abstract class DependencyReference extends Yamlable {}
 
 class GitReference extends DependencyReference {
   final Uri url;
