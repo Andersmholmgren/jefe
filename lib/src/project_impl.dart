@@ -11,6 +11,7 @@ import 'package:path/path.dart' as p;
 import 'dependency_graph.dart';
 import 'package:devops/src/pubspec/pubspec_model.dart';
 import 'package:devops/src/pubspec/dependency.dart';
+import 'pub.dart' as pub;
 
 Logger _log = new Logger('devops.project.impl');
 
@@ -349,7 +350,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   Future pubGet() async {
     _log.info('Running pub get for project ${name}');
     final stopWatch = new Stopwatch()..start();
-    await pubspec.get(installDirectory);
+    await pub.get(installDirectory);
     _log.finest(
         'Completed pub get for project ${name} in ${stopWatch.elapsed}');
     stopWatch.stop();

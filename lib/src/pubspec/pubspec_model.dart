@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:yaml/yaml.dart';
 import 'package:path/path.dart' as p;
 import 'package:devops/src/yaml/yaml_writer.dart';
-import 'package:devops/src/util/process_utils.dart';
 
 class PubSpec implements Jsonable {
   final String name;
@@ -86,9 +85,6 @@ class PubSpec implements Jsonable {
             : this.dependencyOverrides,
         unParsedYaml: unParsedYaml != null ? unParsedYaml : this.unParsedYaml);
   }
-
-  Future get(Directory parentDir) =>
-      runCommand('pub', ['get'], processWorkingDir: parentDir.path);
 
   @override
   Map toJson() {
