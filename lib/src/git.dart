@@ -5,17 +5,17 @@ import 'dart:async';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 
-Future<GitDir> gitWorkspaceDir(Uri gitUri, Directory parentDirectory) =>
+Future<GitDir> gitWorkspaceDir(String gitUri, Directory parentDirectory) =>
     GitDir.fromExisting(gitWorkspacePath(gitUri, parentDirectory));
 
-String gitWorkspaceName(Uri gitUri) => p.basenameWithoutExtension(gitUri.path);
+String gitWorkspaceName(String gitUri) => p.basenameWithoutExtension(gitUri);
 
-String gitWorkspacePath(Uri gitUri, Directory parentDirectory) {
+String gitWorkspacePath(String gitUri, Directory parentDirectory) {
   print('---- $gitUri ---- $parentDirectory');
   return p.join(parentDirectory.path, gitWorkspaceName(gitUri));
 }
 
-Future<GitDir> clone(Uri gitUri, Directory parentDirectory) async {
+Future<GitDir> clone(String gitUri, Directory parentDirectory) async {
   final ProcessResult result = await runGit(['clone', gitUri.toString()],
       processWorkingDir: parentDirectory.path);
 
@@ -39,14 +39,14 @@ Future<String> currentCommitHash(GitDir gitDir) async =>
     (await gitDir.runCommand(['rev-parse', 'HEAD'])).stdout.trim();
 
 // TODO: should generalise into fetching all remotes if any etc
-Future<Uri> getFirstRemote(GitDir gitDir) async {
+Future<String> getFirstRemote(GitDir gitDir) async {
   final ProcessResult result = await gitDir.runCommand(['remote', '-v']);
 
   final String remotesStr = result.stdout;
 
   final firstLine = remotesStr.split('\n').first;
 
-  return Uri.parse(firstLine.split(new RegExp(r'\s+')).elementAt(1));
+  return firstLine.split(new RegExp(r'\s+')).elementAt(1);
 }
 
 Future initGitFlow(GitDir gitDir) async =>

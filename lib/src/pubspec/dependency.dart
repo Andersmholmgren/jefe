@@ -28,17 +28,17 @@ abstract class DependencyReference extends Jsonable {
 }
 
 class GitReference extends DependencyReference {
-  final Uri url;
+  final String url;
   final String ref;
 
   GitReference(this.url, this.ref);
   factory GitReference.fromJson(Map json) {
     final git = json['git'];
     if (git is String) {
-      return new GitReference(Uri.parse(git), null);
+      return new GitReference(git, null);
     } else if (git is Map) {
       Map m = git;
-      return new GitReference(Uri.parse(m['url']), m['ref']);
+      return new GitReference(m['url'], m['ref']);
     } else {
       throw new StateError('Unexpected format for git dependency $git');
     }

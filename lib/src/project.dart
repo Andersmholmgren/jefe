@@ -11,7 +11,7 @@ import 'package:pub_semver/pub_semver.dart';
 
 abstract class Ref<T> {
   String get name;
-  Uri get gitUri;
+  String get gitUri;
 
   Future<T> install(Directory parentDirectory, {bool recursive: true});
 
@@ -20,15 +20,15 @@ abstract class Ref<T> {
 
 abstract class ProjectGroupRef implements Ref<ProjectGroup> {
   factory ProjectGroupRef.fromGitUrl(
-      String name, Uri gitUri) = ProjectGroupRefImpl;
+      String name, String gitUri) = ProjectGroupRefImpl;
 }
 
 abstract class ProjectRef implements Ref<Project> {
-  factory ProjectRef.fromGitUrl(String name, Uri gitUri) = ProjectRefImpl;
+  factory ProjectRef.fromGitUrl(String name, String gitUri) = ProjectRefImpl;
 }
 
 abstract class ProjectEntity {
-  Uri get gitUri;
+  String get gitUri;
   Future<GitDir> get gitDir;
   Directory get installDirectory;
 }
@@ -37,7 +37,7 @@ abstract class ProjectGroup extends ProjectEntity {
   ProjectGroupMetaData get metaData;
 
   static Future<ProjectGroup> install(
-      String name, Uri gitUri, Directory parentDir,
+      String name, String gitUri, Directory parentDir,
       {bool recursive: true}) => new ProjectGroupRef.fromGitUrl(name, gitUri)
       .install(parentDir, recursive: recursive);
 
@@ -78,7 +78,8 @@ abstract class ProjectGroup extends ProjectEntity {
 abstract class Project extends ProjectEntity {
   PubSpec get pubspec;
 
-  static Future<Project> install(String name, Uri gitUri, Directory parentDir,
+  static Future<Project> install(
+      String name, String gitUri, Directory parentDir,
       {bool recursive: true}) => new ProjectRef.fromGitUrl(name, gitUri)
       .install(parentDir, recursive: recursive);
 

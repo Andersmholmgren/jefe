@@ -30,8 +30,8 @@ mainA() async {
 //      'https://andersmholmgren@bitbucket.org/andersmholmgren/shelf_path.git');
 
 //  print(p.basenameWithoutExtension(url.path));
-  final GitDir gitDir = await clone(Uri.parse(
-          'https://andersmholmgren@bitbucket.org/andersmholmgren/shelf_path.git'),
+  final GitDir gitDir = await clone(
+      'https://andersmholmgren@bitbucket.org/andersmholmgren/shelf_path.git',
       installDir);
 
   print(await gitDir.isWorkingTreeClean());
@@ -39,8 +39,8 @@ mainA() async {
   final Directory installDir2 = await Directory.systemTemp.createTemp();
   print(installDir2);
 
-  final GitDir gitDir2 = await clone(
-      Uri.parse(p.join(installDir.path, 'shelf_path')), installDir2);
+  final GitDir gitDir2 =
+      await clone(p.join(installDir.path, 'shelf_path'), installDir2);
 }
 
 //main() async {
@@ -53,7 +53,7 @@ main() async {
   hierarchicalLoggingEnabled = true;
 
   ProjectGroupRef ref = new ProjectGroupRef.fromGitUrl(
-      'top', Uri.parse('/Users/blah/dart/jefe_jefe/jefe_test_projects/top'));
+      'top', '/Users/blah/dart/jefe_jefe/jefe_test_projects/gissue');
 
   final Directory installDir = await Directory.systemTemp.createTemp();
 
@@ -77,9 +77,9 @@ main() async {
 
 //  await new Future.delayed(const Duration(minutes: 2));
 
-  await projectGroup2.featureFinish('awesomeness');
+//  await projectGroup2.featureFinish('awesomeness');
 
-  await projectGroup2.release();
+//  await projectGroup2.release();
 }
 
 //mainVV() async {

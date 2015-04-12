@@ -19,10 +19,10 @@ Future<ProjectGroupMetaData> readProjectGroupYaml(File projectGroupFile) async {
   print(projectsMap);
 
   final childProjectGroups = projectGroupsMap.keys
-      .map((k) => new ProjectGroupRefImpl(k, Uri.parse(projectGroupsMap[k])));
+      .map((k) => new ProjectGroupRefImpl(k, projectGroupsMap[k]));
 
-  final childProjects = projectsMap.keys
-      .map((k) => new ProjectRefImpl(k, Uri.parse(projectsMap[k])));
+  final childProjects =
+      projectsMap.keys.map((k) => new ProjectRefImpl(k, projectsMap[k]));
 
   return new ProjectGroupMetaDataImpl(
       yaml['name'], childProjectGroups, childProjects);

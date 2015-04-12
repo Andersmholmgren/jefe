@@ -16,7 +16,7 @@ Logger _log = new Logger('devops.project.impl');
 
 abstract class _BaseRef<T> implements Ref<T> {
   final String name;
-  final Uri gitUri;
+  final String gitUri;
 
   _BaseRef(this.name, this.gitUri);
 
@@ -25,7 +25,7 @@ abstract class _BaseRef<T> implements Ref<T> {
 }
 
 class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupRef {
-  ProjectGroupRefImpl(String name, Uri gitUri) : super(name, gitUri);
+  ProjectGroupRefImpl(String name, String gitUri) : super(name, gitUri);
 
   @override
   Future<ProjectGroup> install(Directory parentDir,
@@ -70,7 +70,7 @@ class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupRef {
 }
 
 class ProjectRefImpl extends _BaseRef implements ProjectRef {
-  ProjectRefImpl(String name, Uri gitUri) : super(name, gitUri);
+  ProjectRefImpl(String name, String gitUri) : super(name, gitUri);
 
   @override
   Future<Project> install(Directory parentDir, {bool recursive: true}) async {
@@ -88,7 +88,7 @@ class ProjectRefImpl extends _BaseRef implements ProjectRef {
 }
 
 abstract class ProjectEntityImpl implements ProjectEntity {
-  final Uri gitUri;
+  final String gitUri;
   final Directory installDirectory;
 
   ProjectEntityImpl(this.gitUri, this.installDirectory);
@@ -104,7 +104,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   final ProjectGroupMetaData metaData;
   String get name => metaData.name;
 
-  ProjectGroupImpl(Uri gitUri, this.metaData, Directory installDirectory)
+  ProjectGroupImpl(String gitUri, this.metaData, Directory installDirectory)
       : super(gitUri, installDirectory);
 
   @override
@@ -241,7 +241,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   String get name => pubspec.name;
 
-  ProjectImpl(Uri gitUri, Directory installDirectory, this._pubspec)
+  ProjectImpl(String gitUri, Directory installDirectory, this._pubspec)
       : super(gitUri, installDirectory);
 
   @override
@@ -374,7 +374,7 @@ Future<ProjectGroup> loadProjectGroupFromInstallDirectory(
 
   final GitDir gitDir = results.first;
 
-  final Uri gitUri = await getFirstRemote(gitDir);
+  final String gitUri = await getFirstRemote(gitDir);
   return new ProjectGroupImpl(gitUri, results.elementAt(1), installDirectory);
 }
 
@@ -385,6 +385,6 @@ Future<Project> loadProjectFromInstallDirectory(
 
   final PubSpec pubspec = await PubSpec.load(installDirectory);
 
-  final Uri gitUri = await getFirstRemote(gitDir);
+  final String gitUri = await getFirstRemote(gitDir);
   return new ProjectImpl(gitUri, installDirectory, pubspec);
 }
