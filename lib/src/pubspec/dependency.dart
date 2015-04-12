@@ -72,25 +72,3 @@ class HostedReference extends DependencyReference {
   @override
   String toJson() => "'${versionConstraint.toString()}'";
 }
-
-//VersionConstraint
-
-/*
-  frentity:
-    git:
-      url: https://bitbucket.org/andersmholmgren/frentity.git
-      ref: 0980b2a
-  gissue_common:
-    path: ../gissue_common
-
- */
-
-//class Dependency extends Jsonable {
-//  final String name;
-//  final DependencyReference reference;
-//
-//  Dependency(this.name, this.reference);
-//
-//  @override
-//  Map toJson() => {name: reference.toJson()};
-//}

@@ -201,6 +201,10 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   @override
   Future setDevDependencies(Iterable<Project> dependencies) async {
     _log.info('Setting up dev dependencies for project ${name}');
+    if (dependencies.isEmpty) {
+      return;
+    }
+
     final PubSpec _pubspec = await pubspec;
     final newDependencies = new Map.from(_pubspec.dependencies);
 
