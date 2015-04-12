@@ -77,7 +77,9 @@ class ProjectRefImpl extends _BaseRef implements ProjectRef {
     _log.info('installing project $name from $gitUri into $parentDir');
 
     final GitDir gitDir = await clone(gitUri, parentDir);
-    return new ProjectImpl(gitUri, new Directory(gitUri.path));
+    final installDirectory = new Directory(gitDir.path);
+    return new ProjectImpl(
+        gitUri, installDirectory, await PubSpec.load(installDirectory));
   }
 
   @override
@@ -112,9 +114,12 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   // TODO: this is likely problematic as the process method returns a Future
   // but this is not catered for!&^*&!^*!^!
   @override
-  Future setupForDev({bool recursive: true}) => processDependenciesDepthFirst(
-      (Project project, Iterable<Project> dependencies) =>
-          project.setDevDependencies(dependencies));
+  Future setupForDev({bool recursive: true}) {
+    _log.info('Setting up dev dependencies for group ${metaData.name}');
+    return processDependenciesDepthFirst(
+        (Project project, Iterable<Project> dependencies) =>
+            project.setDevDependencies(dependencies));
+  }
 
   @override
   Future update({bool recursive: true}) {
@@ -171,12 +176,20 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 }
 
 class ProjectImpl extends ProjectEntityImpl implements Project {
-  Future<PubSpec> get pubspec => PubSpec.load(installDirectory);
+  PubSpec _pubspec;
 
-  Future updatePubspec(PubSpec newSpec) => newSpec.save(installDirectory);
+  PubSpec get pubspec => _pubspec;
 
-  ProjectImpl(Uri gitUri, Directory installDirectory)
+  String get name => pubspec.name;
+
+  ProjectImpl(Uri gitUri, Directory installDirectory, this._pubspec)
       : super(gitUri, installDirectory);
+
+  @override
+  Future updatePubspec(PubSpec newSpec) async {
+    await newSpec.save(installDirectory);
+    _pubspec = newSpec;
+  }
 
   @override
   Future initFlow() async => initGitFlow(await gitDir);
@@ -187,12 +200,12 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   @override
   Future setDevDependencies(Iterable<Project> dependencies) async {
+    _log.info('Setting up dev dependencies for project ${name}');
     final PubSpec _pubspec = await pubspec;
     final newDependencies = new Map.from(_pubspec.dependencies);
 
     dependencies.forEach((p) async {
-      newDependencies[(await p.pubspec).name] =
-          new PathReference(p.installDirectory.path);
+      newDependencies[p.name] = new PathReference(p.installDirectory.path);
     });
 
     final newPubspec = _pubspec.copy(dependencies: newDependencies);
@@ -227,6 +240,8 @@ Future<Project> loadProjectFromInstallDirectory(
   print('=====+==== $installDirectory');
   final GitDir gitDir = await GitDir.fromExisting(installDirectory.path);
 
+  final PubSpec pubspec = await PubSpec.load(installDirectory);
+
   final Uri gitUri = await getFirstRemote(gitDir);
-  return new ProjectImpl(gitUri, installDirectory);
+  return new ProjectImpl(gitUri, installDirectory, pubspec);
 }

@@ -65,7 +65,7 @@ abstract class ProjectGroup extends ProjectEntity {
 }
 
 abstract class Project extends ProjectEntity {
-  Future<PubSpec> get pubspec;
+  PubSpec get pubspec;
 
   static Future<Project> install(String name, Uri gitUri, Directory parentDir,
       {bool recursive: true}) => new ProjectRef.fromGitUrl(name, gitUri)
@@ -73,6 +73,8 @@ abstract class Project extends ProjectEntity {
 
   static Future<Project> fromInstallDirectory(Directory installDirectory) =>
       loadProjectFromInstallDirectory(installDirectory);
+
+  Future updatePubspec(PubSpec newSpec);
 
   Future initFlow();
 
