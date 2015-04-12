@@ -9,26 +9,6 @@ import 'package:git/git.dart';
 import 'package:devops/src/pubspec/pubspec.dart';
 import 'package:pub_semver/pub_semver.dart';
 
-abstract class Ref<T> {
-  String get name;
-  String get gitUri;
-
-  @deprecated // unless we can find a way to encapsulate folder layout
-  Future<T> install(Directory parentDirectory, {bool recursive: true});
-
-  @deprecated // unless we can find a way to encapsulate folder layout
-  Future<T> load(Directory parentDirectory, {bool recursive: true});
-}
-
-abstract class ProjectGroupRef implements Ref<ProjectGroup> {
-  factory ProjectGroupRef.fromGitUrl(
-      String name, String gitUri) = ProjectGroupRefImpl;
-}
-
-abstract class ProjectRef implements Ref<Project> {
-  factory ProjectRef.fromGitUrl(String name, String gitUri) = ProjectRefImpl;
-}
-
 abstract class ProjectEntityRef<T extends ProjectEntity> {
   String get name;
   String get gitUri;
@@ -126,22 +106,6 @@ abstract class Project extends ProjectEntity {
   Future setToGitDependencies(Iterable<Project> dependencies);
 
   Future pubGet();
-}
-
-abstract class ProjectGroupMetaData {
-  String get name;
-  @deprecated
-  Iterable<ProjectGroupRef> get childGroups;
-  @deprecated
-  Iterable<ProjectRef> get projects;
-
-  static Future<ProjectGroupMetaData> fromDefaultProjectGroupYamlFile(
-          String projectGroupDirectory) =>
-      fromProjectGroupYamlFile(p.join(projectGroupDirectory, 'project.yaml'));
-
-  static Future<ProjectGroupMetaData> fromProjectGroupYamlFile(
-          String projectGroupFile) =>
-      readProjectGroupYaml(new File(projectGroupFile));
 }
 
 //enum ReleaseType { major, minor, patch }

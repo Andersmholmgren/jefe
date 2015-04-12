@@ -12,56 +12,9 @@ import 'dependency_graph.dart';
 import 'package:devops/src/pubspec/pubspec.dart';
 import 'package:devops/src/pubspec/dependency.dart';
 import 'pub.dart' as pub;
+import 'package:devops/src/spec/JefeSpec.dart';
 
 Logger _log = new Logger('devops.project.impl');
-
-abstract class _BaseRef<T> implements Ref<T> {
-  final String name;
-  final String gitUri;
-
-  _BaseRef(this.name, this.gitUri);
-
-  @deprecated
-  Directory installDirectory(Directory parent) =>
-      new Directory(p.join(parent.path, name));
-}
-
-class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupRef {
-  ProjectGroupRefImpl(String name, String gitUri) : super(name, gitUri);
-
-  @override
-  Future<ProjectGroup> install(Directory parentDir, {bool recursive: true}) =>
-      ProjectGroup.install(parentDir, name, gitUri, recursive: recursive);
-
-  Directory installDirectory(Directory parent) =>
-      super.installDirectory(_containerDirectory(parent));
-
-  Directory _containerDirectory(Directory parentDir) =>
-      new Directory(gitWorkspacePath(gitUri, parentDir) + '_root');
-
-  @override
-  Future<ProjectGroup> load(Directory parentDirectory,
-          {bool recursive: true}) =>
-      ProjectGroup.fromInstallDirectory(parentDirectory);
-}
-
-class ProjectRefImpl extends _BaseRef implements ProjectRef {
-  ProjectRefImpl(String name, String gitUri) : super(name, gitUri);
-
-  @override
-  Future<Project> install(Directory parentDir, {bool recursive: true}) async {
-    _log.info('installing project $name from $gitUri into $parentDir');
-
-    final GitDir gitDir = await clone(gitUri, parentDir);
-    final installDirectory = new Directory(gitDir.path);
-    return new ProjectImpl(
-        gitUri, installDirectory, await PubSpec.load(installDirectory));
-  }
-
-  @override
-  Future<Project> load(Directory parentDirectory, {bool recursive: true}) =>
-      Project.fromInstallDirectory(installDirectory(parentDirectory));
-}
 
 class ProjectGroupRef2Impl implements ProjectGroupRef2 {
   final ProjectGroupImpl parent;
