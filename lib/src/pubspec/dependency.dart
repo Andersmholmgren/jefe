@@ -70,7 +70,7 @@ class HostedReference extends DependencyReference {
       : this(new VersionConstraint.parse(json));
 
   @override
-  String toJson() => versionConstraint.toString();
+  String toJson() => "'${versionConstraint.toString()}'";
 }
 
 //VersionConstraint
