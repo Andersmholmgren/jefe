@@ -105,8 +105,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     return projectGroup;
   }
 
-  static Future<ProjectGroup> fromInstallDirectory(
-      Directory installDirectory) async {
+  static Future<ProjectGroup> load(Directory installDirectory) async {
 //  print('========= $installDirectory');
     final gitDirFuture = GitDir.fromExisting(installDirectory.path);
     final metaDataFuture = spec.ProjectGroupMetaData
@@ -123,9 +122,9 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
       new Directory(gitWorkspacePath(gitUri, parentDir) + '_root');
 
   Future<ProjectGroupImpl> _getChildGroup(String name, String gitUri) =>
-      fromInstallDirectory(_childGroupDirectory(name, gitUri));
+      load(_childGroupDirectory(name, gitUri));
   Future<ProjectImpl> _getChildProject(String name, String gitUri) =>
-      ProjectImpl.fromInstallDirectory(_childProjectDirectory(name, gitUri));
+      ProjectImpl.load(_childProjectDirectory(name, gitUri));
 
   Future<ProjectGroupImpl> _installChildGroup(String name, String gitUri) =>
       install(_childGroupDirectory(name, gitUri), name, gitUri);
@@ -288,8 +287,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
         gitUri, installDirectory, await PubSpec.load(installDirectory));
   }
 
-  static Future<Project> fromInstallDirectory(
-      Directory installDirectory) async {
+  static Future<Project> load(Directory installDirectory) async {
 //  print('=====+==== $installDirectory');
     final GitDir gitDir = await GitDir.fromExisting(installDirectory.path);
 

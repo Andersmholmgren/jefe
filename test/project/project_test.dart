@@ -66,7 +66,7 @@ main() async {
 //  await projectGroup.setupForDev();
 
   final ProjectGroup projectGroup2 =
-      await ProjectGroup.fromInstallDirectory(projectGroup.installDirectory);
+      await ProjectGroup.load(projectGroup.installDirectory);
   print(projectGroup2.gitUri);
   print(projectGroup2.installDirectory);
   print(projectGroup2.name);

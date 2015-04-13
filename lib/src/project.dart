@@ -40,9 +40,8 @@ abstract class ProjectGroup extends ProjectEntity {
           {bool recursive: true}) =>
       ProjectGroupImpl.install(parentDir, name, gitUri, recursive: recursive);
 
-  static Future<ProjectGroup> fromInstallDirectory(
-          Directory installDirectory) =>
-      ProjectGroupImpl.fromInstallDirectory(installDirectory);
+  static Future<ProjectGroup> load(Directory installDirectory) =>
+      ProjectGroupImpl.load(installDirectory);
 
 //  Future<ProjectGroup> childProjectGroup(ProjectGroupRef ref);
 
@@ -82,8 +81,8 @@ abstract class Project extends ProjectEntity {
           {bool recursive: true}) =>
       ProjectImpl.install(parentDir, name, gitUri, recursive: recursive);
 
-  static Future<Project> fromInstallDirectory(Directory installDirectory) =>
-      ProjectImpl.fromInstallDirectory(installDirectory);
+  static Future<Project> load(Directory installDirectory) =>
+      ProjectImpl.load(installDirectory);
 
   Future release(Iterable<Project> dependencies,
       {ReleaseType type: ReleaseType.minor});
