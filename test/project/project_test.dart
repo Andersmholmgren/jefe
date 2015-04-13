@@ -9,10 +9,10 @@ import 'package:logging/logging.dart';
 import 'package:yaml/yaml.dart';
 import 'package:devops/src/yaml/yaml_writer.dart';
 import 'package:devops/src/pubspec/pubspec.dart';
-import 'dart:async';
+import 'package:devops/src/spec/JefeSpec.dart' as spec;
 
 mainB() async {
-  final ProjectGroupMetaData metadata = await ProjectGroupMetaData
+  final spec.ProjectGroupMetaData metadata = await spec.ProjectGroupMetaData
       .fromProjectGroupYamlFile(p.absolute('project.yaml'));
 
   print(metadata.name);
@@ -52,14 +52,15 @@ main() async {
   Logger.root.onRecord.listen(print);
   hierarchicalLoggingEnabled = true;
 
-  ProjectGroupRef ref = new ProjectGroupRef.fromGitUrl(
+  spec.ProjectGroupRef ref = new spec.ProjectGroupRef.fromGitUrl(
       'top', '/Users/blah/dart/jefe_jefe/jefe_test_projects/gitbacklog');
 
   final Directory installDir = await Directory.systemTemp.createTemp();
 
   print(installDir);
 
-  final ProjectGroup projectGroup = await ref.install(installDir);
+  final ProjectGroup projectGroup =
+      await ProjectGroup.install(installDir, ref.name, ref.gitUri);
 
 //  await projectGroup.install(installDir);
 //  await projectGroup.setupForDev();
@@ -68,7 +69,7 @@ main() async {
       await ProjectGroup.fromInstallDirectory(projectGroup.installDirectory);
   print(projectGroup2.gitUri);
   print(projectGroup2.installDirectory);
-  print(projectGroup2.metaData);
+  print(projectGroup2.name);
 
   await projectGroup2.initFlow();
 //  await projectGroup2.featureStart('blah');

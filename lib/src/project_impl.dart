@@ -94,17 +94,11 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     final projectGroup =
         new ProjectGroupImpl(gitUri, metaData, projectGroupDir);
 
-    // TODO: now we have a projectGroup object so can get child paths
-    projectGroup.childGroups
-        .map((ref) => projectGroup._installChildGroup(ref.name, ref.gitUri));
-    projectGroup.projects
-        .map((ref) => projectGroup._installChildProject(ref.name, ref.gitUri));
-
     if (recursive) {
-      final projectGroupInstallFutures = metaData.childGroups
-          .map((ref) => ref.install(projectGroupRoot, recursive: true));
-      final projectInstallFutures = metaData.projects
-          .map((ref) => ref.install(projectGroupRoot, recursive: true));
+      final projectGroupInstallFutures = projectGroup.childGroups
+          .map((ref) => projectGroup._installChildGroup(ref.name, ref.gitUri));
+      final projectInstallFutures = projectGroup.projects.map(
+          (ref) => projectGroup._installChildProject(ref.name, ref.gitUri));
       await Future
           .wait(concat([projectGroupInstallFutures, projectInstallFutures]));
     }
@@ -143,18 +137,14 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     final container = _containerDirectory(gitUri, installDirectory.parent);
     return new Directory(p.join(container.path, name));
   }
-//      _childDirectory(name, gitUri);
+
   Directory _childProjectDirectory(String name, String gitUri) =>
       new Directory(p.join(installDirectory.parent.path, name));
-//      _childDirectory(name, gitUri);
-  Directory _childDirectory(String name, String gitUri) {
-//    installDirectory.parent
-  }
 
   @override
   Future release({bool recursive: true, ReleaseType type: ReleaseType.minor}) {
-    _log.info(
-        'Releasing all projects for group ${metaData.name} with release type $type');
+    _log.info('Releasing all projects for group ${metaData.name} with release '
+        'type $type');
     return processDependenciesDepthFirst((Project project,
         Iterable<Project> dependencies) => project.release(dependencies));
   }
@@ -259,8 +249,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   }
 
   static void _addAll(List<Future<Project>> projects, ProjectGroupImpl group) {
-    projects.addAll(
-        group.projects.map((p) => p.load(group.installDirectory.parent)));
+    projects.addAll(group.projects.map((p) => p.get()));
 
     _addFromGroup(ProjectGroupRef2 ref) async {
       final g = await ref.get();

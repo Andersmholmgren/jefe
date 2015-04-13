@@ -26,6 +26,7 @@ abstract class ProjectRef2 implements ProjectEntityRef<Project> {
 }
 
 abstract class ProjectEntity {
+  String get name;
   String get gitUri;
   Future<GitDir> get gitDir;
   Directory get installDirectory;

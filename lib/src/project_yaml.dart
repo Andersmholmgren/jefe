@@ -1,11 +1,9 @@
 library devops.project.metadata.yaml;
 
-import 'project.dart';
-import 'project_impl.dart';
-
 import 'package:yaml/yaml.dart';
 import 'dart:io';
 import 'dart:async';
+import 'package:devops/src/spec/JefeSpec.dart';
 
 Future<ProjectGroupMetaData> readProjectGroupYaml(File projectGroupFile) async {
   final Map yaml = loadYaml(await projectGroupFile.readAsString());
