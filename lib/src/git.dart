@@ -4,6 +4,9 @@ import 'package:git/git.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:path/path.dart' as p;
+import 'package:logging/logging.dart';
+
+Logger _log = new Logger('devops.git');
 
 Future<GitDir> gitWorkspaceDir(String gitUri, Directory parentDirectory) =>
     GitDir.fromExisting(gitWorkspacePath(gitUri, parentDirectory));
@@ -11,15 +14,19 @@ Future<GitDir> gitWorkspaceDir(String gitUri, Directory parentDirectory) =>
 String gitWorkspaceName(String gitUri) => p.basenameWithoutExtension(gitUri);
 
 String gitWorkspacePath(String gitUri, Directory parentDirectory) {
-  print('---- $gitUri ---- $parentDirectory');
+//  print('---- $gitUri ---- $parentDirectory');
   return p.join(parentDirectory.path, gitWorkspaceName(gitUri));
 }
 
 Future<GitDir> clone(String gitUri, Directory parentDirectory) async {
+  _log.info('cloning git repo $gitUri into parent directory $parentDirectory');
   final ProcessResult result = await runGit(['clone', gitUri.toString()],
       processWorkingDir: parentDirectory.path);
 
-  print(result.stdout);
+//  print(result.stdout);
+
+  _log.finest(
+      'successfully cloned git repo $gitUri into parent directory $parentDirectory');
 
   return gitWorkspaceDir(gitUri, parentDirectory);
 }

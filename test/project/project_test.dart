@@ -52,8 +52,8 @@ main() async {
   Logger.root.onRecord.listen(print);
   hierarchicalLoggingEnabled = true;
 
-  spec.ProjectGroupRef ref = new spec.ProjectGroupRef.fromGitUrl(
-      'gitbacklog', '/Users/blah/dart/jefe_jefe/jefe_test_projects/gitbacklog');
+  spec.ProjectGroupRef ref = new spec.ProjectGroupRef.fromGitUrl('gitbacklog',
+      '/Users/blah/dart/jefe_jefe/jefe_test_projects/gitbacklog_local');
 
   final Directory installDir = await Directory.systemTemp.createTemp();
 
@@ -62,14 +62,19 @@ main() async {
   final ProjectGroup projectGroup =
       await ProjectGroup.install(installDir, ref.name, ref.gitUri);
 
+  print('installed group => $projectGroup');
+
+  print('container dir = ${projectGroup.containerDirectory}');
+
 //  await projectGroup.install(installDir);
 //  await projectGroup.setupForDev();
 
   final ProjectGroup projectGroup2 =
       await ProjectGroup.load(projectGroup.containerDirectory);
-  print(projectGroup2.gitUri);
-  print(projectGroup2.installDirectory);
-  print(projectGroup2.name);
+
+  print('loaded group => $projectGroup2');
+
+  print('container dir = ${projectGroup2.containerDirectory}');
 
   await projectGroup2.initFlow();
 //  await projectGroup2.featureStart('blah');

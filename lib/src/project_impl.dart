@@ -113,6 +113,8 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   }
 
   static Future<ProjectGroup> load(Directory groupContainerDirectory) async {
+    _log.info(
+        'loading group from group container directory $groupContainerDirectory');
 //  print('========= $installDirectory');
 //    _childGr
     final directoryLayout =
@@ -129,8 +131,14 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     return new ProjectGroupImpl(gitUri, results.elementAt(1), directoryLayout);
   }
 
-  Future<ProjectGroupImpl> _getChildGroup(String name, String gitUri) =>
-      load(directoryLayout.childGroup(name).containerDirectory);
+  Future<ProjectGroupImpl> _getChildGroup(String childName, String gitUri) {
+    final childContainer =
+        directoryLayout.childGroup(childName).containerDirectory;
+    _log.finer('loading child group $childName of $name contained in '
+        '$childContainer. Parent container is $containerDirectory');
+
+    return load(childContainer);
+  }
 
   Future<ProjectImpl> _getChildProject(String name, String gitUri) =>
       ProjectImpl.load(directoryLayout.projectDirectory(name));
@@ -283,6 +291,11 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     final DependencyGraph graph = await getDependencyGraph(projects);
     return graph.depthFirst(process);
   }
+
+  String toString() =>
+      'ProjectGroup: $name; gitUri: $gitUri; installed: $installDirectory\n'
+      '    projects: ${metaData.projects}\n'
+      '    childGroups: ${metaData.childGroups}';
 }
 
 class ProjectImpl extends ProjectEntityImpl implements Project {

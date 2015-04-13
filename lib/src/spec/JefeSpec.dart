@@ -39,6 +39,8 @@ abstract class Ref<T> {
 //
 //  @deprecated // unless we can find a way to encapsulate folder layout
 //  Future<T> load(Directory parentDirectory, {bool recursive: true});
+
+  String toString() => 'Ref($name, $gitUri)';
 }
 
 abstract class ProjectGroupRef implements Ref<ProjectGroup> {
