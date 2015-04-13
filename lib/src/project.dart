@@ -35,6 +35,7 @@ abstract class ProjectEntity {
 abstract class ProjectGroup extends ProjectEntity {
 //  ProjectGroupMetaData get metaData;
 
+  // TODO: make name optional. Derive from gitUri
   static Future<ProjectGroup> install(
           Directory parentDir, String name, String gitUri,
           {bool recursive: true}) =>
@@ -44,6 +45,10 @@ abstract class ProjectGroup extends ProjectEntity {
       ProjectGroupImpl.load(installDirectory);
 
 //  Future<ProjectGroup> childProjectGroup(ProjectGroupRef ref);
+
+  // the directory that is the container for the group.
+  // Typically named <groupName>_root
+  Directory get containerDirectory;
 
   Future<Set<Project>> get allProjects;
 

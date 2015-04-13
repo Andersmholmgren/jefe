@@ -68,31 +68,38 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   final spec.ProjectGroupMetaData metaData;
   String get name => metaData.name;
 
+  final GroupDirectoryLayout directoryLayout;
+  Directory get containerDirectory => directoryLayout.containerDirectory;
+
   Iterable<ProjectGroupRef2> get childGroups =>
       metaData.childGroups.map((gr) => new ProjectGroupRef2Impl(this, gr));
 
   Iterable<ProjectRef2> get projects =>
       metaData.projects.map((pr) => new ProjectRef2Impl(this, pr));
 
-  ProjectGroupImpl(String gitUri, this.metaData, Directory installDirectory)
-      : super(gitUri, installDirectory);
+  ProjectGroupImpl(
+      String gitUri, this.metaData, GroupDirectoryLayout directoryLayout)
+      : this.directoryLayout = directoryLayout,
+        super(gitUri, directoryLayout.groupDirectory);
 
   static Future<ProjectGroup> install(
       Directory parentDir, String name, String gitUri,
       {bool recursive: true}) async {
     _log.info('installing group $name from $gitUri into $parentDir');
 
+    final GroupDirectoryLayout directoryLayout =
+        new GroupDirectoryLayout.fromParent(parentDir, name);
+
     final Directory projectGroupRoot =
-        await _containerDirectory(gitUri, parentDir).create(recursive: true);
+        await directoryLayout.containerDirectory.create(recursive: true);
 
     final GitDir gitDir = await clone(gitUri, projectGroupRoot);
 
     final spec.ProjectGroupMetaData metaData = await spec.ProjectGroupMetaData
         .fromDefaultProjectGroupYamlFile(gitDir.path);
 
-    final projectGroupDir = new Directory(gitDir.path);
     final projectGroup =
-        new ProjectGroupImpl(gitUri, metaData, projectGroupDir);
+        new ProjectGroupImpl(gitUri, metaData, directoryLayout);
 
     if (recursive) {
       final projectGroupInstallFutures = projectGroup.childGroups
@@ -105,40 +112,52 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     return projectGroup;
   }
 
-  static Future<ProjectGroup> load(Directory installDirectory) async {
+  static Future<ProjectGroup> load(Directory groupContainerDirectory) async {
 //  print('========= $installDirectory');
-    final gitDirFuture = GitDir.fromExisting(installDirectory.path);
+//    _childGr
+    final directoryLayout =
+        new GroupDirectoryLayout.withDefaultName(groupContainerDirectory);
+    var groupDirectoryPath = directoryLayout.groupDirectory.path;
+    final gitDirFuture = GitDir.fromExisting(groupDirectoryPath);
     final metaDataFuture = spec.ProjectGroupMetaData
-        .fromDefaultProjectGroupYamlFile(installDirectory.path);
+        .fromDefaultProjectGroupYamlFile(groupDirectoryPath);
     final results = await Future.wait([gitDirFuture, metaDataFuture]);
 
     final GitDir gitDir = results.first;
 
     final String gitUri = await getFirstRemote(gitDir);
-    return new ProjectGroupImpl(gitUri, results.elementAt(1), installDirectory);
+    return new ProjectGroupImpl(gitUri, results.elementAt(1), directoryLayout);
   }
-
-  static Directory _containerDirectory(String gitUri, Directory parentDir) =>
-      new Directory(gitWorkspacePath(gitUri, parentDir) + '_root');
 
   Future<ProjectGroupImpl> _getChildGroup(String name, String gitUri) =>
-      load(_childGroupDirectory(name, gitUri));
+      load(directoryLayout.childGroup(name).containerDirectory);
+
   Future<ProjectImpl> _getChildProject(String name, String gitUri) =>
-      ProjectImpl.load(_childProjectDirectory(name, gitUri));
+      ProjectImpl.load(directoryLayout.projectDirectory(name));
 
   Future<ProjectGroupImpl> _installChildGroup(String name, String gitUri) =>
-      install(_childGroupDirectory(name, gitUri), name, gitUri);
+      install(directoryLayout.containerDirectory, name, gitUri);
 
   Future<ProjectImpl> _installChildProject(String name, String gitUri) =>
-      ProjectImpl.install(_childProjectDirectory(name, gitUri), name, gitUri);
+      ProjectImpl.install(directoryLayout.containerDirectory, name, gitUri);
 
-  Directory _childGroupDirectory(String name, String gitUri) {
-    final container = _containerDirectory(gitUri, installDirectory.parent);
-    return new Directory(p.join(container.path, name));
-  }
+  // parent is group container??
+//  @deprecated
+//  Directory _childGroupDirectory(String name, String gitUri) {
+//    final container = _containerDirectory(gitUri, installDirectory.parent);
+//    return new Directory(p.join(container.path, name));
+//  }
+//
+//  Directory _childGroupDirectory2(String name) => _childDirectory(name);
+//
+//  Directory _childGroupContainerDirectory(String name, String gitUri) =>
+//      _containerDirectory(gitUri, containerDirectory);
 
-  Directory _childProjectDirectory(String name, String gitUri) =>
-      new Directory(p.join(installDirectory.parent.path, name));
+//  // parent is group container
+//  Directory _childProjectDirectory(String name) => _childDirectory(name);
+//
+//  Directory _childDirectory(String name) =>
+//      new Directory(p.join(containerDirectory.path, name));
 
   @override
   Future release({bool recursive: true, ReleaseType type: ReleaseType.minor}) {
@@ -281,6 +300,8 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
       {bool recursive: true}) async {
     _log.info('installing project $name from $gitUri into $parentDir');
 
+    await parentDir.create(recursive: true);
+
     final GitDir gitDir = await clone(gitUri, parentDir);
     final installDirectory = new Directory(gitDir.path);
     return new ProjectImpl(
@@ -408,3 +429,42 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
     stopWatch.stop();
   }
 }
+
+class GroupDirectoryLayout {
+  final Directory containerDirectory;
+  final String groupName;
+
+  GroupDirectoryLayout(this.containerDirectory, this.groupName);
+
+  GroupDirectoryLayout.fromParent(Directory parent, String groupName)
+      : this(_childDir(parent, _containerName(groupName)), groupName);
+
+  GroupDirectoryLayout.withDefaultName(Directory containerDirectory)
+      : this(containerDirectory, _defaultGroupName(containerDirectory));
+
+  Directory get groupDirectory => _childDir(containerDirectory, groupName);
+
+  Directory projectDirectory(String projectName) =>
+      _childDir(containerDirectory, projectName);
+
+  GroupDirectoryLayout childGroup(String childGroupName) =>
+      new GroupDirectoryLayout(containerDirectory, groupName);
+
+  static const String _containerSuffix = '_root';
+
+  static String _containerName(String groupName) =>
+      groupName + _containerSuffix;
+
+  static String _defaultGroupName(Directory containerDirectory) {
+    final basename = p.basename(containerDirectory.path);
+    if (!basename.endsWith(_containerSuffix)) {
+      throw new ArgumentError(
+          'Invalid container directory. Must start with $_containerSuffix');
+    }
+
+    return basename.replaceAll(_containerSuffix, '');
+  }
+}
+
+Directory _childDir(Directory parent, String childName) =>
+    new Directory(p.join(parent.path, childName));
