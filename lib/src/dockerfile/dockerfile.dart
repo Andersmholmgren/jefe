@@ -9,6 +9,8 @@ import 'package:devops/src/yaml/yaml_writer.dart';
 
 const String _standardFileName = 'Dockerfile';
 
+// TODO: Not YAML. Completely different. Rethink!!
+
 class Dockerfile implements Jsonable {
   final String name;
 

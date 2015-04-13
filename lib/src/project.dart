@@ -3,8 +3,6 @@ library devops.project;
 import 'dart:async';
 import 'dart:io';
 import 'project_impl.dart';
-import 'project_yaml.dart';
-import 'package:path/path.dart' as p;
 import 'package:git/git.dart';
 import 'package:devops/src/pubspec/pubspec.dart';
 import 'package:pub_semver/pub_semver.dart';
@@ -34,7 +32,7 @@ abstract class ProjectEntity {
 }
 
 abstract class ProjectGroup extends ProjectEntity {
-  ProjectGroupMetaData get metaData;
+//  ProjectGroupMetaData get metaData;
 
   static Future<ProjectGroup> install(
           Directory parentDir, String name, String gitUri,
@@ -45,7 +43,7 @@ abstract class ProjectGroup extends ProjectEntity {
           Directory installDirectory) =>
       ProjectGroupImpl.fromInstallDirectory(installDirectory);
 
-  Future<ProjectGroup> childProjectGroup(ProjectGroupRef ref);
+//  Future<ProjectGroup> childProjectGroup(ProjectGroupRef ref);
 
   Future<Set<Project>> get allProjects;
 
@@ -79,12 +77,12 @@ abstract class Project extends ProjectEntity {
   PubSpec get pubspec;
 
   static Future<Project> install(
-      Directory parentDir, String name, String gitUri,
-      {bool recursive: true}) => new ProjectRef.fromGitUrl(name, gitUri)
-      .install(parentDir, recursive: recursive);
+          Directory parentDir, String name, String gitUri,
+          {bool recursive: true}) =>
+      ProjectImpl.install(parentDir, name, gitUri, recursive: recursive);
 
   static Future<Project> fromInstallDirectory(Directory installDirectory) =>
-      loadProjectFromInstallDirectory(installDirectory);
+      ProjectImpl.fromInstallDirectory(installDirectory);
 
   Future release(Iterable<Project> dependencies,
       {ReleaseType type: ReleaseType.minor});

@@ -12,13 +12,13 @@ import 'dependency_graph.dart';
 import 'package:devops/src/pubspec/pubspec.dart';
 import 'package:devops/src/pubspec/dependency.dart';
 import 'pub.dart' as pub;
-import 'package:devops/src/spec/JefeSpec.dart';
+import 'package:devops/src/spec/JefeSpec.dart' as spec;
 
 Logger _log = new Logger('devops.project.impl');
 
 class ProjectGroupRef2Impl implements ProjectGroupRef2 {
   final ProjectGroupImpl parent;
-  final ProjectGroupRef ref;
+  final spec.ProjectGroupRef ref;
   ProjectGroupRef2Impl(this.parent, this.ref);
 
   @override
@@ -35,7 +35,7 @@ class ProjectGroupRef2Impl implements ProjectGroupRef2 {
 
 class ProjectRef2Impl implements ProjectRef2 {
   final ProjectGroupImpl parent;
-  final ProjectRef ref;
+  final spec.ProjectRef ref;
   ProjectRef2Impl(this.parent, this.ref);
 
   @override
@@ -65,7 +65,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   // TODO: we need to hide the project group refs here etc as
   // it complicates encapsulating loading from the right directory
 
-  final ProjectGroupMetaData metaData;
+  final spec.ProjectGroupMetaData metaData;
   String get name => metaData.name;
 
   Iterable<ProjectGroupRef2> get childGroups =>
@@ -87,8 +87,8 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 
     final GitDir gitDir = await clone(gitUri, projectGroupRoot);
 
-    final ProjectGroupMetaData metaData =
-        await ProjectGroupMetaData.fromDefaultProjectGroupYamlFile(gitDir.path);
+    final spec.ProjectGroupMetaData metaData = await spec.ProjectGroupMetaData
+        .fromDefaultProjectGroupYamlFile(gitDir.path);
 
     final projectGroupDir = new Directory(gitDir.path);
     final projectGroup =
@@ -115,7 +115,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
       Directory installDirectory) async {
 //  print('========= $installDirectory');
     final gitDirFuture = GitDir.fromExisting(installDirectory.path);
-    final metaDataFuture = ProjectGroupMetaData
+    final metaDataFuture = spec.ProjectGroupMetaData
         .fromDefaultProjectGroupYamlFile(installDirectory.path);
     final results = await Future.wait([gitDirFuture, metaDataFuture]);
 
@@ -177,7 +177,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   }
 
   @override
-  Future<ProjectGroup> childProjectGroup(ProjectGroupRef ref) {
+  Future<ProjectGroup> childProjectGroup(spec.ProjectGroupRef ref) {
     // TODO: implement childProject
   }
 
@@ -258,15 +258,15 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     return (await Future.wait(projectFutures)).toSet();
   }
 
-  static void _addAll(List<Future<Project>> projects, ProjectGroup group) {
-    projects.addAll(group.metaData.projects
-        .map((p) => p.load(group.installDirectory.parent)));
+  static void _addAll(List<Future<Project>> projects, ProjectGroupImpl group) {
+    projects.addAll(
+        group.projects.map((p) => p.load(group.installDirectory.parent)));
 
-    _addFromGroup(ProjectGroupRef ref) async {
-      final g = await ref.load(group.installDirectory.parent);
+    _addFromGroup(ProjectGroupRef2 ref) async {
+      final g = await ref.get();
       _addAll(projects, g);
     }
-    group.metaData.childGroups.forEach(_addFromGroup);
+    group.childGroups.forEach(_addFromGroup);
   }
 
   @override
@@ -287,6 +287,17 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   ProjectImpl(String gitUri, Directory installDirectory, this._pubspec)
       : super(gitUri, installDirectory);
+
+  static Future<ProjectImpl> install(
+      Directory parentDir, String name, String gitUri,
+      {bool recursive: true}) async {
+    _log.info('installing project $name from $gitUri into $parentDir');
+
+    final GitDir gitDir = await clone(gitUri, parentDir);
+    final installDirectory = new Directory(gitDir.path);
+    return new ProjectImpl(
+        gitUri, installDirectory, await PubSpec.load(installDirectory));
+  }
 
   static Future<Project> fromInstallDirectory(
       Directory installDirectory) async {
@@ -410,36 +421,3 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
     stopWatch.stop();
   }
 }
-
-class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {
-  final String name;
-  final Iterable<ProjectGroupRef> childGroups;
-  final Iterable<ProjectRef> projects;
-
-  ProjectGroupMetaDataImpl(this.name, this.childGroups, this.projects);
-}
-
-//Future<ProjectGroup> loadProjectGroupFromInstallDirectory(
-//    Directory installDirectory) async {
-////  print('========= $installDirectory');
-//  final gitDirFuture = GitDir.fromExisting(installDirectory.path);
-//  final metaDataFuture = ProjectGroupMetaData
-//      .fromDefaultProjectGroupYamlFile(installDirectory.path);
-//  final results = await Future.wait([gitDirFuture, metaDataFuture]);
-//
-//  final GitDir gitDir = results.first;
-//
-//  final String gitUri = await getFirstRemote(gitDir);
-//  return new ProjectGroupImpl(gitUri, results.elementAt(1), installDirectory);
-//}
-
-//Future<Project> loadProjectFromInstallDirectory(
-//    Directory installDirectory) async {
-////  print('=====+==== $installDirectory');
-//  final GitDir gitDir = await GitDir.fromExisting(installDirectory.path);
-//
-//  final PubSpec pubspec = await PubSpec.load(installDirectory);
-//
-//  final String gitUri = await getFirstRemote(gitDir);
-//  return new ProjectImpl(gitUri, installDirectory, pubspec);
-//}
