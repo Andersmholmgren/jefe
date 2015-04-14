@@ -117,19 +117,12 @@ runDaTests() {
         asProvidedBy: () => [],
         expectTheseInvocations: []);
 
-    {
-      MockProject project1;
-      createProjects() {
-        project1 = aProject('project1');
-        return [project1];
-      }
-      testCase(
-          thatWhen: 'a single project has no dependencies',
-          asProvidedBy: createProjects,
-          expectTheseInvocations: [
-        () => new TestProcessInvocation(project1, const [])
-      ]);
-    }
+    testCase(
+        thatWhen: 'a single project has no dependencies',
+        asProvidedBy: () => [aProject('project1')],
+        expectTheseInvocations: [
+      (projects) => new TestProcessInvocation(projects.first, const [])
+    ]);
 
 //    group('for one project with no dependencies', () {
 //      MockProject project1;
@@ -184,7 +177,8 @@ class TestProcessor {
   }
 }
 
-typedef TestProcessInvocation TestProcessInvocationFactory();
+typedef TestProcessInvocation TestProcessInvocationFactory(
+    [Iterable<Project> projects]);
 
 class TestProcessInvocation {
   final Project project;
