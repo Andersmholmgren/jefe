@@ -10,6 +10,8 @@ import 'package:yaml/yaml.dart';
 import 'package:devops/src/yaml/yaml_writer.dart';
 import 'package:devops/src/pubspec/pubspec.dart';
 import 'package:devops/src/spec/JefeSpec.dart' as spec;
+import 'dart:async';
+import 'package:stack_trace/stack_trace.dart';
 
 mainB() async {
   final spec.ProjectGroupMetaData metadata = await spec.ProjectGroupMetaData
@@ -52,6 +54,21 @@ main() async {
   Logger.root.onRecord.listen(print);
   hierarchicalLoggingEnabled = true;
 
+  Chain.capture(() {
+    main123();
+  }, onError: (error, stackChain) {
+    print("Caught error $error\n"
+        "${stackChain.terse}");
+  });
+//  runZoned(() {
+//    main123();
+//  }, onError: (e, st) {
+//    Logger.root.severe(e, st);
+//
+//    new Chain.forTrace(st).;
+//  });
+}
+main123() async {
   spec.ProjectGroupRef ref = new spec.ProjectGroupRef.fromGitUrl('gitbacklog',
       '/Users/blah/dart/jefe_jefe/jefe_test_projects/local/gitbacklog');
 

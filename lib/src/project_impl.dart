@@ -358,25 +358,30 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   @override
   Future initFlow() async {
     _log.info('Initializing git flow for project ${name}');
-    return initGitFlow(await gitDir);
+    await initGitFlow(await gitDir);
+    _log.finer('Initialized git flow for project ${name}');
   }
 
   @override
   Future featureStart(String featureName) async {
     _log.info('Starting feature $featureName for project ${name}');
-    return gitFlowFeatureStart(await gitDir, featureName);
+    await gitFlowFeatureStart(await gitDir, featureName);
+    _log.finer('Started feature $featureName for project ${name}');
   }
 
   @override
   Future featureFinish(String featureName) async {
     _log.info('git flow feature finish $featureName for project ${name}');
     await gitFlowFeatureFinish(await gitDir, featureName);
+    _log.finer(
+        'completed git flow feature finish $featureName for project ${name}');
   }
 
   @override
   Future releaseStart(String version) async {
     _log.info('git flow release start $version for project ${name}');
     await gitFlowReleaseStart(await gitDir, version);
+    _log.finer('git flow release started $version for project ${name}');
   }
 
   @override
@@ -422,6 +427,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
     final newPubspec = _pubspec.copy(dependencies: newDependencies);
     await updatePubspec(newPubspec);
+    _log.finer('Finished setting up $type dependencies for project ${name}');
   }
 
   @override
@@ -465,7 +471,7 @@ class GroupDirectoryLayout {
       _childDir(containerDirectory, projectName);
 
   GroupDirectoryLayout childGroup(String childGroupName) =>
-      new GroupDirectoryLayout(containerDirectory, groupName);
+      new GroupDirectoryLayout.fromParent(containerDirectory, childGroupName);
 
   static const String _containerSuffix = '_root';
 
