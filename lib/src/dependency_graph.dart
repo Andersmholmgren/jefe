@@ -3,7 +3,6 @@ library devops.project.dependency;
 import 'package:devops/src/project.dart';
 import 'dart:async';
 import 'package:devops/src/pubspec/pubspec.dart';
-//import 'package:den_api/den_api.dart';
 
 Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>
     new DependencyGraph(await _determineDependencies(projects));
