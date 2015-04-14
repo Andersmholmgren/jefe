@@ -56,7 +56,7 @@ abstract class ProjectEntityImpl implements ProjectEntity {
 
   @override
   Future<GitDir> get gitDir {
-    print('--- $installDirectory');
+    print('--- loading git dir from ${installDirectory.path}');
     return GitDir.fromExisting(installDirectory.path);
   }
 }
@@ -119,7 +119,9 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 //    _childGr
     final directoryLayout =
         new GroupDirectoryLayout.withDefaultName(groupContainerDirectory);
-    var groupDirectoryPath = directoryLayout.groupDirectory.path;
+    final groupDirectoryPath = directoryLayout.groupDirectory.path;
+
+    print('--- loading git dir from $groupDirectoryPath');
     final gitDirFuture = GitDir.fromExisting(groupDirectoryPath);
     final metaDataFuture = spec.ProjectGroupMetaData
         .fromDefaultProjectGroupYamlFile(groupDirectoryPath);
@@ -322,7 +324,9 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   }
 
   static Future<Project> load(Directory installDirectory) async {
-//  print('=====+==== $installDirectory');
+    _log.info('loading project from install directory $installDirectory');
+    print(
+        '--- ProjectImpl.load: loading git dir from ${installDirectory.path}');
     final GitDir gitDir = await GitDir.fromExisting(installDirectory.path);
 
     final PubSpec pubspec = await PubSpec.load(installDirectory);
