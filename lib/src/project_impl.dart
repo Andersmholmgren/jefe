@@ -415,6 +415,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
       Future<DependencyReference> createReferenceTo(Project p)) async {
     _log.info('Setting up $type dependencies for project ${name}');
     if (dependencies.isEmpty) {
+      _log.finest('No depenencies for project ${name}');
       return;
     }
 
@@ -422,7 +423,9 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
     final newDependencies = new Map.from(_pubspec.dependencies);
 
     await Future.wait(dependencies.map((p) async {
-      newDependencies[p.name] = await createReferenceTo(p);
+      final ref = await createReferenceTo(p);
+      _log.finest('created reference $ref for project ${name}');
+      newDependencies[p.name] = ref;
     }));
 
     final newPubspec = _pubspec.copy(dependencies: newDependencies);
