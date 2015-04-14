@@ -17,3 +17,4 @@ dependencies:
 dev_dependencies:
   unittest: any
   scheduled_test: any
+  mockito: any

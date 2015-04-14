@@ -33,8 +33,9 @@ class PubSpec implements Jsonable {
   final Map unParsedYaml;
 
   PubSpec({this.name, this.author, this.version, this.homepage,
-      this.documentation, this.description, this.environment, this.dependencies,
-      this.devDependencies, this.dependencyOverrides, this.unParsedYaml});
+      this.documentation, this.description, this.environment,
+      this.dependencies: const {}, this.devDependencies: const {},
+      this.dependencyOverrides: const {}, this.unParsedYaml: const {}});
 
   factory PubSpec.fromJson(Map json) {
     final p = parseJson(json, consumeMap: true);
