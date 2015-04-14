@@ -7,8 +7,23 @@ import 'package:mockito/mockito.dart';
 import 'package:devops/src/pubspec/pubspec.dart';
 import 'dart:async';
 import 'package:devops/src/pubspec/dependency.dart';
+import 'package:stack_trace/stack_trace.dart';
+import 'package:logging/logging.dart';
 
-main() {
+main() async {
+  Logger.root.level = Level.ALL;
+  Logger.root.onRecord.listen(print);
+  hierarchicalLoggingEnabled = true;
+
+  Chain.capture(() {
+    runDaTests();
+  }, onError: (error, stackChain) {
+    print("Caught error $error\n"
+        "${stackChain.terse}");
+  });
+}
+
+runDaTests() {
   TestProcessor processor;
 
   group('depthFirst', () {
@@ -100,7 +115,37 @@ main() {
     testCase(
         thatWhen: 'no projects provided',
         asProvidedBy: () => [],
-        expectTheseInvocations: () => []);
+        expectTheseInvocations: (_) => []);
+
+    testCase(
+        thatWhen: 'a single project has no dependencies',
+        asProvidedBy: () => [aProject('project1')],
+        expectTheseInvocations: (Iterable<Project> projects) =>
+            [new TestProcessInvocation(projects.first, const [])]);
+
+//    group('for one project with no dependencies', () {
+//      MockProject project1;
+//
+//      setUp(() {
+//        project1 = new MockProject('project1', new PubSpec());
+//        scheduleForProjects([project1]);
+//      });
+//
+//      test('calls processor once', () {
+//        schedule(() => expect(processor.invocations, hasLength(1)));
+//      });
+//
+//      test('calls processor once with expected project', () {
+//        schedule(() =>
+//            expect(processor.invocations.first.project, equals(project1)));
+//      });
+//
+//      test('calls processor once with no dependencies', () {
+//        schedule(
+//            () => expect(processor.invocations.first.dependencies, isEmpty));
+//      });
+//    });
+
   });
 }
 
@@ -111,16 +156,21 @@ class TestProcessor {
   }
 
   static createTests(
-      TestProcessor processor(), List<TestProcessInvocation> expected) {
+      TestProcessor processor(), List<TestProcessInvocation> expected()) {
     test('has expected number of invocations', () {
       schedule(
-          () => expect(processor().invocations, hasLength(expected.length)));
+          () => expect(processor().invocations, hasLength(expected().length)));
     });
 
     group('each invocation matches expectation', () {
-      for (int i = 0; i < expected.length; i++) {
+      for (int i = 0; i < expected().length; i++) {
+
+        // TODO: need to rework this with ordered equals or something
+        // as we can't create the expected up front so don't know how
+        // many in the list
+
         TestProcessInvocation.createTests(
-            () => processor().invocations[i], expected[i]);
+            () => processor().invocations[i], expected()[i]);
       }
     });
   }
@@ -132,15 +182,8 @@ class TestProcessInvocation {
 
   TestProcessInvocation(this.project, this.dependencies);
 
-//  bool operator==(other) => other is TestProcessInvocation
-//  && project == other.project && unorderedEquals();
-
-//  Matcher get matcher {
-//    new CustomMatcher()
-//  }
-
   static createTests(
-      TestProcessInvocation actual(), TestProcessInvocation expected) {
+      TestProcessInvocation actual(), TestProcessInvocation expected()) {
     test('invocation has expected project', () {
       schedule(() => expect(actual().project, equals(expected.project)));
     });
@@ -160,39 +203,51 @@ class MockProject extends Mock implements Project {
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-foo() {
-  testCase(
-      thatWhen: 'no projects provided',
-      asProvidedBy: () => [],
-      expectTheseInvocations: () => []);
-}
+//foo() {
+//  testCase(
+//      thatWhen: 'no projects provided',
+//      asProvidedBy: () => [],
+//      expectTheseInvocations: () => []);
+//}
 
 testCase({String thatWhen, Iterable<Project> asProvidedBy(),
-    List<TestProcessInvocation> expectTheseInvocations()}) {
+    List<TestProcessInvocation> expectTheseInvocations(
+        Iterable<Project> projects)}) {
   TestProcessor processor;
+  Iterable<Project> theProjects;
 
-  scheduleForProjects(Iterable<Project> projects) {
+  scheduleForProjects(Iterable<Project> projects()) {
     return schedule(() async {
+      theProjects = projects();
       processor = new TestProcessor();
-      final DependencyGraph graph = await getDependencyGraph(projects.toSet());
+      final DependencyGraph graph =
+          await getDependencyGraph(theProjects.toSet());
       return graph.depthFirst(processor);
     });
   }
 
-  setUpForProjects(Iterable<Project> projects) {
+  setUpForProjects(Iterable<Project> projects()) {
     setUp(() => scheduleForProjects(projects));
   }
 
-  group(thatWhen, () {
-    setUpForProjects(asProvidedBy());
-    TestProcessor.createTests(() => processor, expectTheseInvocations());
+  group('when $thatWhen', () {
+    setUpForProjects(asProvidedBy);
+    TestProcessor.createTests(
+        () => processor, () => expectTheseInvocations(theProjects));
   });
 }
 
-awhen(String name, {Iterable<Project> withProjects()}) {}
+Project aProject(String name,
+    {Iterable<PathReference> pathDependencies: const []}) {
+  final dependencies = {};
+  pathDependencies.forEach((pd) {
+    // WARNING: only makes sense if path == name
+    dependencies[pd.path] = pd;
+  });
 
-Project aproject(String name,
-    {Iterable<PathReference> pathDependencies: const []}) {}
+  return new MockProject(
+      name, new PubSpec(name: name, dependencies: dependencies));
+}
 
 class TestPrecondition {
   String description;
