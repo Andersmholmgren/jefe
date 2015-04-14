@@ -115,13 +115,21 @@ runDaTests() {
     testCase(
         thatWhen: 'no projects provided',
         asProvidedBy: () => [],
-        expectTheseInvocations: (_) => []);
+        expectTheseInvocations: []);
 
-    testCase(
-        thatWhen: 'a single project has no dependencies',
-        asProvidedBy: () => [aProject('project1')],
-        expectTheseInvocations: (Iterable<Project> projects) =>
-            [new TestProcessInvocation(projects.first, const [])]);
+    {
+      MockProject project1;
+      createProjects() {
+        project1 = aProject('project1');
+        return [project1];
+      }
+      testCase(
+          thatWhen: 'a single project has no dependencies',
+          asProvidedBy: createProjects,
+          expectTheseInvocations: [
+        () => new TestProcessInvocation(project1, const [])
+      ]);
+    }
 
 //    group('for one project with no dependencies', () {
 //      MockProject project1;
@@ -156,25 +164,27 @@ class TestProcessor {
   }
 
   static createTests(
-      TestProcessor processor(), List<TestProcessInvocation> expected()) {
+      TestProcessor processor(), List<TestProcessInvocationFactory> expected) {
     test('has expected number of invocations', () {
       schedule(
-          () => expect(processor().invocations, hasLength(expected().length)));
+          () => expect(processor().invocations, hasLength(expected.length)));
     });
 
     group('each invocation matches expectation', () {
-      for (int i = 0; i < expected().length; i++) {
+      for (int i = 0; i < expected.length; i++) {
 
         // TODO: need to rework this with ordered equals or something
         // as we can't create the expected up front so don't know how
         // many in the list
 
         TestProcessInvocation.createTests(
-            () => processor().invocations[i], expected()[i]);
+            () => processor().invocations[i], expected[i]);
       }
     });
   }
 }
+
+typedef TestProcessInvocation TestProcessInvocationFactory();
 
 class TestProcessInvocation {
   final Project project;
@@ -183,14 +193,14 @@ class TestProcessInvocation {
   TestProcessInvocation(this.project, this.dependencies);
 
   static createTests(
-      TestProcessInvocation actual(), TestProcessInvocation expected()) {
+      TestProcessInvocation actual(), TestProcessInvocationFactory expected) {
     test('invocation has expected project', () {
-      schedule(() => expect(actual().project, equals(expected.project)));
+      schedule(() => expect(actual().project, equals(expected().project)));
     });
 
     test('invocation has expected dependencies', () {
       schedule(() => expect(
-          actual().dependencies, unorderedEquals(expected.dependencies)));
+          actual().dependencies, unorderedEquals(expected().dependencies)));
     });
   }
 }
@@ -211,8 +221,7 @@ class MockProject extends Mock implements Project {
 //}
 
 testCase({String thatWhen, Iterable<Project> asProvidedBy(),
-    List<TestProcessInvocation> expectTheseInvocations(
-        Iterable<Project> projects)}) {
+    List<TestProcessInvocationFactory> expectTheseInvocations}) {
   TestProcessor processor;
   Iterable<Project> theProjects;
 
@@ -232,8 +241,7 @@ testCase({String thatWhen, Iterable<Project> asProvidedBy(),
 
   group('when $thatWhen', () {
     setUpForProjects(asProvidedBy);
-    TestProcessor.createTests(
-        () => processor, () => expectTheseInvocations(theProjects));
+    TestProcessor.createTests(() => processor, expectTheseInvocations);
   });
 }
 
