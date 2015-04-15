@@ -4,7 +4,7 @@ import 'dart:async';
 import 'project.dart';
 import 'dart:io';
 import 'package:git/git.dart';
-import 'package:devops/src/git.dart';
+import 'package:devops/src/git/git.dart';
 import 'package:quiver/iterables.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
@@ -12,7 +12,7 @@ import 'dependency_graph.dart';
 import 'package:devops/src/spec/JefeSpec.dart' as spec;
 import 'package:devops/src/project_impl.dart';
 
-Logger _log = new Logger('devops.project.impl');
+Logger _log = new Logger('devops.project.group.impl');
 
 class ProjectGroupRef2Impl implements ProjectGroupRef2 {
   final ProjectGroupImpl parent;
@@ -27,8 +27,6 @@ class ProjectGroupRef2Impl implements ProjectGroupRef2 {
 
   @override
   String get name => ref.name;
-
-//  Future<ProjectGroup> install()  => parent._installChildGroup(name, gitUri);
 }
 
 class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {

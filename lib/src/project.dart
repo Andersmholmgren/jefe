@@ -7,6 +7,7 @@ import 'package:git/git.dart';
 import 'package:devops/src/pubspec/pubspec.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:devops/src/project_group_impl.dart';
+import 'package:devops/src/dependency_graph.dart';
 
 abstract class ProjectEntityRef<T extends ProjectEntity> {
   String get name;
@@ -33,7 +34,14 @@ abstract class ProjectEntity {
   Directory get installDirectory;
 }
 
-abstract class ProjectGroup extends ProjectEntity {
+abstract class ProjectSource {
+  Future visitAllProjects(process(Project project));
+
+  Future processDependenciesDepthFirst(
+      process(Project project, Iterable<Project> dependencies));
+}
+
+abstract class ProjectGroup extends ProjectEntity implements ProjectSource {
 //  ProjectGroupMetaData get metaData;
 
   // TODO: make name optional. Derive from gitUri

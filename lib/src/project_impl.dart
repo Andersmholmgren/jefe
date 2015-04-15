@@ -3,7 +3,7 @@ library devops.project.impl;
 import 'dart:async';
 import 'project.dart';
 import 'package:git/git.dart';
-import 'package:devops/src/git.dart';
+import 'package:devops/src/git/git.dart';
 import 'package:logging/logging.dart';
 import 'package:devops/src/pubspec/pubspec.dart';
 import 'package:devops/src/pubspec/dependency.dart';

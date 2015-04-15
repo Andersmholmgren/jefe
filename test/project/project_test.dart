@@ -2,7 +2,7 @@ library devops.project.test;
 
 import 'package:devops/src/project.dart';
 import 'dart:io';
-import 'package:devops/src/git.dart';
+import 'package:devops/src/git/git.dart';
 import 'package:path/path.dart' as p;
 import 'package:git/git.dart';
 import 'package:logging/logging.dart';
