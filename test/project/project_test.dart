@@ -13,6 +13,7 @@ import 'package:devops/src/spec/JefeSpec.dart' as spec;
 import 'dart:async';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:devops/src/project_impl.dart';
+import 'package:devops/src/project_group_impl.dart';
 
 mainB() async {
   final spec.ProjectGroupMetaData metadata = await spec.ProjectGroupMetaData

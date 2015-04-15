@@ -6,6 +6,7 @@ import 'project_impl.dart';
 import 'package:git/git.dart';
 import 'package:devops/src/pubspec/pubspec.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:devops/src/project_group_impl.dart';
 
 abstract class ProjectEntityRef<T extends ProjectEntity> {
   String get name;
