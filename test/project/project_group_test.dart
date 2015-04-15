@@ -12,6 +12,7 @@ import 'package:logging/logging.dart';
 import 'package:devops/src/project_group_impl.dart';
 import 'package:devops/src/spec/JefeSpec.dart';
 import 'dart:io';
+import 'test_helpers.dart';
 
 main() async {
   Logger.root.level = Level.ALL;
@@ -20,10 +21,22 @@ main() async {
 
   group('allProjects', () {
     final group1 = aGroup('group1', [], []);
-//    final group1 = aGroup('group1', [], []);
 
-    test('when no projects or child groups is empty', () async {
+    final project1 = aProject('project1');
+    final project2 = aProject('project2');
+
+    final group2 = aGroup('group1', [group1], [project1, project2]);
+    final group3 = aGroup(
+        'group1', [group1, group2, group1], [project1, project2, project1]);
+
+    test('when no projects or child groups then result is empty', () async {
       expect(await group1.allProjects, isEmpty);
+    });
+
+    test(
+        'when group contains projects and empty child group then result is projects',
+        () async {
+      expect(await group2.allProjects, unorderedEquals([project2, project1]));
     });
   });
 }
@@ -54,12 +67,11 @@ class TestProjectEntityReferenceFactory
     final Map<ProjectIdentifier, ProjectReference> pm = {};
 
     groups.forEach((g) {
-      gm[new ProjectGroupIdentifier(g.name, g.gitUri)] =
-          new TestProjectGroupReference(g);
+      gm[g.id] = new TestProjectGroupReference(g);
     });
 
     projects.forEach((p) {
-      pm[new ProjectIdentifier(p.name, p.gitUri)] = new TestProjectReference(p);
+      pm[p.id] = new TestProjectReference(p);
     });
 
     return new TestProjectEntityReferenceFactory._(gm, pm);

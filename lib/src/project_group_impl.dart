@@ -66,11 +66,11 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 
   ProjectGroupIdentifier get id => new ProjectGroupIdentifier(name, gitUri);
 
-  Iterable<ProjectGroupReference> get childGroups =>
-      metaData.childGroups.map((gr) => new ProjectGroupReferenceImpl(this, gr));
+  Iterable<ProjectGroupReference> get childGroups => metaData.childGroups
+      .map((gr) => _referenceFactory.createGroupReference(this, gr));
 
-  Iterable<ProjectReference> get projects =>
-      metaData.projects.map((pr) => new ProjectReferenceImpl(this, pr));
+  Iterable<ProjectReference> get projects => metaData.projects
+      .map((pr) => _referenceFactory.createProjectReference(this, pr));
 
   ProjectGroupImpl(
       String gitUri, this.metaData, GroupDirectoryLayout directoryLayout,

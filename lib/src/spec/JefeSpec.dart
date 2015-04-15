@@ -51,7 +51,7 @@ abstract class ProjectGroupIdentifier
 }
 
 abstract class ProjectIdentifier implements ProjectEntityIdentifier<Project> {
-  factory ProjectIdentifier(String name, String gitUri) = ProjectRefImpl;
+  factory ProjectIdentifier(String name, String gitUri) = ProjectIdentifierImpl;
 }
 
 //TODO: fix ^^
@@ -65,6 +65,12 @@ abstract class _BaseRef<T> implements ProjectEntityIdentifier<T> {
   @deprecated
   Directory installDirectory(Directory parent) =>
       new Directory(p.join(parent.path, name));
+
+  bool operator ==(other) => other.runtimeType == runtimeType &&
+      name == other.name &&
+      gitUri == other.gitUri;
+
+  int get hashCode => name.hashCode;
 }
 
 class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupIdentifier {
@@ -88,8 +94,8 @@ class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupIdentifier {
   String toString() => 'ProjectGroupRef($name, $gitUri)';
 }
 
-class ProjectRefImpl extends _BaseRef implements ProjectIdentifier {
-  ProjectRefImpl(String name, String gitUri) : super(name, gitUri);
+class ProjectIdentifierImpl extends _BaseRef implements ProjectIdentifier {
+  ProjectIdentifierImpl(String name, String gitUri) : super(name, gitUri);
 
 //  @override
 //  Future<Project> install(Directory parentDir, {bool recursive: true}) async {

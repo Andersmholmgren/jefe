@@ -3,11 +3,8 @@ library devops.project.dependency.test;
 import 'package:devops/src/dependency_graph.dart';
 import 'package:scheduled_test/scheduled_test.dart';
 import 'package:devops/src/project.dart';
-import 'package:devops/src/pubspec/pubspec.dart';
-import 'package:devops/src/pubspec/dependency.dart';
 import 'package:logging/logging.dart';
-import 'package:devops/src/project_impl.dart';
-import 'dart:io';
+import 'test_helpers.dart';
 
 main() async {
   Logger.root.level = Level.ALL;
@@ -132,20 +129,4 @@ expectThat({String thatWhen, Iterable<Project> withTheseProjects(),
 
   setUpForProjects(withTheseProjects);
   TestProcessor.createTests(() => processor, weGetTheseInvocations);
-}
-
-Project aProject(String name, {Iterable<Project> dependencies: const []}) =>
-    __aProject(name,
-        pathDependencies: dependencies.map((p) => new PathReference(p.name)));
-
-Project __aProject(String name,
-    {Iterable<PathReference> pathDependencies: const []}) {
-  final dependencies = {};
-  pathDependencies.forEach((pd) {
-    // WARNING: only makes sense if path == name
-    dependencies[pd.path] = pd;
-  });
-
-  return new ProjectImpl(name, new Directory(name),
-      new PubSpec(name: name, dependencies: dependencies));
 }
