@@ -112,36 +112,33 @@ runDaTests() {
 ////      processor.runTests([new TestProcessInvocation(project1, [])]);
 //    });
 
-    testCase(
-        thatWhen: 'no projects provided',
-        asProvidedBy: () => [],
-        expectTheseInvocations: []);
+    group('when no projects provided', () =>
+        expectThat(withTheseProjects: () => [], weGetTheseInvocations: []));
 
-    {
+    group('for a single project that has no dependencies', () {
       TestProject project1;
       createProjects() {
         project1 = aProject('project1');
         return [project1];
       }
-      testCase(
-          thatWhen: 'a single project has no dependencies',
-          asProvidedBy: createProjects,
-          expectTheseInvocations: [
+
+      expectThat(
+          withTheseProjects: createProjects,
+          weGetTheseInvocations: [
         () => new TestProcessInvocation(project1, const [])
       ]);
-    }
+    });
 
-    {
+    group('for two projects with a single dependency', () {
       final project1 = aProject('project1');
       final project2 = aProject2('project2', dependencies: [project1]);
-      testCase(
-          thatWhen: 'blah project has no dependencies',
-          asProvidedBy: () => [project1, project2],
-          expectTheseInvocations: [
+      expectThat(
+          withTheseProjects: () => [project1, project2],
+          weGetTheseInvocations: [
         () => new TestProcessInvocation(project1, []),
         () => new TestProcessInvocation(project2, [project1])
       ]);
-    }
+    });
 
 //    group('for one project with no dependencies', () {
 //      MockProject project1;
@@ -233,8 +230,8 @@ class TestProject extends Mock implements Project {
 //      expectTheseInvocations: () => []);
 //}
 
-testCase({String thatWhen, Iterable<Project> asProvidedBy(),
-    List<TestProcessInvocationFactory> expectTheseInvocations}) {
+expectThat({String thatWhen, Iterable<Project> withTheseProjects(),
+    List<TestProcessInvocationFactory> weGetTheseInvocations}) {
   TestProcessor processor;
   Iterable<Project> theProjects;
 
@@ -252,10 +249,8 @@ testCase({String thatWhen, Iterable<Project> asProvidedBy(),
     setUp(() => scheduleForProjects(projects));
   }
 
-  group('when $thatWhen', () {
-    setUpForProjects(asProvidedBy);
-    TestProcessor.createTests(() => processor, expectTheseInvocations);
-  });
+  setUpForProjects(withTheseProjects);
+  TestProcessor.createTests(() => processor, weGetTheseInvocations);
 }
 
 Project aProject2(String name, {Iterable<Project> dependencies: const []}) =>
