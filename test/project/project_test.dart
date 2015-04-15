@@ -12,6 +12,7 @@ import 'package:devops/src/pubspec/pubspec.dart';
 import 'package:devops/src/spec/JefeSpec.dart' as spec;
 import 'dart:async';
 import 'package:stack_trace/stack_trace.dart';
+import 'package:devops/src/project_impl.dart';
 
 mainB() async {
   final spec.ProjectGroupMetaData metadata = await spec.ProjectGroupMetaData
@@ -83,6 +84,10 @@ main123() async {
 
   print('container dir = ${projectGroup.containerDirectory}');
 
+  print(
+      '********* childGroups ${await (projectGroup as ProjectGroupImpl).childGroups.first.get()}');
+  print('********* allProjects ${await projectGroup.allProjects}');
+
 //  await projectGroup.install(installDir);
 //  await projectGroup.setupForDev();
 
@@ -92,6 +97,8 @@ main123() async {
   print('loaded group => $projectGroup2');
 
   print('container dir = ${projectGroup2.containerDirectory}');
+
+  print('+++++++++ allProjects ${await projectGroup2.allProjects}');
 
   await projectGroup2.initFlow();
 //  await projectGroup2.featureStart('blah');

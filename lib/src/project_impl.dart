@@ -283,7 +283,17 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
       final g = await ref.get();
       _addAll(projects, g);
     }
-    group.childGroups.forEach(_addFromGroup);
+//    group.childGroups.forEach((ref) {
+//      _addFromGroup(ref);
+//    });
+    final childGroupFutures =
+        group.childGroups.map((ref) => ref.get()).toList(growable: false);
+
+    childGroupFutures.forEach((cgf) async {
+      final g = await cgf;
+      _addAll(projects, g);
+    });
+//    });
   }
 
   @override
