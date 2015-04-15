@@ -15,15 +15,16 @@ main() async {
   Logger.root.onRecord.listen(print);
   hierarchicalLoggingEnabled = true;
 
-  Chain.capture(() {
-    runDaTests();
-  }, onError: (error, stackChain) {
-    print("Caught error $error\n"
-        "${stackChain.terse}");
-  });
-}
-
-runDaTests() {
+//
+//  Chain.capture(() {
+//    runDaTests();
+//  }, onError: (error, stackChain) {
+//    print("Caught error $error\n"
+//        "${stackChain.terse}");
+//  });
+//}
+//
+//runDaTests() {
   group('depthFirst', () {
     group('when no projects provided', () =>
         expectThat(withTheseProjects: () => [], weGetTheseInvocations: []));

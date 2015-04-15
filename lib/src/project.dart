@@ -45,6 +45,7 @@ abstract class ProjectSource {
 
 abstract class ProjectGroup extends ProjectEntity implements ProjectSource {
 //  ProjectGroupMetaData get metaData;
+  ProjectGroupIdentifier get id;
 
   // TODO: make name optional. Derive from gitUri
   static Future<ProjectGroup> install(
@@ -91,6 +92,7 @@ abstract class ProjectGroup extends ProjectEntity implements ProjectSource {
 
 abstract class Project extends ProjectEntity {
   PubSpec get pubspec;
+  ProjectIdentifier get id => new ProjectIdentifier(name, gitUri);
 
   static Future<Project> install(
           Directory parentDir, String name, String gitUri,

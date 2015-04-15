@@ -64,6 +64,8 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   final GroupDirectoryLayout directoryLayout;
   Directory get containerDirectory => directoryLayout.containerDirectory;
 
+  ProjectGroupIdentifier get id => new ProjectGroupIdentifier(name, gitUri);
+
   Iterable<ProjectGroupReference> get childGroups =>
       metaData.childGroups.map((gr) => new ProjectGroupReferenceImpl(this, gr));
 

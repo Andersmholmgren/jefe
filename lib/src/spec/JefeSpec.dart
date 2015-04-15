@@ -7,6 +7,8 @@ import 'package:devops/src/project_yaml.dart';
 import 'package:path/path.dart' as p;
 
 abstract class ProjectGroupMetaData {
+//  factory ProjectGroupMetaData = ProjectGroupMetaDataImpl;
+
   String get name;
 
   Iterable<ProjectGroupIdentifier> get childGroups;
@@ -44,13 +46,12 @@ abstract class ProjectEntityIdentifier<T> {
 
 abstract class ProjectGroupIdentifier
     implements ProjectEntityIdentifier<ProjectGroup> {
-  factory ProjectGroupIdentifier.ProjectGroupIdentifier(
+  factory ProjectGroupIdentifier(
       String name, String gitUri) = ProjectGroupRefImpl;
 }
 
 abstract class ProjectIdentifier implements ProjectEntityIdentifier<Project> {
-  factory ProjectIdentifier.ProjectIdentifier(
-      String name, String gitUri) = ProjectRefImpl;
+  factory ProjectIdentifier(String name, String gitUri) = ProjectRefImpl;
 }
 
 //TODO: fix ^^
