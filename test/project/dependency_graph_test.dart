@@ -24,106 +24,15 @@ main() async {
 }
 
 runDaTests() {
-  TestProcessor processor;
-
   group('depthFirst', () {
-    scheduleForProjects(Iterable<Project> projects) {
-      return schedule(() async {
-        processor = new TestProcessor();
-        final DependencyGraph graph =
-            await getDependencyGraph(projects.toSet());
-        return graph.depthFirst(processor);
-      });
-    }
-
-    setUpForProjects(Iterable<Project> projects) {
-      setUp(() => scheduleForProjects(projects));
-    }
-
-//    group('for empty projects', () {
-//      setUpForProjects([]);
-//
-//      test('does not call processor', () {
-//        schedule(() => expect(processor.invocations, isEmpty));
-//      });
-//    });
-//
-//    group('for one project with no dependencies', () {
-//      MockProject project1;
-//
-//      setUp(() {
-//        project1 = new MockProject('project1', new PubSpec());
-//        scheduleForProjects([project1]);
-//      });
-//
-//      test('calls processor once', () {
-//        schedule(() => expect(processor.invocations, hasLength(1)));
-//      });
-//
-//      test('calls processor once with expected project', () {
-//        schedule(() =>
-//            expect(processor.invocations.first.project, equals(project1)));
-//      });
-//
-//      test('calls processor once with no dependencies', () {
-//        schedule(
-//            () => expect(processor.invocations.first.dependencies, isEmpty));
-//      });
-//    });
-//
-//    group('for two projects with one path dependency', () {
-//      MockProject project1;
-//      MockProject project2;
-//
-//      setUp(() {
-//        project1 = new MockProject('project1', new PubSpec(name: 'project1'));
-//        final pubspec2 = new PubSpec(
-//            name: 'project2',
-//            dependencies: {'project1': new PathReference('project1')});
-//        project2 = new MockProject('project2', pubspec2);
-//
-//        scheduleForProjects([project1, project2]);
-//      });
-//
-//      test('calls processor twice', () {
-//        schedule(() => expect(processor.invocations, hasLength(2)));
-//      });
-//
-//      test('calls processor first with project1', () {
-//        schedule(() =>
-//            expect(processor.invocations.first.project, equals(project1)));
-//      });
-//
-//      test('calls processor first with no dependencies', () {
-//        schedule(
-//            () => expect(processor.invocations.first.dependencies, isEmpty));
-//      });
-//
-//      test('calls processor second with project2', () {
-//        schedule(() => expect(
-//            processor.invocations.elementAt(1).project, equals(project2)));
-//      });
-//
-//      test('calls processor first with one dependency on project1', () {
-//        schedule(() => expect(processor.invocations.elementAt(1).dependencies,
-//            unorderedEquals([project1])));
-//      });
-//
-////      processor.runTests([new TestProcessInvocation(project1, [])]);
-//    });
-
     group('when no projects provided', () =>
         expectThat(withTheseProjects: () => [], weGetTheseInvocations: []));
 
     group('for a single project that has no dependencies', () {
-      TestProject project1;
-      createProjects() {
-        project1 = aProject('project1');
-        return [project1];
-      }
+      final project1 = aProject('project1');
 
       expectThat(
-          withTheseProjects: createProjects,
+          withTheseProjects: () => [project1],
           weGetTheseInvocations: [
         () => new TestProcessInvocation(project1, const [])
       ]);
@@ -131,7 +40,8 @@ runDaTests() {
 
     group('for two projects with a single dependency', () {
       final project1 = aProject('project1');
-      final project2 = aProject2('project2', dependencies: [project1]);
+      final project2 = aProject('project2', dependencies: [project1]);
+
       expectThat(
           withTheseProjects: () => [project1, project2],
           weGetTheseInvocations: [
@@ -140,12 +50,12 @@ runDaTests() {
       ]);
     });
 
-    group('for two projects with a single dependency', () {
-      final project1 = aProject2('project1');
-      final project2 = aProject2('project2', dependencies: [project1]);
-      final project3 = aProject2('project3');
-      final project4 =
-          aProject2('project3', dependencies: [project3, project2]);
+    group('for 4 projects with a several dependency', () {
+      final project1 = aProject('project1');
+      final project2 = aProject('project2', dependencies: [project1]);
+      final project3 = aProject('project3');
+      final project4 = aProject('project3', dependencies: [project3, project2]);
+
       expectThat(
           withTheseProjects: () => [project1, project4, project3, project2],
           weGetTheseInvocations: [
@@ -155,30 +65,6 @@ runDaTests() {
         () => new TestProcessInvocation(project4, [project2, project3])
       ]);
     });
-
-    //    group('for one project with no dependencies', () {
-//      MockProject project1;
-//
-//      setUp(() {
-//        project1 = new MockProject('project1', new PubSpec());
-//        scheduleForProjects([project1]);
-//      });
-//
-//      test('calls processor once', () {
-//        schedule(() => expect(processor.invocations, hasLength(1)));
-//      });
-//
-//      test('calls processor once with expected project', () {
-//        schedule(() =>
-//            expect(processor.invocations.first.project, equals(project1)));
-//      });
-//
-//      test('calls processor once with no dependencies', () {
-//        schedule(
-//            () => expect(processor.invocations.first.dependencies, isEmpty));
-//      });
-//    });
-
   });
 }
 
@@ -197,11 +83,6 @@ class TestProcessor {
 
     group('each invocation matches expectation', () {
       for (int i = 0; i < expected.length; i++) {
-
-        // TODO: need to rework this with ordered equals or something
-        // as we can't create the expected up front so don't know how
-        // many in the list
-
         TestProcessInvocation.createTests(
             () => processor().invocations[i], expected[i]);
       }
@@ -233,20 +114,12 @@ class TestProcessInvocation {
 class TestProject extends Mock implements Project {
   final String name;
   TestProject(String name, PubSpec pubSpec) : this.name = name {
-//    when(this.name).thenReturn(name);
     when(this.pubspec).thenReturn(new Future.value(pubSpec));
   }
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   String toString() => name;
 }
-
-//foo() {
-//  testCase(
-//      thatWhen: 'no projects provided',
-//      asProvidedBy: () => [],
-//      expectTheseInvocations: () => []);
-//}
 
 expectThat({String thatWhen, Iterable<Project> withTheseProjects(),
     List<TestProcessInvocationFactory> weGetTheseInvocations}) {
@@ -271,11 +144,11 @@ expectThat({String thatWhen, Iterable<Project> withTheseProjects(),
   TestProcessor.createTests(() => processor, weGetTheseInvocations);
 }
 
-Project aProject2(String name, {Iterable<Project> dependencies: const []}) =>
-    aProject(name,
+Project aProject(String name, {Iterable<Project> dependencies: const []}) =>
+    __aProject(name,
         pathDependencies: dependencies.map((p) => new PathReference(p.name)));
 
-Project aProject(String name,
+Project __aProject(String name,
     {Iterable<PathReference> pathDependencies: const []}) {
   final dependencies = {};
   pathDependencies.forEach((pd) {
@@ -285,9 +158,4 @@ Project aProject(String name,
 
   return new TestProject(
       name, new PubSpec(name: name, dependencies: dependencies));
-}
-
-class TestPrecondition {
-  String description;
-//  String description;
 }
