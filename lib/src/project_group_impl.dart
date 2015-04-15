@@ -11,13 +11,14 @@ import 'package:path/path.dart' as p;
 import 'dependency_graph.dart';
 import 'package:devops/src/spec/JefeSpec.dart' as spec;
 import 'package:devops/src/project_impl.dart';
+import 'package:devops/src/spec/JefeSpec.dart';
 
 Logger _log = new Logger('devops.project.group.impl');
 
-class ProjectGroupRef2Impl implements ProjectGroupReference {
+class ProjectGroupReferenceImpl implements ProjectGroupReference {
   final ProjectGroupImpl parent;
   final spec.ProjectGroupIdentifier ref;
-  ProjectGroupRef2Impl(this.parent, this.ref);
+  ProjectGroupReferenceImpl(this.parent, this.ref);
 
   @override
   Future<ProjectGroup> get() => parent._getChildGroup(name, gitUri);
@@ -29,9 +30,33 @@ class ProjectGroupRef2Impl implements ProjectGroupReference {
   String get name => ref.name;
 }
 
+abstract class ProjectEntityReferenceFactory {
+  ProjectGroupReference createGroupReference(
+      ProjectGroupImpl group, ProjectGroupIdentifier id);
+  ProjectReference createProjectReference(
+      ProjectGroupImpl group, ProjectIdentifier id);
+}
+
+class DefaultProjectEntityReferenceFactory
+    implements ProjectEntityReferenceFactory {
+  const DefaultProjectEntityReferenceFactory();
+
+  @override
+  ProjectGroupReference createGroupReference(
+          ProjectGroupImpl group, spec.ProjectGroupIdentifier id) =>
+      new ProjectGroupReferenceImpl(group, id);
+
+  @override
+  ProjectReference createProjectReference(
+          ProjectGroupImpl group, spec.ProjectIdentifier id) =>
+      new ProjectReferenceImpl(group, id);
+}
+
 class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   // TODO: we need to hide the project group refs here etc as
   // it complicates encapsulating loading from the right directory
+
+  final ProjectEntityReferenceFactory _referenceFactory;
 
   final spec.ProjectGroupMetaData metaData;
   String get name => metaData.name;
@@ -40,14 +65,16 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   Directory get containerDirectory => directoryLayout.containerDirectory;
 
   Iterable<ProjectGroupReference> get childGroups =>
-      metaData.childGroups.map((gr) => new ProjectGroupRef2Impl(this, gr));
+      metaData.childGroups.map((gr) => new ProjectGroupReferenceImpl(this, gr));
 
   Iterable<ProjectReference> get projects =>
-      metaData.projects.map((pr) => new ProjectRef2Impl(this, pr));
+      metaData.projects.map((pr) => new ProjectReferenceImpl(this, pr));
 
   ProjectGroupImpl(
-      String gitUri, this.metaData, GroupDirectoryLayout directoryLayout)
+      String gitUri, this.metaData, GroupDirectoryLayout directoryLayout,
+      {ProjectEntityReferenceFactory referenceFactory: const DefaultProjectEntityReferenceFactory()})
       : this.directoryLayout = directoryLayout,
+        this._referenceFactory = referenceFactory,
         super(gitUri, directoryLayout.groupDirectory);
 
   static Future<ProjectGroup> install(

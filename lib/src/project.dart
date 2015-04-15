@@ -7,11 +7,12 @@ import 'package:git/git.dart';
 import 'package:devops/src/pubspec/pubspec.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:devops/src/project_group_impl.dart';
-import 'package:devops/src/dependency_graph.dart';
+import 'package:devops/src/spec/JefeSpec.dart';
 
-abstract class ProjectEntityReference<T extends ProjectEntity> {
-  String get name;
-  String get gitUri;
+abstract class ProjectEntityReference<T extends ProjectEntity>
+    extends ProjectEntityIdentifier {
+//  String get name;
+//  String get gitUri;
 
 //  Future<T> install();
 

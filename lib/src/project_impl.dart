@@ -14,10 +14,10 @@ import 'dart:io';
 
 Logger _log = new Logger('devops.project.impl');
 
-class ProjectRef2Impl implements ProjectReference {
+class ProjectReferenceImpl implements ProjectReference {
   final ProjectGroupImpl parent;
   final spec.ProjectIdentifier ref;
-  ProjectRef2Impl(this.parent, this.ref);
+  ProjectReferenceImpl(this.parent, this.ref);
 
   @override
   Future<Project> get() => parent.getChildProject(name, gitUri);
