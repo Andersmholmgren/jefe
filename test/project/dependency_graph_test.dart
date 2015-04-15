@@ -117,12 +117,31 @@ runDaTests() {
         asProvidedBy: () => [],
         expectTheseInvocations: []);
 
-    testCase(
-        thatWhen: 'a single project has no dependencies',
-        asProvidedBy: () => [aProject('project1')],
-        expectTheseInvocations: [
-      (projects) => new TestProcessInvocation(projects.first, const [])
-    ]);
+    {
+      TestProject project1;
+      createProjects() {
+        project1 = aProject('project1');
+        return [project1];
+      }
+      testCase(
+          thatWhen: 'a single project has no dependencies',
+          asProvidedBy: createProjects,
+          expectTheseInvocations: [
+        () => new TestProcessInvocation(project1, const [])
+      ]);
+    }
+
+    {
+      final project1 = aProject('project1');
+      final project2 = aProject2('project2', dependencies: [project1]);
+      testCase(
+          thatWhen: 'blah project has no dependencies',
+          asProvidedBy: () => [project1, project2],
+          expectTheseInvocations: [
+        () => new TestProcessInvocation(project1, []),
+        () => new TestProcessInvocation(project2, [project1])
+      ]);
+    }
 
 //    group('for one project with no dependencies', () {
 //      MockProject project1;
@@ -177,8 +196,7 @@ class TestProcessor {
   }
 }
 
-typedef TestProcessInvocation TestProcessInvocationFactory(
-    [Iterable<Project> projects]);
+typedef TestProcessInvocation TestProcessInvocationFactory();
 
 class TestProcessInvocation {
   final Project project;
@@ -199,9 +217,10 @@ class TestProcessInvocation {
   }
 }
 
-class MockProject extends Mock implements Project {
-  MockProject(String name, PubSpec pubSpec) {
-    when(this.name).thenReturn(name);
+class TestProject extends Mock implements Project {
+  final String name;
+  TestProject(String name, PubSpec pubSpec) : this.name = name {
+//    when(this.name).thenReturn(name);
     when(this.pubspec).thenReturn(new Future.value(pubSpec));
   }
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -239,6 +258,10 @@ testCase({String thatWhen, Iterable<Project> asProvidedBy(),
   });
 }
 
+Project aProject2(String name, {Iterable<Project> dependencies: const []}) =>
+    aProject(name,
+        pathDependencies: dependencies.map((p) => new PathReference(p.name)));
+
 Project aProject(String name,
     {Iterable<PathReference> pathDependencies: const []}) {
   final dependencies = {};
@@ -247,7 +270,7 @@ Project aProject(String name,
     dependencies[pd.path] = pd;
   });
 
-  return new MockProject(
+  return new TestProject(
       name, new PubSpec(name: name, dependencies: dependencies));
 }
 
