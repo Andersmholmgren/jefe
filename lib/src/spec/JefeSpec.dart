@@ -9,9 +9,9 @@ import 'package:path/path.dart' as p;
 abstract class ProjectGroupMetaData {
   String get name;
 
-  Iterable<ProjectGroupRef> get childGroups;
+  Iterable<ProjectGroupIdentifier> get childGroups;
 
-  Iterable<ProjectRef> get projects;
+  Iterable<ProjectIdentifier> get projects;
 
   static Future<ProjectGroupMetaData> fromDefaultProjectGroupYamlFile(
           String projectGroupDirectory) =>
@@ -24,13 +24,13 @@ abstract class ProjectGroupMetaData {
 
 class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {
   final String name;
-  final Iterable<ProjectGroupRef> childGroups;
-  final Iterable<ProjectRef> projects;
+  final Iterable<ProjectGroupIdentifier> childGroups;
+  final Iterable<ProjectIdentifier> projects;
 
   ProjectGroupMetaDataImpl(this.name, this.childGroups, this.projects);
 }
 
-abstract class Ref<T> {
+abstract class ProjectEntityIdentifier<T> {
   String get name;
   String get gitUri;
 
@@ -42,18 +42,20 @@ abstract class Ref<T> {
 
 }
 
-abstract class ProjectGroupRef implements Ref<ProjectGroup> {
-  factory ProjectGroupRef.fromGitUrl(
+abstract class ProjectGroupIdentifier
+    implements ProjectEntityIdentifier<ProjectGroup> {
+  factory ProjectGroupIdentifier.ProjectGroupIdentifier(
       String name, String gitUri) = ProjectGroupRefImpl;
 }
 
-abstract class ProjectRef implements Ref<Project> {
-  factory ProjectRef.fromGitUrl(String name, String gitUri) = ProjectRefImpl;
+abstract class ProjectIdentifier implements ProjectEntityIdentifier<Project> {
+  factory ProjectIdentifier.ProjectIdentifier(
+      String name, String gitUri) = ProjectRefImpl;
 }
 
 //TODO: fix ^^
 
-abstract class _BaseRef<T> implements Ref<T> {
+abstract class _BaseRef<T> implements ProjectEntityIdentifier<T> {
   final String name;
   final String gitUri;
 
@@ -64,7 +66,7 @@ abstract class _BaseRef<T> implements Ref<T> {
       new Directory(p.join(parent.path, name));
 }
 
-class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupRef {
+class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupIdentifier {
   ProjectGroupRefImpl(String name, String gitUri) : super(name, gitUri);
 
 //  @override
@@ -85,7 +87,7 @@ class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupRef {
   String toString() => 'ProjectGroupRef($name, $gitUri)';
 }
 
-class ProjectRefImpl extends _BaseRef implements ProjectRef {
+class ProjectRefImpl extends _BaseRef implements ProjectIdentifier {
   ProjectRefImpl(String name, String gitUri) : super(name, gitUri);
 
 //  @override

@@ -9,7 +9,7 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:devops/src/project_group_impl.dart';
 import 'package:devops/src/dependency_graph.dart';
 
-abstract class ProjectEntityRef<T extends ProjectEntity> {
+abstract class ProjectEntityReference<T extends ProjectEntity> {
   String get name;
   String get gitUri;
 
@@ -18,12 +18,13 @@ abstract class ProjectEntityRef<T extends ProjectEntity> {
   Future<T> get();
 }
 
-abstract class ProjectGroupRef2 implements ProjectEntityRef<ProjectGroup> {
+abstract class ProjectGroupReference
+    implements ProjectEntityReference<ProjectGroup> {
 //  factory ProjectGroupRef.fromGitUrl(
 //      String name, String gitUri) = ProjectGroupRefImpl;
 }
 
-abstract class ProjectRef2 implements ProjectEntityRef<Project> {
+abstract class ProjectReference implements ProjectEntityReference<Project> {
 //  factory ProjectRef.fromGitUrl(String name, String gitUri) = ProjectRefImpl;
 }
 

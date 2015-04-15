@@ -14,9 +14,9 @@ import 'package:devops/src/project_impl.dart';
 
 Logger _log = new Logger('devops.project.group.impl');
 
-class ProjectGroupRef2Impl implements ProjectGroupRef2 {
+class ProjectGroupRef2Impl implements ProjectGroupReference {
   final ProjectGroupImpl parent;
-  final spec.ProjectGroupRef ref;
+  final spec.ProjectGroupIdentifier ref;
   ProjectGroupRef2Impl(this.parent, this.ref);
 
   @override
@@ -39,10 +39,10 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   final GroupDirectoryLayout directoryLayout;
   Directory get containerDirectory => directoryLayout.containerDirectory;
 
-  Iterable<ProjectGroupRef2> get childGroups =>
+  Iterable<ProjectGroupReference> get childGroups =>
       metaData.childGroups.map((gr) => new ProjectGroupRef2Impl(this, gr));
 
-  Iterable<ProjectRef2> get projects =>
+  Iterable<ProjectReference> get projects =>
       metaData.projects.map((pr) => new ProjectRef2Impl(this, pr));
 
   ProjectGroupImpl(
@@ -163,7 +163,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   }
 
   @override
-  Future<ProjectGroup> childProjectGroup(spec.ProjectGroupRef ref) {
+  Future<ProjectGroup> childProjectGroup(spec.ProjectGroupIdentifier ref) {
     // TODO: implement childProject
   }
 
@@ -222,11 +222,6 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
       _visitAllProjects(
           'git flow release finish $name', (p) => p.releaseFinish(name));
 
-  Future _visitAllProjects(String taskDescription, process(Project p)) async {
-    _log.info('$taskDescription for group ${metaData.name}');
-    await Future.wait((await allProjects).map((p) => process(p)));
-  }
-
   @override
   Future pubGet() async {
     _log.info('Running pub get for group ${name}');
@@ -247,7 +242,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   static void _addAll(List<Future<Project>> projects, ProjectGroupImpl group) {
     projects.addAll(group.projects.map((p) => p.get()));
 
-    _addFromGroup(ProjectGroupRef2 ref) async {
+    _addFromGroup(ProjectGroupReference ref) async {
       final g = await ref.get();
       _addAll(projects, g);
     }
@@ -276,6 +271,16 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
       'ProjectGroup: $name; gitUri: $gitUri; installed: $installDirectory\n'
       '    projects: ${metaData.projects}\n'
       '    childGroups: ${metaData.childGroups}';
+
+  @override
+  Future visitAllProjects(process(Project project)) {
+    // TODO: implement visitAllProjects
+  }
+
+  Future _visitAllProjects(String taskDescription, process(Project p)) async {
+    _log.info('$taskDescription for group ${metaData.name}');
+    await Future.wait((await allProjects).map((p) => process(p)));
+  }
 }
 
 class GroupDirectoryLayout {

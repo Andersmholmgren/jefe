@@ -71,8 +71,9 @@ main() async {
 //  });
 }
 main123() async {
-  spec.ProjectGroupRef ref = new spec.ProjectGroupRef.fromGitUrl('gitbacklog',
-      '/Users/blah/dart/jefe_jefe/jefe_test_projects/local/gitbacklog');
+  spec.ProjectGroupIdentifier ref =
+      new spec.ProjectGroupIdentifier.ProjectGroupIdentifier('gitbacklog',
+          '/Users/blah/dart/jefe_jefe/jefe_test_projects/local/gitbacklog');
 
   final Directory installDir = await Directory.systemTemp.createTemp();
 

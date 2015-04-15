@@ -14,9 +14,9 @@ import 'dart:io';
 
 Logger _log = new Logger('devops.project.impl');
 
-class ProjectRef2Impl implements ProjectRef2 {
+class ProjectRef2Impl implements ProjectReference {
   final ProjectGroupImpl parent;
-  final spec.ProjectRef ref;
+  final spec.ProjectIdentifier ref;
   ProjectRef2Impl(this.parent, this.ref);
 
   @override
