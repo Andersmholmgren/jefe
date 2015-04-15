@@ -8,7 +8,7 @@ import 'package:logging/logging.dart';
 import 'package:devops/src/pubspec/pubspec.dart';
 import 'package:devops/src/pubspec/dependency.dart';
 import 'pub.dart' as pub;
-import 'package:devops/src/spec/JefeSpec.dart' as spec;
+import 'package:devops/src/spec/JefeSpec.dart';
 import 'package:devops/src/project_group_impl.dart';
 import 'dart:io';
 
@@ -16,7 +16,7 @@ Logger _log = new Logger('devops.project.impl');
 
 class ProjectReferenceImpl implements ProjectReference {
   final ProjectGroupImpl parent;
-  final spec.ProjectIdentifier ref;
+  final ProjectIdentifier ref;
   ProjectReferenceImpl(this.parent, this.ref);
 
   @override
@@ -48,6 +48,8 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   PubSpec get pubspec => _pubspec;
 
   String get name => pubspec.name;
+
+  ProjectIdentifier get id => new ProjectIdentifier(name, gitUri);
 
   ProjectImpl(String gitUri, Directory installDirectory, this._pubspec)
       : super(gitUri, installDirectory);

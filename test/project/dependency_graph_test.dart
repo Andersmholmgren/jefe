@@ -3,12 +3,11 @@ library devops.project.dependency.test;
 import 'package:devops/src/dependency_graph.dart';
 import 'package:scheduled_test/scheduled_test.dart';
 import 'package:devops/src/project.dart';
-import 'package:mockito/mockito.dart';
 import 'package:devops/src/pubspec/pubspec.dart';
-import 'dart:async';
 import 'package:devops/src/pubspec/dependency.dart';
-import 'package:stack_trace/stack_trace.dart';
 import 'package:logging/logging.dart';
+import 'package:devops/src/project_impl.dart';
+import 'dart:io';
 
 main() async {
   Logger.root.level = Level.ALL;
@@ -112,16 +111,6 @@ class TestProcessInvocation {
   }
 }
 
-class TestProject extends Mock implements Project {
-  final String name;
-  TestProject(String name, PubSpec pubSpec) : this.name = name {
-    when(this.pubspec).thenReturn(new Future.value(pubSpec));
-  }
-  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-
-  String toString() => name;
-}
-
 expectThat({String thatWhen, Iterable<Project> withTheseProjects(),
     List<TestProcessInvocationFactory> weGetTheseInvocations}) {
   TestProcessor processor;
@@ -157,6 +146,6 @@ Project __aProject(String name,
     dependencies[pd.path] = pd;
   });
 
-  return new TestProject(
-      name, new PubSpec(name: name, dependencies: dependencies));
+  return new ProjectImpl(name, new Directory(name),
+      new PubSpec(name: name, dependencies: dependencies));
 }

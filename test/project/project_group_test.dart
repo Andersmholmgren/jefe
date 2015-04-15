@@ -19,9 +19,12 @@ main() async {
   hierarchicalLoggingEnabled = true;
 
   group('allProjects', () {
-    new ProjectGroupImpl();
-//    String gitUri, this.metaData, GroupDirectoryLayout directoryLayout,
-//  {ProjectEntityReferenceFactory referenceFactory: const DefaultProjectEntityReferenceFactory()})
+    final group1 = aGroup('group1', [], []);
+//    final group1 = aGroup('group1', [], []);
+
+    test('when no projects or child groups is empty', () async {
+      expect(await group1.allProjects, isEmpty);
+    });
   });
 }
 

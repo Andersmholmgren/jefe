@@ -92,7 +92,7 @@ abstract class ProjectGroup extends ProjectEntity implements ProjectSource {
 
 abstract class Project extends ProjectEntity {
   PubSpec get pubspec;
-  ProjectIdentifier get id => new ProjectIdentifier(name, gitUri);
+  ProjectIdentifier get id;
 
   static Future<Project> install(
           Directory parentDir, String name, String gitUri,
