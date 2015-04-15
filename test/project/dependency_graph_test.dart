@@ -140,7 +140,23 @@ runDaTests() {
       ]);
     });
 
-//    group('for one project with no dependencies', () {
+    group('for two projects with a single dependency', () {
+      final project1 = aProject2('project1');
+      final project2 = aProject2('project2', dependencies: [project1]);
+      final project3 = aProject2('project3');
+      final project4 =
+          aProject2('project3', dependencies: [project3, project2]);
+      expectThat(
+          withTheseProjects: () => [project1, project4, project3, project2],
+          weGetTheseInvocations: [
+        () => new TestProcessInvocation(project3, []),
+        () => new TestProcessInvocation(project1, []),
+        () => new TestProcessInvocation(project2, [project1]),
+        () => new TestProcessInvocation(project4, [project2, project3])
+      ]);
+    });
+
+    //    group('for one project with no dependencies', () {
 //      MockProject project1;
 //
 //      setUp(() {
@@ -221,6 +237,8 @@ class TestProject extends Mock implements Project {
     when(this.pubspec).thenReturn(new Future.value(pubSpec));
   }
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  String toString() => name;
 }
 
 //foo() {
