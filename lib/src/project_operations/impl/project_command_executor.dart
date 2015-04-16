@@ -1,15 +1,18 @@
+library devops.project.operations.executor.impl;
+
 import 'package:devops/src/project.dart';
 
 import 'package:logging/logging.dart';
 import 'dart:async';
 import 'package:devops/src/project_operations/project_command.dart';
+import 'package:devops/src/project_operations/project_command_executor.dart';
 
 Logger _log = new Logger('devops.project.operations.impl');
 
-class BaseCommandExecutor {
+class CommandExecutorImpl implements CommandExecutor {
   final ProjectSource _projectSource;
 
-  BaseCommandExecutor(this._projectSource);
+  CommandExecutorImpl(this._projectSource);
 
   Future execute(ProjectCommand command) async {
     if (command.function is ProjectWithDependenciesFunction) {
@@ -37,9 +40,9 @@ class BaseCommandExecutor {
           String description, ProjectFunction processor) =>
       (Project project) async {
     final taskDescription = '$description for project ${project.name}';
-    _log.info('Starting $taskDescription');
+    _log.info('Executing command "$taskDescription"');
     await processor(project);
-    _log.finer('Finished $taskDescription');
+    _log.finer('Completed command "$taskDescription"');
   };
 
   ProjectWithDependenciesFunction _wrapDependencyProcessor(
@@ -47,8 +50,8 @@ class BaseCommandExecutor {
       (Project project, Iterable<Project> dependencies) async {
     final taskDescription =
         '$description for project ${project.name} with ${dependencies.length} dependencies';
-    _log.info('Starting $taskDescription');
+    _log.info('Executing command "$taskDescription"');
     await processor(project, dependencies);
-    _log.finer('Finished $taskDescription');
+    _log.finer('Completed command "$taskDescription"');
   };
 }
