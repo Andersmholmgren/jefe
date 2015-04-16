@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:git/git.dart';
 import 'package:devops/src/git/git.dart';
 import 'package:quiver/iterables.dart';
+import 'package:quiver/streams.dart' as streamz;
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'dependency_graph.dart';
@@ -67,9 +68,11 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   ProjectGroupIdentifier get id => new ProjectGroupIdentifier(name, gitUri);
 
   Iterable<ProjectGroupReference> get childGroups => metaData.childGroups
+      .toSet()
       .map((gr) => _referenceFactory.createGroupReference(this, gr));
 
   Iterable<ProjectReference> get projects => metaData.projects
+      .toSet()
       .map((pr) => _referenceFactory.createProjectReference(this, pr));
 
   ProjectGroupImpl(
@@ -262,30 +265,33 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   }
 
   @override
-  Future<Set<Project>> get allProjects async {
-    final List<Future<Project>> projectFutures = [];
-    _addAll(projectFutures, this);
-    return (await Future.wait(projectFutures)).toSet();
-  }
+  Future<Set<Project>> get allProjects => _allProjectsStream.toSet();
 
-  static void _addAll(List<Future<Project>> projects, ProjectGroupImpl group) {
-    projects.addAll(group.projects.map((p) => p.get()));
+  Stream<Project> get _allProjectsStream {
+    final Stream<ProjectGroupImpl> childGroupStream =
+        new Stream.fromIterable(childGroups.map((ref) => ref.get()))
+            .asyncMap((pgf) => pgf);
 
-    _addFromGroup(ProjectGroupReference ref) async {
-      final g = await ref.get();
-      _addAll(projects, g);
+    final Stream<Project> childProjectStream =
+        childGroupStream.asyncExpand((pg) => pg._allProjectsStream);
+
+    final Stream<Project> projectStream =
+        new Stream.fromIterable(projects.map((p) => p.get()))
+            .asyncMap((p) => p);
+
+//    return new Stream.fromIterable([childProjectStream, projectStream])
+//        .asyncExpand((ps) => ps);
+    final resultStream = streamz.concat([childProjectStream, projectStream]);
+
+    listen(Stream s, String name) {
+      s.asBroadcastStream().listen((d) => print('$name --- $d'));
     }
-//    group.childGroups.forEach((ref) {
-//      _addFromGroup(ref);
-//    });
-    final childGroupFutures =
-        group.childGroups.map((ref) => ref.get()).toList(growable: false);
+//    listen(childGroupStream, 'childGroupStream');
+//    listen(childProjectStream, 'childProjectStream');
+//    listen(projectStream, 'projectStream');
+//    listen(resultStream, 'resultStream');
 
-    childGroupFutures.forEach((cgf) async {
-      final g = await cgf;
-      _addAll(projects, g);
-    });
-//    });
+    return resultStream;
   }
 
   @override

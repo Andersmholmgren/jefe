@@ -24,10 +24,16 @@ main() async {
 
     final project1 = aProject('project1');
     final project2 = aProject('project2');
+    final project3 = aProject('project3');
 
     final group2 = aGroup('group1', [group1], [project1, project2]);
+
+    final group2b = aGroup('group2b', [group2], []);
+
+    final group3a = aGroup('group3a', [group2], [project3]);
+
     final group3 = aGroup(
-        'group1', [group1, group2, group1], [project1, project2, project1]);
+        'group1', [group1, group2, group1], [project1, project3, project1]);
 
     test('when no projects or child groups then result is empty', () async {
       expect(await group1.allProjects, isEmpty);
@@ -37,6 +43,31 @@ main() async {
         'when group contains projects and empty child group then result is projects',
         () async {
       expect(await group2.allProjects, unorderedEquals([project2, project1]));
+    });
+
+    test(
+        'when group xxxxx contains projects and empty child group then result is projects',
+        () async {
+      expect(await group2b.allProjects, unorderedEquals([project2, project1]));
+    });
+
+    test(
+        'when group contains projects and child group with projects then result is all projects',
+        () async {
+
+//          final result = await group3.allProjects;
+//          print('****** $result');
+      expect(await group3a.allProjects,
+          unorderedEquals([project2, project1, project3]));
+    });
+    test(
+        'when vvvv group contains projects and child group with projects then result is all projects',
+        () async {
+
+//          final result = await group3.allProjects;
+//          print('****** $result');
+      expect(await group3.allProjects,
+          unorderedEquals([project2, project1, project3]));
     });
   });
 }

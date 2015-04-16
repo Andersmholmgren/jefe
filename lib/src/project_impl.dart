@@ -198,4 +198,6 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
         'Completed pub get for project ${name} in ${stopWatch.elapsed}');
     stopWatch.stop();
   }
+
+  String toString() => 'Project($name, $gitUri)';
 }
