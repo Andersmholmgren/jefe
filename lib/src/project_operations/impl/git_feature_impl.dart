@@ -7,7 +7,7 @@ import 'package:devops/src/git/git.dart';
 import 'package:logging/logging.dart';
 import 'package:devops/src/project.dart';
 
-Logger _log = new Logger('devops.project.impl');
+Logger _log = new Logger('devops.project.operations.git.feature.impl');
 
 /// implements [GitFeatureCommands] via git flow
 class GitFeatureCommandsFlowImpl extends BaseCommand

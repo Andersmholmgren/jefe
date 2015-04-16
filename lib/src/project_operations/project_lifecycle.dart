@@ -1,4 +1,4 @@
-library devops.project.operations.git;
+library devops.project.operations.lifecycle;
 
 import 'dart:async';
 import 'package:devops/src/project.dart';

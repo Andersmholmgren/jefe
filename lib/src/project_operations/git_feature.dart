@@ -6,6 +6,9 @@ import 'impl/git_feature_impl.dart';
 
 typedef GitFeatureCommands GitFeatureCommandsFactory(ProjectSource source);
 
+GitFeatureCommands defaultFlowFeatureFactory(ProjectSource source) =>
+    new GitFeatureCommands(source);
+
 abstract class GitFeatureCommands {
   factory GitFeatureCommands(ProjectSource source) = GitFeatureCommandsFlowImpl;
   Future init();
