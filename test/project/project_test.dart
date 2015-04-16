@@ -15,6 +15,7 @@ import 'package:stack_trace/stack_trace.dart';
 import 'package:devops/src/project_impl.dart';
 import 'package:devops/src/project_group_impl.dart';
 import 'package:devops/src/project_operations/git_feature.dart';
+import 'package:devops/src/project_operations/project_command_executor.dart';
 
 mainB() async {
   final spec.ProjectGroupMetaData metadata = await spec.ProjectGroupMetaData
@@ -84,12 +85,13 @@ main123() async {
   final ProjectGroup projectGroup =
       await ProjectGroup.install(installDir, ref.name, ref.gitUri);
 
-  final flow = new GitFeatureCommands(projectGroup);
-  await flow.init();
-  await flow.featureStart('foooo');
-  await flow.featureFinish('foooo');
-  await flow.releaseStart('1.0');
-  await flow.releaseFinish('1.0');
+  final executor = new CommandExecutor(projectGroup);
+  final flow = new GitFeatureCommands();
+  await executor.execute(flow.init());
+  await executor.execute(flow.featureStart('foooo'));
+  await executor.execute(flow.featureFinish('foooo'));
+  await executor.execute(flow.releaseStart('1.0'));
+  await executor.execute(flow.releaseFinish('1.0'));
 }
 
 main124() async {

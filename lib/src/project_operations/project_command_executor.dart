@@ -8,8 +8,7 @@ import 'package:devops/src/project_operations/project_command.dart';
 import 'impl/project_command_executor.dart';
 
 abstract class CommandExecutor {
-  factory CommandExecutor(ProjectSource projectSource) =>
-      new CommandExecutorImpl(projectSource);
+  factory CommandExecutor(ProjectSource projectSource) = CommandExecutorImpl;
 
   Future execute(ProjectCommand command);
 }
