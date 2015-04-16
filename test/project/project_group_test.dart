@@ -26,14 +26,14 @@ main() async {
     final project2 = aProject('project2');
     final project3 = aProject('project3');
 
-    final group2 = aGroup('group1', [group1], [project1, project2]);
+    final group2 = aGroup('group2', [group1], [project1, project2]);
 
-    final group2b = aGroup('group2b', [group2], []);
+    final group3 = aGroup('group3', [group2], []);
 
-    final group3a = aGroup('group3a', [group2], [project3]);
+    final group4 = aGroup('group4', [group2], [project3]);
 
-    final group3 = aGroup(
-        'group1', [group1, group2, group1], [project1, project3, project1]);
+    final group5 = aGroup(
+        'group5', [group1, group2, group1], [project1, project3, project1]);
 
     test('when no projects or child groups then result is empty', () async {
       expect(await group1.allProjects, isEmpty);
@@ -46,27 +46,21 @@ main() async {
     });
 
     test(
-        'when group xxxxx contains projects and empty child group then result is projects',
+        'when group no projects and child group that contains projects then result is projects',
         () async {
-      expect(await group2b.allProjects, unorderedEquals([project2, project1]));
+      expect(await group3.allProjects, unorderedEquals([project2, project1]));
     });
 
     test(
         'when group contains projects and child group with projects then result is all projects',
         () async {
-
-//          final result = await group3.allProjects;
-//          print('****** $result');
-      expect(await group3a.allProjects,
+      expect(await group4.allProjects,
           unorderedEquals([project2, project1, project3]));
     });
     test(
-        'when vvvv group contains projects and child group with projects then result is all projects',
+        'when group contains duplicate projects and duplicate child group with projects then result is all projects',
         () async {
-
-//          final result = await group3.allProjects;
-//          print('****** $result');
-      expect(await group3.allProjects,
+      expect(await group5.allProjects,
           unorderedEquals([project2, project1, project3]));
     });
   });
