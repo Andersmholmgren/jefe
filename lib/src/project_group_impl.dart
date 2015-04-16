@@ -308,8 +308,9 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
       '    childGroups: ${metaData.childGroups}';
 
   @override
-  Future visitAllProjects(process(Project project)) {
-    // TODO: implement visitAllProjects
+  Future visitAllProjects(process(Project project)) async {
+//    _log.info('$taskDescription for group ${metaData.name}');
+    await Future.wait((await allProjects).map((p) => process(p)));
   }
 
   Future _visitAllProjects(String taskDescription, process(Project p)) async {

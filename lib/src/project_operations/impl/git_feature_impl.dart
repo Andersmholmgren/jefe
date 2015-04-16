@@ -20,8 +20,25 @@ class GitFeatureCommandsFlowImpl extends BaseCommand
       await initGitFlow(await p.gitDir);
     });
   }
-  Future featureStart(String featureName) {}
-  Future featureFinish(String featureName) {}
-  Future releaseStart(String version) {}
-  Future releaseFinish(String version) {}
+  Future featureStart(String featureName) {
+    return visitAllProjects('Starting feature $featureName', (Project p) async {
+      await gitFlowFeatureStart(await p.gitDir, featureName);
+    });
+  }
+  Future featureFinish(String featureName) {
+    return visitAllProjects('Finishing feature $featureName',
+        (Project p) async {
+      await gitFlowFeatureFinish(await p.gitDir, featureName);
+    });
+  }
+  Future releaseStart(String version) {
+    return visitAllProjects('Starting release $version', (Project p) async {
+      await gitFlowReleaseStart(await p.gitDir, version);
+    });
+  }
+  Future releaseFinish(String version) {
+    return visitAllProjects('Finishing release $version', (Project p) async {
+      await gitFlowReleaseFinish(await p.gitDir, version);
+    });
+  }
 }

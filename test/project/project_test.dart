@@ -14,6 +14,7 @@ import 'dart:async';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:devops/src/project_impl.dart';
 import 'package:devops/src/project_group_impl.dart';
+import 'package:devops/src/project_operations/git_feature.dart';
 
 mainB() async {
   final spec.ProjectGroupMetaData metadata = await spec.ProjectGroupMetaData
@@ -70,7 +71,28 @@ main() async {
 //    new Chain.forTrace(st).;
 //  });
 }
+
 main123() async {
+  spec.ProjectGroupIdentifier ref = new spec.ProjectGroupIdentifier(
+      'gitbacklog',
+      '/Users/blah/dart/jefe_jefe/jefe_test_projects/local/gitbacklog');
+
+  final Directory installDir = await Directory.systemTemp.createTemp();
+
+  print(installDir);
+
+  final ProjectGroup projectGroup =
+      await ProjectGroup.install(installDir, ref.name, ref.gitUri);
+
+  final flow = new GitFeatureCommands(projectGroup);
+  await flow.init();
+  await flow.featureStart('foooo');
+  await flow.featureFinish('foooo');
+  await flow.releaseStart('1.0');
+  await flow.releaseFinish('1.0');
+}
+
+main124() async {
   spec.ProjectGroupIdentifier ref = new spec.ProjectGroupIdentifier(
       'gitbacklog',
       '/Users/blah/dart/jefe_jefe/jefe_test_projects/local/gitbacklog');
