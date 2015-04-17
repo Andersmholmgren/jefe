@@ -3,6 +3,7 @@ library devops.project.dependency;
 import 'package:devops/src/project.dart';
 import 'dart:async';
 import 'package:devops/src/pubspec/pubspec.dart';
+import 'package:quiver/iterables.dart';
 
 Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>
     new DependencyGraph(await _determineDependencies(projects));
@@ -42,9 +43,15 @@ class DependencyGraph {
     dependencies.forEach((p) => _rootNodeMap.remove(p));
   }
 
-  Future depthFirst(process(Project project, Iterable<Project> dependencies)) {
+  Future depthFirst(
+      process(Project project, Iterable<Project> dependencies)) async {
+    await Future.forEach(getDepthFirst,
+        (_ProjectDependencies pd) => process(pd.project, pd.dependencies));
+  }
+
+  Iterable<_ProjectDependencies> get getDepthFirst {
     Set<Project> visited = new Set();
-    return Future.forEach(_rootNodes, (n) => n.depthFirst(process, visited));
+    return _rootNodes.expand((n) => n.getDepthFirst(visited));
   }
 
   _DependencyNode _getOrCreateNode(Project project) {
@@ -73,6 +80,19 @@ class _DependencyNode {
       visited.add(project);
       await process(project, dependencies);
     }
+  }
+
+  Iterable<_ProjectDependencies> getDepthFirst(Set<Project> visited) {
+    final children = _dependencies.expand((n) => n.getDepthFirst(visited));
+
+    Iterable us() sync* {
+      if (!visited.contains((project))) {
+        visited.add(project);
+        yield new _ProjectDependencies(project, dependencies.toSet());
+      }
+    }
+
+    return concat([children, us()]);
   }
 }
 
