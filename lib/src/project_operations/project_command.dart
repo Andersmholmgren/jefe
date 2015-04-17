@@ -1,6 +1,7 @@
 library devops.project.operations.core;
 
 import 'package:devops/src/project.dart';
+import 'dart:async';
 
 /// [serial] means the command must execute on a single project at a time and
 /// must complete execution on all the projects before the next command may be
@@ -20,8 +21,9 @@ ProjectCommand projectCommand(String name, ProjectFunction function,
     new _DefaultCommand(name, function, concurrencyMode);
 
 ProjectCommand projectCommandWithDependencies(
-        String name, ProjectWithDependenciesFunction function) =>
-    new _DefaultCommand(name, function, CommandConcurrencyMode.serial);
+        String name, ProjectWithDependenciesFunction function,
+        {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.serial}) =>
+    new _DefaultCommand(name, function, concurrencyMode);
 
 CompositeProjectCommand projectCommandGroup(
     String name, Iterable<ProjectCommand> commands,
@@ -39,6 +41,12 @@ abstract class ProjectCommand<F extends Function> {
   String get name;
   F get function;
   CommandConcurrencyMode get concurrencyMode;
+}
+
+abstract class ProjectCommand2 {
+  String get name;
+  CommandConcurrencyMode get concurrencyMode;
+  Future process(Project project, Iterable<Project> dependencies);
 }
 
 /// [concurrencyMode] can be used to limit the concurrencyMode of the
@@ -63,7 +71,28 @@ class _DefaultCommand<F extends Function> implements ProjectCommand<F> {
   _DefaultCommand(this.name, this.function, this.concurrencyMode);
 }
 
+//class _DefaultCommand2 implements ProjectCommand2 {
+//  final String name;
+//  final Function function;
+//  final CommandConcurrencyMode concurrencyMode;
+//
+//  _DefaultCommand2(this.name, this.function, this.concurrencyMode);
+//
+//  @override
+//  Future process(Project project, Iterable<Project> dependencies) {
+//    return function is ProjectWithDependenciesFunction ? function(project,
+//    dependencies) : function(project);
+//  }
+//}
+
 class _DefaultCompositeProjectCommand implements CompositeProjectCommand {}
+
+//class _DefaultCompositeProjectCommand2 implements ProjectCommand2 {
+//  final String name;
+//  final F function;
+//  final CommandConcurrencyMode concurrencyMode;
+//
+//}
 
 //class _CompositeCommand implements ProjectCommand<ProjectFunction> {
 //  final String name;
