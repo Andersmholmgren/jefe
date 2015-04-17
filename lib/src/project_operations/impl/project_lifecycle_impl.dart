@@ -14,9 +14,15 @@ class ProjectLifecycleImpl /*extends BaseCommand*/ implements ProjectLifecycle {
 
   ProjectLifecycleImpl(ProjectSource projectSource,
       {GitFeatureCommandsFactory gitFeatureFactory: defaultFlowFeatureFactory})
-      : this._gitFeature = gitFeatureFactory(projectSource);
+      : this._gitFeature = gitFeatureFactory();
 //      ,
 //        super(projectSource);
+
+  // TODO: Would be nice if this is just a command too.
+  // Maybe it is a ProjectCommandList or something
+
+  CompositeProjectCommand startNewFeature(String featureName,
+      {bool doPush: false, bool recursive: true}) {}
 
   @override
   Future startNewFeature(String featureName,

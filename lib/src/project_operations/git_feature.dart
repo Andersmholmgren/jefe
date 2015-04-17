@@ -5,7 +5,7 @@ import 'package:devops/src/project.dart';
 import 'impl/git_feature_impl.dart';
 import 'package:devops/src/project_operations/project_command.dart';
 
-typedef GitFeatureCommands GitFeatureCommandsFactory(ProjectSource source);
+typedef GitFeatureCommands GitFeatureCommandsFactory();
 
 GitFeatureCommands defaultFlowFeatureFactory() => new GitFeatureCommands();
 
