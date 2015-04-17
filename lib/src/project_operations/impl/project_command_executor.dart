@@ -103,6 +103,32 @@ class CommandExecutorImpl implements CommandExecutor {
 
 typedef Future CommandExecutorFunction(ProjectCommand command);
 
+class foo {
+  Map<String, ProjectCommandQueue> _projectQueues;
+  final CommandConcurrencyMode concurrencyMode;
+
+  Future execute(Iterable<ProjectCommand> commands) {
+    // TODO: forEach won't work. In some cases need to wait till stuff finishes
+    commands.forEach((command) {
+      final CommandConcurrencyMode mode = concurrencyMode.index <
+              command.concurrencyMode.index
+          ? concurrencyMode
+          : command.concurrencyMode;
+
+      switch (mode) {
+        case CommandConcurrencyMode.serial:
+        // depthFirst. Await completion
+        case CommandConcurrencyMode.concurrentProject:
+        // add to all queues. Wait till all queues empty
+        case CommandConcurrencyMode.concurrentCommand:
+        // add to all queues and move to next command
+        default:
+          throw new StateError('unexpected concurrency mode: $mode');
+      }
+    });
+  }
+}
+
 class ProjectCommandQueue {
   final Queue<ProjectCommand> _queue = new Queue();
   Option<ProjectCommand> _pending = const None();
