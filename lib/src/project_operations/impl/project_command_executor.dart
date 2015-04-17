@@ -6,6 +6,10 @@ import 'package:logging/logging.dart';
 import 'dart:async';
 import 'package:devops/src/project_operations/project_command.dart';
 import 'package:devops/src/project_operations/project_command_executor.dart';
+import 'dart:collection';
+import 'package:option/option.dart';
+import 'package:frappe/frappe.dart';
+import 'package:devops/src/util/frappe_utils.dart';
 
 Logger _log = new Logger('devops.project.operations.impl');
 
@@ -94,5 +98,36 @@ class CommandExecutorImpl implements CommandExecutor {
     _log.info('Executing composite command "${composite.name}"');
     await Future.forEach(composite.commands, execute);
     _log.finer('Completed command "${composite.name}"');
+  }
+}
+
+typedef Future CommandExecutorFunction(ProjectCommand command);
+
+class ProjectCommandQueue {
+  final Queue<ProjectCommand> _queue = new Queue();
+  Option<ProjectCommand> _pending = const None();
+  final CommandExecutorFunction _executor;
+  final ControllableProperty<bool> _queueIsEmpty =
+      new ControllableProperty(true);
+  Property<bool> get queueIsEmpty => _queueIsEmpty.distinctProperty;
+
+  ProjectCommandQueue(this._executor);
+
+  void add(ProjectCommand command) {
+    _queue.add(command);
+    _queueIsEmpty.value = false;
+    _check();
+  }
+
+  Future _check() async {
+    if (_pending is None && _queue.isNotEmpty) {
+      final command = _queue.removeFirst();
+      _pending = new Some(command);
+      // TODO: should we attempt to catch exceptions?
+      await _executor(command);
+      _check();
+    } else if (_pending is None && _queue.isEmpty) {
+      _queueIsEmpty.value = true;
+    }
   }
 }
