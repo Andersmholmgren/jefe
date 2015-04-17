@@ -1,9 +1,9 @@
 library devops.project.operations.git;
 
-import 'dart:async';
+import 'package:devops/src/project_operations/project_command.dart';
 
 abstract class GitCommands {
-  Future commit(String message);
+  ProjectCommand<ProjectFunction> commit(String message);
 
-  Future push();
+  ProjectCommand<ProjectFunction> push();
 }

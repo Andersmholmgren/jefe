@@ -8,12 +8,12 @@ import 'package:quiver/iterables.dart';
 Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>
     new DependencyGraph(await _determineDependencies(projects));
 
-Future<Set<_ProjectDependencies>> _determineDependencies(
+Future<Set<ProjectDependencies>> _determineDependencies(
         Set<Project> projects) async =>
     (await Future.wait(projects.map((p) => _resolveDependencies(
         p, new Map.fromIterable(projects, key: (p) => p.name))))).toSet();
 
-Future<_ProjectDependencies> _resolveDependencies(
+Future<ProjectDependencies> _resolveDependencies(
     Project project, Map<String, Project> projects) async {
   final PubSpec pubspec = await project.pubspec;
   final dependencies = pubspec.dependencies.keys
@@ -21,7 +21,7 @@ Future<_ProjectDependencies> _resolveDependencies(
       .where((v) => v != null)
       .toSet();
 
-  return new _ProjectDependencies(project, dependencies);
+  return new ProjectDependencies(project, dependencies);
 }
 
 class DependencyGraph {
@@ -31,7 +31,7 @@ class DependencyGraph {
 
   Map<Project, _DependencyNode> _nodeMap = {};
 
-  DependencyGraph(Set<_ProjectDependencies> dependencySet) {
+  DependencyGraph(Set<ProjectDependencies> dependencySet) {
     dependencySet.forEach((ds) => _add(ds.project, ds.dependencies));
   }
 
@@ -43,13 +43,13 @@ class DependencyGraph {
     dependencies.forEach((p) => _rootNodeMap.remove(p));
   }
 
-  Future depthFirst(
+  Future processDepthFirst(
       process(Project project, Iterable<Project> dependencies)) async {
-    await Future.forEach(getDepthFirst,
-        (_ProjectDependencies pd) => process(pd.project, pd.dependencies));
+    await Future.forEach(depthFirst,
+        (ProjectDependencies pd) => process(pd.project, pd.dependencies));
   }
 
-  Iterable<_ProjectDependencies> get getDepthFirst {
+  Iterable<ProjectDependencies> get depthFirst {
     Set<Project> visited = new Set();
     return _rootNodes.expand((n) => n.getDepthFirst(visited));
   }
@@ -82,13 +82,13 @@ class _DependencyNode {
     }
   }
 
-  Iterable<_ProjectDependencies> getDepthFirst(Set<Project> visited) {
+  Iterable<ProjectDependencies> getDepthFirst(Set<Project> visited) {
     final children = _dependencies.expand((n) => n.getDepthFirst(visited));
 
     Iterable us() sync* {
       if (!visited.contains((project))) {
         visited.add(project);
-        yield new _ProjectDependencies(project, dependencies.toSet());
+        yield new ProjectDependencies(project, dependencies.toSet());
       }
     }
 
@@ -96,9 +96,9 @@ class _DependencyNode {
   }
 }
 
-class _ProjectDependencies {
+class ProjectDependencies {
   final Project project;
   final Set<Project> dependencies;
 
-  _ProjectDependencies(this.project, this.dependencies);
+  ProjectDependencies(this.project, this.dependencies);
 }

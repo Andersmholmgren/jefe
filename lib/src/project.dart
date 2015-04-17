@@ -41,6 +41,8 @@ abstract class ProjectSource {
 
   Future processDependenciesDepthFirst(
       process(Project project, Iterable<Project> dependencies));
+
+  Set<Project> get projects;
 }
 
 abstract class ProjectGroup extends ProjectEntity implements ProjectSource {

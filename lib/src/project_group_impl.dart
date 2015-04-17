@@ -299,7 +299,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
       process(Project project, Iterable<Project> dependencies)) async {
     final projects = await allProjects;
     final DependencyGraph graph = await getDependencyGraph(projects);
-    return graph.depthFirst(process);
+    return graph.processDepthFirst(process);
   }
 
   String toString() =>

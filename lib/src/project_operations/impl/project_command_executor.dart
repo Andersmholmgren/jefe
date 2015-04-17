@@ -10,6 +10,7 @@ import 'dart:collection';
 import 'package:option/option.dart';
 import 'package:frappe/frappe.dart';
 import 'package:devops/src/util/frappe_utils.dart';
+import 'package:devops/src/dependency_graph.dart';
 
 Logger _log = new Logger('devops.project.operations.impl');
 
@@ -106,10 +107,22 @@ typedef Future CommandExecutorFunction(ProjectCommand command);
 class foo {
   Map<String, ProjectCommandQueue> _projectQueues;
   final CommandConcurrencyMode concurrencyMode;
+  final ProjectSource projectSource;
+
+  Iterable<Project> get projects => projectSource.projects;
+  Future<Iterable<ProjectDependencies>> get depthFirst async =>
+      (await getDependencyGraph(projects)).depthFirst;
+
+  Option<ProjectCommandQueue> getQueue(Project project) =>
+      new Option(_projectQueues[project.name]);
+
+  Future awaitQueuesEmpty() {
+    _projectQueues.values.((q) => q.queueIsEmpty)
+  }
 
   Future execute(Iterable<ProjectCommand> commands) {
     // TODO: forEach won't work. In some cases need to wait till stuff finishes
-    commands.forEach((command) {
+    commands.forEach((command) async {
       final CommandConcurrencyMode mode = concurrencyMode.index <
               command.concurrencyMode.index
           ? concurrencyMode
@@ -117,7 +130,20 @@ class foo {
 
       switch (mode) {
         case CommandConcurrencyMode.serial:
-        // depthFirst. Await completion
+          // depthFirst. Await completion
+          final projectDeps = await depthFirst;
+          await Future.forEach(projectDeps, (ProjectDependencies pd) async {
+            final qOpt = getQueue(pd.project);
+//            qOpt.map((q) )
+            if (qOpt is Some) {
+              // TODO: assuming has depends
+              await qOpt
+                  .get()
+                  .add(() => command.function(pd.project, pd.dependencies));
+            }
+          });
+
+          break;
         case CommandConcurrencyMode.concurrentProject:
         // add to all queues. Wait till all queues empty
         case CommandConcurrencyMode.concurrentCommand:
@@ -129,17 +155,18 @@ class foo {
   }
 }
 
+typedef ProjectCommandExecution();
+
 class ProjectCommandQueue {
-  final Queue<ProjectCommand> _queue = new Queue();
-  Option<ProjectCommand> _pending = const None();
-  final CommandExecutorFunction _executor;
+  final Queue<ProjectCommandExecution> _queue = new Queue();
+  Option<ProjectCommandExecution> _pending = const None();
   final ControllableProperty<bool> _queueIsEmpty =
       new ControllableProperty(true);
   Property<bool> get queueIsEmpty => _queueIsEmpty.distinctProperty;
 
-  ProjectCommandQueue(this._executor);
+//  ProjectCommandQueue(this._executor);
 
-  void add(ProjectCommand command) {
+  void add(ProjectCommandExecution command) {
     _queue.add(command);
     _queueIsEmpty.value = false;
     _check();
@@ -150,7 +177,7 @@ class ProjectCommandQueue {
       final command = _queue.removeFirst();
       _pending = new Some(command);
       // TODO: should we attempt to catch exceptions?
-      await _executor(command);
+      await command();
       _check();
     } else if (_pending is None && _queue.isEmpty) {
       _queueIsEmpty.value = true;

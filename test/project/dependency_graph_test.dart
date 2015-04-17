@@ -119,7 +119,7 @@ expectThat({String thatWhen, Iterable<Project> withTheseProjects(),
       processor = new TestProcessor();
       final DependencyGraph graph =
           await getDependencyGraph(theProjects.toSet());
-      return graph.depthFirst(processor);
+      return graph.processDepthFirst(processor);
     });
   }
 

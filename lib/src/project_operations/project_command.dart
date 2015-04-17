@@ -23,6 +23,11 @@ ProjectCommand projectCommandWithDependencies(
         String name, ProjectWithDependenciesFunction function) =>
     new _DefaultCommand(name, function, CommandConcurrencyMode.serial);
 
+CompositeProjectCommand projectCommandGroup(
+    String name, Iterable<ProjectCommand> commands,
+    {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand}) {
+}
+
 /// Some function applied to a [Project]
 typedef ProjectFunction(Project project);
 
@@ -57,6 +62,8 @@ class _DefaultCommand<F extends Function> implements ProjectCommand<F> {
 
   _DefaultCommand(this.name, this.function, this.concurrencyMode);
 }
+
+class _DefaultCompositeProjectCommand implements CompositeProjectCommand {}
 
 //class _CompositeCommand implements ProjectCommand<ProjectFunction> {
 //  final String name;
