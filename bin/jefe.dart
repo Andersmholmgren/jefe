@@ -2,10 +2,12 @@ import 'package:unscripted/unscripted.dart';
 import 'dart:io';
 import 'package:devops/devops.dart';
 import 'package:logging/logging.dart';
+import 'dart:async';
 
 main(arguments) => new Script(Jefe).execute(arguments);
 
 class Jefe {
+  final lifecycle = new ProjectLifecycle();
   @Command(
       help: 'Manages a set of related Dart projects',
       plugins: const [const Completion()])
@@ -27,13 +29,35 @@ class Jefe {
         await ProjectGroup.install(installDir, gitUri);
 
     final executor = new CommandExecutor(projectGroup);
-    final lifecycle = new ProjectLifecycle();
     await executor.executeAll(lifecycle.init());
+  }
+
+  @SubCommand(help: 'Sets up for the start of development on a new feature')
+  start(String featureName, {@Option(
+      help: 'The directory that contains the root of the projecs',
+      abbr: 'd') String rootDirectory: '.'}) async {
+    final executor = await load(rootDirectory);
+    await executor.executeAll(lifecycle.startNewFeature(featureName));
+  }
+
+  @SubCommand(help: 'Completes feature and returns to development branch')
+  finish(String featureName, {@Option(
+      help: 'The directory that contains the root of the projecs',
+      abbr: 'd') String rootDirectory: '.'}) async {
+    final executor = await load(rootDirectory);
+    await executor.executeAll(lifecycle.startNewFeature(featureName));
+  }
+
+  Future<CommandExecutor> load(String rootDirectory) async {
+    final Directory installDir = new Directory(rootDirectory);
+    final ProjectGroup projectGroup = await ProjectGroup.load(installDir);
+
+    final executor = new CommandExecutor(projectGroup);
+    return executor;
   }
 }
 
 /*
-  jefe install git@... foo
   jefe feature start fbar
   jefe feature finish fbar
  */
