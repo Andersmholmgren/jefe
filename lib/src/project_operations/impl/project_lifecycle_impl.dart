@@ -33,22 +33,40 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         [
       _gitFeature.featureStart(featureName),
       _pubSpec.setToPathDependencies(),
-      _git.commit('set path dependencies for start of feature $featureName'),
-      new OptionalPush(doPush, _git.push()),
-      _pub.get()
+      _pub.get(),
+      _git.commit('set up project for new feature $featureName'),
+      new OptionalPush(doPush, _git.push())
     ]);
   }
 
+  // TODO: return to this approach once the concurrency support is implemented
+  // to handle it
+//  @override
+//  CompositeProjectCommand completeFeature(String featureName,
+//                                          {bool doPush: false, bool recursive: true}) {
+//    return projectCommandGroup('close off feature $featureName', [
+//      _gitFeature.featureFinish(featureName),
+//      _pubSpec.setToGitDependencies(),
+//      _git.commit('set git dependencies for end of feature $featureName'),
+//      new OptionalPush(doPush, _git.push()),
+//      _pub.get()
+//    ]);
+//  }
+
   @override
-  CompositeProjectCommand completeFeature(String featureName,
+  ProjectCommand completeFeature(String featureName,
       {bool doPush: false, bool recursive: true}) {
-    return projectCommandGroup('close off feature $featureName', [
-      _gitFeature.featureFinish(featureName),
-      _pubSpec.setToGitDependencies(),
-      _git.commit('set git dependencies for end of feature $featureName'),
-      new OptionalPush(doPush, _git.push()),
-      _pub.get()
-    ]);
+    return projectCommandWithDependencies('close off feature $featureName',
+        (Project project, Iterable<Project> dependencies) async {
+      await _gitFeature.featureFinish(featureName).process(project);
+      await _pubSpec.setToGitDependencies().process(project,
+          dependencies: dependencies);
+      await _pub.get().process(project);
+      await _git
+          .commit('set git dependencies for end of feature $featureName')
+          .process(project);
+      await _git.push().process(project);
+    });
   }
 
   @override
@@ -66,6 +84,9 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       await _git.push().process(project);
     });
   }
+
+  @override
+  ProjectCommand init() => _gitFeature.init();
 }
 
 class OptionalPush implements ProjectCommand {

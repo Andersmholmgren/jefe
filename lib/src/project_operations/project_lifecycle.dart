@@ -9,11 +9,13 @@ abstract class ProjectLifecycle {
   factory ProjectLifecycle(
       {GitFeatureCommandsFactory gitFeatureFactory}) = ProjectLifecycleImpl;
 
+  ProjectCommand init();
+
   CompositeProjectCommand startNewFeature(String featureName,
       {bool doPush: false, bool recursive: true});
 
   // merge to develop, returns to git dependencies
-  CompositeProjectCommand completeFeature(String featureName,
+  ProjectCommand completeFeature(String featureName,
       {bool doPush: false, bool recursive: true});
 
   ProjectCommand release({ReleaseType type: ReleaseType.minor});

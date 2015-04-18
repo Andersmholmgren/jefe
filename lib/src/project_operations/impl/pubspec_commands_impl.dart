@@ -22,7 +22,7 @@ class PubSpecCommandsImpl implements PubSpecCommands {
   // Note: this must run serially
   @override
   ProjectCommand setToGitDependencies() => projectCommandWithDependencies(
-      'change to path dependencies',
+      'change to git dependencies',
       (Project p, Iterable<Project> dependencies) async {
     await _setDependencies(p, 'git', dependencies, (Project p) async =>
         await new GitReference(p.gitUri, await p.currentGitCommitHash));

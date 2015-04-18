@@ -10,10 +10,7 @@ import 'package:yaml/yaml.dart';
 import 'package:devops/src/yaml/yaml_writer.dart';
 import 'package:devops/src/pubspec/pubspec.dart';
 import 'package:devops/src/spec/JefeSpec.dart' as spec;
-import 'dart:async';
 import 'package:stack_trace/stack_trace.dart';
-import 'package:devops/src/project_impl.dart';
-import 'package:devops/src/project_group_impl.dart';
 import 'package:devops/src/project_operations/git_feature.dart';
 import 'package:devops/src/project_operations/project_command_executor.dart';
 import 'package:devops/src/project_operations/project_lifecycle.dart';
@@ -75,23 +72,19 @@ main() async {
 }
 
 main123() async {
-  spec.ProjectGroupIdentifier ref = new spec.ProjectGroupIdentifier(
+  final Directory installDir = await Directory.systemTemp.createTemp();
+//  final Directory installDir = new Directory('/Users/blah/dart/newbacklogio');
+  final ProjectGroup projectGroup = await ProjectGroup.install(installDir,
       'gitbacklog',
       '/Users/blah/dart/jefe_jefe/jefe_test_projects/local/gitbacklog');
 
-  final Directory installDir = await Directory.systemTemp.createTemp();
-
-  print(installDir);
-
-  final ProjectGroup projectGroup =
-      await ProjectGroup.install(installDir, ref.name, ref.gitUri);
-
   final executor = new CommandExecutor(projectGroup);
-  final flow = new GitFeatureCommands();
-  await executor.execute(flow.init());
 
   final lifecycle = new ProjectLifecycle();
+
+  await executor.execute(lifecycle.init());
   await executor.executeAll(lifecycle.startNewFeature('feacha'));
+  await executor.execute(lifecycle.completeFeature('feacha'));
 }
 
 main122() async {

@@ -2,6 +2,7 @@ library devops.pubspec.dependency;
 
 import 'package:pub_semver/pub_semver.dart';
 import 'package:devops/src/jsonyaml/json_utils.dart';
+import 'dart:convert';
 
 abstract class DependencyReference extends Jsonable {
   DependencyReference();
@@ -25,6 +26,8 @@ abstract class DependencyReference extends Jsonable {
       throw new StateError('Unable to parse dependency $json');
     }
   }
+
+  String toString() => JSON.encode(this);
 }
 
 class GitReference extends DependencyReference {
