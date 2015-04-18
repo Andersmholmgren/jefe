@@ -152,6 +152,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
         await new GitReference(gitUri, await currentGitCommitHash));
   }
 
+  @override
   Future<String> get currentGitCommitHash async =>
       currentCommitHash(await gitDir);
 

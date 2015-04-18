@@ -81,6 +81,10 @@ class CommandExecutorImpl implements CommandExecutor {
 
 typedef Future CommandExecutorFunction(ProjectCommand command);
 
+/// TODO: will need something like this.
+/// - maintain queues per project
+/// - commands always execute serially on a project
+/// - add commands to queues according to concurrency mode
 class ConcurrentCommandExecutor {
   Map<String, ProjectCommandQueue> _projectQueues;
   final CommandConcurrencyMode concurrencyMode;

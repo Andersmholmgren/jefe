@@ -104,6 +104,8 @@ abstract class Project extends ProjectEntity {
   static Future<Project> load(Directory installDirectory) =>
       ProjectImpl.load(installDirectory);
 
+  Future<String> get currentGitCommitHash;
+
   Future release(Iterable<Project> dependencies,
       {ReleaseType type: ReleaseType.minor});
 
