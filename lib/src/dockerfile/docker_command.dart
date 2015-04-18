@@ -15,3 +15,26 @@ class AddCommand extends DockerCommand {
     sink.writeln('ADD $from $to');
   }
 }
+
+class WorkDirCommand extends DockerCommand {
+  final String dir;
+
+  WorkDirCommand(this.dir);
+
+  @override
+  void write(IOSink sink) {
+    sink.writeln('WORKDIR $dir');
+  }
+}
+
+class RunCommand extends DockerCommand {
+  final String command;
+  final Iterable<String> args;
+
+  RunCommand(this.command, this.args);
+
+  @override
+  void write(IOSink sink) {
+    sink.writeln('RUN $command ${args.join(' ')}');
+  }
+}

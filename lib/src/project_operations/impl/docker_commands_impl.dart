@@ -9,6 +9,7 @@ import 'package:devops/src/dockerfile/dockerfile.dart';
 import 'package:devops/src/pubspec/dependency.dart';
 import 'package:devops/src/dependency_graph.dart';
 import 'dart:io';
+import 'package:quiver/iterables.dart';
 
 Logger _log = new Logger('devops.project.operations.docker.impl');
 
@@ -25,6 +26,47 @@ class DockerCommandsImpl implements DockerCommands {
         .toSet();
 
     final topLevelProjects = projectDependencies.map((pd) => pd.project);
+
+    final depMap =
+        new Map.fromIterable(allDependencies, key: (project) => project.name);
+
+    final pathDependentProjects = topLevelProjects.expand((Project project) {
+      final deps = project.pubspec.dependencies;
+      final pathKeys = deps.keys.where(
+          (key) => deps[key] is PathReference && depMap.keys.contains(key));
+      return pathKeys.map((key) => depMap[key]);
+    }).toSet();
+
+    final dockerfile = new Dockerfile();
+
+    pathDependentProjects.forEach((prj) {
+      final dir = prj.installDirectory.path;
+      dockerfile.add(dir, dir);
+    });
+
+    topLevelProjects.forEach((prj) {
+      final dir = prj.installDirectory.path;
+      dockerfile.add(dir, dir);
+    });
+
+    await dockerfile.save(outputDirectory);
+  });
+
+  ProjectDependencyGraphCommand foo(String serverProjectName,
+          String clientProjectName, Directory outputDirectory) =>
+      dependencyGraphCommand('generate Dockerfile',
+          (DependencyGraph graph) async {
+    final serverProjectDeps = graph.forProject(serverProjectName);
+    final clientProjectDeps = graph.forProject(clientProjectName);
+
+    final allDependencies = concat(
+            [serverProjectDeps.dependencies, clientProjectDeps.dependencies])
+        .toSet();
+
+    final topLevelProjects = [
+      serverProjectDeps.project,
+      clientProjectDeps.project
+    ];
 
     final depMap =
         new Map.fromIterable(allDependencies, key: (project) => project.name);

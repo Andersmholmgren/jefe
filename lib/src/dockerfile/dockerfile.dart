@@ -19,6 +19,14 @@ class Dockerfile {
     _commands.add(new AddCommand(from, to));
   }
 
+  void workDir(String dir) {
+    _commands.add(new WorkDirCommand(dir));
+  }
+
+  void run(String command, {Iterable<String> args: const []}) {
+    _commands.add(new RunCommand(command, args));
+  }
+
   void write(IOSink sink) {
     _commands.forEach((c) {
       c.write(sink);
