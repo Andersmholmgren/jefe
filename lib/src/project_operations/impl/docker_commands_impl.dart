@@ -82,17 +82,18 @@ class DockerCommandsImpl implements DockerCommands {
 
     pathDependentProjects.forEach((prj) {
       final dir = prj.installDirectory.path;
-      dockerfile.add(dir, dir);
+      dockerfile.addDir(dir, dir);
     });
 
-    _addServerFiles(dockerfile, serverProjectDeps);
+    _addTopLevelProjectFiles(dockerfile, serverProjectDeps);
+    _addTopLevelProjectFiles(dockerfile, clientProjectDeps);
 
     await dockerfile.save(outputDirectory);
   });
 
-  _addServerFiles(
-      Dockerfile dockerfile, ProjectDependencies serverProjectDeps) {
-    final dir = serverProjectDeps.project.installDirectory;
+  _addTopLevelProjectFiles(
+      Dockerfile dockerfile, ProjectDependencies topLevelProjectDeps) {
+    final dir = topLevelProjectDeps.project.installDirectory;
     final dirPath = dir.path;
 
     final pubspecyaml = p.join(dirPath, 'pubspec.yaml');
@@ -104,7 +105,7 @@ class DockerCommandsImpl implements DockerCommands {
     dockerfile.workDir(dirPath);
     dockerfile.run('pub', args: ['get']);
 
-    dockerfile.add(dirPath, dirPath);
+    dockerfile.addDir(dirPath, dirPath);
     dockerfile.run('pub', args: ['get', '--offline']);
   }
 }

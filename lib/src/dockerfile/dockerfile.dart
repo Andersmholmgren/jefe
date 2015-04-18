@@ -19,6 +19,11 @@ class Dockerfile {
     _commands.add(new AddCommand(from, to));
   }
 
+  void addDir(String from, String to) {
+    final toDir = to.endsWith('/') ? to : to + '/';
+    add(from, toDir);
+  }
+
   void workDir(String dir) {
     _commands.add(new WorkDirCommand(dir));
   }
