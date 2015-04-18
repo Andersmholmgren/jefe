@@ -3,12 +3,11 @@ library devops.project.operations.lifecycle;
 import 'package:devops/src/project.dart';
 import 'package:devops/src/project_operations/git_feature.dart';
 import 'package:devops/src/project_operations/project_command.dart';
+import 'impl/project_lifecycle_impl.dart';
 
 abstract class ProjectLifecycle {
-  factory ProjectLifecycle(ProjectSource source,
-      {GitFeatureCommandsFactory gitFeatureFactory}) {
-    throw new StateError('Not implemented yet');
-  }
+  factory ProjectLifecycle(
+      {GitFeatureCommandsFactory gitFeatureFactory}) = ProjectLifecycleImpl;
 
   CompositeProjectCommand startNewFeature(String featureName,
       {bool doPush: false, bool recursive: true});

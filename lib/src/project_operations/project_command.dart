@@ -31,6 +31,7 @@ ProjectCommand projectCommandWithDependencies(
 CompositeProjectCommand projectCommandGroup(
     String name, Iterable<ProjectCommand> commands,
     {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand}) {
+  return new _DefaultCompositeProjectCommand(name, commands, concurrencyMode);
 }
 
 /// Some function applied to a [Project]
@@ -82,7 +83,13 @@ class _DefaultCommand implements ProjectCommand {
   }
 }
 
-class _DefaultCompositeProjectCommand implements CompositeProjectCommand {}
+class _DefaultCompositeProjectCommand implements CompositeProjectCommand {
+  final String name;
+  final Iterable<ProjectCommand> commands;
+  final CommandConcurrencyMode concurrencyMode;
+  _DefaultCompositeProjectCommand(
+      this.name, this.commands, this.concurrencyMode);
+}
 
 //class _DefaultCompositeProjectCommand2 implements ProjectCommand2 {
 //  final String name;

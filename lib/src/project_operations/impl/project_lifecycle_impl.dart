@@ -25,11 +25,6 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         this._git = new GitCommands(),
         this._pub = new PubCommands(),
         this._pubSpec = new PubSpecCommands();
-//      ,
-//        super(projectSource);
-
-  // TODO: Would be nice if this is just a command too.
-  // Maybe it is a ProjectCommandList or something
 
   @override
   CompositeProjectCommand startNewFeature(String featureName,
@@ -39,7 +34,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       _gitFeature.featureStart(featureName),
       _pubSpec.setToPathDependencies(),
       _git.commit('set path dependencies for start of feature $featureName'),
-      _git.push(),
+      new OptionalPush(doPush, _git.push()),
       _pub.get()
     ]);
   }
@@ -49,9 +44,9 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       {bool doPush: false, bool recursive: true}) {
     return projectCommandGroup('close off feature $featureName', [
       _gitFeature.featureFinish(featureName),
-      _pubSpec.setToGitDependencies(), // This must be serial
+      _pubSpec.setToGitDependencies(),
       _git.commit('set git dependencies for end of feature $featureName'),
-      _git.push(),
+      new OptionalPush(doPush, _git.push()),
       _pub.get()
     ]);
   }
@@ -70,5 +65,26 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       await _gitFeature.releaseFinish(newVersion.toString()).process(project);
       await _git.push().process(project);
     });
+  }
+}
+
+class OptionalPush implements ProjectCommand {
+  final bool doPush;
+  final ProjectCommand realPush;
+
+  OptionalPush(this.doPush, this.realPush);
+
+  @override
+  CommandConcurrencyMode get concurrencyMode => realPush.concurrencyMode;
+
+  // TODO: implement name
+  @override
+  String get name => '';
+
+  @override
+  Future process(Project project, {Iterable<Project> dependencies}) async {
+    if (doPush) {
+      await realPush.process(project, dependencies: dependencies);
+    }
   }
 }

@@ -16,6 +16,7 @@ import 'package:devops/src/project_impl.dart';
 import 'package:devops/src/project_group_impl.dart';
 import 'package:devops/src/project_operations/git_feature.dart';
 import 'package:devops/src/project_operations/project_command_executor.dart';
+import 'package:devops/src/project_operations/project_lifecycle.dart';
 
 mainB() async {
   final spec.ProjectGroupMetaData metadata = await spec.ProjectGroupMetaData
@@ -74,6 +75,26 @@ main() async {
 }
 
 main123() async {
+  spec.ProjectGroupIdentifier ref = new spec.ProjectGroupIdentifier(
+      'gitbacklog',
+      '/Users/blah/dart/jefe_jefe/jefe_test_projects/local/gitbacklog');
+
+  final Directory installDir = await Directory.systemTemp.createTemp();
+
+  print(installDir);
+
+  final ProjectGroup projectGroup =
+      await ProjectGroup.install(installDir, ref.name, ref.gitUri);
+
+  final executor = new CommandExecutor(projectGroup);
+  final flow = new GitFeatureCommands();
+  await executor.execute(flow.init());
+
+  final lifecycle = new ProjectLifecycle();
+  await executor.executeAll(lifecycle.startNewFeature('feacha'));
+}
+
+main122() async {
   spec.ProjectGroupIdentifier ref = new spec.ProjectGroupIdentifier(
       'gitbacklog',
       '/Users/blah/dart/jefe_jefe/jefe_test_projects/local/gitbacklog');
