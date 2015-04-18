@@ -15,13 +15,13 @@ class Dockerfile {
 //          await new File(p.join(projectDirectory.path, _standardFileName))
 //              .readAsString()));
 
-  void add(String from, String to) {
-    _commands.add(new AddCommand(from, to));
+  void add(String from, String to, {bool execForm: true}) {
+    _commands.add(new AddCommand(from, to, execForm));
   }
 
-  void addDir(String from, String to) {
+  void addDir(String from, String to, {bool execForm: true}) {
     final toDir = to.endsWith('/') ? to : to + '/';
-    add(from, toDir);
+    add(from, toDir, execForm: execForm);
   }
 
   void workDir(String dir) {

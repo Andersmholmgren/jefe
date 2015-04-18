@@ -5,16 +5,14 @@ abstract class DockerCommand {
   void write(IOSink sink);
 }
 
-class AddCommand extends DockerCommand {
+class AddCommand extends _BaseCommandWithExecForm {
   final String from;
   final String to;
 
-  AddCommand(this.from, this.to);
+  AddCommand(this.from, this.to, bool execForm) : super('ADD', execForm);
 
   @override
-  void write(IOSink sink) {
-    sink.writeln('ADD ${_formatList([from, to])}');
-  }
+  Iterable<String> get commandArgs => [from, to];
 }
 
 class WorkDirCommand extends DockerCommand {
@@ -28,25 +26,6 @@ class WorkDirCommand extends DockerCommand {
   }
 }
 
-class _BaseRunCommand extends DockerCommand {
-  final String name;
-  final String command;
-  final Iterable<String> args;
-  final bool execForm;
-
-  _BaseRunCommand(this.name, this.command, this.args, this.execForm);
-
-  @override
-  void write(IOSink sink) {
-    if (execForm) {
-      final list = _formatList(concat([[command], args]));
-      sink.writeln('$name $list');
-    } else {
-      sink.writeln('$name $command ${args.join(' ')}');
-    }
-  }
-}
-
 class RunCommand extends _BaseRunCommand {
   RunCommand(String command, Iterable<String> args, bool execForm)
       : super('RUN', command, args, execForm);
@@ -55,6 +34,35 @@ class RunCommand extends _BaseRunCommand {
 class EntryPointCommand extends _BaseRunCommand {
   EntryPointCommand(String command, Iterable<String> args, bool execForm)
       : super('ENTRYPOINT', command, args, execForm);
+}
+
+abstract class _BaseCommandWithExecForm extends DockerCommand {
+  final String name;
+  Iterable<String> get commandArgs;
+  final bool execForm;
+
+  _BaseCommandWithExecForm(this.name, this.execForm);
+
+  @override
+  void write(IOSink sink) {
+    if (execForm) {
+      final list = _formatList(commandArgs);
+      sink.writeln('$name $list');
+    } else {
+      sink.writeln('$name ${commandArgs.join(' ')}');
+    }
+  }
+}
+
+class _BaseRunCommand extends _BaseCommandWithExecForm {
+  final String command;
+  final Iterable<String> args;
+
+  _BaseRunCommand(String name, this.command, this.args, bool execForm)
+      : super(name, execForm);
+
+  @override
+  Iterable<String> get commandArgs => concat([[command], args]);
 }
 
 String _formatList(Iterable<String> list) {
