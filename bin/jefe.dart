@@ -49,7 +49,8 @@ class Jefe {
   }
 
   Future<CommandExecutor> load(String rootDirectory) async {
-    final Directory installDir = new Directory(rootDirectory);
+    final Directory installDir =
+        rootDirectory == '.' ? Directory.current : new Directory(rootDirectory);
     final ProjectGroup projectGroup = await ProjectGroup.load(installDir);
 
     final executor = new CommandExecutor(projectGroup);

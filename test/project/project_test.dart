@@ -67,10 +67,10 @@ main() async {
 //  });
 }
 
-main123x() async {
-  print((await Process.run('which', ['dart'])).stdout);
-}
 main123() async {
+  print(new Directory('.').absolute);
+}
+main123ff() async {
   final Directory installDir = await Directory.systemTemp.createTemp();
 //  final Directory installDir = new Directory('/Users/blah/dart/newbacklogio');
   final ProjectGroup projectGroup = await ProjectGroup.install(installDir,
