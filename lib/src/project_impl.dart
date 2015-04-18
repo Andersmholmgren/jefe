@@ -69,26 +69,12 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   static Future<Project> load(Directory installDirectory) async {
     _log.info('loading project from install directory $installDirectory');
-//    print(
-//        '--- ProjectImpl.load: loading git dir from ${installDirectory.path}');
     final GitDir gitDir = await GitDir.fromExisting(installDirectory.path);
 
     final PubSpec pubspec = await PubSpec.load(installDirectory);
 
     final String gitUri = await getFirstRemote(gitDir);
     return new ProjectImpl(gitUri, installDirectory, pubspec);
-  }
-
-  @override
-  Future release(Iterable<Project> dependencies,
-      {ReleaseType type: ReleaseType.minor}) async {
-    final newVersion = type.bump(pubspec.version);
-    await releaseStart(newVersion.toString());
-    await updatePubspec(pubspec.copy(version: newVersion));
-    await setToGitDependencies(dependencies);
-    await commit('releasing version $newVersion');
-    await releaseFinish(newVersion.toString());
-    await push();
   }
 
   @override
@@ -100,105 +86,8 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   }
 
   @override
-  Future initFlow() async {
-    _log.info('Initializing git flow for project ${name}');
-    await initGitFlow(await gitDir);
-    _log.finer('Initialized git flow for project ${name}');
-  }
-
-  @override
-  Future featureStart(String featureName) async {
-    _log.info('Starting feature $featureName for project ${name}');
-    await gitFlowFeatureStart(await gitDir, featureName);
-    _log.finer('Started feature $featureName for project ${name}');
-  }
-
-  @override
-  Future featureFinish(String featureName) async {
-    _log.info('git flow feature finish $featureName for project ${name}');
-    await gitFlowFeatureFinish(await gitDir, featureName);
-    _log.finer(
-        'completed git flow feature finish $featureName for project ${name}');
-  }
-
-  @override
-  Future releaseStart(String version) async {
-    _log.info('git flow release start $version for project ${name}');
-    await gitFlowReleaseStart(await gitDir, version);
-    _log.finer('git flow release started $version for project ${name}');
-  }
-
-  @override
-  Future releaseFinish(String version) async {
-    _log.info('git flow release finish $version for project ${name}');
-    var _gitDir = await gitDir;
-    await gitFlowReleaseFinish(_gitDir, version);
-    // bug in git flow prevents tagging with -m working so run with -n
-    // and tag manually
-    await gitTag(_gitDir, version);
-    _log.finest(
-        'completed git flow release finish $version for project ${name}');
-  }
-
-  @override
-  Future setToPathDependencies(Iterable<Project> dependencies) async {
-    await _setDependencies('path', dependencies, (Project p) =>
-        new Future.value(new PathReference(p.installDirectory.path)));
-  }
-
-  @override
-  Future setToGitDependencies(Iterable<Project> dependencies) async {
-    await _setDependencies('git', dependencies, (Project p) async =>
-        await new GitReference(gitUri, await currentGitCommitHash));
-  }
-
-  @override
   Future<String> get currentGitCommitHash async =>
       currentCommitHash(await gitDir);
-
-  Future _setDependencies(String type, Iterable<Project> dependencies,
-      Future<DependencyReference> createReferenceTo(Project p)) async {
-    _log.info('Setting up $type dependencies for project ${name}');
-    if (dependencies.isEmpty) {
-      _log.finest('No depenencies for project ${name}');
-      return;
-    }
-
-    final PubSpec _pubspec = await pubspec;
-    final newDependencies = new Map.from(_pubspec.dependencies);
-
-    await Future.wait(dependencies.map((p) async {
-      final ref = await createReferenceTo(p);
-      _log.finest('created reference $ref for project ${name}');
-      newDependencies[p.name] = ref;
-    }));
-
-    final newPubspec = _pubspec.copy(dependencies: newDependencies);
-    await updatePubspec(newPubspec);
-    _log.finer('Finished setting up $type dependencies for project ${name}');
-  }
-
-  @override
-  Future commit(String message) async {
-    _log.info('Commiting project ${name} with message $message');
-    return gitCommit(await gitDir, message);
-  }
-
-  @override
-  Future push() async {
-    _log.info('Pushing project ${name}');
-//    return gitPush(await gitDir);
-  }
-
-  @override
-  Future pubGet() async {
-    _log.info('Running pub get for project ${name}');
-    final stopWatch = new Stopwatch()..start();
-    await pub.get(installDirectory);
-    _log.finest(
-        'Completed pub get for project ${name} in ${stopWatch.elapsed}');
-    stopWatch.stop();
-  }
 
   String toString() => 'Project($name, $gitUri)';
 }
