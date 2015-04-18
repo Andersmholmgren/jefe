@@ -15,6 +15,10 @@ class Dockerfile {
 //          await new File(p.join(projectDirectory.path, _standardFileName))
 //              .readAsString()));
 
+  void from(String image, {String tag, String digest}) {
+    _commands.add(new FromCommand(image, tag, digest));
+  }
+
   void add(String from, String to, {bool execForm: true}) {
     _commands.add(new AddCommand(from, to, execForm));
   }

@@ -5,6 +5,28 @@ abstract class DockerCommand {
   void write(IOSink sink);
 }
 
+//FROM google/dart:1.9.1
+
+class FromCommand extends DockerCommand {
+  final String image;
+  final String tag;
+  final String digest;
+
+  FromCommand(this.image, this.tag, this.digest) {
+    if (tag != null && digest != null) {
+      throw new ArgumentError('only one of tag and digest can be specified');
+    }
+  }
+
+  @override
+  void write(IOSink sink) {
+    final String ref =
+        tag != null ? '$image:$tag' : digest != null ? '$image@$digest' : image;
+
+    sink.writeln('FROM $ref');
+  }
+}
+
 class AddCommand extends _BaseCommandWithExecForm {
   final String from;
   final String to;

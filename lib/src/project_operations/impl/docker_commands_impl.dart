@@ -80,6 +80,8 @@ class DockerCommandsImpl implements DockerCommands {
 
     final dockerfile = new Dockerfile();
 
+    dockerfile.from('google/dart', tag: '1.9.1');
+
     pathDependentProjects.forEach((prj) {
       final dir = prj.installDirectory.path;
       dockerfile.addDir(dir, dir);
