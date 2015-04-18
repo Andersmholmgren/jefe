@@ -10,6 +10,7 @@ import 'package:devops/src/spec/JefeSpec.dart' as spec;
 import 'package:stack_trace/stack_trace.dart';
 import 'package:devops/src/project_operations/project_command_executor.dart';
 import 'package:devops/src/project_operations/project_lifecycle.dart';
+import 'package:devops/src/project_operations/docker_commands.dart';
 
 mainB() async {
   final spec.ProjectGroupMetaData metadata = await spec.ProjectGroupMetaData
@@ -68,8 +69,20 @@ main() async {
 }
 
 main123() async {
-  print(new Directory('.').absolute);
+  final ProjectGroup projectGroup = await ProjectGroup
+      .load(new Directory('/Users/blah/dart/newbacklogio/gitbacklog_root'));
+
+  final executor = new CommandExecutor(projectGroup);
+
+  final docker = new DockerCommands();
+  final genDocker = docker.generateDockerfile([
+    'gitbacklog_server',
+    'gitbacklog_client'
+  ], new Directory('/Users/blah/dart/jefe_jefe'));
+
+  await executor.executeOnGraph(genDocker);
 }
+
 main123ff() async {
   final Directory installDir = await Directory.systemTemp.createTemp();
 //  final Directory installDir = new Directory('/Users/blah/dart/newbacklogio');

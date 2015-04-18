@@ -39,12 +39,12 @@ class DockerCommandsImpl implements DockerCommands {
     final dockerfile = new Dockerfile();
 
     pathDependentProjects.forEach((prj) {
-      final dir = prj.installDirectory.toString();
+      final dir = prj.installDirectory.path;
       dockerfile.add(dir, dir);
     });
 
     topLevelProjects.forEach((prj) {
-      final dir = prj.installDirectory.toString();
+      final dir = prj.installDirectory.path;
       dockerfile.add(dir, dir);
     });
 
