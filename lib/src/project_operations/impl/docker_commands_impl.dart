@@ -91,6 +91,10 @@ class DockerCommandsImpl implements DockerCommands {
         serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
 
     // TODO: pass in
+    final Map<String, dynamic> environment = {'USE_PUB_SERVE_IN_DEV': false};
+    dockerfile.envs(environment);
+
+    // TODO: pass in
     final exposePorts = [8080, 8181, 5858];
     dockerfile.expose(exposePorts);
 

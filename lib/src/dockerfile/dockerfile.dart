@@ -42,6 +42,16 @@ class Dockerfile {
     _commands.add(new ExposeCommand(ports));
   }
 
+  void env(String key, value) {
+    _commands.add(new EnvCommand(key, value));
+  }
+
+  void envs(Map<String, dynamic> values) {
+    values.forEach((key, value) {
+      env(key, value);
+    });
+  }
+
   void write(IOSink sink) {
     _commands.forEach((c) {
       c.write(sink);

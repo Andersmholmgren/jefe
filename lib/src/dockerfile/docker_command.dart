@@ -26,15 +26,23 @@ class WorkDirCommand extends DockerCommand {
   }
 }
 
-class ExposeCommand extends DockerCommand {
+class ExposeCommand extends _BaseCommandWithExecForm {
   final Iterable<int> ports;
 
-  ExposeCommand(this.ports);
+  ExposeCommand(this.ports) : super('EXPOSE', false);
 
   @override
-  void write(IOSink sink) {
-    sink.writeln('EXPOSE ${ports.join(' ')}');
-  }
+  Iterable get commandArgs => ports;
+}
+
+class EnvCommand extends _BaseCommandWithExecForm {
+  final String key;
+  final value;
+
+  EnvCommand(this.key, this.value) : super('ENV', false);
+
+  @override
+  Iterable get commandArgs => [key, value];
 }
 
 class RunCommand extends _BaseRunCommand {
@@ -49,7 +57,7 @@ class EntryPointCommand extends _BaseRunCommand {
 
 abstract class _BaseCommandWithExecForm extends DockerCommand {
   final String name;
-  Iterable<String> get commandArgs;
+  Iterable get commandArgs;
   final bool execForm;
 
   _BaseCommandWithExecForm(this.name, this.execForm);
