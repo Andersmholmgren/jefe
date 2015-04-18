@@ -37,7 +37,7 @@ abstract class ProjectEntityImpl implements ProjectEntity {
 
   @override
   Future<GitDir> get gitDir {
-    print('--- loading git dir from ${installDirectory.path}');
+//    print('--- loading git dir from ${installDirectory.path}');
     return GitDir.fromExisting(installDirectory.path);
   }
 }
@@ -69,8 +69,8 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   static Future<Project> load(Directory installDirectory) async {
     _log.info('loading project from install directory $installDirectory');
-    print(
-        '--- ProjectImpl.load: loading git dir from ${installDirectory.path}');
+//    print(
+//        '--- ProjectImpl.load: loading git dir from ${installDirectory.path}');
     final GitDir gitDir = await GitDir.fromExisting(installDirectory.path);
 
     final PubSpec pubspec = await PubSpec.load(installDirectory);

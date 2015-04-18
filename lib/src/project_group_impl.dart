@@ -120,7 +120,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
         new GroupDirectoryLayout.withDefaultName(groupContainerDirectory);
     final groupDirectoryPath = directoryLayout.groupDirectory.path;
 
-    print('--- loading git dir from $groupDirectoryPath');
+//    print('--- loading git dir from $groupDirectoryPath');
     final gitDirFuture = GitDir.fromExisting(groupDirectoryPath);
     final metaDataFuture = spec.ProjectGroupMetaData
         .fromDefaultProjectGroupYamlFile(groupDirectoryPath);
@@ -281,17 +281,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
         new Stream.fromIterable(_projects.map((p) => p.get()))
             .asyncMap((p) => p);
 
-//    return new Stream.fromIterable([childProjectStream, projectStream])
-//        .asyncExpand((ps) => ps);
     final resultStream = streamz.concat([childProjectStream, projectStream]);
-
-    listen(Stream s, String name) {
-      s.asBroadcastStream().listen((d) => print('$name --- $d'));
-    }
-//    listen(childGroupStream, 'childGroupStream');
-//    listen(childProjectStream, 'childProjectStream');
-//    listen(projectStream, 'projectStream');
-//    listen(resultStream, 'resultStream');
 
     return resultStream;
   }
