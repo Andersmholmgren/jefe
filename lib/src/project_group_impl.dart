@@ -82,13 +82,13 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
         this._referenceFactory = referenceFactory,
         super(gitUri, directoryLayout.groupDirectory);
 
-  static Future<ProjectGroup> install(
-      Directory parentDir, String name, String gitUri,
-      {bool recursive: true}) async {
-    _log.info('installing group $name from $gitUri into $parentDir');
+  static Future<ProjectGroup> install(Directory parentDir, String gitUri,
+      {String name}) async {
+    final workspaceName = name != null ? name : gitWorkspaceName(gitUri);
+    _log.info('installing group $workspaceName from $gitUri into $parentDir');
 
     final GroupDirectoryLayout directoryLayout =
-        new GroupDirectoryLayout.fromParent(parentDir, name);
+        new GroupDirectoryLayout.fromParent(parentDir, workspaceName);
 
     final Directory projectGroupRoot =
         await directoryLayout.containerDirectory.create(recursive: true);
@@ -101,14 +101,13 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     final projectGroup =
         new ProjectGroupImpl(gitUri, metaData, directoryLayout);
 
-    if (recursive) {
-      final projectGroupInstallFutures = projectGroup._childGroups
-          .map((ref) => projectGroup._installChildGroup(ref.name, ref.gitUri));
-      final projectInstallFutures = projectGroup._projects.map(
-          (ref) => projectGroup._installChildProject(ref.name, ref.gitUri));
-      await Future
-          .wait(concat([projectGroupInstallFutures, projectInstallFutures]));
-    }
+    final projectGroupInstallFutures = projectGroup._childGroups
+        .map((ref) => projectGroup._installChildGroup(ref.name, ref.gitUri));
+    final projectInstallFutures = projectGroup._projects
+        .map((ref) => projectGroup._installChildProject(ref.name, ref.gitUri));
+    await Future
+        .wait(concat([projectGroupInstallFutures, projectInstallFutures]));
+
     return projectGroup;
   }
 

@@ -50,10 +50,8 @@ abstract class ProjectGroup extends ProjectEntity implements ProjectSource {
   ProjectGroupIdentifier get id;
 
   // TODO: make name optional. Derive from gitUri
-  static Future<ProjectGroup> install(
-          Directory parentDir, String name, String gitUri,
-          {bool recursive: true}) =>
-      ProjectGroupImpl.install(parentDir, name, gitUri, recursive: recursive);
+  static Future<ProjectGroup> install(Directory parentDir, String gitUri,
+      {String name}) => ProjectGroupImpl.install(parentDir, gitUri, name: name);
 
   static Future<ProjectGroup> load(Directory installDirectory) =>
       ProjectGroupImpl.load(installDirectory);

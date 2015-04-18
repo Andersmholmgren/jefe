@@ -14,8 +14,11 @@ dependencies:
   quiver: any
   logging: any
   frappe: any
+  unscripted: any
 #  den_api: any
 dev_dependencies:
   unittest: any
   scheduled_test: any
   mockito: any
+executables:
+  jefe:
