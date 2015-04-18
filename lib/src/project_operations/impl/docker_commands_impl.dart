@@ -5,7 +5,7 @@ import 'package:devops/src/project.dart';
 import 'package:devops/src/project_operations/project_command.dart';
 import 'package:devops/src/project_operations/docker_commands.dart';
 import 'package:devops/src/dockerfile/dockerfile.dart';
-//import 'package:path/path.dart' as p;
+import 'package:path/path.dart' as p;
 import 'package:devops/src/pubspec/dependency.dart';
 import 'package:devops/src/dependency_graph.dart';
 import 'dart:io';
@@ -52,7 +52,7 @@ class DockerCommandsImpl implements DockerCommands {
     await dockerfile.save(outputDirectory);
   });
 
-  ProjectDependencyGraphCommand foo(String serverProjectName,
+  ProjectDependencyGraphCommand generateDockerfile2(String serverProjectName,
           String clientProjectName, Directory outputDirectory) =>
       dependencyGraphCommand('generate Dockerfile',
           (DependencyGraph graph) async {
@@ -85,11 +85,52 @@ class DockerCommandsImpl implements DockerCommands {
       dockerfile.add(dir, dir);
     });
 
-    topLevelProjects.forEach((prj) {
-      final dir = prj.installDirectory.path;
-      dockerfile.add(dir, dir);
-    });
+    _addServerFiles(dockerfile, serverProjectDeps);
 
     await dockerfile.save(outputDirectory);
   });
+
+  _addServerFiles(
+      Dockerfile dockerfile, ProjectDependencies serverProjectDeps) {
+    final dir = serverProjectDeps.project.installDirectory;
+    final dirPath = dir.path;
+
+    final pubspecyaml = p.join(dirPath, 'pubspec.yaml');
+    dockerfile.add(pubspecyaml, pubspecyaml);
+
+    final pubspeclock = p.join(dirPath, 'pubspec.lock');
+    dockerfile.add(pubspeclock, pubspeclock);
+
+    dockerfile.workDir(dirPath);
+    dockerfile.run('pub', args: ['get']);
+
+    dockerfile.add(dirPath, dirPath);
+    dockerfile.run('pub', args: ['get', '--offline']);
+  }
 }
+
+/*
+ADD gitbacklog/gitbacklog_client/pubspec.yaml /app/client/
+ADD gitbacklog/gitbacklog_client/pubspec.lock /app/client/
+
+WORKDIR /app/client
+RUN pub get
+
+ADD gitbacklog/gitbacklog_client /app/client/
+WORKDIR /app/client
+RUN pub get --offline
+RUN pub build
+
+
+
+ADD gitbacklog/gitbacklog_server/pubspec.yaml /app/server/
+ADD gitbacklog/gitbacklog_server/pubspec.lock /app/server/
+
+WORKDIR /app/server
+RUN pub get
+
+ADD gitbacklog/gitbacklog_server /app/server/
+WORKDIR /app/server
+RUN pub get --offline
+
+ */

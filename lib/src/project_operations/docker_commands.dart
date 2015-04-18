@@ -12,4 +12,7 @@ abstract class DockerCommands {
   /// managed by jefe then those dependent projects are added first
   ProjectDependencyGraphCommand generateDockerfile(
       Iterable<String> topLevelProjectNames, Directory outputDirectory);
+
+  ProjectDependencyGraphCommand generateDockerfile2(String serverProjectName,
+      String clientProjectName, Directory outputDirectory);
 }
