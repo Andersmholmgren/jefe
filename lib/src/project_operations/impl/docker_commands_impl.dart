@@ -91,6 +91,10 @@ class DockerCommandsImpl implements DockerCommands {
         serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
 
     // TODO: pass in
+    final exposePorts = [8080, 8181, 5858];
+    dockerfile.expose(exposePorts);
+
+    // TODO: pass in
     final entryPointOptions = ["--debug:5858/0.0.0.0"];
     dockerfile.entryPoint('/usr/bin/dart',
         args: concat([entryPointOptions, [serverMain]]));

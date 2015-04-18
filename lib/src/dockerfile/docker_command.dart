@@ -33,7 +33,7 @@ class ExposeCommand extends DockerCommand {
 
   @override
   void write(IOSink sink) {
-    sink.writeln('EXPOSE ${ports.join(', ')}');
+    sink.writeln('EXPOSE ${ports.join(' ')}');
   }
 }
 
