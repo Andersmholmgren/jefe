@@ -56,13 +56,16 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   @override
   ProjectCommand completeFeature(String featureName,
       {bool doPush: false, bool recursive: true}) {
-    return projectCommandWithDependencies('close off feature $featureName',
+    return projectCommandWithDependencies(
+        'complete development of feature $featureName',
         (Project project, Iterable<Project> dependencies) async {
       await _gitFeature.featureFinish(featureName).process(project);
       await _pubSpec.setToGitDependencies().process(project,
           dependencies: dependencies);
       await _pub.get().process(project);
-      await _git.commit('completed qfeature $featureName').process(project);
+      await _git
+          .commit('completed development of feature $featureName')
+          .process(project);
       await _git.push().process(project);
     });
   }

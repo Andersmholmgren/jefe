@@ -82,13 +82,13 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
         this._referenceFactory = referenceFactory,
         super(gitUri, directoryLayout.groupDirectory);
 
-  static Future<ProjectGroup> install(
-      Directory parentDir, String name, String gitUri,
-      {bool recursive: true}) async {
-    _log.info('installing group $name from $gitUri into $parentDir');
+  static Future<ProjectGroup> install(Directory parentDir, String gitUri,
+      {String name}) async {
+    final workspaceName = name != null ? name : gitWorkspaceName(gitUri);
+    _log.info('installing group $workspaceName from $gitUri into $parentDir');
 
     final GroupDirectoryLayout directoryLayout =
-        new GroupDirectoryLayout.fromParent(parentDir, name);
+        new GroupDirectoryLayout.fromParent(parentDir, workspaceName);
 
     final Directory projectGroupRoot =
         await directoryLayout.containerDirectory.create(recursive: true);
@@ -101,19 +101,18 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     final projectGroup =
         new ProjectGroupImpl(gitUri, metaData, directoryLayout);
 
-    if (recursive) {
-      final projectGroupInstallFutures = projectGroup._childGroups
-          .map((ref) => projectGroup._installChildGroup(ref.name, ref.gitUri));
-      final projectInstallFutures = projectGroup._projects.map(
-          (ref) => projectGroup._installChildProject(ref.name, ref.gitUri));
-      await Future
-          .wait(concat([projectGroupInstallFutures, projectInstallFutures]));
-    }
+    final projectGroupInstallFutures = projectGroup._childGroups
+        .map((ref) => projectGroup._installChildGroup(ref.name, ref.gitUri));
+    final projectInstallFutures = projectGroup._projects
+        .map((ref) => projectGroup._installChildProject(ref.name, ref.gitUri));
+    await Future
+        .wait(concat([projectGroupInstallFutures, projectInstallFutures]));
+
     return projectGroup;
   }
 
   static Future<ProjectGroup> load(Directory groupContainerDirectory) async {
-    _log.info(
+    _log.fine(
         'loading group from group container directory $groupContainerDirectory');
 //  print('========= $installDirectory');
 //    _childGr
@@ -121,7 +120,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
         new GroupDirectoryLayout.withDefaultName(groupContainerDirectory);
     final groupDirectoryPath = directoryLayout.groupDirectory.path;
 
-    print('--- loading git dir from $groupDirectoryPath');
+//    print('--- loading git dir from $groupDirectoryPath');
     final gitDirFuture = GitDir.fromExisting(groupDirectoryPath);
     final metaDataFuture = spec.ProjectGroupMetaData
         .fromDefaultProjectGroupYamlFile(groupDirectoryPath);
@@ -146,123 +145,10 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
       ProjectImpl.load(directoryLayout.projectDirectory(name));
 
   Future<ProjectGroupImpl> _installChildGroup(String name, String gitUri) =>
-      install(directoryLayout.containerDirectory, name, gitUri);
+      install(directoryLayout.containerDirectory, gitUri, name: name);
 
   Future<ProjectImpl> _installChildProject(String name, String gitUri) =>
       ProjectImpl.install(directoryLayout.containerDirectory, name, gitUri);
-
-  // parent is group container??
-//  @deprecated
-//  Directory _childGroupDirectory(String name, String gitUri) {
-//    final container = _containerDirectory(gitUri, installDirectory.parent);
-//    return new Directory(p.join(container.path, name));
-//  }
-//
-//  Directory _childGroupDirectory2(String name) => _childDirectory(name);
-//
-//  Directory _childGroupContainerDirectory(String name, String gitUri) =>
-//      _containerDirectory(gitUri, containerDirectory);
-
-//  // parent is group container
-//  Directory _childProjectDirectory(String name) => _childDirectory(name);
-//
-//  Directory _childDirectory(String name) =>
-//      new Directory(p.join(containerDirectory.path, name));
-
-  @override
-  Future release({bool recursive: true, ReleaseType type: ReleaseType.minor}) {
-    _log.info('Releasing all projects for group ${metaData.name} with release '
-        'type $type');
-    return processDependenciesDepthFirst((Project project,
-        Iterable<Project> dependencies) => project.release(dependencies));
-  }
-
-  @override
-  Future setupForNewFeature(String featureName,
-      {bool doPush: false, bool recursive: true}) async {
-    await featureStart(featureName, recursive: recursive);
-    await setToPathDependencies(recursive: recursive);
-    await commit('set path dependencies for start of feature $featureName');
-    if (doPush) {
-      await push();
-    }
-    await pubGet();
-  }
-
-  @override
-  Future update({bool recursive: true}) {
-    // TODO: implement update
-  }
-
-  @override
-  Future<ProjectGroup> childProjectGroup(spec.ProjectGroupIdentifier ref) {
-    // TODO: implement childProject
-  }
-
-  @override
-  Future commit(String message) {
-    // TODO: don't really need the graph traversal here
-    _log.info(
-        'Commiting all projects for group ${metaData.name} with message $message');
-    return processDependenciesDepthFirst((Project project,
-        Iterable<Project> dependencies) => project.commit(message));
-  }
-
-  @override
-  Future push() {
-    // TODO: don't really need the graph traversal here
-    _log.info('Pushing all projects for group ${metaData.name}');
-    return processDependenciesDepthFirst(
-        (Project project, Iterable<Project> dependencies) => project.push());
-  }
-
-  @override
-  Future setToPathDependencies({bool recursive: true}) {
-    _log.info('Setting up path dependencies for group ${metaData.name}');
-    return processDependenciesDepthFirst(
-        (Project project, Iterable<Project> dependencies) =>
-            project.setToPathDependencies(dependencies));
-  }
-
-  @override
-  Future setToGitDependencies({bool recursive: true}) {
-    _log.info('Setting up git dependencies for group ${metaData.name}');
-    return processDependenciesDepthFirst(
-        (Project project, Iterable<Project> dependencies) =>
-            project.setToGitDependencies(dependencies));
-  }
-
-  @override
-  Future initFlow({bool recursive: true}) =>
-      _visitAllProjects('Initialising git flow', (p) => p.initFlow());
-
-  @override
-  Future featureStart(String name, {bool recursive: true}) => _visitAllProjects(
-      'git flow feature start $name', (p) => p.featureStart(name));
-
-  @override
-  Future featureFinish(String name, {bool recursive: true}) =>
-      _visitAllProjects(
-          'git flow feature finish $name', (p) => p.featureFinish(name));
-
-  @override
-  Future releaseStart(String name, {bool recursive: true}) => _visitAllProjects(
-      'git flow release start $name', (p) => p.releaseStart(name));
-
-  @override
-  Future releaseFinish(String name, {bool recursive: true}) =>
-      _visitAllProjects(
-          'git flow release finish $name', (p) => p.releaseFinish(name));
-
-  @override
-  Future pubGet() async {
-    _log.info('Running pub get for group ${name}');
-    final stopWatch = new Stopwatch()..start();
-
-    await Future.wait((await allProjects).map((p) => p.pubGet()));
-    _log.finest('Completed pub get for group ${name} in ${stopWatch.elapsed}');
-    stopWatch.stop();
-  }
 
 //  @override
 //  Future<Set<Project>> get projects => allProjects;
@@ -282,17 +168,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
         new Stream.fromIterable(_projects.map((p) => p.get()))
             .asyncMap((p) => p);
 
-//    return new Stream.fromIterable([childProjectStream, projectStream])
-//        .asyncExpand((ps) => ps);
     final resultStream = streamz.concat([childProjectStream, projectStream]);
-
-    listen(Stream s, String name) {
-      s.asBroadcastStream().listen((d) => print('$name --- $d'));
-    }
-//    listen(childGroupStream, 'childGroupStream');
-//    listen(childProjectStream, 'childProjectStream');
-//    listen(projectStream, 'projectStream');
-//    listen(resultStream, 'resultStream');
 
     return resultStream;
   }
@@ -331,8 +207,9 @@ class GroupDirectoryLayout {
   GroupDirectoryLayout.fromParent(Directory parent, String groupName)
       : this(_childDir(parent, _containerName(groupName)), groupName);
 
-  GroupDirectoryLayout.withDefaultName(Directory containerDirectory)
-      : this(containerDirectory, _defaultGroupName(containerDirectory));
+  GroupDirectoryLayout.withDefaultName(Directory containerDirectory) : this(
+          containerDirectory.absolute,
+          _defaultGroupName(containerDirectory.absolute));
 
   Directory get groupDirectory => _childDir(containerDirectory, groupName);
 

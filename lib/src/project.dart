@@ -50,10 +50,8 @@ abstract class ProjectGroup extends ProjectEntity implements ProjectSource {
   ProjectGroupIdentifier get id;
 
   // TODO: make name optional. Derive from gitUri
-  static Future<ProjectGroup> install(
-          Directory parentDir, String name, String gitUri,
-          {bool recursive: true}) =>
-      ProjectGroupImpl.install(parentDir, name, gitUri, recursive: recursive);
+  static Future<ProjectGroup> install(Directory parentDir, String gitUri,
+      {String name}) => ProjectGroupImpl.install(parentDir, gitUri, name: name);
 
   static Future<ProjectGroup> load(Directory installDirectory) =>
       ProjectGroupImpl.load(installDirectory);
@@ -68,28 +66,6 @@ abstract class ProjectGroup extends ProjectEntity implements ProjectSource {
 
   Future processDependenciesDepthFirst(
       process(Project project, Iterable<Project> dependencies));
-
-  Future update({bool recursive: true});
-  Future setupForNewFeature(String featureName, {bool recursive: true});
-  Future release({bool recursive: true, ReleaseType type: ReleaseType.minor});
-
-  Future setToPathDependencies({bool recursive: true});
-  Future setToGitDependencies({bool recursive: true});
-
-  Future commit(String message);
-  Future push();
-
-  Future initFlow({bool recursive: true});
-  Future featureStart(String name, {bool recursive: true});
-  Future featureFinish(String name, {bool recursive: true});
-  Future releaseStart(String version, {bool recursive: true});
-  Future releaseFinish(String version, {bool recursive: true});
-
-  Future pubGet();
-
-  // May also be possible to checkout a particular version and create a bugfix
-  // branch off it
-  //  e.g Future checkout(String version, {bool recursive: true});
 }
 
 abstract class Project extends ProjectEntity {
@@ -106,26 +82,7 @@ abstract class Project extends ProjectEntity {
 
   Future<String> get currentGitCommitHash;
 
-  Future release(Iterable<Project> dependencies,
-      {ReleaseType type: ReleaseType.minor});
-
   Future updatePubspec(PubSpec newSpec);
-
-  Future commit(String message);
-
-  Future push();
-
-  Future initFlow();
-  Future featureStart(String featureName);
-  Future featureFinish(String featureName);
-  Future releaseStart(String version);
-  Future releaseFinish(String version);
-
-  Future setToPathDependencies(Iterable<Project> dependencies);
-
-  Future setToGitDependencies(Iterable<Project> dependencies);
-
-  Future pubGet();
 }
 
 //enum ReleaseType { major, minor, patch }
