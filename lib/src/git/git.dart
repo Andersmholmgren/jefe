@@ -37,10 +37,18 @@ Future gitCommit(GitDir gitDir, String message) async {
   }
 }
 
+Future gitCheckout(GitDir gitDir, String branchName) async =>
+    await gitDir.runCommand(['checkout', branchName]);
+
 Future gitTag(GitDir gitDir, String tag) async =>
     await gitDir.runCommand(['tag', tag]);
 
-Future gitPush(GitDir gitDir) async => await gitDir.runCommand(['push']);
+Future gitPush(GitDir gitDir) async {
+  final BranchReference current = await gitDir.getCurrentBranch();
+
+  await gitDir
+      .runCommand(['push', '--set-upstream', 'origin', current.branchName]);
+}
 
 Future<String> currentCommitHash(GitDir gitDir) async =>
     (await gitDir.runCommand(['rev-parse', 'HEAD'])).stdout.trim();

@@ -9,7 +9,7 @@ abstract class ProjectLifecycle {
   factory ProjectLifecycle(
       {GitFeatureCommandsFactory gitFeatureFactory}) = ProjectLifecycleImpl;
 
-  ProjectCommand init();
+  CompositeProjectCommand init();
 
   CompositeProjectCommand startNewFeature(String featureName,
       {bool doPush: false, bool recursive: true});

@@ -62,9 +62,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       await _pubSpec.setToGitDependencies().process(project,
           dependencies: dependencies);
       await _pub.get().process(project);
-      await _git
-          .commit('set git dependencies for end of feature $featureName')
-          .process(project);
+      await _git.commit('completed qfeature $featureName').process(project);
       await _git.push().process(project);
     });
   }
@@ -86,7 +84,12 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   }
 
   @override
-  ProjectCommand init() => _gitFeature.init();
+  CompositeProjectCommand init() {
+    return projectCommandGroup('Initialising for development', [
+      _gitFeature.init(),
+      _git.checkout(_gitFeature.developBranchName)
+    ]);
+  }
 }
 
 class OptionalPush implements ProjectCommand {

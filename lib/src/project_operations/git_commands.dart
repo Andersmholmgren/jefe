@@ -9,4 +9,6 @@ abstract class GitCommands {
   ProjectCommand commit(String message);
 
   ProjectCommand push();
+
+  ProjectCommand checkout(String branchName);
 }

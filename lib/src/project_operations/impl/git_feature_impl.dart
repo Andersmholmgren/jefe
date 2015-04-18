@@ -32,4 +32,7 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
       'git flow release finish', (Project p) async {
     await gitFlowReleaseFinish(await p.gitDir, releaseName);
   });
+
+  @override
+  String get developBranchName => 'develop';
 }

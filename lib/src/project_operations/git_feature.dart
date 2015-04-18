@@ -9,6 +9,7 @@ GitFeatureCommands defaultFlowFeatureFactory() => new GitFeatureCommands();
 
 abstract class GitFeatureCommands {
   factory GitFeatureCommands() = GitFeatureCommandsFlowImpl;
+  String get developBranchName;
   ProjectCommand init();
   ProjectCommand featureStart(String featureName);
   ProjectCommand featureFinish(String featureName);

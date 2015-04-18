@@ -71,6 +71,9 @@ main() async {
 //  });
 }
 
+main123x() async {
+  print((await Process.run('which', ['dart'])).stdout);
+}
 main123() async {
   final Directory installDir = await Directory.systemTemp.createTemp();
 //  final Directory installDir = new Directory('/Users/blah/dart/newbacklogio');
@@ -82,7 +85,7 @@ main123() async {
 
   final lifecycle = new ProjectLifecycle();
 
-  await executor.execute(lifecycle.init());
+  await executor.executeAll(lifecycle.init());
   await executor.executeAll(lifecycle.startNewFeature('feacha'));
   await executor.execute(lifecycle.completeFeature('feacha'));
 }
