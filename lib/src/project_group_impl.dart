@@ -145,7 +145,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
       ProjectImpl.load(directoryLayout.projectDirectory(name));
 
   Future<ProjectGroupImpl> _installChildGroup(String name, String gitUri) =>
-      install(directoryLayout.containerDirectory, name, gitUri);
+      install(directoryLayout.containerDirectory, gitUri, name: name);
 
   Future<ProjectImpl> _installChildProject(String name, String gitUri) =>
       ProjectImpl.install(directoryLayout.containerDirectory, name, gitUri);
