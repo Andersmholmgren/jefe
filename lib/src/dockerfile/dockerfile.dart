@@ -38,6 +38,10 @@ class Dockerfile {
     _commands.add(new EntryPointCommand(command, args, execForm));
   }
 
+  void expose(Iterable<int> ports) {
+    _commands.add(new ExposeCommand(ports));
+  }
+
   void write(IOSink sink) {
     _commands.forEach((c) {
       c.write(sink);

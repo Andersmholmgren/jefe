@@ -89,8 +89,11 @@ class DockerCommandsImpl implements DockerCommands {
     _addTopLevelProjectFiles(dockerfile, clientProjectDeps);
     final serverMain = p.join(
         serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
-    dockerfile.entryPoint('/usr/bin/dart', args: [serverMain]);
-//    #ENTRYPOINT ["/usr/bin/dart", "--debug:5858/0.0.0.0", "/app/server/bin/server.dart"]
+
+    // TODO: pass in
+    final entryPointOptions = ["--debug:5858/0.0.0.0"];
+    dockerfile.entryPoint('/usr/bin/dart',
+        args: concat([entryPointOptions, [serverMain]]));
 
     await dockerfile.save(outputDirectory);
   });
@@ -100,11 +103,11 @@ class DockerCommandsImpl implements DockerCommands {
     final dir = topLevelProjectDeps.project.installDirectory;
     final dirPath = dir.path;
 
-    final pubspecyaml = p.join(dirPath, 'pubspec.yaml');
-    dockerfile.add(pubspecyaml, pubspecyaml);
+    final pubspecYaml = p.join(dirPath, 'pubspec.yaml');
+    dockerfile.add(pubspecYaml, pubspecYaml);
 
-    final pubspeclock = p.join(dirPath, 'pubspec.lock');
-    dockerfile.add(pubspeclock, pubspeclock);
+    final pubspecLock = p.join(dirPath, 'pubspec.lock');
+    dockerfile.add(pubspecLock, pubspecLock);
 
     dockerfile.workDir(dirPath);
     dockerfile.run('pub', args: ['get']);

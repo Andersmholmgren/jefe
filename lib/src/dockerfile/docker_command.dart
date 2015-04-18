@@ -26,6 +26,17 @@ class WorkDirCommand extends DockerCommand {
   }
 }
 
+class ExposeCommand extends DockerCommand {
+  final Iterable<int> ports;
+
+  ExposeCommand(this.ports);
+
+  @override
+  void write(IOSink sink) {
+    sink.writeln('EXPOSE ${ports.join(', ')}');
+  }
+}
+
 class RunCommand extends _BaseRunCommand {
   RunCommand(String command, Iterable<String> args, bool execForm)
       : super('RUN', command, args, execForm);
