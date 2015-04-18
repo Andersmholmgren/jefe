@@ -15,6 +15,7 @@ dependencies:
   logging: any
   frappe: any
   unscripted: any
+  stack_trace: any
 #  den_api: any
 dev_dependencies:
   unittest: any
