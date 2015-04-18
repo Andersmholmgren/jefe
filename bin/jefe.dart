@@ -3,11 +3,21 @@ import 'dart:io';
 import 'package:devops/devops.dart';
 import 'package:logging/logging.dart';
 import 'dart:async';
+import 'package:stack_trace/stack_trace.dart';
 
-main(arguments) => new Script(Jefe).execute(arguments);
+main(arguments) {
+  Chain.capture(() {
+    new Script(Jefe).execute(arguments);
+  }, onError: (error, stackChain) {
+    print("Caught error $error\n"
+        "${stackChain.terse}");
+  });
+}
 
 class Jefe {
   final lifecycle = new ProjectLifecycle();
+  final process = new ProcessCommands();
+
   @Command(
       help: 'Manages a set of related Dart projects',
       plugins: const [const Completion()])
@@ -46,6 +56,14 @@ class Jefe {
       abbr: 'd') String rootDirectory: '.'}) async {
     final executor = await load(rootDirectory);
     await executor.executeAll(lifecycle.startNewFeature(featureName));
+  }
+
+  @SubCommand(help: 'Runs the given command in all projects')
+  exec(String command, @Rest() List<String> args, {@Option(
+      help: 'The directory that contains the root of the projecs',
+      abbr: 'd') String rootDirectory: '.'}) async {
+    final executor = await load(rootDirectory);
+    await executor.execute(process.process(command, args));
   }
 
   Future<CommandExecutor> load(String rootDirectory) async {

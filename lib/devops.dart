@@ -7,3 +7,4 @@ library devops;
 export 'src/project.dart';
 export 'src/project_operations/project_command_executor.dart';
 export 'src/project_operations/project_lifecycle.dart';
+export 'src/project_operations/process_commands.dart';

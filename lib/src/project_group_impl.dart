@@ -112,7 +112,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   }
 
   static Future<ProjectGroup> load(Directory groupContainerDirectory) async {
-    _log.info(
+    _log.fine(
         'loading group from group container directory $groupContainerDirectory');
 //  print('========= $installDirectory');
 //    _childGr
