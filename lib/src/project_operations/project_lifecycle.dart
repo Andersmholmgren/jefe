@@ -17,7 +17,7 @@ abstract class ProjectLifecycle {
   CompositeProjectCommand completeFeature(String featureName,
       {bool doPush: false, bool recursive: true});
 
-  CompositeProjectCommand release({ReleaseType type: ReleaseType.minor});
+  ProjectCommand release({ReleaseType type: ReleaseType.minor});
 
 //  Future deploy(); ????
 }

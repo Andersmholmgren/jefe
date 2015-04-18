@@ -2,6 +2,9 @@ library devops.project.operations.core;
 
 import 'package:devops/src/project.dart';
 import 'dart:async';
+import 'package:logging/logging.dart';
+
+Logger _log = new Logger('devops.project.operations.core');
 
 /// [serial] means the command must execute on a single project at a time and
 /// must complete execution on all the projects before the next command may be
@@ -37,53 +40,46 @@ typedef ProjectFunction(Project project);
 typedef ProjectWithDependenciesFunction(
     Project project, Iterable<Project> dependencies);
 
-abstract class ProjectCommand<F extends Function> {
-  String get name;
-  F get function;
-  CommandConcurrencyMode get concurrencyMode;
-}
-
-abstract class ProjectCommand2 {
+abstract class ProjectCommand {
   String get name;
   CommandConcurrencyMode get concurrencyMode;
-  Future process(Project project, Iterable<Project> dependencies);
+  Future process(Project project, {Iterable<Project> dependencies});
 }
 
 /// [concurrencyMode] can be used to limit the concurrencyMode of the
 /// individual commands. Each command will execute in the more conservative of
 /// the CompositeProjectCommand's value and the ProjectCommand's value.
+/// TODO: this is not currently a composite. Either make it one or rename to
+/// ProjectCommandGroup or something
 abstract class CompositeProjectCommand {
   String get name;
   Iterable<ProjectCommand> get commands;
   CommandConcurrencyMode get concurrencyMode;
 }
 
-//abstract class ProjectCommand extends Command<ProjectFunction> {}
-//
-//abstract class ProjectWithDependenciesFunctionCommand
-//    extends Command<ProjectWithDependenciesFunction> {}
-
-class _DefaultCommand<F extends Function> implements ProjectCommand<F> {
+class _DefaultCommand implements ProjectCommand {
   final String name;
-  final F function;
+  final Function function;
   final CommandConcurrencyMode concurrencyMode;
 
   _DefaultCommand(this.name, this.function, this.concurrencyMode);
-}
 
-//class _DefaultCommand2 implements ProjectCommand2 {
-//  final String name;
-//  final Function function;
-//  final CommandConcurrencyMode concurrencyMode;
-//
-//  _DefaultCommand2(this.name, this.function, this.concurrencyMode);
-//
-//  @override
-//  Future process(Project project, Iterable<Project> dependencies) {
-//    return function is ProjectWithDependenciesFunction ? function(project,
-//    dependencies) : function(project);
-//  }
-//}
+  @override
+  Future process(Project project, {Iterable<Project> dependencies: []}) async {
+    final taskDescription = '$name for project ${project.name}';
+    _log.info('Executing command "$taskDescription"');
+
+    if (function is! ProjectWithDependenciesFunction &&
+        function is! ProjectFunction) {
+      throw new ArgumentError('Invalid function passed into process');
+    }
+    final result = await (function is ProjectWithDependenciesFunction
+        ? function(project, dependencies)
+        : function(project));
+    _log.finer('Completed command "$taskDescription"');
+    return result;
+  }
+}
 
 class _DefaultCompositeProjectCommand implements CompositeProjectCommand {}
 

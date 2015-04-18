@@ -13,7 +13,7 @@ import 'package:devops/src/project_operations/pubspec_commands.dart';
 
 Logger _log = new Logger('devops.project.operations.git.feature.impl');
 
-class ProjectLifecycleImpl /*extends BaseCommand*/ implements ProjectLifecycle {
+class ProjectLifecycleImpl implements ProjectLifecycle {
   final GitFeatureCommands _gitFeature;
   final GitCommands _git;
   final PubCommands _pub;
@@ -45,20 +45,6 @@ class ProjectLifecycleImpl /*extends BaseCommand*/ implements ProjectLifecycle {
   }
 
   @override
-//  Future startNewFeature(String featureName,
-//      {bool doPush: false, bool recursive: true}) async {
-//    await _gitFeature.featureStart(featureName);
-//    await _pubSpec.setToPathDependencies();
-//    await _git
-//        .commit('set path dependencies for start of feature $featureName');
-//    if (doPush) {
-//      await _git.push();
-//    }
-//    await _pub.get();
-////    });
-//  }
-
-  @override
   CompositeProjectCommand completeFeature(String featureName,
       {bool doPush: false, bool recursive: true}) {
     return projectCommandGroup('close off feature $featureName', [
@@ -68,51 +54,21 @@ class ProjectLifecycleImpl /*extends BaseCommand*/ implements ProjectLifecycle {
       _git.push(),
       _pub.get()
     ]);
-
-//    final newVersion = type.bump(pubspec.version);
-//    await releaseStart(newVersion.toString());
-//    await updatePubspec(pubspec.copy(version: newVersion));
-////    await setToGitDependencies(dependencies);
-//    await commit('releasing version $newVersion');
-//    await releaseFinish(newVersion.toString());
-//    await push();
-
   }
 
   @override
-  CompositeProjectCommand release({ReleaseType type: ReleaseType.minor}) {
-    return projectCommandGroup('Release version type $type', [
-      _gitFeature.releaseStart(newVersion.toString()),
-      _pubSpec.updateVersion(newVersion),
-      _git.commit('releasing version $newVersion'),
-      _gitFeature.releaseFinish(newVersion.toString()),
-      _git.push()
-    ]);
-  }
-
-  @override
-  ProjectCommand<ProjectWithDependenciesFunction> release2(
-      {ReleaseType type: ReleaseType.minor}) {
+  ProjectCommand release({ReleaseType type: ReleaseType.minor}) {
     return projectCommand('Release version type $type',
         (Project project) async {
       final newVersion = type.bump(project.pubspec.version);
-      await _gitFeature.releaseStart(newVersion.toString()).function(project);
+      await _gitFeature.releaseStart(newVersion.toString()).process(project);
       await _pubSpec
-          .updatePubspec(project.pubspec.copy(version: newVersion))
-          .function(project);
+          .update(project.pubspec.copy(version: newVersion))
+          .process(project);
       //    await setToGitDependencies(dependencies);
-      await _git.commit('releasing version $newVersion').function(project);
-      await _gitFeature.releaseFinish(newVersion.toString()).function(project);
-      await _git.push().function(project);
+      await _git.commit('releasing version $newVersion').process(project);
+      await _gitFeature.releaseFinish(newVersion.toString()).process(project);
+      await _git.push().process(project);
     });
-//    [
-//      _gitFeature.releaseStart(newVersion.toString()),
-//      _pubSpec.updateVersion(newVersion),
-//      _git.commit('releasing version $newVersion'),
-//      _gitFeature.releaseFinish(newVersion.toString()),
-//      _git.push()
-//    ]);
   }
 }
-
-//typedef Future ProjectCommandExecutorXX(ProjectCommand command);
