@@ -15,7 +15,7 @@ abstract class DockerCommands {
 
   ProjectDependencyGraphCommand generateDockerfile2(String serverProjectName,
       String clientProjectName, Directory outputDirectory,
-      {Map<String, dynamic> environment: const {},
+      {String dartVersion: 'latest', Map<String, dynamic> environment: const {},
       Iterable<int> exposePorts: const [],
       Iterable<String> entryPointOptions: const []});
 }

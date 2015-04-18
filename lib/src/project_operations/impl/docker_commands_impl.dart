@@ -54,7 +54,7 @@ class DockerCommandsImpl implements DockerCommands {
 
   ProjectDependencyGraphCommand generateDockerfile2(String serverProjectName,
       String clientProjectName, Directory outputDirectory,
-      {Map<String, dynamic> environment: const {},
+      {String dartVersion: 'latest', Map<String, dynamic> environment: const {},
       Iterable<int> exposePorts: const [],
       Iterable<String> entryPointOptions: const []}) => dependencyGraphCommand(
           'generate Dockerfile', (DependencyGraph graph) async {
@@ -82,7 +82,7 @@ class DockerCommandsImpl implements DockerCommands {
 
     final dockerfile = new Dockerfile();
 
-    dockerfile.from('google/dart', tag: '1.9.1');
+    dockerfile.from('google/dart', tag: dartVersion);
 
     pathDependentProjects.forEach((prj) {
       final dir = prj.installDirectory.path;
