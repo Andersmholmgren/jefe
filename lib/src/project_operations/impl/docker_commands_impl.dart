@@ -87,6 +87,10 @@ class DockerCommandsImpl implements DockerCommands {
 
     _addTopLevelProjectFiles(dockerfile, serverProjectDeps);
     _addTopLevelProjectFiles(dockerfile, clientProjectDeps);
+    final serverMain = p.join(
+        serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
+    dockerfile.entryPoint('/usr/bin/dart', args: [serverMain]);
+//    #ENTRYPOINT ["/usr/bin/dart", "--debug:5858/0.0.0.0", "/app/server/bin/server.dart"]
 
     await dockerfile.save(outputDirectory);
   });
