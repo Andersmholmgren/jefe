@@ -207,8 +207,9 @@ class GroupDirectoryLayout {
   GroupDirectoryLayout.fromParent(Directory parent, String groupName)
       : this(_childDir(parent, _containerName(groupName)), groupName);
 
-  GroupDirectoryLayout.withDefaultName(Directory containerDirectory)
-      : this(containerDirectory, _defaultGroupName(containerDirectory));
+  GroupDirectoryLayout.withDefaultName(Directory containerDirectory) : this(
+          containerDirectory.absolute,
+          _defaultGroupName(containerDirectory.absolute));
 
   Directory get groupDirectory => _childDir(containerDirectory, groupName);
 
