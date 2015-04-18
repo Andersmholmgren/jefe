@@ -20,45 +20,20 @@ class CommandExecutorImpl implements CommandExecutor {
   CommandExecutorImpl(this._projectSource);
 
   Future execute(ProjectCommand command) async {
-    if (command.function is ProjectWithDependenciesFunction) {
-      await _depthFirst(command.name, command.function);
-    } else if (command.function is ProjectFunction) {
-      await _visitAllProjects(command.name, command.function);
-    } else {
-      throw new ArgumentError('Invalid function passed into execute');
-    }
+    return await _projectSource.processDependenciesDepthFirst(
+        (Project project, Iterable<Project> dependencies) =>
+            command.process(project, dependencies: dependencies));
   }
 
-  Future _visitAllProjects(
-      String description, ProjectFunction processor) async {
-    await _projectSource
-        .visitAllProjects(_wrapProcessor(description, processor));
-  }
-
-  Future _depthFirst(
-      String description, ProjectWithDependenciesFunction processor) async {
-    await _projectSource.processDependenciesDepthFirst(
-        _wrapDependencyProcessor(description, processor));
-  }
-
-  ProjectFunction _wrapProcessor(
-          String description, ProjectFunction processor) =>
-      (Project project) async {
-    final taskDescription = '$description for project ${project.name}';
-    _log.info('Executing command "$taskDescription"');
-    await processor(project);
-    _log.finer('Completed command "$taskDescription"');
-  };
-
-  ProjectWithDependenciesFunction _wrapDependencyProcessor(
-          String description, ProjectWithDependenciesFunction processor) =>
-      (Project project, Iterable<Project> dependencies) async {
-    final taskDescription =
-        '$description for project ${project.name} with ${dependencies.length} dependencies';
-    _log.info('Executing command "$taskDescription"');
-    await processor(project, dependencies);
-    _log.finer('Completed command "$taskDescription"');
-  };
+//  ProjectWithDependenciesFunction _wrapDependencyProcessor(
+//          String description, ProjectWithDependenciesFunction processor) =>
+//      (Project project, Iterable<Project> dependencies) async {
+//    final taskDescription =
+//        '$description for project ${project.name} with ${dependencies.length} dependencies';
+//    _log.info('Executing command "$taskDescription"');
+//    await processor(project, dependencies);
+//    _log.finer('Completed command "$taskDescription"');
+//  };
 
 //  Future executeAll(Iterable<ProjectCommand> commands) =>
 //      Future.forEach(commands, execute);
@@ -69,31 +44,33 @@ class CommandExecutorImpl implements CommandExecutor {
 
   @override
   Future executeAll(CompositeProjectCommand composite,
-      {bool concurrently: true}) async {
-    if (concurrently) {
-      await _executeConcurrently(composite);
-    } else {
-      await _executeSerially(composite);
-    }
+      {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand}) async {
+    // TODO: only serial supported for now
+    return _executeSerially(composite);
+//    if (concurrently) {
+//      await _executeConcurrently(composite);
+//    } else {
+//      await _executeSerially(composite);
+//    }
   }
 
   /////// BAD IDEA. Can't do this
-  Future _executeConcurrently(CompositeProjectCommand composite) async {
-    final wrappedCommand = projectCommandWithDependencies(composite.name,
-        (Project project, Iterable<Project> dependencies) async {
-      await Future.forEach(composite.commands, (ProjectCommand command) async {
-        if (command.function is ProjectWithDependenciesFunction) {
-          await command.function(project, dependencies);
-        } else if (command.function is ProjectFunction) {
-          await command.function(project);
-        } else {
-          throw new ArgumentError('Invalid function passed into execute');
-        }
-      });
-    });
-
-    await execute(wrappedCommand);
-  }
+//  Future _executeConcurrently(CompositeProjectCommand composite) async {
+//    final wrappedCommand = projectCommandWithDependencies(composite.name,
+//        (Project project, Iterable<Project> dependencies) async {
+//      await Future.forEach(composite.commands, (ProjectCommand command) async {
+//        if (command.function is ProjectWithDependenciesFunction) {
+//          await command.function(project, dependencies);
+//        } else if (command.function is ProjectFunction) {
+//          await command.function(project);
+//        } else {
+//          throw new ArgumentError('Invalid function passed into execute');
+//        }
+//      });
+//    });
+//
+//    await execute(wrappedCommand);
+//  }
 
   Future _executeSerially(CompositeProjectCommand composite) async {
     _log.info('Executing composite command "${composite.name}"');
@@ -104,7 +81,7 @@ class CommandExecutorImpl implements CommandExecutor {
 
 typedef Future CommandExecutorFunction(ProjectCommand command);
 
-class foo {
+class ConcurrentCommandExecutor {
   Map<String, ProjectCommandQueue> _projectQueues;
   final CommandConcurrencyMode concurrencyMode;
   final ProjectSource projectSource;
@@ -117,7 +94,7 @@ class foo {
       new Option(_projectQueues[project.name]);
 
   Future awaitQueuesEmpty() {
-    _projectQueues.values.((q) => q.queueIsEmpty)
+//    _projectQueues.values.((q) => q.queueIsEmpty)
   }
 
   Future execute(Iterable<ProjectCommand> commands) {
@@ -137,9 +114,8 @@ class foo {
 //            qOpt.map((q) )
             if (qOpt is Some) {
               // TODO: assuming has depends
-              await qOpt
-                  .get()
-                  .add(() => command.function(pd.project, pd.dependencies));
+              await qOpt.get().add(() =>
+                  command.process(pd.project, dependencies: pd.dependencies));
             }
           });
 

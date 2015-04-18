@@ -10,13 +10,12 @@ import 'impl/project_command_executor.dart';
 abstract class CommandExecutor {
   factory CommandExecutor(ProjectSource projectSource) = CommandExecutorImpl;
 
+  // TODO: should allow concurrencyMode here
   Future execute(ProjectCommand command);
 
-  /// executes all the commands in [composite]. If [concurrently] is true
-  /// (the default) then commands will be executed on all the projects
-  /// concurrently. Note: each command in the composite must complete for each
-  /// project before moving on to the next command.
-  /// if [concurrently] is false then each command must complete for each project
-  /// before moving onto the next project.
-  Future executeAll(CompositeProjectCommand composite);
+  /// executes all the commands in [composite]. Optionally a [concurrencyMode]
+  /// can be provided to run the commands in a more conservative concurrency
+  /// mode than may be supported by the underlying commands
+  Future executeAll(CompositeProjectCommand composite,
+      {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand});
 }
