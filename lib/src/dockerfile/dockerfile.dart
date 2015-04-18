@@ -33,6 +33,11 @@ class Dockerfile {
     _commands.add(new RunCommand(command, args, execForm));
   }
 
+  void entryPoint(String command,
+      {Iterable<String> args: const [], bool execForm: true}) {
+    _commands.add(new EntryPointCommand(command, args, execForm));
+  }
+
   void write(IOSink sink) {
     _commands.forEach((c) {
       c.write(sink);

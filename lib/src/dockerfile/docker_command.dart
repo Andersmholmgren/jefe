@@ -28,22 +28,33 @@ class WorkDirCommand extends DockerCommand {
   }
 }
 
-class RunCommand extends DockerCommand {
+class _BaseRunCommand extends DockerCommand {
+  final String name;
   final String command;
   final Iterable<String> args;
   final bool execForm;
 
-  RunCommand(this.command, this.args, this.execForm);
+  _BaseRunCommand(this.name, this.command, this.args, this.execForm);
 
   @override
   void write(IOSink sink) {
     if (execForm) {
       final list = _formatList(concat([[command], args]));
-      sink.writeln('RUN $list');
+      sink.writeln('$name $list');
     } else {
-      sink.writeln('RUN $command ${args.join(' ')}');
+      sink.writeln('$name $command ${args.join(' ')}');
     }
   }
+}
+
+class RunCommand extends _BaseRunCommand {
+  RunCommand(String command, Iterable<String> args, bool execForm)
+      : super('RUN', command, args, execForm);
+}
+
+class EntryPointCommand extends _BaseRunCommand {
+  EntryPointCommand(String command, Iterable<String> args, bool execForm)
+      : super('ENTRYPOINT', command, args, execForm);
 }
 
 String _formatList(Iterable<String> list) {
