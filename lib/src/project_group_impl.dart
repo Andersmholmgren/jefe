@@ -150,8 +150,8 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   Future<ProjectImpl> _installChildProject(String name, String gitUri) =>
       ProjectImpl.install(directoryLayout.containerDirectory, name, gitUri);
 
-//  @override
-//  Future<Set<Project>> get projects => allProjects;
+  @override
+  Future<Set<Project>> get projects => allProjects;
 
   @override
   Future<Set<Project>> get allProjects => _allProjectsStream.toSet();

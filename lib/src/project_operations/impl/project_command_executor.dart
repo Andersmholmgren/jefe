@@ -77,6 +77,22 @@ class CommandExecutorImpl implements CommandExecutor {
     await Future.forEach(composite.commands, execute);
     _log.finer('Completed command "${composite.name}"');
   }
+
+  @override
+  Future executeOn(ProjectCommand command, String projectName) async {
+    final DependencyGraph graph =
+        await getDependencyGraph(await _projectSource.projects);
+    final projectDependencies = graph.forProject(projectName);
+    await command.process(projectDependencies.project,
+        dependencies: projectDependencies.dependencies);
+  }
+
+  @override
+  Future executeOnGraph(ProjectDependencyGraphCommand command) async {
+    final DependencyGraph graph =
+        await getDependencyGraph(await _projectSource.projects);
+    await command.process(graph);
+  }
 }
 
 typedef Future CommandExecutorFunction(ProjectCommand command);

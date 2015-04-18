@@ -54,6 +54,9 @@ class DependencyGraph {
     return _rootNodes.expand((n) => n.getDepthFirst(visited));
   }
 
+  ProjectDependencies forProject(String projectName) =>
+      depthFirst.firstWhere((pd) => pd.project.name == projectName);
+
   _DependencyNode _getOrCreateNode(Project project) {
     var node = _nodeMap[project]; // TODO: is this possible?
     if (node == null) {
