@@ -131,10 +131,6 @@ main124() async {
 
   print('container dir = ${projectGroup.containerDirectory}');
 
-  print(
-      '********* childGroups ${await (projectGroup as ProjectGroupImpl).childGroups.first.get()}');
-  print('********* allProjects ${await projectGroup.allProjects}');
-
 //  await projectGroup.install(installDir);
 //  await projectGroup.setupForDev();
 
