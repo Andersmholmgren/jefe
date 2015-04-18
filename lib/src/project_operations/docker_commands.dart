@@ -14,5 +14,8 @@ abstract class DockerCommands {
       Iterable<String> topLevelProjectNames, Directory outputDirectory);
 
   ProjectDependencyGraphCommand generateDockerfile2(String serverProjectName,
-      String clientProjectName, Directory outputDirectory);
+      String clientProjectName, Directory outputDirectory,
+      {Map<String, dynamic> environment: const {},
+      Iterable<int> exposePorts: const [],
+      Iterable<String> entryPointOptions: const []});
 }

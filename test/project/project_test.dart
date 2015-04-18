@@ -74,9 +74,16 @@ main123() async {
 
   final executor = new CommandExecutor(projectGroup);
 
+  Map<String, dynamic> environment = {'USE_PUB_SERVE_IN_DEV': false};
+  Iterable<int> exposePorts = [8080, 8181, 5858];
+  Iterable<String> entryPointOptions = ["--debug:5858/0.0.0.0"];
+
   final docker = new DockerCommands();
   final genDocker = docker.generateDockerfile2('gitbacklog_server',
-      'gitbacklog_client', new Directory('/Users/blah/dart/jefe_jefe'));
+      'gitbacklog_client', new Directory('/Users/blah/dart/jefe_jefe'),
+      environment: environment,
+      exposePorts: exposePorts,
+      entryPointOptions: entryPointOptions);
 
   await executor.executeOnGraph(genDocker);
 }

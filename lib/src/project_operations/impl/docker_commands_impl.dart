@@ -53,9 +53,11 @@ class DockerCommandsImpl implements DockerCommands {
   });
 
   ProjectDependencyGraphCommand generateDockerfile2(String serverProjectName,
-          String clientProjectName, Directory outputDirectory) =>
-      dependencyGraphCommand('generate Dockerfile',
-          (DependencyGraph graph) async {
+      String clientProjectName, Directory outputDirectory,
+      {Map<String, dynamic> environment: const {},
+      Iterable<int> exposePorts: const [],
+      Iterable<String> entryPointOptions: const []}) => dependencyGraphCommand(
+          'generate Dockerfile', (DependencyGraph graph) async {
     final serverProjectDeps = graph.forProject(serverProjectName);
     final clientProjectDeps = graph.forProject(clientProjectName);
 
@@ -89,19 +91,15 @@ class DockerCommandsImpl implements DockerCommands {
 
     _addTopLevelProjectFiles(dockerfile, serverProjectDeps);
     _addTopLevelProjectFiles(dockerfile, clientProjectDeps);
+    dockerfile.run('pub', args: ['build']);
+
     final serverMain = p.join(
         serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
 
-    // TODO: pass in
-    final Map<String, dynamic> environment = {'USE_PUB_SERVE_IN_DEV': false};
     dockerfile.envs(environment);
 
-    // TODO: pass in
-    final exposePorts = [8080, 8181, 5858];
     dockerfile.expose(exposePorts);
 
-    // TODO: pass in
-    final entryPointOptions = ["--debug:5858/0.0.0.0"];
     dockerfile.entryPoint('/usr/bin/dart',
         args: concat([entryPointOptions, [serverMain]]));
 

@@ -86,11 +86,13 @@ abstract class _BaseCommandWithExecForm extends DockerCommand {
 
   @override
   void write(IOSink sink) {
-    if (execForm) {
-      final list = _formatList(commandArgs);
-      sink.writeln('$name $list');
-    } else {
-      sink.writeln('$name ${commandArgs.join(' ')}');
+    if (commandArgs.isNotEmpty) {
+      if (execForm) {
+        final list = _formatList(commandArgs);
+        sink.writeln('$name $list');
+      } else {
+        sink.writeln('$name ${commandArgs.join(' ')}');
+      }
     }
   }
 }
