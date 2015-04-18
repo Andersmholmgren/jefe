@@ -65,7 +65,8 @@ class _DefaultCommand implements ProjectCommand {
   _DefaultCommand(this.name, this.function, this.concurrencyMode);
 
   @override
-  Future process(Project project, {Iterable<Project> dependencies: []}) async {
+  Future process(Project project,
+      {Iterable<Project> dependencies: const []}) async {
     final taskDescription = '$name for project ${project.name}';
     _log.info('Executing command "$taskDescription"');
 

@@ -2,12 +2,13 @@ library devops.project.operations.pub.spec;
 
 import 'package:devops/src/project_operations/project_command.dart';
 import 'package:devops/src/pubspec/pubspec.dart';
+import 'impl/pubspec_commands_impl.dart';
 
 abstract class PubSpecCommands {
-  // This doesn't need to be run serially
+  factory PubSpecCommands() = PubSpecCommandsImpl;
+
   ProjectCommand setToPathDependencies();
 
-  // TODO: this must be serial
   ProjectCommand setToGitDependencies();
 
   ProjectCommand update(PubSpec pubspec);
