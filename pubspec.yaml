@@ -7,6 +7,15 @@ environment:
   sdk: '>=1.9.0 <2.0.0'
 dependencies:
   git: '^0.4.1+1'
-  grinder: '^0.6.2'
+#  grinder: '^0.6.2'
   pub_semver: '^1.1.0'
+  option: any
   yaml: "^2.0.1+1"
+  quiver: any
+  logging: any
+  frappe: any
+#  den_api: any
+dev_dependencies:
+  unittest: any
+  scheduled_test: any
+  mockito: any
