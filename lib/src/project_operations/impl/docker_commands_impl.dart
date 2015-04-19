@@ -66,10 +66,10 @@ class DockerCommandsImpl implements DockerCommands {
 
     dockerfile.expose(exposePorts);
 
+    dockerfile.cmd([]);
+
     final serverMain = p.join(
         serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
-
-    dockerfile.cmd([]);
 
     dockerfile.entryPoint('/usr/bin/dart',
         args: concat(
