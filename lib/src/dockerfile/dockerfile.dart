@@ -37,7 +37,7 @@ class Dockerfile {
     _commands.add(new RunCommand(command, args, execForm));
   }
 
-  void cmd(Iterable<String> commandArgs, {bool execForm: false}) {
+  void cmd(Iterable<String> commandArgs, {bool execForm: true}) {
     _commands.add(new CmdCommand(commandArgs, execForm));
   }
 
