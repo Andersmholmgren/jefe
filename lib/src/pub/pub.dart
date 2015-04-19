@@ -1,6 +1,6 @@
 library devops.pub;
 
-import 'package:devops/src/util/process_utils.dart';
+import '../util/process_utils.dart';
 import 'dart:async';
 import 'dart:io';
 

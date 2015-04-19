@@ -9,26 +9,6 @@ abstract class Jsonable {
   toJson();
 }
 
-//List fromJsonList(List l, create(i)) =>
-//    l != null ? l.map(create).toList(growable: false) : [];
-//
-//List toJsonList(List l) =>
-//    l != null ? l.map((i) => i.toJson()).toList(growable: false) : [];
-//
-//Map toJsonObject(o) => o != null ? o.toJson() : null;
-//
-//fromJsonObject(Map json, create(i)) => json != null ? create(json) : null;
-//
-//String toJsonUrl(Uri url) => url != null ? url.toString() : null;
-//
-//Map toJsonOption(Option o) => o.map((v) => v.toJson()).getOrElse(() => {});
-//
-//void addToJsonOption(Option o, Map json, String fieldName) {
-//  o.map((v) => v.toJson()).map((j) {
-//    json[fieldName] = j;
-//  });
-//}
-
 JsonBuilder get buildJson => new JsonBuilder();
 JsonParser parseJson(Map j, {bool consumeMap: false}) =>
     new JsonParser(j, consumeMap);

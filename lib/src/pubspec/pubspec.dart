@@ -9,6 +9,21 @@ import 'package:yaml/yaml.dart';
 import 'package:path/path.dart' as p;
 import 'package:devops/src/yaml/yaml_writer.dart';
 
+/// Represents a [pubspec](https://www.dartlang.org/tools/pub/pubspec.html).
+///
+/// Example Usage:
+///
+///
+///     // load it
+///     var pubSpec = await PubSpec.load(myDirectory);
+///
+///     // change the dependencies to a single path dependency on project 'foo'
+///     var newPubSpec = pubSpec.copy(dependencies: { 'foo': new PathReference('../foo') });
+///
+///     // save it
+///     await newPubSpec.save(myDirectory);
+///
+///
 class PubSpec implements Jsonable {
   final String name;
 
@@ -57,11 +72,13 @@ class PubSpec implements Jsonable {
         unParsedYaml: p.unconsumed);
   }
 
+  /// loads the pubspec from the [projectDirectory]
   static Future<PubSpec> load(Directory projectDirectory) async =>
       new PubSpec.fromJson(loadYaml(
           await new File(p.join(projectDirectory.path, 'pubspec.yaml'))
               .readAsString()));
 
+  /// creates a copy of the pubspec with the changes provided
   PubSpec copy({String name, String author, Version version, String homepage,
       String documentation, String description, Environment environment,
       Map<String, DependencyReference> dependencies,
@@ -87,6 +104,18 @@ class PubSpec implements Jsonable {
         unParsedYaml: unParsedYaml != null ? unParsedYaml : this.unParsedYaml);
   }
 
+  /// saves the pubspec to the [projectDirectory]
+  Future save(Directory projectDirectory) {
+    final ioSink =
+        new File(p.join(projectDirectory.path, 'pubspec.yaml')).openWrite();
+    try {
+      writeYamlString(toJson(), ioSink);
+    } finally {
+      return ioSink.close();
+    }
+  }
+
+  /// Converts to a Map that can be serialised to Yaml or Json
   @override
   Map toJson() {
     return (buildJson
@@ -101,15 +130,6 @@ class PubSpec implements Jsonable {
       ..add('dev_dependencies', devDependencies)
       ..add('dependency_overrides', dependencyOverrides)
       ..addAll(unParsedYaml)).json;
-  }
-
-  Future save(Directory parentDir) {
-    final ioSink = new File(p.join(parentDir.path, 'pubspec.yaml')).openWrite();
-    try {
-      writeYamlString(toJson(), ioSink);
-    } finally {
-      return ioSink.close();
-    }
   }
 }
 

@@ -47,6 +47,8 @@ typedef ProjectFunction(Project project);
 typedef ProjectWithDependenciesFunction(
     Project project, Iterable<Project> dependencies);
 
+/// A command that can be executed on a [Project] and optionally it's set of
+/// [dependencies]
 abstract class ProjectCommand {
   String get name;
   CommandConcurrencyMode get concurrencyMode;

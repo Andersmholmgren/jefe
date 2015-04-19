@@ -2,14 +2,16 @@ library devops.yaml;
 
 import 'package:quiver/iterables.dart';
 
+/// Serialises [node] into a String and returns it
 String toYamlString(node) {
   var sb = new StringBuffer();
   writeYamlString(node, sb);
   return sb.toString();
 }
 
-void writeYamlString(node, StringSink ss) {
-  _writeYamlString(node, 0, ss, true);
+/// Serialises [node] into a String and writes it to the [sink]
+void writeYamlString(node, StringSink sink) {
+  _writeYamlString(node, 0, sink, true);
 }
 
 _writeYamlString(node, int indent, StringSink ss, bool isTopLevel) {

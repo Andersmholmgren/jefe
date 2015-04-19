@@ -1,3 +1,5 @@
+library dockerfile.command;
+
 import 'dart:io';
 import 'package:quiver/iterables.dart';
 

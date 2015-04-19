@@ -7,13 +7,15 @@ import 'package:devops/src/dockerfile/docker_command.dart';
 
 const String _standardFileName = 'Dockerfile';
 
+/// Represents a [Dockerfile](https://docs.docker.com/reference/builder/)
+/// Currently supports creating and saving Dockerfiles
 class Dockerfile {
   final List<DockerCommand> _commands = [];
 
 //  static Future<Dockerfile> load(Directory projectDirectory) async =>
-//      new Dockerfile.fromJson(loadYaml(
+//      new Dockerfile.parse(
 //          await new File(p.join(projectDirectory.path, _standardFileName))
-//              .readAsString()));
+//              .readAsString());
 
   void from(String image, {String tag, String digest}) {
     _commands.add(new FromCommand(image, tag, digest));
