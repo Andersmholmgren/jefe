@@ -7,15 +7,13 @@ import 'impl/docker_commands_impl.dart';
 abstract class DockerCommands {
   factory DockerCommands() = DockerCommandsImpl;
 
-  /// Generates a Dockerfile based on the provided [topLevelProjectNames].
+  /// Generates a Dockerfile based on the provided [serverProjectName].
   /// If these projects have path dependencies on other projects
   /// managed by jefe then those dependent projects are added first
   ProjectDependencyGraphCommand generateDockerfile(
-      Iterable<String> topLevelProjectNames, Directory outputDirectory);
-
-  ProjectDependencyGraphCommand generateDockerfile2(String serverProjectName,
-      String clientProjectName, Directory outputDirectory,
-      {String dartVersion: 'latest', Map<String, dynamic> environment: const {},
+      String serverProjectName, String clientProjectName,
+      {Directory outputDirectory, String dartVersion: 'latest',
+      Map<String, dynamic> environment: const {},
       Iterable<int> exposePorts: const [],
       Iterable<String> entryPointOptions: const [],
       bool omitClientWhenPathDependencies: true,

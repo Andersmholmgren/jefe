@@ -14,47 +14,10 @@ import 'package:quiver/iterables.dart';
 Logger _log = new Logger('devops.project.operations.docker.impl');
 
 class DockerCommandsImpl implements DockerCommands {
-  @override
   ProjectDependencyGraphCommand generateDockerfile(
-          Iterable<String> topLevelProjectNames, Directory outputDirectory) =>
-      dependencyGraphCommand('generate Dockerfile',
-          (DependencyGraph graph, _) async {
-    final projectDependencies = topLevelProjectNames.map(graph.forProject);
-
-    final allDependencies = projectDependencies
-        .expand((ProjectDependencies pd) => pd.dependencies)
-        .toSet();
-
-    final topLevelProjects = projectDependencies.map((pd) => pd.project);
-
-    final depMap =
-        new Map.fromIterable(allDependencies, key: (project) => project.name);
-
-    final pathDependentProjects = topLevelProjects.expand((Project project) {
-      final deps = project.pubspec.dependencies;
-      final pathKeys = deps.keys.where(
-          (key) => deps[key] is PathReference && depMap.keys.contains(key));
-      return pathKeys.map((key) => depMap[key]);
-    }).toSet();
-
-    final dockerfile = new Dockerfile();
-
-    pathDependentProjects.forEach((prj) {
-      final dir = prj.installDirectory.path;
-      dockerfile.add(dir, dir);
-    });
-
-    topLevelProjects.forEach((prj) {
-      final dir = prj.installDirectory.path;
-      dockerfile.add(dir, dir);
-    });
-
-    await dockerfile.save(outputDirectory);
-  });
-
-  ProjectDependencyGraphCommand generateDockerfile2(String serverProjectName,
-      String clientProjectName, Directory outputDirectory,
-      {String dartVersion: 'latest', Map<String, dynamic> environment: const {},
+      String serverProjectName, String clientProjectName,
+      {Directory outputDirectory, String dartVersion: 'latest',
+      Map<String, dynamic> environment: const {},
       Iterable<int> exposePorts: const [],
       Iterable<String> entryPointOptions: const [],
       bool omitClientWhenPathDependencies: true,
@@ -68,6 +31,9 @@ class DockerCommandsImpl implements DockerCommands {
         _pathDependentProjects(serverProjectDeps);
     final clientPathDependentProjects =
         _pathDependentProjects(clientProjectDeps);
+
+//    final serverPathDependentProjects = new Set();
+//    final clientPathDependentProjects = new Set();
 
     final omitClient = omitClientWhenPathDependencies &&
         clientPathDependentProjects.isNotEmpty;
@@ -95,21 +61,24 @@ class DockerCommandsImpl implements DockerCommands {
       dockerfile.run('pub', args: ['build']);
     }
 
-    final serverMain = p.join(
-        serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
-
     dockerfile.envs(environment);
 
     dockerfile.expose(exposePorts);
+
+    final serverMain = p.join(
+        serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
 
     dockerfile.entryPoint('/usr/bin/dart',
         args: concat(
             [entryPointOptions, [pathHandler.targetPath(serverMain)]]));
 
-    await dockerfile.save(outputDirectory);
+    final saveDirectory = outputDirectory != null
+        ? outputDirectory
+        : serverProjectDeps.project.installDirectory;
+    await dockerfile.save(saveDirectory);
   });
 
-  _addTopLevelProjectFiles(Dockerfile dockerfile,
+  void _addTopLevelProjectFiles(Dockerfile dockerfile,
       ProjectDependencies topLevelProjectDeps, _PathHandler pathHandler) {
     final addHelper = new _AddHelper(pathHandler, dockerfile);
     final dir = topLevelProjectDeps.project.installDirectory;
@@ -148,11 +117,12 @@ class _PathHandler {
   _PathHandler(this.rootPath, this.targetRootPath, this.hasPathDependencies);
 
   String sourcePath(String source) {
-    if (hasPathDependencies) {
-      return source;
-    }
-
-    return p.relative(source, from: rootPath);
+    return source;
+//    if (hasPathDependencies) {
+//      return source;
+//    }
+//
+//    return p.relative(source, from: rootPath);
   }
 
   String targetPath(String source) {
