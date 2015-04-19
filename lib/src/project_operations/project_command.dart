@@ -3,6 +3,8 @@ library devops.project.operations.core;
 import 'package:devops/src/project.dart';
 import 'dart:async';
 import 'package:logging/logging.dart';
+import 'package:devops/src/dependency_graph.dart';
+import 'dart:io';
 
 Logger _log = new Logger('devops.project.operations.core');
 
@@ -34,6 +36,10 @@ CompositeProjectCommand projectCommandGroup(
   return new _DefaultCompositeProjectCommand(name, commands, concurrencyMode);
 }
 
+ProjectDependencyGraphCommand dependencyGraphCommand(
+        String name, ProjectDependencyGraphFunction function) =>
+    new _DefaultProjectDependencyGraphCommand(name, function);
+
 /// Some function applied to a [Project]
 typedef ProjectFunction(Project project);
 
@@ -45,6 +51,15 @@ abstract class ProjectCommand {
   String get name;
   CommandConcurrencyMode get concurrencyMode;
   Future process(Project project, {Iterable<Project> dependencies});
+}
+
+typedef Future ProjectDependencyGraphFunction(
+    DependencyGraph graph, Directory rootDirectory);
+
+/// a command that operates on the dependency graph as a whole
+abstract class ProjectDependencyGraphCommand {
+  String get name;
+  Future process(DependencyGraph graph, Directory rootDirectory);
 }
 
 /// [concurrencyMode] can be used to limit the concurrencyMode of the
@@ -89,6 +104,24 @@ class _DefaultCompositeProjectCommand implements CompositeProjectCommand {
   final CommandConcurrencyMode concurrencyMode;
   _DefaultCompositeProjectCommand(
       this.name, this.commands, this.concurrencyMode);
+}
+
+class _DefaultProjectDependencyGraphCommand
+    implements ProjectDependencyGraphCommand {
+  final String name;
+  final ProjectDependencyGraphFunction function;
+
+  _DefaultProjectDependencyGraphCommand(this.name, this.function);
+
+  @override
+  Future process(DependencyGraph graph, Directory rootDirectory) async {
+    _log.info('Executing command "$name"');
+
+    final result = await function(graph, rootDirectory);
+
+    _log.finer('Completed command "$name"');
+    return result;
+  }
 }
 
 //class _DefaultCompositeProjectCommand2 implements ProjectCommand2 {

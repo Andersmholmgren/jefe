@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:logging/logging.dart';
+import 'package:option/option.dart';
 
 Logger _log = new Logger('devops.git');
 
@@ -86,3 +87,12 @@ Future gitFlowReleaseFinish(GitDir gitDir, String version) async => await gitDir
   '-n',
   version
 ]);
+
+Future<Option<String>> gitFlowCurrentFeatureName(GitDir gitDir) async {
+  final String branchName = (await gitDir.getCurrentBranch()).branchName;
+  if (branchName.startsWith('feature/')) {
+    return new Some(branchName.replaceFirst('feature/', ''));
+  } else {
+    return const None();
+  }
+}

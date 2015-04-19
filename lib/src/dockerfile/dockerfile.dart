@@ -1,51 +1,76 @@
 library dockerfile.spec;
 
-import 'package:devops/src/jsonyaml/json_utils.dart';
 import 'dart:async';
 import 'dart:io';
-import 'package:yaml/yaml.dart';
 import 'package:path/path.dart' as p;
-import 'package:devops/src/yaml/yaml_writer.dart';
+import 'package:devops/src/dockerfile/docker_command.dart';
 
 const String _standardFileName = 'Dockerfile';
 
-// TODO: Not YAML. Completely different. Rethink!!
+class Dockerfile {
+  final List<DockerCommand> _commands = [];
 
-class Dockerfile implements Jsonable {
-  final String name;
+//  static Future<Dockerfile> load(Directory projectDirectory) async =>
+//      new Dockerfile.fromJson(loadYaml(
+//          await new File(p.join(projectDirectory.path, _standardFileName))
+//              .readAsString()));
 
-  final Map unParsedYaml;
-
-  Dockerfile({this.name, this.unParsedYaml});
-
-  factory Dockerfile.fromJson(Map json) {
-    final p = parseJson(json, consumeMap: true);
-    return new Dockerfile(name: p.single('name'), unParsedYaml: p.unconsumed);
+  void from(String image, {String tag, String digest}) {
+    _commands.add(new FromCommand(image, tag, digest));
   }
 
-  static Future<Dockerfile> load(Directory projectDirectory) async =>
-      new Dockerfile.fromJson(loadYaml(
-          await new File(p.join(projectDirectory.path, _standardFileName))
-              .readAsString()));
-
-  Dockerfile copy({String name, Map unParsedYaml}) {
-    return new Dockerfile(
-        name: name != null ? name : this.name,
-        unParsedYaml: unParsedYaml != null ? unParsedYaml : this.unParsedYaml);
+  void add(String from, String to, {bool execForm: true}) {
+    _commands.add(new AddCommand(from, to, execForm));
   }
 
-  @override
-  Map toJson() {
-    return (buildJson
-      ..add('name', name)
-      ..addAll(unParsedYaml)).json;
+  void addDir(String from, String to, {bool execForm: true}) {
+    final toDir = to.endsWith('/') ? to : to + '/';
+    add(from, toDir, execForm: execForm);
+  }
+
+  void workDir(String dir) {
+    _commands.add(new WorkDirCommand(dir));
+  }
+
+  void run(String command,
+      {Iterable<String> args: const [], bool execForm: false}) {
+    _commands.add(new RunCommand(command, args, execForm));
+  }
+
+  void cmd(Iterable<String> commandArgs, {bool execForm: true}) {
+    _commands.add(new CmdCommand(commandArgs, execForm));
+  }
+
+  void entryPoint(String command,
+      {Iterable<String> args: const [], bool execForm: true}) {
+    _commands.add(new EntryPointCommand(command, args, execForm));
+  }
+
+  void expose(Iterable<int> ports) {
+    _commands.add(new ExposeCommand(ports));
+  }
+
+  void env(String key, value) {
+    _commands.add(new EnvCommand(key, value));
+  }
+
+  void envs(Map<String, dynamic> values) {
+    values.forEach((key, value) {
+      env(key, value);
+    });
+  }
+
+  void write(IOSink sink) {
+    _commands.forEach((c) {
+      c.write(sink);
+    });
   }
 
   Future save(Directory parentDir) {
     final ioSink =
         new File(p.join(parentDir.path, _standardFileName)).openWrite();
     try {
-      writeYamlString(toJson(), ioSink);
+      write(ioSink);
     } finally {
       return ioSink.close();
     }

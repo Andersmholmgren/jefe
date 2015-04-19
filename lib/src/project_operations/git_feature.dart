@@ -13,6 +13,7 @@ abstract class GitFeatureCommands {
   ProjectCommand init();
   ProjectCommand featureStart(String featureName);
   ProjectCommand featureFinish(String featureName);
+  ProjectDependencyGraphCommand currentFeatureName();
   ProjectCommand releaseStart(String version);
   ProjectCommand releaseFinish(String version);
 }

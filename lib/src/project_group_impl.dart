@@ -150,8 +150,8 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   Future<ProjectImpl> _installChildProject(String name, String gitUri) =>
       ProjectImpl.install(directoryLayout.containerDirectory, name, gitUri);
 
-//  @override
-//  Future<Set<Project>> get projects => allProjects;
+  @override
+  Future<Set<Project>> get projects => allProjects;
 
   @override
   Future<Set<Project>> get allProjects => _allProjectsStream.toSet();
@@ -228,7 +228,8 @@ class GroupDirectoryLayout {
     final basename = p.basename(containerDirectory.path);
     if (!basename.endsWith(_containerSuffix)) {
       throw new ArgumentError(
-          'Invalid container directory. Must start with $_containerSuffix');
+          'Invalid container directory ($containerDirectory). '
+          'Must start with $_containerSuffix');
     }
 
     return basename.replaceAll(_containerSuffix, '');

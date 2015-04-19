@@ -18,4 +18,8 @@ abstract class CommandExecutor {
   /// mode than may be supported by the underlying commands
   Future executeAll(CompositeProjectCommand composite,
       {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand});
+
+  Future executeOn(ProjectCommand command, String projectName);
+
+  Future executeOnGraph(ProjectDependencyGraphCommand command);
 }
