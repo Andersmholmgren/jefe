@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 
 Logger _log = new Logger('devops.project.metadata.yaml');
 
+/// Reads the [ProjectGroupMetaData] from the [File]
 Future<ProjectGroupMetaData> readProjectGroupYaml(File projectGroupFile) async {
   final Map yaml = loadYaml(await projectGroupFile.readAsString());
 

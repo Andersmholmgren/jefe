@@ -83,7 +83,7 @@ class CommandExecutorImpl implements CommandExecutor {
   @override
   Future executeOn(ProjectCommand command, String projectName) async {
     final DependencyGraph graph =
-        await getDependencyGraph(await _projectSource.projects);
+        await getDependencyGraph(await _projectSource.allProjects);
     final projectDependencies = graph.forProject(projectName);
     return await command.process(projectDependencies.project,
         dependencies: projectDependencies.dependencies);
@@ -92,7 +92,7 @@ class CommandExecutorImpl implements CommandExecutor {
   @override
   Future executeOnGraph(ProjectDependencyGraphCommand command) async {
     final DependencyGraph graph =
-        await getDependencyGraph(await _projectSource.projects);
+        await getDependencyGraph(await _projectSource.allProjects);
     return await command.process(graph, _projectSource.containerDirectory);
   }
 }
@@ -108,7 +108,7 @@ class ConcurrentCommandExecutor {
   final CommandConcurrencyMode concurrencyMode;
   final ProjectSource projectSource;
 
-  Iterable<Project> get projects => projectSource.projects;
+  Iterable<Project> get projects => projectSource.allProjects;
   Future<Iterable<ProjectDependencies>> get depthFirst async =>
       (await getDependencyGraph(projects)).depthFirst;
 

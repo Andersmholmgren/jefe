@@ -15,18 +15,22 @@ abstract class ProjectGroupReference
 abstract class ProjectGroup extends ProjectEntity implements ProjectSource {
   ProjectGroupIdentifier get id;
 
-  static Future<ProjectGroup> install(Directory parentDir, String gitUri,
-      {String name}) => ProjectGroupImpl.install(parentDir, gitUri, name: name);
+  /// Install a [ProjectGroup] plus all its [Project]s and child [ProjectGroup]s
+  /// recursively.
+  /// The [gitUri] is the git repository that contains the metadata file for
+  /// the project group.
+  /// The group will be installed as a child of the [parentDirectory]
+  static Future<ProjectGroup> install(Directory parentDirectory, String gitUri,
+          {String name}) =>
+      ProjectGroupImpl.install(parentDirectory, gitUri, name: name);
 
   static Future<ProjectGroup> load(Directory installDirectory) =>
       ProjectGroupImpl.load(installDirectory);
 
-  // the directory that is the container for the group.
-  // Typically named <groupName>_root
-  Directory get containerDirectory;
+  /// References to the projects contained directly within this group.
+  /// This excludes those contained in child groups
+  Iterable<ProjectReference> get projects;
 
-  Future<Set<Project>> get allProjects;
-
-  Future processDependenciesDepthFirst(
-      process(Project project, Iterable<Project> dependencies));
+  /// References to [ProjectGroup]s that are direct children of this group
+  Iterable<ProjectGroupReference> get childGroups;
 }

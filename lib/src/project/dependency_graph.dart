@@ -5,25 +5,11 @@ import 'dart:async';
 import '../pubspec/pubspec.dart';
 import 'package:quiver/iterables.dart';
 
+/// Returns a [DependencyGraph] for the set of [projects]
 Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>
     new DependencyGraph(await _determineDependencies(projects));
 
-Future<Set<ProjectDependencies>> _determineDependencies(
-        Set<Project> projects) async =>
-    (await Future.wait(projects.map((p) => _resolveDependencies(
-        p, new Map.fromIterable(projects, key: (p) => p.name))))).toSet();
-
-Future<ProjectDependencies> _resolveDependencies(
-    Project project, Map<String, Project> projects) async {
-  final PubSpec pubspec = await project.pubspec;
-  final dependencies = pubspec.dependencies.keys
-      .map((name) => projects[name])
-      .where((v) => v != null)
-      .toSet();
-
-  return new ProjectDependencies(project, dependencies);
-}
-
+/// Represents a graph of dependencies between [Project]s
 class DependencyGraph {
   // root nodes are those that nothing else depends on
   Set<_DependencyNode> get _rootNodes => _rootNodeMap.values.toSet();
@@ -43,19 +29,24 @@ class DependencyGraph {
     dependencies.forEach((p) => _rootNodeMap.remove(p));
   }
 
-  Future processDepthFirst(
-      process(Project project, Iterable<Project> dependencies)) async {
-    await Future.forEach(depthFirst,
-        (ProjectDependencies pd) => process(pd.project, pd.dependencies));
-  }
-
+  /// Navigates the graph of [ProjectDependencies] depthFirst such that those
+  /// with no dependencies are returned first and those projects that are
+  /// depended upon by other projects are returned before those projects
   Iterable<ProjectDependencies> get depthFirst {
     Set<Project> visited = new Set();
     return _rootNodes.expand((n) => n.getDepthFirst(visited));
   }
 
+  /// The [ProjectDependencies] for the given [projectName]
   ProjectDependencies forProject(String projectName) =>
       depthFirst.firstWhere((pd) => pd.project.name == projectName);
+
+  @deprecated // TODO: is this at all useful now that depthFirst exists
+  Future processDepthFirst(
+      process(Project project, Iterable<Project> dependencies)) async {
+    await Future.forEach(depthFirst,
+        (ProjectDependencies pd) => process(pd.project, pd.dependencies));
+  }
 
   _DependencyNode _getOrCreateNode(Project project) {
     var node = _nodeMap[project]; // TODO: is this possible?
@@ -67,6 +58,14 @@ class DependencyGraph {
 
     return node;
   }
+}
+
+/// Represents a [Project] and the projects it depends on
+class ProjectDependencies {
+  final Project project;
+  final Set<Project> dependencies;
+
+  ProjectDependencies(this.project, this.dependencies);
 }
 
 class _DependencyNode {
@@ -99,9 +98,18 @@ class _DependencyNode {
   }
 }
 
-class ProjectDependencies {
-  final Project project;
-  final Set<Project> dependencies;
+Future<Set<ProjectDependencies>> _determineDependencies(
+        Set<Project> projects) async =>
+    (await Future.wait(projects.map((p) => _resolveDependencies(
+        p, new Map.fromIterable(projects, key: (p) => p.name))))).toSet();
 
-  ProjectDependencies(this.project, this.dependencies);
+Future<ProjectDependencies> _resolveDependencies(
+    Project project, Map<String, Project> projects) async {
+  final PubSpec pubspec = await project.pubspec;
+  final dependencies = pubspec.dependencies.keys
+      .map((name) => projects[name])
+      .where((v) => v != null)
+      .toSet();
+
+  return new ProjectDependencies(project, dependencies);
 }

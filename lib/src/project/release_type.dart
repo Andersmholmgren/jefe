@@ -9,6 +9,7 @@ Version _bumpMajor(Version v) => v.nextMajor;
 Version _bumpPatch(Version v) => v.nextPatch;
 Version _bumpBreaking(Version v) => v.nextBreaking;
 
+/// Identifies a type of release
 class ReleaseType {
   final _VersionBumper _bump;
   const ReleaseType._(this._bump);
@@ -21,5 +22,7 @@ class ReleaseType {
 
   static const ReleaseType breaking = const ReleaseType._(_bumpBreaking);
 
+  /// Returns a new [Version] that adjusts [version] according to the type
+  /// of release
   Version bump(Version version) => _bump(version);
 }

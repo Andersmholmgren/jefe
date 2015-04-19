@@ -68,11 +68,11 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 
   ProjectGroupIdentifier get id => new ProjectGroupIdentifier(name, gitUri);
 
-  Iterable<ProjectGroupReference> get _childGroups => metaData.childGroups
+  Iterable<ProjectGroupReference> get childGroups => metaData.childGroups
       .toSet()
       .map((gr) => _referenceFactory.createGroupReference(this, gr));
 
-  Iterable<ProjectReference> get _projects => metaData.projects
+  Iterable<ProjectReference> get projects => metaData.projects
       .toSet()
       .map((pr) => _referenceFactory.createProjectReference(this, pr));
 
@@ -102,9 +102,9 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     final projectGroup =
         new ProjectGroupImpl(gitUri, metaData, directoryLayout);
 
-    final projectGroupInstallFutures = projectGroup._childGroups
+    final projectGroupInstallFutures = projectGroup.childGroups
         .map((ref) => projectGroup._installChildGroup(ref.name, ref.gitUri));
-    final projectInstallFutures = projectGroup._projects
+    final projectInstallFutures = projectGroup.projects
         .map((ref) => projectGroup._installChildProject(ref.name, ref.gitUri));
     await Future
         .wait(concat([projectGroupInstallFutures, projectInstallFutures]));
@@ -152,21 +152,18 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
       ProjectImpl.install(directoryLayout.containerDirectory, name, gitUri);
 
   @override
-  Future<Set<Project>> get projects => allProjects;
-
-  @override
   Future<Set<Project>> get allProjects => _allProjectsStream.toSet();
 
   Stream<Project> get _allProjectsStream {
     final Stream<ProjectGroupImpl> childGroupStream =
-        new Stream.fromIterable(_childGroups.map((ref) => ref.get()))
+        new Stream.fromIterable(childGroups.map((ref) => ref.get()))
             .asyncMap((pgf) => pgf);
 
     final Stream<Project> childProjectStream =
         childGroupStream.asyncExpand((pg) => pg._allProjectsStream);
 
     final Stream<Project> projectStream =
-        new Stream.fromIterable(_projects.map((p) => p.get()))
+        new Stream.fromIterable(projects.map((p) => p.get()))
             .asyncMap((p) => p);
 
     final resultStream = streamz.concat([childProjectStream, projectStream]);
