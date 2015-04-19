@@ -98,6 +98,6 @@ Future<Option<String>> gitFlowCurrentFeatureName(GitDir gitDir) async {
 }
 
 Future<Option<String>> gitCurrentTagName(GitDir gitDir) async => new Option(
-    (await gitDir.runCommand(['describe', 'HEAD', '--tags'])).stdout);
+    (await gitDir.runCommand(['describe', 'HEAD', '--tags'])).stdout.trim());
 
 //git describe HEAD --tags
