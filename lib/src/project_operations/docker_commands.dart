@@ -16,6 +16,6 @@ abstract class DockerCommands {
       Map<String, dynamic> environment: const {},
       Iterable<int> exposePorts: const [],
       Iterable<String> entryPointOptions: const [],
-      bool omitClientWhenPathDependencies: true, bool addSshKeys: true,
+      bool omitClientWhenPathDependencies: true, bool setupForPrivateGit: true,
       String targetRootPath: '/app'});
 }

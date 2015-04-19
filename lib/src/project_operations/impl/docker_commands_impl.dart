@@ -20,7 +20,7 @@ class DockerCommandsImpl implements DockerCommands {
       Map<String, dynamic> environment: const {},
       Iterable<int> exposePorts: const [],
       Iterable<String> entryPointOptions: const [],
-      bool omitClientWhenPathDependencies: true, bool addSshKeys: true,
+      bool omitClientWhenPathDependencies: true, bool setupForPrivateGit: true,
       String targetRootPath: '/app'}) => dependencyGraphCommand(
           'generate Dockerfile',
           (DependencyGraph graph, Directory rootDirectory) async {
@@ -47,7 +47,7 @@ class DockerCommandsImpl implements DockerCommands {
 
     dockerfile.from('google/dart', tag: dartVersion);
 
-    if (addSshKeys) {
+    if (setupForPrivateGit) {
       // TODO: ssh required for git protocol. Is there a smaller package?
       // Is there any security issues to adding this?
       dockerfile.run('apt-get', args: ['update']);
