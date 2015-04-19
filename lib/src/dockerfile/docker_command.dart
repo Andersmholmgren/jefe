@@ -74,7 +74,8 @@ class RunCommand extends _BaseRunCommand {
 
 class CmdCommand extends _BaseCommandWithExecForm {
   final Iterable<String> commandArgs;
-  CmdCommand(this.commandArgs, bool execForm) : super('CMD', execForm);
+  CmdCommand(this.commandArgs, bool execForm)
+      : super('CMD', execForm, omitWhenArgsEmpty: false);
 }
 
 class EntryPointCommand extends _BaseRunCommand {
@@ -86,12 +87,14 @@ abstract class _BaseCommandWithExecForm extends DockerCommand {
   final String name;
   Iterable get commandArgs;
   final bool execForm;
+  final bool omitWhenArgsEmpty;
 
-  _BaseCommandWithExecForm(this.name, this.execForm);
+  _BaseCommandWithExecForm(this.name, this.execForm,
+      {this.omitWhenArgsEmpty: true});
 
   @override
   void write(IOSink sink) {
-    if (commandArgs.isNotEmpty) {
+    if (commandArgs.isNotEmpty || !omitWhenArgsEmpty) {
       if (execForm) {
         final list = _formatList(commandArgs);
         sink.writeln('$name $list');
