@@ -18,6 +18,7 @@ dependencies:
   stack_trace: any
   pubspec: '^0.0.1+2'
   yamlicious: '^0.0.1'
+  dockerfile: '^0.0.1'
 #  den_api: any
 dev_dependencies:
   unittest: any

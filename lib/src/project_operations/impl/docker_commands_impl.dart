@@ -4,7 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:devops/src/project/project.dart';
 import 'package:devops/src/project_operations/project_command.dart';
 import 'package:devops/src/project_operations/docker_commands.dart';
-import 'package:devops/src/dockerfile/dockerfile.dart';
+import 'package:dockerfile/dockerfile.dart';
 import 'package:path/path.dart' as p;
 import 'package:devops/src/project/dependency_graph.dart';
 import 'dart:io';
