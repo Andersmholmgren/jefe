@@ -18,7 +18,7 @@ class DockerCommandsImpl implements DockerCommands {
   ProjectDependencyGraphCommand generateDockerfile(
           Iterable<String> topLevelProjectNames, Directory outputDirectory) =>
       dependencyGraphCommand('generate Dockerfile',
-          (DependencyGraph graph) async {
+          (DependencyGraph graph, _) async {
     final projectDependencies = topLevelProjectNames.map(graph.forProject);
 
     final allDependencies = projectDependencies
@@ -57,8 +57,10 @@ class DockerCommandsImpl implements DockerCommands {
       {String dartVersion: 'latest', Map<String, dynamic> environment: const {},
       Iterable<int> exposePorts: const [],
       Iterable<String> entryPointOptions: const [],
-      bool omitClientWhenPathDependencies: true}) => dependencyGraphCommand(
-          'generate Dockerfile', (DependencyGraph graph) async {
+      bool omitClientWhenPathDependencies: true,
+      String targetRootPath: '/app'}) => dependencyGraphCommand(
+          'generate Dockerfile',
+          (DependencyGraph graph, Directory rootDirectory) async {
     final serverProjectDeps = graph.forProject(serverProjectName);
     final clientProjectDeps = graph.forProject(clientProjectName);
 
@@ -75,24 +77,8 @@ class DockerCommandsImpl implements DockerCommands {
         : concat([serverPathDependentProjects, clientPathDependentProjects])
             .toSet();
 
-//    final allDependencies = concat(
-//            [serverProjectDeps.dependencies, clientProjectDeps.dependencies])
-//        .toSet();
-//
-//    final topLevelProjects = [
-//      serverProjectDeps.project,
-//      clientProjectDeps.project
-//    ];
-//
-//    final depMap =
-//        new Map.fromIterable(allDependencies, key: (project) => project.name);
-//
-//    final pathDependentProjects = topLevelProjects.expand((Project project) {
-//      final deps = project.pubspec.dependencies;
-//      final pathKeys = deps.keys.where(
-//          (key) => deps[key] is PathReference && depMap.keys.contains(key));
-//      return pathKeys.map((key) => depMap[key]);
-//    }).toSet();
+    final pathHandler = new _PathHandler(
+        rootDirectory.path, targetRootPath, pathDependentProjects.isNotEmpty);
 
     final dockerfile = new Dockerfile();
 
@@ -103,9 +89,9 @@ class DockerCommandsImpl implements DockerCommands {
       dockerfile.addDir(dir, dir);
     });
 
-    _addTopLevelProjectFiles(dockerfile, serverProjectDeps);
+    _addTopLevelProjectFiles(dockerfile, serverProjectDeps, pathHandler);
     if (!omitClient) {
-      _addTopLevelProjectFiles(dockerfile, clientProjectDeps);
+      _addTopLevelProjectFiles(dockerfile, clientProjectDeps, pathHandler);
       dockerfile.run('pub', args: ['build']);
     }
 
@@ -117,39 +103,80 @@ class DockerCommandsImpl implements DockerCommands {
     dockerfile.expose(exposePorts);
 
     dockerfile.entryPoint('/usr/bin/dart',
-        args: concat([entryPointOptions, [serverMain]]));
+        args: concat(
+            [entryPointOptions, [pathHandler.targetPath(serverMain)]]));
 
     await dockerfile.save(outputDirectory);
   });
 
-  _addTopLevelProjectFiles(
-      Dockerfile dockerfile, ProjectDependencies topLevelProjectDeps) {
+  _addTopLevelProjectFiles(Dockerfile dockerfile,
+      ProjectDependencies topLevelProjectDeps, _PathHandler pathHandler) {
+    final addHelper = new _AddHelper(pathHandler, dockerfile);
     final dir = topLevelProjectDeps.project.installDirectory;
     final dirPath = dir.path;
 
     final pubspecYaml = p.join(dirPath, 'pubspec.yaml');
-    dockerfile.add(pubspecYaml, pubspecYaml);
+    addHelper.add(pubspecYaml);
 
     final pubspecLock = p.join(dirPath, 'pubspec.lock');
-    dockerfile.add(pubspecLock, pubspecLock);
+    addHelper.add(pubspecLock);
 
-    dockerfile.workDir(dirPath);
+    dockerfile.workDir(pathHandler.targetPath(dirPath));
     dockerfile.run('pub', args: ['get']);
 
-    dockerfile.addDir(dirPath, dirPath);
+    addHelper.addDir(dirPath);
     dockerfile.run('pub', args: ['get', '--offline']);
+  }
+
+  Set<Project> _pathDependentProjects(ProjectDependencies projectDependencies) {
+    final depMap = new Map.fromIterable(projectDependencies.dependencies,
+        key: (project) => project.name);
+
+    final deps = projectDependencies.project.pubspec.dependencies;
+    final pathKeys = deps.keys.where(
+        (key) => deps[key] is PathReference && depMap.keys.contains(key));
+
+    return pathKeys.map((key) => depMap[key]).toSet();
   }
 }
 
-Set<Project> _pathDependentProjects(ProjectDependencies projectDependencies) {
-  final depMap = new Map.fromIterable(projectDependencies.dependencies,
-      key: (project) => project.name);
+class _PathHandler {
+  final String rootPath;
+  final String targetRootPath;
+  final bool hasPathDependencies;
 
-  final deps = projectDependencies.project.pubspec.dependencies;
-  final pathKeys = deps.keys
-      .where((key) => deps[key] is PathReference && depMap.keys.contains(key));
+  _PathHandler(this.rootPath, this.targetRootPath, this.hasPathDependencies);
 
-  return pathKeys.map((key) => depMap[key]).toSet();
+  String sourcePath(String source) {
+    if (hasPathDependencies) {
+      return source;
+    }
+
+    return p.relative(source, from: rootPath);
+  }
+
+  String targetPath(String source) {
+    if (hasPathDependencies) {
+      return source;
+    }
+
+    final subPath = p.relative(source, from: rootPath);
+    return p.join(targetRootPath, subPath);
+  }
+}
+
+class _AddHelper {
+  final _PathHandler pathHandler;
+  final Dockerfile dockerfile;
+  _AddHelper(this.pathHandler, this.dockerfile);
+
+  void add(String path) {
+    dockerfile.add(pathHandler.sourcePath(path), pathHandler.targetPath(path));
+  }
+  void addDir(String path) {
+    dockerfile.addDir(
+        pathHandler.sourcePath(path), pathHandler.targetPath(path));
+  }
 }
 
 /*

@@ -18,5 +18,6 @@ abstract class DockerCommands {
       {String dartVersion: 'latest', Map<String, dynamic> environment: const {},
       Iterable<int> exposePorts: const [],
       Iterable<String> entryPointOptions: const [],
-      bool omitClientWhenPathDependencies: true});
+      bool omitClientWhenPathDependencies: true,
+      String targetRootPath: '/app'});
 }

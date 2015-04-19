@@ -91,7 +91,7 @@ class CommandExecutorImpl implements CommandExecutor {
   Future executeOnGraph(ProjectDependencyGraphCommand command) async {
     final DependencyGraph graph =
         await getDependencyGraph(await _projectSource.projects);
-    await command.process(graph);
+    await command.process(graph, _projectSource.containerDirectory);
   }
 }
 

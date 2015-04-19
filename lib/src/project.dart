@@ -43,6 +43,8 @@ abstract class ProjectSource {
       process(Project project, Iterable<Project> dependencies));
 
   Future<Iterable<Project>> get projects;
+
+  Directory get containerDirectory;
 }
 
 abstract class ProjectGroup extends ProjectEntity implements ProjectSource {

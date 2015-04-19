@@ -4,6 +4,7 @@ import 'package:devops/src/project.dart';
 import 'dart:async';
 import 'package:logging/logging.dart';
 import 'package:devops/src/dependency_graph.dart';
+import 'dart:io';
 
 Logger _log = new Logger('devops.project.operations.core');
 
@@ -52,12 +53,13 @@ abstract class ProjectCommand {
   Future process(Project project, {Iterable<Project> dependencies});
 }
 
-typedef Future ProjectDependencyGraphFunction(DependencyGraph graph);
+typedef Future ProjectDependencyGraphFunction(
+    DependencyGraph graph, Directory rootDirectory);
 
 /// a command that operates on the dependency graph as a whole
 abstract class ProjectDependencyGraphCommand {
   String get name;
-  Future process(DependencyGraph graph);
+  Future process(DependencyGraph graph, Directory rootDirectory);
 }
 
 /// [concurrencyMode] can be used to limit the concurrencyMode of the
@@ -112,10 +114,10 @@ class _DefaultProjectDependencyGraphCommand
   _DefaultProjectDependencyGraphCommand(this.name, this.function);
 
   @override
-  Future process(DependencyGraph graph) async {
+  Future process(DependencyGraph graph, Directory rootDirectory) async {
     _log.info('Executing command "$name"');
 
-    final result = await function(graph);
+    final result = await function(graph, rootDirectory);
 
     _log.finer('Completed command "$name"');
     return result;
