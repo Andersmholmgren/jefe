@@ -24,7 +24,7 @@ abstract class ProjectSource {
   Future processDependenciesDepthFirst(
       process(Project project, Iterable<Project> dependencies));
 
-  Future<Iterable<Project>> get projects;
+  Future<Iterable<Project>> get allProjects;
 
   Directory get containerDirectory;
 }
