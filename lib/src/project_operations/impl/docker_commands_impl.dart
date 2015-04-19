@@ -32,9 +32,6 @@ class DockerCommandsImpl implements DockerCommands {
     final clientPathDependentProjects =
         _pathDependentProjects(clientProjectDeps);
 
-//    final serverPathDependentProjects = new Set();
-//    final clientPathDependentProjects = new Set();
-
     final omitClient = omitClientWhenPathDependencies &&
         clientPathDependentProjects.isNotEmpty;
 
@@ -51,7 +48,15 @@ class DockerCommandsImpl implements DockerCommands {
     dockerfile.from('google/dart', tag: dartVersion);
 
     if (addSshKeys) {
+      // TODO: ssh required for git protocol. Is there a smaller package?
+      // Is there any security issues to adding this?
+      dockerfile.run('apt-get', args: ['update']);
+      dockerfile.run('apt-get', args: ['install', '-y', 'ssh']);
       dockerfile.add('id_rsa', '/root/.ssh/id_rsa');
+      dockerfile.run('ssh-keyscan',
+          args: ['bitbucket.org', '>>', '/root/.ssh/known_hosts']);
+      dockerfile.run('ssh-keyscan',
+          args: ['github.com', '>>', '/root/.ssh/known_hosts']);
     }
 
     pathDependentProjects.forEach((prj) {
