@@ -10,6 +10,7 @@ import 'package:devops/src/pubspec/dependency.dart';
 import 'package:devops/src/dependency_graph.dart';
 import 'dart:io';
 import 'package:quiver/iterables.dart';
+import 'dart:async';
 
 Logger _log = new Logger('devops.project.operations.docker.impl');
 
@@ -82,8 +83,8 @@ class DockerCommandsImpl implements DockerCommands {
   });
 
   ProjectDependencyGraphCommand generateProductionDockerfile(
-      String serverProjectName, String clientProjectName, String serverGitRef,
-      String clientGitRef, {Directory outputDirectory,
+      String serverProjectName, String clientProjectName, {String serverGitRef,
+      String clientGitRef, Directory outputDirectory,
       String dartVersion: 'latest', Map<String, dynamic> environment: const {},
       Iterable<int> exposePorts: const [],
       Iterable<String> entryPointOptions: const [],
@@ -102,9 +103,9 @@ class DockerCommandsImpl implements DockerCommands {
 
     _setupForPrivateGit(true, dockerfile);
 
-    _cloneTopLevelProject(
+    await _cloneTopLevelProject(
         dockerfile, serverProjectDeps, serverGitRef, pathHandler);
-    _cloneTopLevelProject(
+    await _cloneTopLevelProject(
         dockerfile, clientProjectDeps, clientGitRef, pathHandler);
     dockerfile.run('pub', args: ['build']);
 
@@ -145,9 +146,13 @@ class DockerCommandsImpl implements DockerCommands {
     dockerfile.run('pub', args: ['get', '--offline']);
   }
 
-  void _cloneTopLevelProject(Dockerfile dockerfile,
+  Future _cloneTopLevelProject(Dockerfile dockerfile,
       ProjectDependencies topLevelProjectDeps, String gitRef,
-      _PathHandler pathHandler) {
+      _PathHandler pathHandler) async {
+    final ref = gitRef != null
+        ? gitRef
+        : await topLevelProjectDeps.project.currentGitCommitHash;
+
     final dir = topLevelProjectDeps.project.installDirectory;
     final dirPath = dir.path;
 
@@ -155,7 +160,7 @@ class DockerCommandsImpl implements DockerCommands {
     dockerfile.run('git',
         args: ['clone', '-n', topLevelProjectDeps.project.gitUri, targetPath]);
     dockerfile.workDir(targetPath);
-    dockerfile.run('git', args: ['checkout', gitRef]);
+    dockerfile.run('git', args: ['checkout', ref]);
 
     dockerfile.run('pub', args: ['get']);
   }

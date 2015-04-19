@@ -80,9 +80,9 @@ main123() async {
 
   final docker = new DockerCommands();
   final genDocker = docker.generateProductionDockerfile(
-      'gitbacklog_server', 'gitbacklog_client', 'serverref', 'clientreft',
+      'gitbacklog_server', 'gitbacklog_client',
       outputDirectory: new Directory('/Users/blah/dart/jefe_jefe'),
-      dartVersion: '1.9.1',
+      dartVersion: '1.9.3',
       environment: environment,
       exposePorts: exposePorts,
       entryPointOptions: entryPointOptions);

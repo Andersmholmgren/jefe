@@ -20,8 +20,8 @@ abstract class DockerCommands {
       String targetRootPath: '/app'});
 
   ProjectDependencyGraphCommand generateProductionDockerfile(
-      String serverProjectName, String clientProjectName, String serverGitRef,
-      String clientGitRef, {Directory outputDirectory,
+      String serverProjectName, String clientProjectName, {String serverGitRef,
+      String clientGitRef, Directory outputDirectory,
       String dartVersion: 'latest', Map<String, dynamic> environment: const {},
       Iterable<int> exposePorts: const [],
       Iterable<String> entryPointOptions: const [],
