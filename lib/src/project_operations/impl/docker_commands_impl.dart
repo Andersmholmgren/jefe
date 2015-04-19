@@ -20,7 +20,7 @@ class DockerCommandsImpl implements DockerCommands {
       Map<String, dynamic> environment: const {},
       Iterable<int> exposePorts: const [],
       Iterable<String> entryPointOptions: const [],
-      bool omitClientWhenPathDependencies: true,
+      bool omitClientWhenPathDependencies: true, bool addSshKeys: true,
       String targetRootPath: '/app'}) => dependencyGraphCommand(
           'generate Dockerfile',
           (DependencyGraph graph, Directory rootDirectory) async {
@@ -49,6 +49,10 @@ class DockerCommandsImpl implements DockerCommands {
     final dockerfile = new Dockerfile();
 
     dockerfile.from('google/dart', tag: dartVersion);
+
+    if (addSshKeys) {
+      dockerfile.add('id_rsa', '/root/.ssh/id_rsa');
+    }
 
     pathDependentProjects.forEach((prj) {
       final dir = prj.installDirectory.path;
