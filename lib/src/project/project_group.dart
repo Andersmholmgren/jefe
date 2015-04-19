@@ -5,20 +5,10 @@ import 'dart:io';
 import 'impl/project_group_impl.dart';
 import '../spec/JefeSpec.dart';
 import 'project.dart';
+import 'core.dart';
 
 abstract class ProjectGroupReference
     implements ProjectEntityReference<ProjectGroup> {}
-
-abstract class ProjectSource {
-  Future visitAllProjects(process(Project project));
-
-  Future processDependenciesDepthFirst(
-      process(Project project, Iterable<Project> dependencies));
-
-  Future<Iterable<Project>> get projects;
-
-  Directory get containerDirectory;
-}
 
 abstract class ProjectGroup extends ProjectEntity implements ProjectSource {
   ProjectGroupIdentifier get id;

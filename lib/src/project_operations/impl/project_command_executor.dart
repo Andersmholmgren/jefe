@@ -11,7 +11,7 @@ import 'package:option/option.dart';
 import 'package:frappe/frappe.dart';
 import 'package:devops/src/util/frappe_utils.dart';
 import 'package:devops/src/project/dependency_graph.dart';
-import 'package:devops/src/project/project_group.dart';
+import 'package:devops/src/project/core.dart';
 
 Logger _log = new Logger('devops.project.operations.impl');
 
