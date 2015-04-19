@@ -72,6 +72,11 @@ class RunCommand extends _BaseRunCommand {
       : super('RUN', command, args, execForm);
 }
 
+class CmdCommand extends _BaseCommandWithExecForm {
+  final Iterable<String> commandArgs;
+  CmdCommand(this.commandArgs, bool execForm) : super('CMD', execForm);
+}
+
 class EntryPointCommand extends _BaseRunCommand {
   EntryPointCommand(String command, Iterable<String> args, bool execForm)
       : super('ENTRYPOINT', command, args, execForm);
