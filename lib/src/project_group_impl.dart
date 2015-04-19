@@ -228,7 +228,8 @@ class GroupDirectoryLayout {
     final basename = p.basename(containerDirectory.path);
     if (!basename.endsWith(_containerSuffix)) {
       throw new ArgumentError(
-          'Invalid container directory. Must start with $_containerSuffix');
+          'Invalid container directory ($containerDirectory). '
+          'Must start with $_containerSuffix');
     }
 
     return basename.replaceAll(_containerSuffix, '');

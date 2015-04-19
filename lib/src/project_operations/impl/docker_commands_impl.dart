@@ -52,7 +52,8 @@ class DockerCommandsImpl implements DockerCommands {
 
     pathDependentProjects.forEach((prj) {
       final dir = prj.installDirectory.path;
-      dockerfile.addDir(dir, dir);
+      dockerfile.addDir(
+          pathHandler.sourcePath(dir), pathHandler.targetPath(dir));
     });
 
     _addTopLevelProjectFiles(dockerfile, serverProjectDeps, pathHandler);
@@ -72,9 +73,8 @@ class DockerCommandsImpl implements DockerCommands {
         args: concat(
             [entryPointOptions, [pathHandler.targetPath(serverMain)]]));
 
-    final saveDirectory = outputDirectory != null
-        ? outputDirectory
-        : serverProjectDeps.project.installDirectory;
+    final saveDirectory =
+        outputDirectory != null ? outputDirectory : rootDirectory;
     await dockerfile.save(saveDirectory);
   });
 
@@ -117,12 +117,7 @@ class _PathHandler {
   _PathHandler(this.rootPath, this.targetRootPath, this.hasPathDependencies);
 
   String sourcePath(String source) {
-    return source;
-//    if (hasPathDependencies) {
-//      return source;
-//    }
-//
-//    return p.relative(source, from: rootPath);
+    return p.relative(source, from: rootPath);
   }
 
   String targetPath(String source) {

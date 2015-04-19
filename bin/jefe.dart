@@ -55,7 +55,7 @@ class Jefe {
       help: 'The directory that contains the root of the projecs',
       abbr: 'd') String rootDirectory: '.'}) async {
     final executor = await load(rootDirectory);
-    await executor.executeAll(lifecycle.startNewFeature(featureName));
+    await executor.executeAll(lifecycle.completeFeature(featureName));
   }
 
   @SubCommand(help: 'Runs the given command in all projects')
