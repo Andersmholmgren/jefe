@@ -54,8 +54,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
       : super(gitUri, installDirectory);
 
   static Future<ProjectImpl> install(
-      Directory parentDir, String name, String gitUri,
-      {bool recursive: true}) async {
+      Directory parentDir, String name, String gitUri) async {
     _log.info('installing project $name from $gitUri into $parentDir');
 
     await parentDir.create(recursive: true);

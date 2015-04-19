@@ -15,10 +15,10 @@ abstract class Project extends ProjectEntity {
   PubSpec get pubspec;
   ProjectIdentifier get id;
 
+  /// Installs a Project from the [gitUri] into the [parentDirectory]
   static Future<Project> install(
-          Directory parentDir, String name, String gitUri,
-          {bool recursive: true}) =>
-      ProjectImpl.install(parentDir, name, gitUri, recursive: recursive);
+          Directory parentDirectory, String name, String gitUri) =>
+      ProjectImpl.install(parentDirectory, name, gitUri);
 
   static Future<Project> load(Directory installDirectory) =>
       ProjectImpl.load(installDirectory);

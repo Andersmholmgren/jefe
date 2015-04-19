@@ -10,6 +10,8 @@ import 'core.dart';
 abstract class ProjectGroupReference
     implements ProjectEntityReference<ProjectGroup> {}
 
+/// Represents a group of related [Project]s. These projects are managed as
+/// a unit and typically have dependencies between them.
 abstract class ProjectGroup extends ProjectEntity implements ProjectSource {
   ProjectGroupIdentifier get id;
 
