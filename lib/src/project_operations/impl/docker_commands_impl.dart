@@ -160,7 +160,7 @@ class DockerCommandsImpl implements DockerCommands {
     dockerfile.run('git',
         args: ['clone', '-n', topLevelProjectDeps.project.gitUri, targetPath]);
     dockerfile.workDir(targetPath);
-    dockerfile.run('git', args: ['checkout', ref]);
+    dockerfile.run('git', args: ['checkout', '-q', ref]);
 
     dockerfile.run('pub', args: ['get']);
   }
