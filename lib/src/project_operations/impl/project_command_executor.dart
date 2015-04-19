@@ -74,8 +74,9 @@ class CommandExecutorImpl implements CommandExecutor {
 
   Future _executeSerially(CompositeProjectCommand composite) async {
     _log.info('Executing composite command "${composite.name}"');
-    await Future.forEach(composite.commands, execute);
+    final result = await Future.forEach(composite.commands, execute);
     _log.finer('Completed command "${composite.name}"');
+    return result;
   }
 
   @override
@@ -83,7 +84,7 @@ class CommandExecutorImpl implements CommandExecutor {
     final DependencyGraph graph =
         await getDependencyGraph(await _projectSource.projects);
     final projectDependencies = graph.forProject(projectName);
-    await command.process(projectDependencies.project,
+    return await command.process(projectDependencies.project,
         dependencies: projectDependencies.dependencies);
   }
 
@@ -91,7 +92,7 @@ class CommandExecutorImpl implements CommandExecutor {
   Future executeOnGraph(ProjectDependencyGraphCommand command) async {
     final DependencyGraph graph =
         await getDependencyGraph(await _projectSource.projects);
-    await command.process(graph, _projectSource.containerDirectory);
+    return await command.process(graph, _projectSource.containerDirectory);
   }
 }
 
