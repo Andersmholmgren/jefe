@@ -13,3 +13,4 @@ export 'src/project_operations/project_lifecycle.dart';
 export 'src/project_operations/process_commands.dart';
 export 'src/project_operations/docker_commands.dart';
 export 'src/project_operations/all_commands.dart';
+export 'src/spec/JefeSpec.dart';
