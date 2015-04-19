@@ -171,6 +171,9 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     return resultStream;
   }
 
+  Future<DependencyGraph> get dependencyGraph async =>
+      getDependencyGraph(await allProjects);
+
   @override
   Future processDependenciesDepthFirst(
       process(Project project, Iterable<Project> dependencies)) async {

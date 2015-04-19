@@ -6,6 +6,7 @@ import 'impl/project_group_impl.dart';
 import '../spec/JefeSpec.dart';
 import 'project.dart';
 import 'core.dart';
+import 'package:devops/src/project/dependency_graph.dart';
 
 abstract class ProjectGroupReference
     implements ProjectEntityReference<ProjectGroup> {}
@@ -33,4 +34,7 @@ abstract class ProjectGroup extends ProjectEntity implements ProjectSource {
 
   /// References to [ProjectGroup]s that are direct children of this group
   Iterable<ProjectGroupReference> get childGroups;
+
+  /// Creates a graph of the dependency relationships for [allProjects]
+  Future<DependencyGraph> get dependencyGraph;
 }
