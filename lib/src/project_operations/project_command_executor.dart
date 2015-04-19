@@ -1,11 +1,10 @@
 library devops.project.operations.executor;
 
-import 'package:devops/src/project.dart';
-
 import 'dart:async';
 import 'package:devops/src/project_operations/project_command.dart';
 
 import 'impl/project_command_executor.dart';
+import 'package:devops/src/project/project_group.dart';
 
 abstract class CommandExecutor {
   factory CommandExecutor(ProjectSource projectSource) = CommandExecutorImpl;

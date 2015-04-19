@@ -1,15 +1,13 @@
 library devops.project.impl;
 
 import 'dart:async';
-import 'project.dart';
+import '../project.dart';
 import 'package:git/git.dart';
-import 'package:devops/src/git/git.dart';
+import '../../git/git.dart';
 import 'package:logging/logging.dart';
-import 'package:devops/src/pubspec/pubspec.dart';
-import 'package:devops/src/pubspec/dependency.dart';
-import 'pub.dart' as pub;
-import 'package:devops/src/spec/JefeSpec.dart';
-import 'package:devops/src/project_group_impl.dart';
+import '../../pubspec/pubspec.dart';
+import '../../spec/JefeSpec.dart';
+import 'package:devops/src/project/impl/project_group_impl.dart';
 import 'dart:io';
 
 Logger _log = new Logger('devops.project.impl');

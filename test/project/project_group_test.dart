@@ -1,18 +1,14 @@
 library devops.project.group.test;
 
-import 'package:devops/src/dependency_graph.dart';
 import 'package:scheduled_test/scheduled_test.dart';
-import 'package:devops/src/project.dart';
-import 'package:mockito/mockito.dart';
-import 'package:devops/src/pubspec/pubspec.dart';
+import 'package:devops/src/project/project.dart';
 import 'dart:async';
-import 'package:devops/src/pubspec/dependency.dart';
-import 'package:stack_trace/stack_trace.dart';
 import 'package:logging/logging.dart';
-import 'package:devops/src/project_group_impl.dart';
+import 'package:devops/src/project/impl/project_group_impl.dart';
 import 'package:devops/src/spec/JefeSpec.dart';
 import 'dart:io';
 import 'test_helpers.dart';
+import 'package:devops/src/project/project_group.dart';
 
 main() async {
   Logger.root.level = Level.ALL;

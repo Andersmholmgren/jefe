@@ -2,14 +2,14 @@ library devops.project.operations.lifecycle.impl;
 
 import 'dart:async';
 import 'package:devops/src/project_operations/git_feature.dart';
-import 'package:devops/src/project_operations/impl/core.dart';
 import 'package:logging/logging.dart';
-import 'package:devops/src/project.dart';
+import 'package:devops/src/project/project.dart';
 import 'package:devops/src/project_operations/project_lifecycle.dart';
 import 'package:devops/src/project_operations/project_command.dart';
 import 'package:devops/src/project_operations/git_commands.dart';
 import 'package:devops/src/project_operations/pub_commands.dart';
 import 'package:devops/src/project_operations/pubspec_commands.dart';
+import 'package:devops/src/project/release_type.dart';
 
 Logger _log = new Logger('devops.project.operations.git.feature.impl');
 

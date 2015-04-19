@@ -1,6 +1,6 @@
 library devops.project.operations.executor.impl;
 
-import 'package:devops/src/project.dart';
+import 'package:devops/src/project/project.dart';
 
 import 'package:logging/logging.dart';
 import 'dart:async';
@@ -10,7 +10,8 @@ import 'dart:collection';
 import 'package:option/option.dart';
 import 'package:frappe/frappe.dart';
 import 'package:devops/src/util/frappe_utils.dart';
-import 'package:devops/src/dependency_graph.dart';
+import 'package:devops/src/project/dependency_graph.dart';
+import 'package:devops/src/project/project_group.dart';
 
 Logger _log = new Logger('devops.project.operations.impl');
 

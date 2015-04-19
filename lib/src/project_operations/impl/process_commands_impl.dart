@@ -1,7 +1,7 @@
 library devops.project.operations.process.impl;
 
 import 'package:logging/logging.dart';
-import 'package:devops/src/project.dart';
+import 'package:devops/src/project/project.dart';
 import 'package:devops/src/project_operations/project_command.dart';
 import 'package:devops/src/project_operations/process_commands.dart';
 import 'package:devops/src/util/process_utils.dart';

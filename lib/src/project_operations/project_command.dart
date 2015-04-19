@@ -1,9 +1,9 @@
 library devops.project.operations.core;
 
-import 'package:devops/src/project.dart';
+import 'package:devops/src/project/project.dart';
 import 'dart:async';
 import 'package:logging/logging.dart';
-import 'package:devops/src/dependency_graph.dart';
+import 'package:devops/src/project/dependency_graph.dart';
 import 'dart:io';
 
 Logger _log = new Logger('devops.project.operations.core');

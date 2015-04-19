@@ -3,9 +3,9 @@ library devops.project.operations.git.feature.impl;
 import 'package:devops/src/project_operations/git_feature.dart';
 import 'package:devops/src/git/git.dart';
 import 'package:logging/logging.dart';
-import 'package:devops/src/project.dart';
+import 'package:devops/src/project/project.dart';
 import 'package:devops/src/project_operations/project_command.dart';
-import 'package:devops/src/dependency_graph.dart';
+import 'package:devops/src/project/dependency_graph.dart';
 import 'dart:io';
 import 'package:option/option.dart';
 

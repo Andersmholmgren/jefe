@@ -3,7 +3,6 @@
 
 library devops_test;
 
-import 'package:devops/devops.dart';
 import 'package:unittest/unittest.dart';
 
 void main() => defineTests();

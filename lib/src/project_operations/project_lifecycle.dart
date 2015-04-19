@@ -1,9 +1,9 @@
 library devops.project.operations.lifecycle;
 
-import 'package:devops/src/project.dart';
 import 'package:devops/src/project_operations/git_feature.dart';
 import 'package:devops/src/project_operations/project_command.dart';
 import 'impl/project_lifecycle_impl.dart';
+import 'package:devops/src/project/release_type.dart';
 
 abstract class ProjectLifecycle {
   factory ProjectLifecycle(

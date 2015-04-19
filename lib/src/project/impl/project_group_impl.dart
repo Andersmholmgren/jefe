@@ -1,18 +1,19 @@
 library devops.project.group.impl;
 
 import 'dart:async';
-import 'project.dart';
+import '../project.dart';
+import '../project_group.dart';
 import 'dart:io';
 import 'package:git/git.dart';
-import 'package:devops/src/git/git.dart';
+import '../../git/git.dart';
 import 'package:quiver/iterables.dart';
 import 'package:quiver/streams.dart' as streamz;
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
-import 'dependency_graph.dart';
-import 'package:devops/src/spec/JefeSpec.dart' as spec;
-import 'package:devops/src/project_impl.dart';
-import 'package:devops/src/spec/JefeSpec.dart';
+import '../dependency_graph.dart';
+import '../../spec/JefeSpec.dart' as spec;
+import 'project_impl.dart';
+import '../../spec/JefeSpec.dart';
 
 Logger _log = new Logger('devops.project.group.impl');
 
@@ -189,11 +190,6 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   @override
   Future visitAllProjects(process(Project project)) async {
 //    _log.info('$taskDescription for group ${metaData.name}');
-    await Future.wait((await allProjects).map((p) => process(p)));
-  }
-
-  Future _visitAllProjects(String taskDescription, process(Project p)) async {
-    _log.info('$taskDescription for group ${metaData.name}');
     await Future.wait((await allProjects).map((p) => process(p)));
   }
 }

@@ -1,6 +1,5 @@
 library devops.project.test;
 
-import 'package:devops/src/project.dart';
 import 'dart:io';
 import 'package:devops/src/git/git.dart';
 import 'package:path/path.dart' as p;
@@ -11,6 +10,7 @@ import 'package:stack_trace/stack_trace.dart';
 import 'package:devops/src/project_operations/project_command_executor.dart';
 import 'package:devops/src/project_operations/project_lifecycle.dart';
 import 'package:devops/src/project_operations/docker_commands.dart';
+import 'package:devops/src/project/project_group.dart';
 
 mainB() async {
   final spec.ProjectGroupMetaData metadata = await spec.ProjectGroupMetaData
@@ -40,8 +40,7 @@ mainA() async {
   final Directory installDir2 = await Directory.systemTemp.createTemp();
   print(installDir2);
 
-  final GitDir gitDir2 =
-      await clone(p.join(installDir.path, 'shelf_path'), installDir2);
+  await clone(p.join(installDir.path, 'shelf_path'), installDir2);
 }
 
 //main() async {

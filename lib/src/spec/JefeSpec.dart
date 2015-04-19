@@ -3,7 +3,7 @@ library devops.project.spec;
 import 'dart:async';
 import 'dart:io';
 import 'package:devops/devops.dart';
-import 'package:devops/src/project_yaml.dart';
+import 'package:devops/src/project/project_yaml.dart';
 import 'package:path/path.dart' as p;
 
 abstract class ProjectGroupMetaData {

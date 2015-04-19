@@ -21,10 +21,8 @@ String gitWorkspacePath(String gitUri, Directory parentDirectory) {
 
 Future<GitDir> clone(String gitUri, Directory parentDirectory) async {
   _log.info('cloning git repo $gitUri into parent directory $parentDirectory');
-  final ProcessResult result = await runGit(['clone', gitUri.toString()],
+  await runGit(['clone', gitUri.toString()],
       processWorkingDir: parentDirectory.path);
-
-//  print(result.stdout);
 
   _log.finest(
       'successfully cloned git repo $gitUri into parent directory $parentDirectory');

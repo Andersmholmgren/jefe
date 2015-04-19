@@ -1,7 +1,7 @@
 library devops.project.operations.pub.spec.impl;
 
 import 'package:logging/logging.dart';
-import 'package:devops/src/project.dart';
+import 'package:devops/src/project/project.dart';
 import 'package:devops/src/project_operations/project_command.dart';
 import 'package:devops/src/project_operations/pubspec_commands.dart';
 import 'package:devops/src/pubspec/pubspec.dart';

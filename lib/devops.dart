@@ -4,7 +4,10 @@
 /// The devops library.
 library devops;
 
-export 'src/project.dart';
+export 'src/project/project.dart';
+export 'src/project/project_group.dart';
+export 'src/project/project_yaml.dart';
+export 'src/project/release_type.dart';
 export 'src/project_operations/project_command_executor.dart';
 export 'src/project_operations/project_lifecycle.dart';
 export 'src/project_operations/process_commands.dart';

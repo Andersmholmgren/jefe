@@ -1,8 +1,8 @@
 library devops.project.dependency.test;
 
-import 'package:devops/src/dependency_graph.dart';
+import 'package:devops/src/project/dependency_graph.dart';
 import 'package:scheduled_test/scheduled_test.dart';
-import 'package:devops/src/project.dart';
+import 'package:devops/src/project/project.dart';
 import 'package:logging/logging.dart';
 import 'test_helpers.dart';
 
