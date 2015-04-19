@@ -79,8 +79,8 @@ main123() async {
   Iterable<String> entryPointOptions = ["--debug:5858/0.0.0.0"];
 
   final docker = new DockerCommands();
-  final genDocker = docker.generateDockerfile(
-      'gitbacklog_server', 'gitbacklog_client',
+  final genDocker = docker.generateProductionDockerfile(
+      'gitbacklog_server', 'gitbacklog_client', 'serverref', 'clientreft',
       outputDirectory: new Directory('/Users/blah/dart/jefe_jefe'),
       dartVersion: '1.9.1',
       environment: environment,
