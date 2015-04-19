@@ -33,7 +33,9 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
 
   ProjectCommand releaseFinish(String releaseName) => projectCommand(
       'git flow release finish', (Project p) async {
-    await gitFlowReleaseFinish(await p.gitDir, releaseName);
+    var gitDir = await p.gitDir;
+    await gitFlowReleaseFinish(gitDir, releaseName);
+    await gitTag(gitDir, releaseName);
   });
 
   @override

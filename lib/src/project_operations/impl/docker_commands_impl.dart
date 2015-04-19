@@ -11,6 +11,7 @@ import 'package:devops/src/dependency_graph.dart';
 import 'dart:io';
 import 'package:quiver/iterables.dart';
 import 'dart:async';
+import 'package:devops/src/git/git.dart';
 
 Logger _log = new Logger('devops.project.operations.docker.impl');
 
@@ -151,7 +152,8 @@ class DockerCommandsImpl implements DockerCommands {
       _PathHandler pathHandler) async {
     final ref = gitRef != null
         ? gitRef
-        : await topLevelProjectDeps.project.currentGitCommitHash;
+        : (await gitCurrentTagName(await topLevelProjectDeps.project.gitDir))
+            .get();
 
     final dir = topLevelProjectDeps.project.installDirectory;
     final dirPath = dir.path;
