@@ -59,11 +59,11 @@ class Jefe {
   }
 
   @SubCommand(help: 'Create a release of all the projects')
-  release(String featureName, {@Option(
+  release({@Option(
       help: 'The directory that contains the root of the projecs',
       abbr: 'd') String rootDirectory: '.'}) async {
     final executor = await load(rootDirectory);
-    await executor.executeAll(lifecycle.release());
+    await executor.execute(lifecycle.release());
   }
 
   @SubCommand(help: 'Runs the given command in all projects')
