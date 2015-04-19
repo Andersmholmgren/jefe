@@ -4,9 +4,8 @@ import 'package:logging/logging.dart';
 import 'package:devops/src/project/project.dart';
 import 'package:devops/src/project_operations/project_command.dart';
 import 'package:devops/src/project_operations/pubspec_commands.dart';
-import 'package:devops/src/pubspec/pubspec.dart';
 import 'dart:async';
-import 'package:devops/src/pubspec/dependency.dart';
+import 'package:pubspec/pubspec.dart';
 
 Logger _log = new Logger('devops.project.operations.pub.impl');
 

@@ -2,8 +2,8 @@ library devops.project.dependency;
 
 import 'project.dart';
 import 'dart:async';
-import '../pubspec/pubspec.dart';
 import 'package:quiver/iterables.dart';
+import 'package:pubspec/pubspec.dart';
 
 /// Returns a [DependencyGraph] for the set of [projects]
 Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>

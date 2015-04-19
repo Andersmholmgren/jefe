@@ -3,9 +3,9 @@ library devops.project;
 import 'dart:async';
 import 'dart:io';
 import 'impl/project_impl.dart';
-import '../pubspec/pubspec.dart';
 import '../spec/JefeSpec.dart';
 import 'core.dart';
+import 'package:pubspec/pubspec.dart';
 
 abstract class ProjectReference implements ProjectEntityReference<Project> {}
 
