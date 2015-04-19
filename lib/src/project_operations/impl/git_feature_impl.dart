@@ -5,6 +5,9 @@ import 'package:devops/src/git/git.dart';
 import 'package:logging/logging.dart';
 import 'package:devops/src/project.dart';
 import 'package:devops/src/project_operations/project_command.dart';
+import 'package:devops/src/dependency_graph.dart';
+import 'dart:io';
+import 'package:option/option.dart';
 
 Logger _log = new Logger('devops.project.operations.git.feature.impl');
 
@@ -35,4 +38,23 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
 
   @override
   String get developBranchName => 'develop';
+
+  ProjectDependencyGraphCommand currentFeatureName() => dependencyGraphCommand(
+      'Get current feature name',
+      (DependencyGraph graph, Directory rootDirectory) async {
+    final featureNames = graph.depthFirst
+        .map((pd) async =>
+            await gitFlowCurrentFeatureName(await pd.project.gitDir))
+        .where((o) => o is Some)
+        .map((o) => o.get())
+        .toSet();
+
+    if (featureNames.length == 0) {
+      return const None();
+    } else if (featureNames.length == 1) {
+      return new Some(featureNames.first);
+    } else {
+      throw new StateError('more than one current feature $featureNames');
+    }
+  });
 }
