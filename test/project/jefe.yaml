@@ -1,0 +1,11 @@
+#url: https://bitbucket.org/andersmholmgren/test_jefe_top.git
+#url: https://bitbucket.org/andersmholmgren/gitbacklog2.git # is this where the grind scripts will live
+
+name: gitbacklog
+
+groups:
+  child1: https://bitbucket.org/andersmholmgren/gissue2.git
+
+projects:
+  gitbacklog_client: https://bitbucket.org/andersmholmgren/gitbacklog_client.git
+  gitbacklog_server: https://bitbucket.org/andersmholmgren/gitbacklog_server.git

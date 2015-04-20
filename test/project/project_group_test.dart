@@ -1,18 +1,17 @@
-library devops.project.group.test;
+// Copyright (c) 2015, Anders Holmgren. All rights reserved. Use of this source code
+// is governed by a BSD-style license that can be found in the LICENSE file.
 
-import 'package:devops/src/dependency_graph.dart';
+library jefe.project.group.test;
+
 import 'package:scheduled_test/scheduled_test.dart';
-import 'package:devops/src/project.dart';
-import 'package:mockito/mockito.dart';
-import 'package:devops/src/pubspec/pubspec.dart';
+import 'package:jefe/src/project/project.dart';
 import 'dart:async';
-import 'package:devops/src/pubspec/dependency.dart';
-import 'package:stack_trace/stack_trace.dart';
 import 'package:logging/logging.dart';
-import 'package:devops/src/project_group_impl.dart';
-import 'package:devops/src/spec/JefeSpec.dart';
+import 'package:jefe/src/project/impl/project_group_impl.dart';
+import 'package:jefe/src/spec/jefe_spec.dart';
 import 'dart:io';
 import 'test_helpers.dart';
+import 'package:jefe/src/project/project_group.dart';
 
 main() async {
   Logger.root.level = Level.ALL;
@@ -68,7 +67,7 @@ main() async {
 
 ProjectGroupImpl aGroup(
     String name, Iterable<ProjectGroup> groups, Iterable<Project> projects) {
-  final metaData = new ProjectGroupMetaDataImpl(
+  final metaData = new ProjectGroupMetaData(
       name, groups.map((g) => g.id), projects.map((p) => p.id));
 
   final factory = new TestProjectEntityReferenceFactory(groups, projects);

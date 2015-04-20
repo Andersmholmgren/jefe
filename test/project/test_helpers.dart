@@ -1,10 +1,12 @@
-library devops.project.test.helpers;
+// Copyright (c) 2015, Anders Holmgren. All rights reserved. Use of this source code
+// is governed by a BSD-style license that can be found in the LICENSE file.
 
-import 'package:devops/src/project.dart';
-import 'package:devops/src/pubspec/dependency.dart';
+library jefe.project.test.helpers;
+
+import 'package:jefe/src/project/project.dart';
 import 'dart:io';
-import 'package:devops/src/project_impl.dart';
-import 'package:devops/src/pubspec/pubspec.dart';
+import 'package:jefe/src/project/impl/project_impl.dart';
+import 'package:pubspec/pubspec.dart';
 
 Project aProject(String name, {Iterable<Project> dependencies: const []}) =>
     __aProject(name,

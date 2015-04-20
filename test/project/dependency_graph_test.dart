@@ -1,8 +1,11 @@
-library devops.project.dependency.test;
+// Copyright (c) 2015, Anders Holmgren. All rights reserved. Use of this source code
+// is governed by a BSD-style license that can be found in the LICENSE file.
 
-import 'package:devops/src/dependency_graph.dart';
+library jefe.project.dependency.test;
+
+import 'package:jefe/src/project/dependency_graph.dart';
 import 'package:scheduled_test/scheduled_test.dart';
-import 'package:devops/src/project.dart';
+import 'package:jefe/src/project/project.dart';
 import 'package:logging/logging.dart';
 import 'test_helpers.dart';
 

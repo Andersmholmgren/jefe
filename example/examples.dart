@@ -1,30 +1,29 @@
-# jefe
+// Copyright (c) 2015, Anders Holmgren. All rights reserved. Use of this source code
+// is governed by a BSD-style license that can be found in the LICENSE file.
 
-A minimal command-line application.
+library example;
 
-## Usage
-
-For now the best place to learn about Jefe is this blog post.
-
-
-
-### Installing
-
-
-```
-pub global activate jefe
-```
-
-
-### Project Lifecycle Basics
-
-```
-
+import 'dart:io';
+import 'package:logging/logging.dart';
+import 'package:stack_trace/stack_trace.dart';
 import 'package:jefe/jefe.dart';
-
+import 'dart:async';
 
 main() async {
-  // first install the project group
+  Logger.root.level = Level.ALL;
+  Logger.root.onRecord.listen(print);
+  hierarchicalLoggingEnabled = true;
+
+  Chain.capture(() async {
+    await generateProductionDockerfile();
+  }, onError: (error, stackChain) {
+    print("Caught error $error\n"
+        "${stackChain.terse}");
+  });
+}
+
+Future projectLifecycleBasics() async {
+  // first install the project groupd
   final ProjectGroup projectGroup = await ProjectGroup.install(
       new Directory('/Users/blah'), 'git@git.example');
 
@@ -55,13 +54,7 @@ main() async {
   await executor.execute(lifecycle.release(type: ReleaseType.major));
 }
 
-```
-
-### Generate a Production Dockerfile
-
-```
-
-main() async {
+Future generateProductionDockerfile() async {
   final executor = await executorForDirectory('/Users/blah/myfoo_root');
 
   await executor.executeOnGraph(docker.generateProductionDockerfile(
@@ -72,13 +65,3 @@ main() async {
       exposePorts: [8080, 8181, 5858],
       entryPointOptions: ["--debug:5858/0.0.0.0"]));
 }
-
-
-```
-
-
-## Features and bugs
-
-Please file feature requests and bugs at the [issue tracker][tracker].
-
-[tracker]: https://github.com/Andersmholmgren/jefe/issues

@@ -1,4 +1,7 @@
-library devops.git;
+// Copyright (c) 2015, Anders Holmgren. All rights reserved. Use of this source code
+// is governed by a BSD-style license that can be found in the LICENSE file.
+
+library jefe.git;
 
 import 'package:git/git.dart';
 import 'dart:async';
@@ -7,7 +10,7 @@ import 'package:path/path.dart' as p;
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 
-Logger _log = new Logger('devops.git');
+Logger _log = new Logger('jefe.git');
 
 Future<GitDir> gitWorkspaceDir(String gitUri, Directory parentDirectory) =>
     GitDir.fromExisting(gitWorkspacePath(gitUri, parentDirectory));
@@ -15,16 +18,13 @@ Future<GitDir> gitWorkspaceDir(String gitUri, Directory parentDirectory) =>
 String gitWorkspaceName(String gitUri) => p.basenameWithoutExtension(gitUri);
 
 String gitWorkspacePath(String gitUri, Directory parentDirectory) {
-//  print('---- $gitUri ---- $parentDirectory');
   return p.join(parentDirectory.path, gitWorkspaceName(gitUri));
 }
 
 Future<GitDir> clone(String gitUri, Directory parentDirectory) async {
   _log.info('cloning git repo $gitUri into parent directory $parentDirectory');
-  final ProcessResult result = await runGit(['clone', gitUri.toString()],
+  await runGit(['clone', gitUri.toString()],
       processWorkingDir: parentDirectory.path);
-
-//  print(result.stdout);
 
   _log.finest(
       'successfully cloned git repo $gitUri into parent directory $parentDirectory');
@@ -99,5 +99,3 @@ Future<Option<String>> gitFlowCurrentFeatureName(GitDir gitDir) async {
 
 Future<Option<String>> gitCurrentTagName(GitDir gitDir) async => new Option(
     (await gitDir.runCommand(['describe', 'HEAD', '--tags'])).stdout.trim());
-
-//git describe HEAD --tags

@@ -1,6 +1,9 @@
+// Copyright (c) 2015, Anders Holmgren. All rights reserved. Use of this source code
+// is governed by a BSD-style license that can be found in the LICENSE file.
+
 import 'package:unscripted/unscripted.dart';
 import 'dart:io';
-import 'package:devops/devops.dart';
+import 'package:jefe/jefe.dart';
 import 'package:logging/logging.dart';
 import 'dart:async';
 import 'package:stack_trace/stack_trace.dart';
@@ -15,9 +18,6 @@ main(arguments) {
 }
 
 class Jefe {
-  final lifecycle = new ProjectLifecycle();
-  final process = new ProcessCommands();
-
   @Command(
       help: 'Manages a set of related Dart projects',
       plugins: const [const Completion()])
@@ -30,10 +30,11 @@ class Jefe {
   }
 
   @SubCommand(help: 'Installs a group of projects')
-  install(@Positional(
-      help: 'The git Uri containing the project.yaml.') String gitUri, {@Option(
-      help: 'The directory to install into',
-      abbr: 'd') String installDirectory: '.'}) async {
+  install(
+      @Positional(help: 'The git Uri containing the jefe.yaml.') String gitUri,
+      {@Option(
+          help: 'The directory to install into',
+          abbr: 'd') String installDirectory: '.'}) async {
     final Directory installDir = new Directory(installDirectory);
     final ProjectGroup projectGroup =
         await ProjectGroup.install(installDir, gitUri);
@@ -83,8 +84,3 @@ class Jefe {
     return executor;
   }
 }
-
-/*
-  jefe feature start fbar
-  jefe feature finish fbar
- */
