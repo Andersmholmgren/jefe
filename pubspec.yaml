@@ -1,8 +1,8 @@
 name: devops
 version: 0.0.1
-description: A minimal command-line application.
-#author: <your name> <email@example.com>
-#homepage: https://www.example.com
+description: A library for maintaining sets of related Dart projects versioned in git
+author: Anders Holmgren <andersmholmgren@gmail.com>
+homepage: https://github.com/Andersmholmgren/dockerfile
 environment:
   sdk: '>=1.9.0 <2.0.0'
 dependencies:

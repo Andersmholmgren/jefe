@@ -1,8 +1,6 @@
 library example;
 
 import 'dart:io';
-import 'package:path/path.dart' as p;
-import 'package:git/git.dart';
 import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:devops/devops.dart';
