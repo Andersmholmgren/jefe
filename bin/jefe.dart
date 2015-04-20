@@ -27,10 +27,11 @@ class Jefe {
   }
 
   @SubCommand(help: 'Installs a group of projects')
-  install(@Positional(
-      help: 'The git Uri containing the project.yaml.') String gitUri, {@Option(
-      help: 'The directory to install into',
-      abbr: 'd') String installDirectory: '.'}) async {
+  install(
+      @Positional(help: 'The git Uri containing the jefe.yaml.') String gitUri,
+      {@Option(
+          help: 'The directory to install into',
+          abbr: 'd') String installDirectory: '.'}) async {
     final Directory installDir = new Directory(installDirectory);
     final ProjectGroup projectGroup =
         await ProjectGroup.install(installDir, gitUri);

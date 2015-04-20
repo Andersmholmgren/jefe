@@ -41,13 +41,13 @@ gcloud deploy
 
 Dev layout
 
-project.yaml (maybe at the backlogio level + gissue + gitbacklog)
+jefe.yaml (maybe at the backlogio level + gissue + gitbacklog)
 - generates pubspec.yaml
 - handles local paths for dev as overrides
 
 
 
-- backlogio project.yaml
+- backlogio jefe.yaml
 
   projects:
   	gissue: https://github.com/Andersmholmgren/gissue
@@ -56,7 +56,7 @@ project.yaml (maybe at the backlogio level + gissue + gitbacklog)
 
 OR
 
-- gitbacklog project.yaml (https://github.com/Andersmholmgren/gitbacklog)
+- gitbacklog jefe.yaml (https://github.com/Andersmholmgren/gitbacklog)
 
   modules:
 	  gitbacklog_client: https://github.com/Andersmholmgren/gitbacklog_client
@@ -66,7 +66,7 @@ OR
     gissue: https://github.com/Andersmholmgren/gissue
 
 
-- gissue project.yaml
+- gissue jefe.yaml
 
   modules:
 	  gissue_common: https://github.com/Andersmholmgren/gissue_common

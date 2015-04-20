@@ -20,7 +20,7 @@ abstract class ProjectGroupMetaData {
 
   static Future<ProjectGroupMetaData> fromDefaultProjectGroupYamlFile(
           String projectGroupDirectory) =>
-      fromProjectGroupYamlFile(p.join(projectGroupDirectory, 'project.yaml'));
+      fromProjectGroupYamlFile(p.join(projectGroupDirectory, 'jefe.yaml'));
 
   static Future<ProjectGroupMetaData> fromProjectGroupYamlFile(
           String projectGroupFile) =>

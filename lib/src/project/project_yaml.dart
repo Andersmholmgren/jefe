@@ -15,7 +15,7 @@ Logger _log = new Logger('jefe.project.metadata.yaml');
 Future<ProjectGroupMetaData> readProjectGroupYaml(File projectGroupFile) async {
   final Map yaml = loadYaml(await projectGroupFile.readAsString());
 
-  _log.finer('reading project.yaml $projectGroupFile');
+  _log.finer('reading jefe.yaml $projectGroupFile');
 
   final Map projectGroupsMap = yaml['groups'] != null ? yaml['groups'] : {};
 
