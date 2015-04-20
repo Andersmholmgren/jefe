@@ -1,6 +1,6 @@
 # jefe
 
-A minimal command-line application.
+A library for maintaining sets of related Dart projects versioned in git.
 
 ## Usage
 
