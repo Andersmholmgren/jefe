@@ -44,6 +44,7 @@ class DependencyGraph {
   ProjectDependencies forProject(String projectName) =>
       depthFirst.firstWhere((pd) => pd.project.name == projectName);
 
+  /// Iterates over [depthFirst] invoking process for each
   Future processDepthFirst(
       process(Project project, Iterable<Project> dependencies)) async {
     await Future.forEach(depthFirst,
@@ -76,15 +77,6 @@ class _DependencyNode {
   Iterable<Project> get dependencies => _dependencies.map((n) => n.project);
 
   _DependencyNode(this.project);
-
-  Future depthFirst(process(Project project, Iterable<Project> dependencies),
-      Set<Project> visited) async {
-    await Future.forEach(_dependencies, (n) => n.depthFirst(process, visited));
-    if (!visited.contains((project))) {
-      visited.add(project);
-      await process(project, dependencies);
-    }
-  }
 
   Iterable<ProjectDependencies> getDepthFirst(Set<Project> visited) {
     final children = _dependencies.expand((n) => n.getDepthFirst(visited));

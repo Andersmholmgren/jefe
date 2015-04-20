@@ -42,10 +42,10 @@ abstract class ProjectGroup extends ProjectEntity {
   /// as within child groups recursively
   Future<Iterable<Project>> get allProjects;
 
+  /// Creates a graph of the dependency relationships for [allProjects]
+  Future<DependencyGraph> get dependencyGraph;
+
   /// The directory that acts as the container for all the groups project
   /// and metadata directories. These are named with a '_root' suffix
   Directory get containerDirectory;
-
-  /// Creates a graph of the dependency relationships for [allProjects]
-  Future<DependencyGraph> get dependencyGraph;
 }
