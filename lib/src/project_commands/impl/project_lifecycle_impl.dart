@@ -79,9 +79,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         (Project project) async {
       final newVersion = type.bump(project.pubspec.version);
       await _gitFeature.releaseStart(newVersion.toString()).process(project);
-      await _pubSpec
-          .update(project.pubspec.copy(version: newVersion))
-          .process(project);
+      await project.updatePubspec(project.pubspec.copy(version: newVersion));
       //    await setToGitDependencies(dependencies);
       await _git.commit('releasing version $newVersion').process(project);
       await _gitFeature.releaseFinish(newVersion.toString()).process(project);

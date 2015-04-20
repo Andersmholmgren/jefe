@@ -17,6 +17,7 @@ import '../dependency_graph.dart';
 import '../../spec/jefe_spec.dart' as spec;
 import 'project_impl.dart';
 import '../../spec/jefe_spec.dart';
+import 'core_impl.dart';
 
 Logger _log = new Logger('jefe.project.group.impl');
 

@@ -18,7 +18,6 @@ Future<GitDir> gitWorkspaceDir(String gitUri, Directory parentDirectory) =>
 String gitWorkspaceName(String gitUri) => p.basenameWithoutExtension(gitUri);
 
 String gitWorkspacePath(String gitUri, Directory parentDirectory) {
-//  print('---- $gitUri ---- $parentDirectory');
   return p.join(parentDirectory.path, gitWorkspaceName(gitUri));
 }
 
@@ -100,5 +99,3 @@ Future<Option<String>> gitFlowCurrentFeatureName(GitDir gitDir) async {
 
 Future<Option<String>> gitCurrentTagName(GitDir gitDir) async => new Option(
     (await gitDir.runCommand(['describe', 'HEAD', '--tags'])).stdout.trim());
-
-//git describe HEAD --tags

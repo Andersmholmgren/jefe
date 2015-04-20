@@ -29,10 +29,6 @@ class PubSpecCommandsImpl implements PubSpecCommands {
     await _setDependencies(p, 'git', dependencies, (Project p) async =>
         await new GitReference(p.gitUri, await p.currentGitCommitHash));
   });
-
-  @override
-  ProjectCommand update(PubSpec pubspec) => projectCommand(
-      'update pubspec', (Project p) async => await p.updatePubspec(pubspec));
 }
 
 Future _setDependencies(Project project, String type,

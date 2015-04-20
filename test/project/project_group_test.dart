@@ -67,7 +67,7 @@ main() async {
 
 ProjectGroupImpl aGroup(
     String name, Iterable<ProjectGroup> groups, Iterable<Project> projects) {
-  final metaData = new ProjectGroupMetaDataImpl(
+  final metaData = new ProjectGroupMetaData(
       name, groups.map((g) => g.id), projects.map((p) => p.id));
 
   final factory = new TestProjectEntityReferenceFactory(groups, projects);

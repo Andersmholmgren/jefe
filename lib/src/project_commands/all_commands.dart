@@ -12,9 +12,15 @@ import 'package:jefe/src/project_commands/pubspec_commands.dart';
 import 'package:jefe/src/project_commands/project_lifecycle.dart';
 
 final DockerCommands docker = new DockerCommands();
+
 final GitCommands git = new GitCommands();
+
 final GitFeatureCommands feature = new GitFeatureCommands();
+
 final ProcessCommands process = new ProcessCommands();
+
 final PubCommands pub = new PubCommands();
+
 final PubSpecCommands pubSpec = new PubSpecCommands();
+
 final ProjectLifecycle lifecycle = new ProjectLifecycle();

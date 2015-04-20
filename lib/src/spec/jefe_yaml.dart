@@ -22,11 +22,11 @@ Future<ProjectGroupMetaData> readProjectGroupYaml(File projectGroupFile) async {
   final Map projectsMap = yaml['projects'] != null ? yaml['projects'] : {};
 
   final childProjectGroups = projectGroupsMap.keys
-      .map((k) => new ProjectGroupRefImpl(k, projectGroupsMap[k]));
+      .map((k) => new ProjectGroupIdentifier(k, projectGroupsMap[k]));
 
   final childProjects =
-      projectsMap.keys.map((k) => new ProjectIdentifierImpl(k, projectsMap[k]));
+      projectsMap.keys.map((k) => new ProjectIdentifier(k, projectsMap[k]));
 
-  return new ProjectGroupMetaDataImpl(
+  return new ProjectGroupMetaData(
       yaml['name'], childProjectGroups, childProjects);
 }

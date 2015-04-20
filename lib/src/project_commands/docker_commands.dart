@@ -10,7 +10,8 @@ import 'impl/docker_commands_impl.dart';
 abstract class DockerCommands {
   factory DockerCommands() = DockerCommandsImpl;
 
-  /// Generates a Dockerfile based on the provided [serverProjectName].
+  /// Generates a Dockerfile based on the provided [serverProjectName]
+  /// and [clientProjectName].
   /// If these projects have path dependencies on other projects
   /// managed by jefe then those dependent projects are added first
   ProjectDependencyGraphCommand generateDockerfile(
@@ -22,6 +23,10 @@ abstract class DockerCommands {
       bool omitClientWhenPathDependencies: true, bool setupForPrivateGit: true,
       String targetRootPath: '/app'});
 
+  /// Generates a Dockerfile based on the provided [serverProjectName]
+  /// and [clientProjectName] suitable for production.
+  /// The client and server projects will be cloned within the docker file
+  /// base on a git tag
   ProjectDependencyGraphCommand generateProductionDockerfile(
       String serverProjectName, String clientProjectName, {String serverGitRef,
       String clientGitRef, Directory outputDirectory,

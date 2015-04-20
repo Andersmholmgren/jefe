@@ -7,12 +7,15 @@ import 'package:jefe/src/project_commands/project_command.dart';
 import 'impl/pubspec_commands_impl.dart';
 import 'package:pubspec/pubspec.dart';
 
+/// Commands that operate on each [Project]s [PubSpec] files
 abstract class PubSpecCommands {
   factory PubSpecCommands() = PubSpecCommandsImpl;
 
+  /// Sets the dependencies between [Project]s within the group to use path
+  /// dependencies
   ProjectCommand setToPathDependencies();
 
+  /// Sets the dependencies between [Project]s within the group to use git
+  /// dependencies, based on the current commit hash of the respective projects
   ProjectCommand setToGitDependencies();
-
-  ProjectCommand update(PubSpec pubspec);
 }

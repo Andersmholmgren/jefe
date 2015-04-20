@@ -24,21 +24,31 @@ Logger _log = new Logger('jefe.project.commands.core');
 /// command has completed before it has completed on all projects
 enum CommandConcurrencyMode { serial, concurrentProject, concurrentCommand }
 
+/// A command that operates on a single [Project]
 ProjectCommand projectCommand(String name, ProjectFunction function,
         {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand}) =>
     new _DefaultCommand(name, function, concurrencyMode);
 
+/// A command that operates on a single [Project] and the projects it depends on
 ProjectCommand projectCommandWithDependencies(
         String name, ProjectWithDependenciesFunction function,
         {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.serial}) =>
     new _DefaultCommand(name, function, concurrencyMode);
 
+/// A command that is made up of an ordered list of other commands.
+/// For a given [Project] the commands will be executed one at a time in the
+/// order provided. Depending on the [concurrencyMode] of the composite command
+/// and that of the individual commands, commands may be executing on other
+/// [Project]s in the group simultaneously
 CompositeProjectCommand projectCommandGroup(
     String name, Iterable<ProjectCommand> commands,
     {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand}) {
   return new _DefaultCompositeProjectCommand(name, commands, concurrencyMode);
 }
 
+/// A command that operates on a [DependencyGraph]. Unlike the other commands,
+/// a ProjectDependencyGraphCommand is for tasks that require interacting with
+/// several projects at once
 ProjectDependencyGraphCommand dependencyGraphCommand(
         String name, ProjectDependencyGraphFunction function) =>
     new _DefaultProjectDependencyGraphCommand(name, function);
@@ -58,6 +68,7 @@ abstract class ProjectCommand {
   Future process(Project project, {Iterable<Project> dependencies});
 }
 
+/// a function that operates on the dependency graph as a whole
 typedef Future ProjectDependencyGraphFunction(
     DependencyGraph graph, Directory rootDirectory);
 
@@ -128,34 +139,3 @@ class _DefaultProjectDependencyGraphCommand
     return result;
   }
 }
-
-//class _DefaultCompositeProjectCommand2 implements ProjectCommand2 {
-//  final String name;
-//  final F function;
-//  final CommandConcurrencyMode concurrencyMode;
-//
-//}
-
-//class _CompositeCommand implements ProjectCommand<ProjectFunction> {
-//  final String name;
-//  final Iterable<ProjectCommand> commands;
-//
-//  _CompositeCommand(this.name, this.commands);
-//
-//  @override
-//  ProjectFunction get function => (Project project) {
-//    Future.forEach(commands, (ProjectCommand command) {
-//      await command
-//    });
-//  };
-//}
-
-//class _CompositeCommand<F extends Function> implements ProjectCommand<F> {
-//  final String name;
-//  final Iterable<ProjectCommand> commands;
-//
-//  _CompositeCommand(this.name, this.commands);
-//
-//  @override
-//  F get function => null;
-//}

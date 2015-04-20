@@ -8,15 +8,20 @@ import 'dart:io';
 import 'package:jefe/jefe.dart';
 import 'package:jefe/src/spec/jefe_yaml.dart';
 import 'package:path/path.dart' as p;
+import 'jefe_spec_impl.dart';
 
+/// The meta data that defines a [ProjectGroup]. This is read from the group's
+/// jefe.yaml file
 abstract class ProjectGroupMetaData {
-//  factory ProjectGroupMetaData = ProjectGroupMetaDataImpl;
-
   String get name;
 
   Iterable<ProjectGroupIdentifier> get childGroups;
 
   Iterable<ProjectIdentifier> get projects;
+
+  factory ProjectGroupMetaData(String name,
+      Iterable<ProjectGroupIdentifier> childGroups,
+      Iterable<ProjectIdentifier> projects) = ProjectGroupMetaDataImpl;
 
   static Future<ProjectGroupMetaData> fromDefaultProjectGroupYamlFile(
           String projectGroupDirectory) =>
@@ -27,91 +32,17 @@ abstract class ProjectGroupMetaData {
       readProjectGroupYaml(new File(projectGroupFile));
 }
 
-class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {
-  final String name;
-  final Iterable<ProjectGroupIdentifier> childGroups;
-  final Iterable<ProjectIdentifier> projects;
-
-  ProjectGroupMetaDataImpl(this.name, this.childGroups, this.projects);
-}
-
 abstract class ProjectEntityIdentifier<T> {
   String get name;
   String get gitUri;
-
-//  @deprecated // unless we can find a way to encapsulate folder layout
-//  Future<T> install(Directory parentDirectory, {bool recursive: true});
-//
-//  @deprecated // unless we can find a way to encapsulate folder layout
-//  Future<T> load(Directory parentDirectory, {bool recursive: true});
-
 }
 
 abstract class ProjectGroupIdentifier
     implements ProjectEntityIdentifier<ProjectGroup> {
   factory ProjectGroupIdentifier(
-      String name, String gitUri) = ProjectGroupRefImpl;
+      String name, String gitUri) = ProjectGroupIdentifierImpl;
 }
 
 abstract class ProjectIdentifier implements ProjectEntityIdentifier<Project> {
   factory ProjectIdentifier(String name, String gitUri) = ProjectIdentifierImpl;
-}
-
-//TODO: fix ^^
-
-abstract class _BaseRef<T> implements ProjectEntityIdentifier<T> {
-  final String name;
-  final String gitUri;
-
-  _BaseRef(this.name, this.gitUri);
-
-  @deprecated
-  Directory installDirectory(Directory parent) =>
-      new Directory(p.join(parent.path, name));
-
-  bool operator ==(other) => other.runtimeType == runtimeType &&
-      name == other.name &&
-      gitUri == other.gitUri;
-
-  int get hashCode => name.hashCode;
-}
-
-class ProjectGroupRefImpl extends _BaseRef implements ProjectGroupIdentifier {
-  ProjectGroupRefImpl(String name, String gitUri) : super(name, gitUri);
-
-//  @override
-//  Future<ProjectGroup> install(Directory parentDir, {bool recursive: true}) =>
-//      ProjectGroup.install(parentDir, name, gitUri, recursive: recursive);
-//
-//  Directory installDirectory(Directory parent) =>
-//      super.installDirectory(_containerDirectory(parent));
-//
-//  Directory _containerDirectory(Directory parentDir) =>
-//      new Directory(gitWorkspacePath(gitUri, parentDir) + '_root');
-
-//  @override
-//  Future<ProjectGroup> load(Directory parentDirectory,
-//          {bool recursive: true}) =>
-//      ProjectGroup.fromInstallDirectory(parentDirectory);
-
-  String toString() => 'ProjectGroupRef($name, $gitUri)';
-}
-
-class ProjectIdentifierImpl extends _BaseRef implements ProjectIdentifier {
-  ProjectIdentifierImpl(String name, String gitUri) : super(name, gitUri);
-
-//  @override
-//  Future<Project> install(Directory parentDir, {bool recursive: true}) async {
-//    _log.info('installing project $name from $gitUri into $parentDir');
-//
-//    final GitDir gitDir = await clone(gitUri, parentDir);
-//    final installDirectory = new Directory(gitDir.path);
-//    return new ProjectImpl(
-//        gitUri, installDirectory, await PubSpec.load(installDirectory));
-//  }
-//
-//  @override
-//  Future<Project> load(Directory parentDirectory, {bool recursive: true}) =>
-//      Project.fromInstallDirectory(installDirectory(parentDirectory));
-  String toString() => 'ProjectRef($name, $gitUri)';
 }

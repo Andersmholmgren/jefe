@@ -11,8 +11,8 @@ import 'package:logging/logging.dart';
 import '../../spec/jefe_spec.dart';
 import 'package:jefe/src/project/impl/project_group_impl.dart';
 import 'dart:io';
-import 'package:jefe/src/project/core.dart';
 import 'package:pubspec/pubspec.dart';
+import 'core_impl.dart';
 
 Logger _log = new Logger('jefe.project.impl');
 
@@ -29,19 +29,6 @@ class ProjectReferenceImpl implements ProjectReference {
 
   @override
   String get name => ref.name;
-}
-
-abstract class ProjectEntityImpl implements ProjectEntity {
-  final String gitUri;
-  final Directory installDirectory;
-
-  ProjectEntityImpl(this.gitUri, this.installDirectory);
-
-  @override
-  Future<GitDir> get gitDir {
-//    print('--- loading git dir from ${installDirectory.path}');
-    return GitDir.fromExisting(installDirectory.path);
-  }
 }
 
 class ProjectImpl extends ProjectEntityImpl implements Project {
