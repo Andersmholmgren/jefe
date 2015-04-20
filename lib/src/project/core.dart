@@ -25,13 +25,6 @@ abstract class ProjectEntity {
 
 @deprecated // TODO: Does this still provide any value beyond ProjectGroup??
 abstract class ProjectSource {
-  @deprecated
-  Future visitAllProjects(process(Project project));
-
-  @deprecated
-  Future processDependenciesDepthFirst(
-      process(Project project, Iterable<Project> dependencies));
-
   /// All [Project]s contained either directly within this [ProjectGroup] or
   /// as within child groups recursively
   Future<Iterable<Project>> get allProjects;

@@ -24,9 +24,16 @@ class CommandExecutorImpl implements CommandExecutor {
   CommandExecutorImpl(this._projectSource);
 
   Future execute(ProjectCommand command) async {
-    return await _projectSource.processDependenciesDepthFirst(
+    return await _processDependenciesDepthFirst(
         (Project project, Iterable<Project> dependencies) =>
             command.process(project, dependencies: dependencies));
+  }
+
+  Future _processDependenciesDepthFirst(
+      process(Project project, Iterable<Project> dependencies)) async {
+    final projects = await _projectSource.allProjects;
+    final DependencyGraph graph = await getDependencyGraph(projects);
+    return graph.processDepthFirst(process);
   }
 
 //  ProjectWithDependenciesFunction _wrapDependencyProcessor(

@@ -177,24 +177,10 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   Future<DependencyGraph> get dependencyGraph async =>
       getDependencyGraph(await allProjects);
 
-  @override
-  Future processDependenciesDepthFirst(
-      process(Project project, Iterable<Project> dependencies)) async {
-    final projects = await allProjects;
-    final DependencyGraph graph = await getDependencyGraph(projects);
-    return graph.processDepthFirst(process);
-  }
-
   String toString() =>
       'ProjectGroup: $name; gitUri: $gitUri; installed: $installDirectory\n'
       '    projects: ${metaData.projects}\n'
       '    childGroups: ${metaData.childGroups}';
-
-  @override
-  Future visitAllProjects(process(Project project)) async {
-//    _log.info('$taskDescription for group ${metaData.name}');
-    await Future.wait((await allProjects).map((p) => process(p)));
-  }
 }
 
 class GroupDirectoryLayout {
