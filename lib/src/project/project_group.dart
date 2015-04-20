@@ -31,7 +31,7 @@ abstract class ProjectGroup extends ProjectEntity {
   static Future<ProjectGroup> load(Directory installDirectory) =>
       ProjectGroupImpl.load(installDirectory);
 
-  /// References to the projects contained directly within this group.
+  /// References to the [Project]s contained directly within this group.
   /// This excludes those contained in child groups
   Iterable<ProjectReference> get projects;
 

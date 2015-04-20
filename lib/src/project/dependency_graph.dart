@@ -44,7 +44,6 @@ class DependencyGraph {
   ProjectDependencies forProject(String projectName) =>
       depthFirst.firstWhere((pd) => pd.project.name == projectName);
 
-  @deprecated // TODO: is this at all useful now that depthFirst exists
   Future processDepthFirst(
       process(Project project, Iterable<Project> dependencies)) async {
     await Future.forEach(depthFirst,
