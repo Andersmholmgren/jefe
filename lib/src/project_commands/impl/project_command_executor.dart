@@ -14,14 +14,14 @@ import 'package:option/option.dart';
 import 'package:frappe/frappe.dart';
 import 'package:jefe/src/util/frappe_utils.dart';
 import 'package:jefe/src/project/dependency_graph.dart';
-import 'package:jefe/src/project/core.dart';
+import 'package:jefe/src/project/project_group.dart';
 
 Logger _log = new Logger('jefe.project.commands.impl');
 
 class CommandExecutorImpl implements CommandExecutor {
-  final ProjectSource _projectSource;
+  final ProjectGroup _projectGroup;
 
-  CommandExecutorImpl(this._projectSource);
+  CommandExecutorImpl(this._projectGroup);
 
   Future execute(ProjectCommand command) async {
     return await _processDependenciesDepthFirst(
@@ -31,7 +31,7 @@ class CommandExecutorImpl implements CommandExecutor {
 
   Future _processDependenciesDepthFirst(
       process(Project project, Iterable<Project> dependencies)) async {
-    final projects = await _projectSource.allProjects;
+    final projects = await _projectGroup.allProjects;
     final DependencyGraph graph = await getDependencyGraph(projects);
     return graph.processDepthFirst(process);
   }
@@ -93,7 +93,7 @@ class CommandExecutorImpl implements CommandExecutor {
   @override
   Future executeOn(ProjectCommand command, String projectName) async {
     final DependencyGraph graph =
-        await getDependencyGraph(await _projectSource.allProjects);
+        await getDependencyGraph(await _projectGroup.allProjects);
     final projectDependencies = graph.forProject(projectName);
     return await command.process(projectDependencies.project,
         dependencies: projectDependencies.dependencies);
@@ -102,8 +102,8 @@ class CommandExecutorImpl implements CommandExecutor {
   @override
   Future executeOnGraph(ProjectDependencyGraphCommand command) async {
     final DependencyGraph graph =
-        await getDependencyGraph(await _projectSource.allProjects);
-    return await command.process(graph, _projectSource.containerDirectory);
+        await getDependencyGraph(await _projectGroup.allProjects);
+    return await command.process(graph, _projectGroup.containerDirectory);
   }
 }
 
@@ -116,9 +116,9 @@ typedef Future CommandExecutorFunction(ProjectCommand command);
 class ConcurrentCommandExecutor {
   Map<String, ProjectCommandQueue> _projectQueues;
   final CommandConcurrencyMode concurrencyMode;
-  final ProjectSource projectSource;
+  final ProjectGroup projectGroup;
 
-  Iterable<Project> get projects => projectSource.allProjects;
+  Iterable<Project> get projects => projectGroup.allProjects;
   Future<Iterable<ProjectDependencies>> get depthFirst async =>
       (await getDependencyGraph(projects)).depthFirst;
 

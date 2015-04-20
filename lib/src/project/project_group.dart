@@ -16,7 +16,7 @@ abstract class ProjectGroupReference
 
 /// Represents a group of related [Project]s. These projects are managed as
 /// a unit and typically have dependencies between them.
-abstract class ProjectGroup extends ProjectEntity implements ProjectSource {
+abstract class ProjectGroup extends ProjectEntity {
   ProjectGroupIdentifier get id;
 
   /// Install a [ProjectGroup] plus all its [Project]s and child [ProjectGroup]s
@@ -37,6 +37,14 @@ abstract class ProjectGroup extends ProjectEntity implements ProjectSource {
 
   /// References to [ProjectGroup]s that are direct children of this group
   Iterable<ProjectGroupReference> get childGroups;
+
+  /// All [Project]s contained either directly within this [ProjectGroup] or
+  /// as within child groups recursively
+  Future<Iterable<Project>> get allProjects;
+
+  /// The directory that acts as the container for all the groups project
+  /// and metadata directories. These are named with a '_root' suffix
+  Directory get containerDirectory;
 
   /// Creates a graph of the dependency relationships for [allProjects]
   Future<DependencyGraph> get dependencyGraph;

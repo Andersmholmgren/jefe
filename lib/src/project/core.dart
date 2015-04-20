@@ -22,14 +22,3 @@ abstract class ProjectEntity {
   Future<GitDir> get gitDir;
   Directory get installDirectory;
 }
-
-@deprecated // TODO: Does this still provide any value beyond ProjectGroup??
-abstract class ProjectSource {
-  /// All [Project]s contained either directly within this [ProjectGroup] or
-  /// as within child groups recursively
-  Future<Iterable<Project>> get allProjects;
-
-  /// The directory that acts as the container for all the groups project
-  /// and metadata directories. These are named with a '_root' suffix
-  Directory get containerDirectory;
-}
