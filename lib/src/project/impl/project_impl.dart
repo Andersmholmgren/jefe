@@ -1,4 +1,4 @@
-library devops.project.impl;
+library jefe.project.impl;
 
 import 'dart:async';
 import '../project.dart';
@@ -6,12 +6,12 @@ import 'package:git/git.dart';
 import '../../git/git.dart';
 import 'package:logging/logging.dart';
 import '../../spec/JefeSpec.dart';
-import 'package:devops/src/project/impl/project_group_impl.dart';
+import 'package:jefe/src/project/impl/project_group_impl.dart';
 import 'dart:io';
-import 'package:devops/src/project/core.dart';
+import 'package:jefe/src/project/core.dart';
 import 'package:pubspec/pubspec.dart';
 
-Logger _log = new Logger('devops.project.impl');
+Logger _log = new Logger('jefe.project.impl');
 
 class ProjectReferenceImpl implements ProjectReference {
   final ProjectGroupImpl parent;

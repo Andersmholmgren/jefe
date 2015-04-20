@@ -1,7 +1,7 @@
-library devops.project.operations.git.feature;
+library jefe.project.operations.git.feature;
 
 import 'impl/git_feature_impl.dart';
-import 'package:devops/src/project_operations/project_command.dart';
+import 'package:jefe/src/project_operations/project_command.dart';
 
 typedef GitFeatureCommands GitFeatureCommandsFactory();
 

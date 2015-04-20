@@ -1,19 +1,19 @@
-library devops.project.operations.docker.impl;
+library jefe.project.operations.docker.impl;
 
 import 'package:logging/logging.dart';
-import 'package:devops/src/project/project.dart';
-import 'package:devops/src/project_operations/project_command.dart';
-import 'package:devops/src/project_operations/docker_commands.dart';
+import 'package:jefe/src/project/project.dart';
+import 'package:jefe/src/project_operations/project_command.dart';
+import 'package:jefe/src/project_operations/docker_commands.dart';
 import 'package:dockerfile/dockerfile.dart';
 import 'package:path/path.dart' as p;
-import 'package:devops/src/project/dependency_graph.dart';
+import 'package:jefe/src/project/dependency_graph.dart';
 import 'dart:io';
 import 'package:quiver/iterables.dart';
 import 'dart:async';
-import 'package:devops/src/git/git.dart';
+import 'package:jefe/src/git/git.dart';
 import 'package:pubspec/pubspec.dart';
 
-Logger _log = new Logger('devops.project.operations.docker.impl');
+Logger _log = new Logger('jefe.project.operations.docker.impl');
 
 class DockerCommandsImpl implements DockerCommands {
   ProjectDependencyGraphCommand generateDockerfile(

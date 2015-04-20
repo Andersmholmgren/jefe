@@ -1,13 +1,13 @@
-library devops.project.operations.pub.spec.impl;
+library jefe.project.operations.pub.spec.impl;
 
 import 'package:logging/logging.dart';
-import 'package:devops/src/project/project.dart';
-import 'package:devops/src/project_operations/project_command.dart';
-import 'package:devops/src/project_operations/pubspec_commands.dart';
+import 'package:jefe/src/project/project.dart';
+import 'package:jefe/src/project_operations/project_command.dart';
+import 'package:jefe/src/project_operations/pubspec_commands.dart';
 import 'dart:async';
 import 'package:pubspec/pubspec.dart';
 
-Logger _log = new Logger('devops.project.operations.pub.impl');
+Logger _log = new Logger('jefe.project.operations.pub.impl');
 
 class PubSpecCommandsImpl implements PubSpecCommands {
   @override

@@ -1,9 +1,9 @@
-library devops.project.spec;
+library jefe.project.spec;
 
 import 'dart:async';
 import 'dart:io';
-import 'package:devops/devops.dart';
-import 'package:devops/src/project/project_yaml.dart';
+import 'package:jefe/jefe.dart';
+import 'package:jefe/src/project/project_yaml.dart';
 import 'package:path/path.dart' as p;
 
 abstract class ProjectGroupMetaData {

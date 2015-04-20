@@ -3,8 +3,8 @@
 
 library all_tests;
 
-import 'devops_test.dart' as devops_test;
+import 'jefe_test.dart' as jefe_test;
 
 void main() {
-  devops_test.defineTests();
+  jefe_test.defineTests();
 }

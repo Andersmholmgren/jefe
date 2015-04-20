@@ -1,19 +1,19 @@
-library devops.project.operations.executor.impl;
+library jefe.project.operations.executor.impl;
 
-import 'package:devops/src/project/project.dart';
+import 'package:jefe/src/project/project.dart';
 
 import 'package:logging/logging.dart';
 import 'dart:async';
-import 'package:devops/src/project_operations/project_command.dart';
-import 'package:devops/src/project_operations/project_command_executor.dart';
+import 'package:jefe/src/project_operations/project_command.dart';
+import 'package:jefe/src/project_operations/project_command_executor.dart';
 import 'dart:collection';
 import 'package:option/option.dart';
 import 'package:frappe/frappe.dart';
-import 'package:devops/src/util/frappe_utils.dart';
-import 'package:devops/src/project/dependency_graph.dart';
-import 'package:devops/src/project/core.dart';
+import 'package:jefe/src/util/frappe_utils.dart';
+import 'package:jefe/src/project/dependency_graph.dart';
+import 'package:jefe/src/project/core.dart';
 
-Logger _log = new Logger('devops.project.operations.impl');
+Logger _log = new Logger('jefe.project.operations.impl');
 
 class CommandExecutorImpl implements CommandExecutor {
   final ProjectSource _projectSource;

@@ -1,11 +1,11 @@
-library devops.project.operations.executor;
+library jefe.project.operations.executor;
 
 import 'dart:async';
-import 'package:devops/src/project_operations/project_command.dart';
+import 'package:jefe/src/project_operations/project_command.dart';
 
 import 'impl/project_command_executor.dart';
 import 'dart:io';
-import 'package:devops/src/project/project_group.dart';
+import 'package:jefe/src/project/project_group.dart';
 
 Future<CommandExecutor> executorForDirectory(String rootDirectory) async =>
     new CommandExecutor(await ProjectGroup.load(new Directory(rootDirectory)));

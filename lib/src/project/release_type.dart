@@ -1,4 +1,4 @@
-library devops.project.release.type;
+library jefe.project.release.type;
 
 import 'package:pub_semver/pub_semver.dart';
 

@@ -1,6 +1,6 @@
-library devops.project.operations.docker;
+library jefe.project.operations.docker;
 
-import 'package:devops/src/project_operations/project_command.dart';
+import 'package:jefe/src/project_operations/project_command.dart';
 import 'dart:io';
 import 'impl/docker_commands_impl.dart';
 

@@ -1,8 +1,8 @@
-library devops.project.test.helpers;
+library jefe.project.test.helpers;
 
-import 'package:devops/src/project/project.dart';
+import 'package:jefe/src/project/project.dart';
 import 'dart:io';
-import 'package:devops/src/project/impl/project_impl.dart';
+import 'package:jefe/src/project/impl/project_impl.dart';
 import 'package:pubspec/pubspec.dart';
 
 Project aProject(String name, {Iterable<Project> dependencies: const []}) =>

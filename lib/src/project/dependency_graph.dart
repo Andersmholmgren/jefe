@@ -1,4 +1,4 @@
-library devops.project.dependency;
+library jefe.project.dependency;
 
 import 'project.dart';
 import 'dart:async';

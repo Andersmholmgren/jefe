@@ -1,4 +1,4 @@
-library devops.project.metadata.yaml;
+library jefe.project.metadata.yaml;
 
 import 'package:yaml/yaml.dart';
 import 'dart:io';
@@ -6,7 +6,7 @@ import 'dart:async';
 import '../spec/JefeSpec.dart';
 import 'package:logging/logging.dart';
 
-Logger _log = new Logger('devops.project.metadata.yaml');
+Logger _log = new Logger('jefe.project.metadata.yaml');
 
 /// Reads the [ProjectGroupMetaData] from the [File]
 Future<ProjectGroupMetaData> readProjectGroupYaml(File projectGroupFile) async {

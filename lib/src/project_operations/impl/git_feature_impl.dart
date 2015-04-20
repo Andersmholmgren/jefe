@@ -1,15 +1,15 @@
-library devops.project.operations.git.feature.impl;
+library jefe.project.operations.git.feature.impl;
 
-import 'package:devops/src/project_operations/git_feature.dart';
-import 'package:devops/src/git/git.dart';
+import 'package:jefe/src/project_operations/git_feature.dart';
+import 'package:jefe/src/git/git.dart';
 import 'package:logging/logging.dart';
-import 'package:devops/src/project/project.dart';
-import 'package:devops/src/project_operations/project_command.dart';
-import 'package:devops/src/project/dependency_graph.dart';
+import 'package:jefe/src/project/project.dart';
+import 'package:jefe/src/project_operations/project_command.dart';
+import 'package:jefe/src/project/dependency_graph.dart';
 import 'dart:io';
 import 'package:option/option.dart';
 
-Logger _log = new Logger('devops.project.operations.git.feature.impl');
+Logger _log = new Logger('jefe.project.operations.git.feature.impl');
 
 class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
   ProjectCommand init() => projectCommand('git flow init', (Project p) async {

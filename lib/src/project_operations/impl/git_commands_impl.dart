@@ -1,12 +1,12 @@
-library devops.project.operations.git.impl;
+library jefe.project.operations.git.impl;
 
-import 'package:devops/src/git/git.dart';
+import 'package:jefe/src/git/git.dart';
 import 'package:logging/logging.dart';
-import 'package:devops/src/project/project.dart';
-import 'package:devops/src/project_operations/project_command.dart';
-import 'package:devops/src/project_operations/git_commands.dart';
+import 'package:jefe/src/project/project.dart';
+import 'package:jefe/src/project_operations/project_command.dart';
+import 'package:jefe/src/project_operations/git_commands.dart';
 
-Logger _log = new Logger('devops.project.operations.git.impl');
+Logger _log = new Logger('jefe.project.operations.git.impl');
 
 class GitCommandsImpl implements GitCommands {
   @override

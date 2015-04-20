@@ -1,8 +1,8 @@
 // Copyright (c) 2015, Anders Holmgren. All rights reserved. Use of this source code
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
-/// The devops library.
-library devops;
+/// The jefe library.
+library jefe;
 
 export 'src/project/project.dart';
 export 'src/project/project_group.dart';

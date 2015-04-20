@@ -1,6 +1,6 @@
-library devops.project.operations.process;
+library jefe.project.operations.process;
 
-import 'package:devops/src/project_operations/project_command.dart';
+import 'package:jefe/src/project_operations/project_command.dart';
 import 'impl/process_commands_impl.dart';
 
 abstract class ProcessCommands {

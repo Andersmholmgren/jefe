@@ -1,4 +1,4 @@
-name: devops
+name: jefe
 version: 0.0.1
 description: A library for maintaining sets of related Dart projects versioned in git
 author: Anders Holmgren <andersmholmgren@gmail.com>

@@ -1,4 +1,4 @@
-library devops.project.group.impl;
+library jefe.project.group.impl;
 
 import 'dart:async';
 import '../project.dart';
@@ -15,7 +15,7 @@ import '../../spec/JefeSpec.dart' as spec;
 import 'project_impl.dart';
 import '../../spec/JefeSpec.dart';
 
-Logger _log = new Logger('devops.project.group.impl');
+Logger _log = new Logger('jefe.project.group.impl');
 
 class ProjectGroupReferenceImpl implements ProjectGroupReference {
   final ProjectGroupImpl parent;

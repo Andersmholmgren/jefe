@@ -1,14 +1,14 @@
-library devops.project.group.test;
+library jefe.project.group.test;
 
 import 'package:scheduled_test/scheduled_test.dart';
-import 'package:devops/src/project/project.dart';
+import 'package:jefe/src/project/project.dart';
 import 'dart:async';
 import 'package:logging/logging.dart';
-import 'package:devops/src/project/impl/project_group_impl.dart';
-import 'package:devops/src/spec/JefeSpec.dart';
+import 'package:jefe/src/project/impl/project_group_impl.dart';
+import 'package:jefe/src/spec/JefeSpec.dart';
 import 'dart:io';
 import 'test_helpers.dart';
-import 'package:devops/src/project/project_group.dart';
+import 'package:jefe/src/project/project_group.dart';
 
 main() async {
   Logger.root.level = Level.ALL;

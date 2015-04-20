@@ -1,12 +1,12 @@
-library devops.project.operations.core;
+library jefe.project.operations.core;
 
-import 'package:devops/src/project/project.dart';
+import 'package:jefe/src/project/project.dart';
 import 'dart:async';
 import 'package:logging/logging.dart';
-import 'package:devops/src/project/dependency_graph.dart';
+import 'package:jefe/src/project/dependency_graph.dart';
 import 'dart:io';
 
-Logger _log = new Logger('devops.project.operations.core');
+Logger _log = new Logger('jefe.project.operations.core');
 
 /// [serial] means the command must execute on a single project at a time and
 /// must complete execution on all the projects before the next command may be

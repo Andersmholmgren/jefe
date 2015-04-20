@@ -1,4 +1,4 @@
-library devops.git;
+library jefe.git;
 
 import 'package:git/git.dart';
 import 'dart:async';
@@ -7,7 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 
-Logger _log = new Logger('devops.git');
+Logger _log = new Logger('jefe.git');
 
 Future<GitDir> gitWorkspaceDir(String gitUri, Directory parentDirectory) =>
     GitDir.fromExisting(gitWorkspacePath(gitUri, parentDirectory));

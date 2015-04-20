@@ -1,4 +1,4 @@
-library devops.project.core;
+library jefe.project.core;
 
 import 'dart:async';
 import 'dart:io';

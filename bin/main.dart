@@ -72,7 +72,7 @@ OR
 	  gissue_common: https://github.com/Andersmholmgren/gissue_common
 
 
-run> devops dev
+run> jefe dev
 
 - creates overrides like
 
@@ -81,7 +81,7 @@ run> devops dev
   	  	path: ../gissue_common in relevant pubspecs
 
 
-run> devops release
+run> jefe release
 
 - bumps minor version on all changed projects (in order)
 - git releases them with tag

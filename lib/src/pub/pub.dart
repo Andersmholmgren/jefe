@@ -1,4 +1,4 @@
-library devops.pub;
+library jefe.pub;
 
 import '../util/process_utils.dart';
 import 'dart:async';

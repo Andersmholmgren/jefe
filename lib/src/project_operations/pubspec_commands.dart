@@ -1,6 +1,6 @@
-library devops.project.operations.pub.spec;
+library jefe.project.operations.pub.spec;
 
-import 'package:devops/src/project_operations/project_command.dart';
+import 'package:jefe/src/project_operations/project_command.dart';
 import 'impl/pubspec_commands_impl.dart';
 import 'package:pubspec/pubspec.dart';
 

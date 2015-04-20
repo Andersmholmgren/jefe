@@ -1,4 +1,4 @@
-library devops.utils.frappe;
+library jefe.utils.frappe;
 
 import 'dart:async';
 import 'package:frappe/frappe.dart';
