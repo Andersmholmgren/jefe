@@ -1,20 +1,20 @@
 // Copyright (c) 2015, Anders Holmgren. All rights reserved. Use of this source code
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
-library jefe.project.operations.lifecycle.impl;
+library jefe.project.commands.lifecycle.impl;
 
 import 'dart:async';
-import 'package:jefe/src/project_operations/git_feature.dart';
+import 'package:jefe/src/project_commands/git_feature.dart';
 import 'package:logging/logging.dart';
 import 'package:jefe/src/project/project.dart';
-import 'package:jefe/src/project_operations/project_lifecycle.dart';
-import 'package:jefe/src/project_operations/project_command.dart';
-import 'package:jefe/src/project_operations/git_commands.dart';
-import 'package:jefe/src/project_operations/pub_commands.dart';
-import 'package:jefe/src/project_operations/pubspec_commands.dart';
+import 'package:jefe/src/project_commands/project_lifecycle.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
+import 'package:jefe/src/project_commands/git_commands.dart';
+import 'package:jefe/src/project_commands/pub_commands.dart';
+import 'package:jefe/src/project_commands/pubspec_commands.dart';
 import 'package:jefe/src/project/release_type.dart';
 
-Logger _log = new Logger('jefe.project.operations.git.feature.impl');
+Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
 class ProjectLifecycleImpl implements ProjectLifecycle {
   final GitFeatureCommands _gitFeature;

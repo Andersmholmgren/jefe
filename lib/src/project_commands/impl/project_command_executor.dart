@@ -1,14 +1,14 @@
 // Copyright (c) 2015, Anders Holmgren. All rights reserved. Use of this source code
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
-library jefe.project.operations.executor.impl;
+library jefe.project.commands.executor.impl;
 
 import 'package:jefe/src/project/project.dart';
 
 import 'package:logging/logging.dart';
 import 'dart:async';
-import 'package:jefe/src/project_operations/project_command.dart';
-import 'package:jefe/src/project_operations/project_command_executor.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
+import 'package:jefe/src/project_commands/project_command_executor.dart';
 import 'dart:collection';
 import 'package:option/option.dart';
 import 'package:frappe/frappe.dart';
@@ -16,7 +16,7 @@ import 'package:jefe/src/util/frappe_utils.dart';
 import 'package:jefe/src/project/dependency_graph.dart';
 import 'package:jefe/src/project/core.dart';
 
-Logger _log = new Logger('jefe.project.operations.impl');
+Logger _log = new Logger('jefe.project.commands.impl');
 
 class CommandExecutorImpl implements CommandExecutor {
   final ProjectSource _projectSource;

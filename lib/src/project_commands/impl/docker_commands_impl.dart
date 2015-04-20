@@ -1,12 +1,12 @@
 // Copyright (c) 2015, Anders Holmgren. All rights reserved. Use of this source code
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
-library jefe.project.operations.docker.impl;
+library jefe.project.commands.docker.impl;
 
 import 'package:logging/logging.dart';
 import 'package:jefe/src/project/project.dart';
-import 'package:jefe/src/project_operations/project_command.dart';
-import 'package:jefe/src/project_operations/docker_commands.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
+import 'package:jefe/src/project_commands/docker_commands.dart';
 import 'package:dockerfile/dockerfile.dart';
 import 'package:path/path.dart' as p;
 import 'package:jefe/src/project/dependency_graph.dart';
@@ -16,7 +16,7 @@ import 'dart:async';
 import 'package:jefe/src/git/git.dart';
 import 'package:pubspec/pubspec.dart';
 
-Logger _log = new Logger('jefe.project.operations.docker.impl');
+Logger _log = new Logger('jefe.project.commands.docker.impl');
 
 class DockerCommandsImpl implements DockerCommands {
   ProjectDependencyGraphCommand generateDockerfile(

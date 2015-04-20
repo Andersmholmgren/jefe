@@ -1,9 +1,9 @@
 // Copyright (c) 2015, Anders Holmgren. All rights reserved. Use of this source code
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
-library jefe.project.operations.docker;
+library jefe.project.commands.docker;
 
-import 'package:jefe/src/project_operations/project_command.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
 import 'dart:io';
 import 'impl/docker_commands_impl.dart';
 

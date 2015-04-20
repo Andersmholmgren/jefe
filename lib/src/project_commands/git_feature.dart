@@ -1,10 +1,10 @@
 // Copyright (c) 2015, Anders Holmgren. All rights reserved. Use of this source code
 // is governed by a BSD-style license that can be found in the LICENSE file.
 
-library jefe.project.operations.git.feature;
+library jefe.project.commands.git.feature;
 
 import 'impl/git_feature_impl.dart';
-import 'package:jefe/src/project_operations/project_command.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
 
 typedef GitFeatureCommands GitFeatureCommandsFactory();
 

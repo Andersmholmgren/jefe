@@ -15,9 +15,6 @@ main(arguments) {
 }
 
 class Jefe {
-  final lifecycle = new ProjectLifecycle();
-  final process = new ProcessCommands();
-
   @Command(
       help: 'Manages a set of related Dart projects',
       plugins: const [const Completion()])
