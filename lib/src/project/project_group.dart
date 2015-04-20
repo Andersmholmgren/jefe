@@ -6,7 +6,7 @@ library jefe.project.group;
 import 'dart:async';
 import 'dart:io';
 import 'impl/project_group_impl.dart';
-import '../spec/JefeSpec.dart';
+import '../spec/jefe_spec.dart';
 import 'project.dart';
 import 'core.dart';
 import 'package:jefe/src/project/dependency_graph.dart';

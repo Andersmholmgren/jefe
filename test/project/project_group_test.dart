@@ -8,7 +8,7 @@ import 'package:jefe/src/project/project.dart';
 import 'dart:async';
 import 'package:logging/logging.dart';
 import 'package:jefe/src/project/impl/project_group_impl.dart';
-import 'package:jefe/src/spec/JefeSpec.dart';
+import 'package:jefe/src/spec/jefe_spec.dart';
 import 'dart:io';
 import 'test_helpers.dart';
 import 'package:jefe/src/project/project_group.dart';

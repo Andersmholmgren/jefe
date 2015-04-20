@@ -14,9 +14,9 @@ import 'package:quiver/streams.dart' as streamz;
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import '../dependency_graph.dart';
-import '../../spec/JefeSpec.dart' as spec;
+import '../../spec/jefe_spec.dart' as spec;
 import 'project_impl.dart';
-import '../../spec/JefeSpec.dart';
+import '../../spec/jefe_spec.dart';
 
 Logger _log = new Logger('jefe.project.group.impl');
 

@@ -1,3 +1,6 @@
+// Copyright (c) 2015, Anders Holmgren. All rights reserved. Use of this source code
+// is governed by a BSD-style license that can be found in the LICENSE file.
+
 import 'package:unscripted/unscripted.dart';
 import 'dart:io';
 import 'package:jefe/jefe.dart';
@@ -81,8 +84,3 @@ class Jefe {
     return executor;
   }
 }
-
-/*
-  jefe feature start fbar
-  jefe feature finish fbar
- */

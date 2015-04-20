@@ -6,7 +6,7 @@ library jefe.project;
 import 'dart:async';
 import 'dart:io';
 import 'impl/project_impl.dart';
-import '../spec/JefeSpec.dart';
+import '../spec/jefe_spec.dart';
 import 'core.dart';
 import 'package:pubspec/pubspec.dart';
 

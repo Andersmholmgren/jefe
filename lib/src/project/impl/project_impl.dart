@@ -8,7 +8,7 @@ import '../project.dart';
 import 'package:git/git.dart';
 import '../../git/git.dart';
 import 'package:logging/logging.dart';
-import '../../spec/JefeSpec.dart';
+import '../../spec/jefe_spec.dart';
 import 'package:jefe/src/project/impl/project_group_impl.dart';
 import 'dart:io';
 import 'package:jefe/src/project/core.dart';

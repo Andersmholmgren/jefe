@@ -6,8 +6,8 @@ library jefe;
 
 export 'src/project/project.dart';
 export 'src/project/project_group.dart';
-export 'src/project/project_yaml.dart';
+export 'src/spec/jefe_yaml.dart';
 export 'src/project/release_type.dart';
 export 'src/project_commands/project_command_executor.dart';
 export 'src/project_commands/all_commands.dart';
-export 'src/spec/JefeSpec.dart';
+export 'src/spec/jefe_spec.dart';

@@ -6,7 +6,7 @@ library jefe.project.core;
 import 'dart:async';
 import 'dart:io';
 import 'package:git/git.dart';
-import '../spec/JefeSpec.dart';
+import '../spec/jefe_spec.dart';
 import 'project.dart';
 
 /// A reference to a [ProjectEntity]. The actual entity is fetched via [get]
