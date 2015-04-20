@@ -3,7 +3,7 @@
 
 library jefe.project.spec.impl;
 
-import 'jefe_spec.dart';
+import '../jefe_spec.dart';
 
 class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {
   final String name;

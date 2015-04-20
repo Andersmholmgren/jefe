@@ -6,7 +6,7 @@ library jefe.project.metadata.yaml;
 import 'package:yaml/yaml.dart';
 import 'dart:io';
 import 'dart:async';
-import 'jefe_spec.dart';
+import '../jefe_spec.dart';
 import 'package:logging/logging.dart';
 
 Logger _log = new Logger('jefe.project.metadata.yaml');
