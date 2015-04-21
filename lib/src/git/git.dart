@@ -47,8 +47,9 @@ Future gitTag(GitDir gitDir, String tag) async =>
 Future gitPush(GitDir gitDir) async {
   final BranchReference current = await gitDir.getCurrentBranch();
 
-  await gitDir
-      .runCommand(['push', '--set-upstream', 'origin', current.branchName]);
+  // TODO: make pushing tags optional
+  await gitDir.runCommand(
+      ['push', '--tags', '--set-upstream', 'origin', current.branchName]);
 }
 
 Future<String> currentCommitHash(GitDir gitDir) async =>
