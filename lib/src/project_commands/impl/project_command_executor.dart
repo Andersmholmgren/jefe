@@ -54,38 +54,45 @@ class CommandExecutorImpl implements CommandExecutor {
   @override
   Future executeAll(CompositeProjectCommand composite,
       {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand}) async {
-    // TODO: only serial supported for now
-    return _executeSerially(composite);
-//    if (concurrently) {
-//      await _executeConcurrently(composite);
-//    } else {
-//      await _executeSerially(composite);
-//    }
+    if (concurrencyMode != CommandConcurrencyMode.serial &&
+        composite.commands
+            .every((c) => c.concurrencyMode != CommandConcurrencyMode.serial)) {
+      return _executeAllOnConcurrentProjects(composite);
+    } else {
+      return _executeSerially(composite);
+    }
+
+    // TODO: add support for concurrentCommand
   }
 
-  /////// BAD IDEA. Can't do this
-//  Future _executeConcurrently(CompositeProjectCommand composite) async {
-//    final wrappedCommand = projectCommandWithDependencies(composite.name,
-//        (Project project, Iterable<Project> dependencies) async {
-//      await Future.forEach(composite.commands, (ProjectCommand command) async {
-//        if (command.function is ProjectWithDependenciesFunction) {
-//          await command.function(project, dependencies);
-//        } else if (command.function is ProjectFunction) {
-//          await command.function(project);
-//        } else {
-//          throw new ArgumentError('Invalid function passed into execute');
-//        }
-//      });
-//    });
-//
-//    await execute(wrappedCommand);
-//  }
-
   Future _executeSerially(CompositeProjectCommand composite) async {
-    _log.info('Executing composite command "${composite.name}"');
+    _log.info('Executing composite command "${composite.name} serially"');
     final result = await Future.forEach(composite.commands, execute);
-    _log.finer('Completed command "${composite.name}"');
+    _log.finer('Completed composite command "${composite.name}"');
     return result;
+  }
+
+  // executes concurrently on all projects but each command must complete on all
+  // projects before moving on to next
+  Future _executeAllOnConcurrentProjects(
+      CompositeProjectCommand composite) async {
+    _log.info('Executing composite command "${composite.name} '
+        'concurrently on all projects"');
+    final projectGraph = await _projectGroup.dependencyGraph;
+
+    await Future.forEach(composite.commands, (command) async {
+      await _executeOnConcurrentProjects(projectGraph, command);
+    });
+
+    _log.finer('Completed composite command "${composite.name}"');
+  }
+
+  Future _executeOnConcurrentProjects(
+      DependencyGraph projectGraph, ProjectCommand command) async {
+    return await new Stream.fromIterable(projectGraph.depthFirst)
+        .asyncMap((ProjectDependencies pd) =>
+            command.process(pd.project, dependencies: pd.dependencies))
+        .toList();
   }
 
   @override
