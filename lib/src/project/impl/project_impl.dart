@@ -50,10 +50,9 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
     final projectParentDir = await parentDir.create(recursive: true);
 
-    final GitDir gitDir = await (updateIfExists
-        ? cloneOrPull(gitUri, projectParentDir,
-            new Directory(gitWorkspacePath(gitUri, projectParentDir)))
-        : clone(gitUri, projectParentDir));
+    final GitDir gitDir = await cloneOrPull(gitUri, projectParentDir,
+        new Directory(gitWorkspacePath(gitUri, projectParentDir)),
+        OnExistsAction.ignore);
 
     final installDirectory = new Directory(gitDir.path);
     return new ProjectImpl(

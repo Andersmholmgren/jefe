@@ -21,14 +21,20 @@ String gitWorkspacePath(String gitUri, Directory parentDirectory) {
   return p.join(parentDirectory.path, gitWorkspaceName(gitUri));
 }
 
+enum OnExistsAction { pull, ignore }
+
 Future<GitDir> cloneOrPull(String gitUri, Directory containerDirectory,
-    Directory groupDirectory) async {
+    Directory groupDirectory, OnExistsAction onExistsAction) async {
 
 //  _log.fine(
 //      'checking if $gitDirPath is a git workspace - git repo: $gitUri; parent directory $parentDirectory');
   if (await groupDirectory.exists() &&
       await GitDir.isGitDir(groupDirectory.path)) {
-    return pull(gitUri, groupDirectory);
+    if (onExistsAction == OnExistsAction.pull) {
+      return pull(gitUri, groupDirectory);
+    } else {
+      return GitDir.fromExisting(groupDirectory.path);
+    }
   } else {
     return clone(gitUri, containerDirectory);
   }
