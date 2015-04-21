@@ -17,7 +17,7 @@ Future<CommandExecutor> executorForDirectory(String rootDirectory) async =>
 typedef bool ProjectFilter(Project p);
 
 ProjectFilter projectNameFilter(String pattern) =>
-    (Project p) => p.name.contains(pattern);
+    (Project p) => pattern == null || p.name.contains(pattern);
 
 /// Facilitates the execution of commands on a [ProjectGroup]
 abstract class CommandExecutor {
