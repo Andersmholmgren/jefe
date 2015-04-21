@@ -83,6 +83,10 @@ Future gitPush(GitDir gitDir) async {
       ['push', '--tags', '--set-upstream', 'origin', current.branchName]);
 }
 
+Future gitFetch(GitDir gitDir) async {
+  await gitDir.runCommand(['fetch']);
+}
+
 Future<String> currentCommitHash(GitDir gitDir) async =>
     (await gitDir.runCommand(['rev-parse', 'HEAD'])).stdout.trim();
 

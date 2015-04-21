@@ -13,5 +13,7 @@ abstract class GitCommands {
 
   ProjectCommand push();
 
+  ProjectCommand fetch();
+
   ProjectCommand checkout(String branchName);
 }

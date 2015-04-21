@@ -98,6 +98,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   CompositeProjectCommand init() {
     return projectCommandGroup('Initialising for development', [
       _gitFeature.init(),
+      _git.fetch(),
       _git.checkout(_gitFeature.developBranchName)
     ]);
   }

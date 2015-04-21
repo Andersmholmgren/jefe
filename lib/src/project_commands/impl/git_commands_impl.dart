@@ -23,6 +23,10 @@ class GitCommandsImpl implements GitCommands {
     await gitPush(await p.gitDir);
   });
 
+  ProjectCommand fetch() => projectCommand('git fetch', (Project p) async {
+    await gitFetch(await p.gitDir);
+  });
+
   @override
   ProjectCommand checkout(String branchName) => projectCommand(
       'git checkout $branchName', (Project p) async {
