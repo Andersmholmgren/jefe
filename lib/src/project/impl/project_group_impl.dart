@@ -151,8 +151,6 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     return projectGroup;
   }
 
-  static Future<GitDir> _cloneOrPull() {}
-
   Future<ProjectGroupImpl> _getChildGroup(String childName, String gitUri) {
     final childContainer =
         directoryLayout.childGroup(childName).containerDirectory;

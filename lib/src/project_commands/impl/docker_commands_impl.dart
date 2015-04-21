@@ -178,7 +178,7 @@ class DockerCommandsImpl implements DockerCommands {
   }
 
   Set<Project> _pathDependentProjects(ProjectDependencies projectDependencies) {
-    final depMap = new Map.fromIterable(projectDependencies.dependencies,
+    final depMap = new Map.fromIterable(projectDependencies.directDependencies,
         key: (project) => project.name);
 
     final deps = projectDependencies.project.pubspec.dependencies;

@@ -99,7 +99,7 @@ class CommandExecutorImpl implements CommandExecutor {
     return await new Stream.fromIterable(projectGraph.depthFirst)
         .asyncMap((ProjectDependencies pd) {
       if (filter(pd.project)) {
-        return command.process(pd.project, dependencies: pd.dependencies);
+        return command.process(pd.project, dependencies: pd.directDependencies);
       }
     }).toList();
   }
@@ -110,7 +110,7 @@ class CommandExecutorImpl implements CommandExecutor {
         await getDependencyGraph(await _projectGroup.allProjects);
     final projectDependencies = graph.forProject(projectName);
     return await command.process(projectDependencies.project,
-        dependencies: projectDependencies.dependencies);
+        dependencies: projectDependencies.directDependencies);
   }
 
   @override
@@ -162,8 +162,8 @@ class ConcurrentCommandExecutor {
 //            qOpt.map((q) )
             if (qOpt is Some) {
               // TODO: assuming has depends
-              await qOpt.get().add(() =>
-                  command.process(pd.project, dependencies: pd.dependencies));
+              await qOpt.get().add(() => command.process(pd.project,
+                  dependencies: pd.directDependencies));
             }
           });
 

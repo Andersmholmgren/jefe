@@ -10,7 +10,7 @@ import 'package:pubspec/pubspec.dart';
 
 /// Returns a [DependencyGraph] for the set of [projects]
 Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>
-    new DependencyGraph(await _determineDependencies(projects));
+    new DependencyGraph._(await _determineDependencies(projects));
 
 /// Represents a graph of dependencies between [Project]s
 class DependencyGraph {
@@ -20,8 +20,8 @@ class DependencyGraph {
 
   Map<Project, _DependencyNode> _nodeMap = {};
 
-  DependencyGraph(Set<ProjectDependencies> dependencySet) {
-    dependencySet.forEach((ds) => _add(ds.project, ds.dependencies));
+  DependencyGraph._(Set<_ProjectDependencies> dependencySet) {
+    dependencySet.forEach((ds) => _add(ds.project, ds.directDependencies));
   }
 
   void _add(Project project, Set<Project> dependencies) {
@@ -48,7 +48,7 @@ class DependencyGraph {
   Future processDepthFirst(
       process(Project project, Iterable<Project> dependencies)) async {
     await Future.forEach(depthFirst,
-        (ProjectDependencies pd) => process(pd.project, pd.dependencies));
+        (ProjectDependencies pd) => process(pd.project, pd.directDependencies));
   }
 
   _DependencyNode _getOrCreateNode(Project project) {
@@ -63,18 +63,26 @@ class DependencyGraph {
   }
 }
 
-/// Represents a [Project] and the projects it depends on
-class ProjectDependencies {
+/// Represents a [Project] and the immediate projects it depends on
+class _ProjectDependencies {
   final Project project;
-  final Set<Project> dependencies;
+  final Set<Project> directDependencies;
 
-  ProjectDependencies(this.project, this.dependencies);
+  _ProjectDependencies(this.project, this.directDependencies);
 }
 
-class _DependencyNode {
+/// Represents a [Project] and all the projects it depends on directly and
+/// indirectly
+abstract class ProjectDependencies implements _ProjectDependencies {
+  Set<Project> get indirectDependencies;
+  Set<Project> get allDependencies;
+}
+
+class _DependencyNode implements ProjectDependencies {
   final Project project;
   final Set<_DependencyNode> _dependencies = new Set();
-  Iterable<Project> get dependencies => _dependencies.map((n) => n.project);
+  Iterable<Project> get directDependencies =>
+      _dependencies.map((n) => n.project);
 
   _DependencyNode(this.project);
 
@@ -84,20 +92,28 @@ class _DependencyNode {
     Iterable us() sync* {
       if (!visited.contains((project))) {
         visited.add(project);
-        yield new ProjectDependencies(project, dependencies.toSet());
+        yield this;
       }
     }
 
     return concat([children, us()]);
   }
+
+  @override
+  Set<Project> get allDependencies =>
+      getDepthFirst(new Set()).map((pd) => pd.project).toSet();
+
+  @override
+  Set<Project> get indirectDependencies =>
+      allDependencies.difference(directDependencies);
 }
 
-Future<Set<ProjectDependencies>> _determineDependencies(
+Future<Set<_ProjectDependencies>> _determineDependencies(
         Set<Project> projects) async =>
     (await Future.wait(projects.map((p) => _resolveDependencies(
         p, new Map.fromIterable(projects, key: (p) => p.name))))).toSet();
 
-Future<ProjectDependencies> _resolveDependencies(
+Future<_ProjectDependencies> _resolveDependencies(
     Project project, Map<String, Project> projects) async {
   final PubSpec pubspec = await project.pubspec;
   final dependencies = pubspec.dependencies.keys
@@ -105,5 +121,5 @@ Future<ProjectDependencies> _resolveDependencies(
       .where((v) => v != null)
       .toSet();
 
-  return new ProjectDependencies(project, dependencies);
+  return new _ProjectDependencies(project, dependencies);
 }
