@@ -53,10 +53,13 @@ class Jefe {
 
   @SubCommand(help: 'Completes feature and returns to development branch')
   finish(String featureName, {@Option(
-      help: 'The directory that contains the root of the projecs',
-      abbr: 'd') String rootDirectory: '.'}) async {
+      help: 'The directory that contains the root of the projects',
+      abbr: 'd') String rootDirectory: '.', @Option(
+      help: 'A project name filter. Only projects whose name contains the text will run',
+      abbr: 'p') String projects}) async {
     final executor = await load(rootDirectory);
-    await executor.execute(lifecycle.completeFeature(featureName));
+    await executor.execute(lifecycle.completeFeature(featureName),
+        filter: projectNameFilter(projects));
   }
 
   @SubCommand(help: 'Create a release of all the projects')

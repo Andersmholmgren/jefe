@@ -23,10 +23,14 @@ class CommandExecutorImpl implements CommandExecutor {
 
   CommandExecutorImpl(this._projectGroup);
 
-  Future execute(ProjectCommand command) async {
-    return await _processDependenciesDepthFirst(
-        (Project project, Iterable<Project> dependencies) =>
-            command.process(project, dependencies: dependencies));
+  Future execute(ProjectCommand command,
+      {ProjectFilter filter: _noOpFilter}) async {
+    return await _processDependenciesDepthFirst((Project project,
+        Iterable<Project> dependencies) async {
+      if (filter(project)) {
+        return await command.process(project, dependencies: dependencies);
+      }
+    });
   }
 
   Future _processDependenciesDepthFirst(
@@ -53,21 +57,24 @@ class CommandExecutorImpl implements CommandExecutor {
 
   @override
   Future executeAll(CompositeProjectCommand composite,
-      {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand}) async {
+      {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand,
+      ProjectFilter filter: _noOpFilter}) async {
     if (concurrencyMode != CommandConcurrencyMode.serial &&
         composite.commands
             .every((c) => c.concurrencyMode != CommandConcurrencyMode.serial)) {
-      return _executeAllOnConcurrentProjects(composite);
+      return _executeAllOnConcurrentProjects(composite, filter);
     } else {
-      return _executeSerially(composite);
+      return _executeSerially(composite, filter);
     }
 
     // TODO: add support for concurrentCommand
   }
 
-  Future _executeSerially(CompositeProjectCommand composite) async {
+  Future _executeSerially(
+      CompositeProjectCommand composite, ProjectFilter filter) async {
     _log.info('Executing composite command "${composite.name} serially"');
-    final result = await Future.forEach(composite.commands, execute);
+    final result = await Future.forEach(
+        composite.commands, (c) => execute(c, filter: filter));
     _log.finer('Completed composite command "${composite.name}"');
     return result;
   }
@@ -75,24 +82,26 @@ class CommandExecutorImpl implements CommandExecutor {
   // executes concurrently on all projects but each command must complete on all
   // projects before moving on to next
   Future _executeAllOnConcurrentProjects(
-      CompositeProjectCommand composite) async {
+      CompositeProjectCommand composite, ProjectFilter filter) async {
     _log.info('Executing composite command "${composite.name} '
         'concurrently on all projects"');
     final projectGraph = await _projectGroup.dependencyGraph;
 
     await Future.forEach(composite.commands, (command) async {
-      await _executeOnConcurrentProjects(projectGraph, command);
+      await _executeOnConcurrentProjects(projectGraph, command, filter);
     });
 
     _log.finer('Completed composite command "${composite.name}"');
   }
 
-  Future _executeOnConcurrentProjects(
-      DependencyGraph projectGraph, ProjectCommand command) async {
+  Future _executeOnConcurrentProjects(DependencyGraph projectGraph,
+      ProjectCommand command, ProjectFilter filter) async {
     return await new Stream.fromIterable(projectGraph.depthFirst)
-        .asyncMap((ProjectDependencies pd) =>
-            command.process(pd.project, dependencies: pd.dependencies))
-        .toList();
+        .asyncMap((ProjectDependencies pd) {
+      if (filter(pd.project)) {
+        return command.process(pd.project, dependencies: pd.dependencies);
+      }
+    }).toList();
   }
 
   @override
@@ -105,10 +114,12 @@ class CommandExecutorImpl implements CommandExecutor {
   }
 
   @override
-  Future executeOnGraph(ProjectDependencyGraphCommand command) async {
+  Future executeOnGraph(ProjectDependencyGraphCommand command,
+      {ProjectFilter filter: _noOpFilter}) async {
     final DependencyGraph graph =
         await getDependencyGraph(await _projectGroup.allProjects);
-    return await command.process(graph, _projectGroup.containerDirectory);
+    return await command.process(
+        graph, _projectGroup.containerDirectory, filter);
   }
 }
 
@@ -197,3 +208,5 @@ class ProjectCommandQueue {
     }
   }
 }
+
+bool _noOpFilter(Project p) => true;

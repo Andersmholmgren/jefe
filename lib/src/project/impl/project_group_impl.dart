@@ -137,6 +137,13 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     return new ProjectGroupImpl(gitUri, results.elementAt(1), directoryLayout);
   }
 
+  static Future<ProjectGroup> init(Directory installDirectory) async {
+//    try {
+//      await load(installDirectory);
+//
+//    } catch
+  }
+
   Future<ProjectGroupImpl> _getChildGroup(String childName, String gitUri) {
     final childContainer =
         directoryLayout.childGroup(childName).containerDirectory;

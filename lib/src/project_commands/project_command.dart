@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 import 'package:jefe/src/project/dependency_graph.dart';
 import 'dart:io';
+import 'package:jefe/src/project_commands/project_command_executor.dart';
 
 Logger _log = new Logger('jefe.project.commands.core');
 
@@ -70,12 +71,13 @@ abstract class ProjectCommand {
 
 /// a function that operates on the dependency graph as a whole
 typedef Future ProjectDependencyGraphFunction(
-    DependencyGraph graph, Directory rootDirectory);
+    DependencyGraph graph, Directory rootDirectory, ProjectFilter filter);
 
 /// a command that operates on the dependency graph as a whole
 abstract class ProjectDependencyGraphCommand {
   String get name;
-  Future process(DependencyGraph graph, Directory rootDirectory);
+  Future process(
+      DependencyGraph graph, Directory rootDirectory, ProjectFilter filter);
 }
 
 /// [concurrencyMode] can be used to limit the concurrencyMode of the
@@ -130,10 +132,11 @@ class _DefaultProjectDependencyGraphCommand
   _DefaultProjectDependencyGraphCommand(this.name, this.function);
 
   @override
-  Future process(DependencyGraph graph, Directory rootDirectory) async {
+  Future process(DependencyGraph graph, Directory rootDirectory,
+      ProjectFilter filter) async {
     _log.info('Executing command "$name"');
 
-    final result = await function(graph, rootDirectory);
+    final result = await function(graph, rootDirectory, filter);
 
     _log.finer('Completed command "$name"');
     return result;
