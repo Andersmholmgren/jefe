@@ -88,33 +88,8 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
         super(gitUri, directoryLayout.groupDirectory);
 
   static Future<ProjectGroup> install(Directory parentDir, String gitUri,
-      {String name}) async {
-    final workspaceName = name != null ? name : gitWorkspaceName(gitUri);
-    _log.info('installing group $workspaceName from $gitUri into $parentDir');
-
-    final GroupDirectoryLayout directoryLayout =
-        new GroupDirectoryLayout.fromParent(parentDir, workspaceName);
-
-    final Directory projectGroupRoot =
-        await directoryLayout.containerDirectory.create(recursive: true);
-
-    final GitDir gitDir = await clone(gitUri, projectGroupRoot);
-
-    final spec.ProjectGroupMetaData metaData = await spec.ProjectGroupMetaData
-        .fromDefaultProjectGroupYamlFile(gitDir.path);
-
-    final projectGroup =
-        new ProjectGroupImpl(gitUri, metaData, directoryLayout);
-
-    final projectGroupInstallFutures = projectGroup.childGroups
-        .map((ref) => projectGroup._installChildGroup(ref.name, ref.gitUri));
-    final projectInstallFutures = projectGroup.projects
-        .map((ref) => projectGroup._installChildProject(ref.name, ref.gitUri));
-    await Future
-        .wait(concat([projectGroupInstallFutures, projectInstallFutures]));
-
-    return projectGroup;
-  }
+          {String name}) =>
+      _installOrUpdate(parentDir, gitUri, name: name, updateIfExists: false);
 
   static Future<ProjectGroup> load(Directory groupContainerDirectory) async {
     _log.fine(
@@ -137,6 +112,47 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     return new ProjectGroupImpl(gitUri, results.elementAt(1), directoryLayout);
   }
 
+  static Future<ProjectGroup> init(Directory parentDir, String gitUri,
+          {String name}) =>
+      _installOrUpdate(parentDir, gitUri, name: name, updateIfExists: true);
+
+  static Future<ProjectGroup> _installOrUpdate(
+      Directory parentDir, String gitUri,
+      {String name, bool updateIfExists: true}) async {
+    final workspaceName = name != null ? name : gitWorkspaceName(gitUri);
+    _log.info('installing group $workspaceName from $gitUri into $parentDir');
+
+    final GroupDirectoryLayout directoryLayout =
+        new GroupDirectoryLayout.fromParent(parentDir, workspaceName);
+
+    final onExistsAction =
+        updateIfExists ? OnExistsAction.pull : OnExistsAction.ignore;
+
+    final GitDir gitDir = await cloneOrPull(gitUri,
+        directoryLayout.containerDirectory, directoryLayout.groupDirectory,
+        onExistsAction);
+
+    final spec.ProjectGroupMetaData metaData = await spec.ProjectGroupMetaData
+        .fromDefaultProjectGroupYamlFile(gitDir.path);
+
+    final projectGroup =
+        new ProjectGroupImpl(gitUri, metaData, directoryLayout);
+
+    final projectGroupInstallFutures = projectGroup.childGroups.map((ref) =>
+        projectGroup._installChildGroup(ref.name, ref.gitUri, updateIfExists));
+    final projectInstallFutures = projectGroup.projects.map(
+        (ref) => projectGroup._installChildProject(
+            ref.name, ref.gitUri, updateIfExists));
+    await Future
+        .wait(concat([projectGroupInstallFutures, projectInstallFutures]));
+
+    _log.info(
+        'Completed installing group $workspaceName from $gitUri into $parentDir');
+    return projectGroup;
+  }
+
+  static Future<GitDir> _cloneOrPull() {}
+
   Future<ProjectGroupImpl> _getChildGroup(String childName, String gitUri) {
     final childContainer =
         directoryLayout.childGroup(childName).containerDirectory;
@@ -149,11 +165,15 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   Future<ProjectImpl> getChildProject(String name, String gitUri) =>
       ProjectImpl.load(directoryLayout.projectDirectory(name));
 
-  Future<ProjectGroupImpl> _installChildGroup(String name, String gitUri) =>
-      install(directoryLayout.containerDirectory, gitUri, name: name);
+  Future<ProjectGroupImpl> _installChildGroup(
+      String name, String gitUri, bool updateIfExists) => _installOrUpdate(
+          directoryLayout.containerDirectory, gitUri,
+          name: name, updateIfExists: updateIfExists);
 
-  Future<ProjectImpl> _installChildProject(String name, String gitUri) =>
-      ProjectImpl.install(directoryLayout.containerDirectory, name, gitUri);
+  Future<ProjectImpl> _installChildProject(
+      String name, String gitUri, bool updateIfExists) => ProjectImpl.install(
+          directoryLayout.containerDirectory, name, gitUri,
+          updateIfExists: updateIfExists);
 
   @override
   Future<Set<Project>> get allProjects => _allProjectsStream.toSet();
