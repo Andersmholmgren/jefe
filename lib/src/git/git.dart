@@ -21,6 +21,25 @@ String gitWorkspacePath(String gitUri, Directory parentDirectory) {
   return p.join(parentDirectory.path, gitWorkspaceName(gitUri));
 }
 
+enum OnExistsAction { pull, ignore }
+
+Future<GitDir> cloneOrPull(String gitUri, Directory containerDirectory,
+    Directory groupDirectory, OnExistsAction onExistsAction) async {
+
+//  _log.fine(
+//      'checking if $gitDirPath is a git workspace - git repo: $gitUri; parent directory $parentDirectory');
+  if (await groupDirectory.exists() &&
+      await GitDir.isGitDir(groupDirectory.path)) {
+    if (onExistsAction == OnExistsAction.pull) {
+      return pull(gitUri, groupDirectory);
+    } else {
+      return GitDir.fromExisting(groupDirectory.path);
+    }
+  } else {
+    return clone(gitUri, containerDirectory);
+  }
+}
+
 Future<GitDir> clone(String gitUri, Directory parentDirectory) async {
   _log.info('cloning git repo $gitUri into parent directory $parentDirectory');
   await runGit(['clone', gitUri.toString()],
@@ -30,6 +49,18 @@ Future<GitDir> clone(String gitUri, Directory parentDirectory) async {
       'successfully cloned git repo $gitUri into parent directory $parentDirectory');
 
   return gitWorkspaceDir(gitUri, parentDirectory);
+}
+
+Future<GitDir> pull(String gitUri, Directory gitDirectory) async {
+  _log.info('running git pull from repo $gitUri in directory $gitDirectory');
+  final GitDir gitDir = await GitDir.fromExisting(gitDirectory.path);
+//?  await gitDir.runCommand(['branch', '--set-upstream-to=origin/<branch> <branch>']);
+  await gitDir.runCommand(['pull']);
+//  await runGit(['pull'], processWorkingDir: gitDirectory.path);
+  _log.finest(
+      'successfully pulled git repo $gitUri into parent directory $gitDirectory');
+
+  return await GitDir.fromExisting(gitDirectory.path);
 }
 
 Future gitCommit(GitDir gitDir, String message) async {

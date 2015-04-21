@@ -44,12 +44,16 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
       : super(gitUri, installDirectory);
 
   static Future<ProjectImpl> install(
-      Directory parentDir, String name, String gitUri) async {
+      Directory parentDir, String name, String gitUri,
+      {bool updateIfExists}) async {
     _log.info('installing project $name from $gitUri into $parentDir');
 
-    await parentDir.create(recursive: true);
+    final projectParentDir = await parentDir.create(recursive: true);
 
-    final GitDir gitDir = await clone(gitUri, parentDir);
+    final GitDir gitDir = await cloneOrPull(gitUri, projectParentDir,
+        new Directory(gitWorkspacePath(gitUri, projectParentDir)),
+        OnExistsAction.ignore);
+
     final installDirectory = new Directory(gitDir.path);
     return new ProjectImpl(
         gitUri, installDirectory, await PubSpec.load(installDirectory));
