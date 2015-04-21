@@ -46,9 +46,12 @@ class Jefe {
   @SubCommand(help: 'Sets up for the start of development on a new feature')
   start(String featureName, {@Option(
       help: 'The directory that contains the root of the projecs',
-      abbr: 'd') String rootDirectory: '.'}) async {
+      abbr: 'd') String rootDirectory: '.', @Option(
+      help: 'A project name filter. Only projects whose name contains the text will run',
+      abbr: 'p') String projects}) async {
     final executor = await load(rootDirectory);
-    await executor.executeAll(lifecycle.startNewFeature(featureName));
+    await executor.executeAll(lifecycle.startNewFeature(featureName),
+        filter: projectNameFilter(projects));
   }
 
   @SubCommand(help: 'Completes feature and returns to development branch')
@@ -65,17 +68,23 @@ class Jefe {
   @SubCommand(help: 'Create a release of all the projects')
   release({@Option(
       help: 'The directory that contains the root of the projecs',
-      abbr: 'd') String rootDirectory: '.'}) async {
+      abbr: 'd') String rootDirectory: '.', @Option(
+      help: 'A project name filter. Only projects whose name contains the text will run',
+      abbr: 'p') String projects}) async {
     final executor = await load(rootDirectory);
-    await executor.execute(lifecycle.release());
+    await executor.execute(lifecycle.release(),
+        filter: projectNameFilter(projects));
   }
 
   @SubCommand(help: 'Runs the given command in all projects')
   exec(String command, @Rest() List<String> args, {@Option(
       help: 'The directory that contains the root of the projecs',
-      abbr: 'd') String rootDirectory: '.'}) async {
+      abbr: 'd') String rootDirectory: '.', @Option(
+      help: 'A project name filter. Only projects whose name contains the text will run',
+      abbr: 'p') String projects}) async {
     final executor = await load(rootDirectory);
-    await executor.execute(process.process(command, args));
+    await executor.execute(process.process(command, args),
+        filter: projectNameFilter(projects));
   }
 
   Future<CommandExecutor> load(String rootDirectory) async {
