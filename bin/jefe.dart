@@ -43,6 +43,19 @@ class Jefe {
     await executor.executeAll(lifecycle.init());
   }
 
+  @SubCommand(help: 'Installs or updates a group of projects')
+  init(@Positional(help: 'The git Uri containing the jefe.yaml.') String gitUri,
+      {@Option(
+          help: 'The directory to install into',
+          abbr: 'd') String installDirectory: '.'}) async {
+    final Directory installDir = new Directory(installDirectory);
+    final ProjectGroup projectGroup =
+        await ProjectGroup.init(installDir, gitUri);
+
+    final executor = new CommandExecutor(projectGroup);
+    await executor.executeAll(lifecycle.init());
+  }
+
   @SubCommand(help: 'Sets up for the start of development on a new feature')
   start(String featureName, {@Option(
       help: 'The directory that contains the root of the projecs',
