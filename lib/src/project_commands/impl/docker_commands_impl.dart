@@ -178,12 +178,17 @@ class DockerCommandsImpl implements DockerCommands {
   }
 
   Set<Project> _pathDependentProjects(ProjectDependencies projectDependencies) {
-    final depMap = new Map.fromIterable(projectDependencies.directDependencies,
+    final depMap = new Map.fromIterable(projectDependencies.allDependencies,
         key: (project) => project.name);
 
-    final deps = projectDependencies.project.pubspec.dependencies;
-    final pathKeys = deps.keys.where(
-        (key) => deps[key] is PathReference && depMap.keys.contains(key));
+    final allProjects = concat(
+        [[projectDependencies.project], projectDependencies.allDependencies]);
+
+    final pathKeys = allProjects.expand((Project project) {
+      final deps = project.pubspec.dependencies;
+      return deps.keys.where(
+          (key) => deps[key] is PathReference && depMap.keys.contains(key));
+    });
 
     return pathKeys.map((key) => depMap[key]).toSet();
   }
