@@ -5,6 +5,7 @@ library jefe.project.commands.git.feature;
 
 import 'impl/git_feature_impl.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
+import 'package:git/git.dart';
 
 typedef GitFeatureCommands GitFeatureCommandsFactory();
 
@@ -25,8 +26,12 @@ abstract class GitFeatureCommands {
   /// Creates a new feature branch based on the [featureName]
   ProjectCommand featureStart(String featureName);
 
-  /// Merges the feature branch back on to the [developBranchName]
-  ProjectCommand featureFinish(String featureName);
+  /// Merges the feature branch back on to the [developBranchName].
+  /// Optionally [excludeOnlyCommitIf] may be passed to exclude an automatically
+  /// generated commit on feature start if that is the only commit on the
+  /// feature branch
+  ProjectCommand featureFinish(String featureName,
+      {bool excludeOnlyCommitIf(Commit commit)});
 
   /// Looks up the name of the current feature branch if any. Note it is an
   /// error if different projects are on different feature branches

@@ -13,8 +13,11 @@ import 'package:jefe/src/project_commands/git_commands.dart';
 import 'package:jefe/src/project_commands/pub_commands.dart';
 import 'package:jefe/src/project_commands/pubspec_commands.dart';
 import 'package:jefe/src/project/release_type.dart';
+import 'package:git/git.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
+
+const String featureStartCommitPrefix = 'set up project for new feature';
 
 class ProjectLifecycleImpl implements ProjectLifecycle {
   final GitFeatureCommands _gitFeature;
@@ -37,7 +40,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       _gitFeature.featureStart(featureName),
       _pubSpec.setToPathDependencies(),
       _pub.get(),
-      _git.commit('set up project for new feature $featureName'),
+      _git.commit('$featureStartCommitPrefix $featureName'),
       new OptionalPush(doPush, _git.push())
     ]);
   }
@@ -62,7 +65,11 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     return projectCommandWithDependencies(
         'complete development of feature $featureName',
         (Project project, Iterable<Project> dependencies) async {
-      await _gitFeature.featureFinish(featureName).process(project);
+      await _gitFeature
+          .featureFinish(featureName,
+              excludeOnlyCommitIf: (Commit c) =>
+                  c.message.startsWith(featureStartCommitPrefix))
+          .process(project);
       await _pubSpec.setToGitDependencies().process(project,
           dependencies: dependencies);
       await _pub.get().process(project);
