@@ -11,6 +11,7 @@ import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:jefe/src/project/dependency_graph.dart';
 import 'dart:io';
 import 'package:option/option.dart';
+import 'dart:async';
 
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
@@ -47,8 +48,8 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
   ProjectDependencyGraphCommand currentFeatureName() => dependencyGraphCommand(
       'Get current feature name',
       (DependencyGraph graph, Directory rootDirectory) async {
-    final featureNames = graph.depthFirst
-        .map((pd) async =>
+    final featureNames = await new Stream.fromIterable(graph.depthFirst)
+        .asyncMap((pd) async =>
             await gitFlowCurrentFeatureName(await pd.project.gitDir))
         .where((o) => o is Some)
         .map((o) => o.get())
