@@ -124,8 +124,11 @@ Future gitFlowReleaseFinish(GitDir gitDir, String version) async => await gitDir
   version
 ]);
 
+Future<String> gitCurrentBranchName(GitDir gitDir) async =>
+    (await gitDir.getCurrentBranch()).branchName;
+
 Future<Option<String>> gitFlowCurrentFeatureName(GitDir gitDir) async {
-  final String branchName = (await gitDir.getCurrentBranch()).branchName;
+  final branchName = await gitCurrentBranchName(gitDir);
   if (branchName.startsWith('feature/')) {
     return new Some(branchName.replaceFirst('feature/', ''));
   } else {

@@ -6,6 +6,7 @@ library jefe.project.commands.lifecycle.impl;
 import 'dart:async';
 import 'package:jefe/src/project_commands/git_feature.dart';
 import 'package:logging/logging.dart';
+import 'package:jefe/src/git/git.dart';
 import 'package:jefe/src/project/project.dart';
 import 'package:jefe/src/project_commands/project_lifecycle.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
@@ -65,11 +66,16 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     return projectCommandWithDependencies(
         'complete development of feature $featureName',
         (Project project, Iterable<Project> dependencies) async {
-      await _gitFeature
-          .featureFinish(featureName,
-              excludeOnlyCommitIf: (Commit c) =>
-                  c.message.startsWith(featureStartCommitPrefix))
-          .process(project);
+      final currentBranchName =
+          await gitCurrentBranchName(await project.gitDir);
+      if (!(currentBranchName == _gitFeature.developBranchName)) {
+        await _gitFeature
+            .featureFinish(featureName,
+                excludeOnlyCommitIf: (Commit c) =>
+                    c.message.startsWith(featureStartCommitPrefix))
+            .process(project);
+      }
+
       await _pubSpec.setToGitDependencies().process(project,
           dependencies: dependencies);
       await _pub.get().process(project);
