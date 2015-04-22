@@ -94,10 +94,15 @@ class Jefe {
       help: 'The directory that contains the root of the projecs',
       abbr: 'd') String rootDirectory: '.', @Option(
       help: 'A project name filter. Only projects whose name contains the text will run',
-      abbr: 'p') String projects}) async {
-    final executor = await load(rootDirectory);
+      abbr: 'p') String projects, @Option(
+      help: 'Instead of running the commands concurrently on the projects, run only one command on one project at a time',
+      abbr: 's') bool executeSerially: false}) async {
+    final CommandExecutor executor = await load(rootDirectory);
     await executor.execute(process.process(command, args),
-        filter: projectNameFilter(projects));
+        filter: projectNameFilter(projects),
+        concurrencyMode: executeSerially
+            ? CommandConcurrencyMode.serial
+            : CommandConcurrencyMode.concurrentProject);
   }
 
   Future<CommandExecutor> load(String rootDirectory) async {
