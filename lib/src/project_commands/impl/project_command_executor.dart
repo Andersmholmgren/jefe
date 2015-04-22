@@ -9,10 +9,6 @@ import 'package:logging/logging.dart';
 import 'dart:async';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:jefe/src/project_commands/project_command_executor.dart';
-import 'dart:collection';
-import 'package:option/option.dart';
-import 'package:frappe/frappe.dart';
-import 'package:jefe/src/util/frappe_utils.dart';
 import 'package:jefe/src/project/dependency_graph.dart';
 import 'package:jefe/src/project/project_group.dart';
 
@@ -128,7 +124,7 @@ class CommandExecutorImpl implements CommandExecutor {
 }
 
 typedef Future CommandExecutorFunction(ProjectCommand command);
-
+/*
 /// TODO: will need something like this.
 /// - maintain queues per project
 /// - commands always execute serially on a project
@@ -212,5 +208,6 @@ class ProjectCommandQueue {
     }
   }
 }
+*/
 
 bool _noOpFilter(Project p) => true;
