@@ -20,14 +20,22 @@ class CommandExecutorImpl implements CommandExecutor {
   CommandExecutorImpl(this._projectGroup);
 
   Future execute(ProjectCommand command,
-      {ProjectFilter filter: _noOpFilter}) async {
+      {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentProject,
+      ProjectFilter filter: _noOpFilter}) async {
     final _filter = filter != null ? filter : _noOpFilter;
-    return await _processDependenciesDepthFirst((Project project,
-        Iterable<Project> dependencies) async {
-      if (_filter(project)) {
-        return await command.process(project, dependencies: dependencies);
-      }
-    });
+
+    if (concurrencyMode == CommandConcurrencyMode.concurrentProject ||
+        concurrencyMode == CommandConcurrencyMode.concurrentCommand) {
+      return await _executeOnConcurrentProjects(
+          await _projectGroup.dependencyGraph, command, filter);
+    } else {
+      return await _processDependenciesDepthFirst((Project project,
+          Iterable<Project> dependencies) async {
+        if (_filter(project)) {
+          return await command.process(project, dependencies: dependencies);
+        }
+      });
+    }
   }
 
   Future _processDependenciesDepthFirst(
