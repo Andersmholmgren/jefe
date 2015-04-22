@@ -94,7 +94,7 @@ class Jefe {
       help: 'The directory that contains the root of the projecs',
       abbr: 'd') String rootDirectory: '.', @Option(
       help: 'A project name filter. Only projects whose name contains the text will run',
-      abbr: 'p') String projects, @Option(
+      abbr: 'p') String projects, @Flag(
       help: 'Instead of running the commands concurrently on the projects, run only one command on one project at a time',
       abbr: 's') bool executeSerially: false}) async {
     final CommandExecutor executor = await load(rootDirectory);

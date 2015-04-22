@@ -113,7 +113,7 @@ class _DefaultCommand implements ProjectCommand {
     final result = await (function is ProjectWithDependenciesFunction
         ? function(project, dependencies)
         : function(project));
-    _log.finer('Completed command "$taskDescription" in ${stopWatch.elapsed}');
+    _log.info('Completed command "$taskDescription" in ${stopWatch.elapsed}');
     stopWatch.stop();
     return result;
   }
