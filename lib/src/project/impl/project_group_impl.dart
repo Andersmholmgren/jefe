@@ -89,7 +89,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 
   static Future<ProjectGroup> install(Directory parentDir, String gitUri,
           {String name}) =>
-      _installOrUpdate(parentDir, gitUri, name: name, updateIfExists: false);
+      _installOrUpdate(parentDir, gitUri, name: name, updateIfExists: true);
 
   static Future<ProjectGroup> load(Directory groupContainerDirectory) async {
     _log.fine(
@@ -116,14 +116,13 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
           {String name}) =>
       _installOrUpdate(parentDir, gitUri, name: name, updateIfExists: true);
 
-  static Future<ProjectGroup> _installOrUpdate(
-      Directory parentDir, String gitUri,
+  static Future<ProjectGroup> _installOrUpdate(Directory dir, String gitUri,
       {String name, bool updateIfExists: true}) async {
-    final workspaceName = name != null ? name : gitWorkspaceName(gitUri);
-    _log.info('installing group $workspaceName from $gitUri into $parentDir');
+    _log.info(
+        'initialising group with gitUri: $gitUri and installDirectory: $dir');
 
     final GroupDirectoryLayout directoryLayout =
-        new GroupDirectoryLayout.fromParent(parentDir, workspaceName);
+        await GroupDirectoryLayout.resolve(dir, gitUri);
 
     final onExistsAction =
         updateIfExists ? OnExistsAction.pull : OnExistsAction.ignore;
@@ -134,11 +133,11 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     final GitDir gitDir = await cloneOrPull(gitUri, projectGroupRoot,
         directoryLayout.groupDirectory, onExistsAction);
 
-    final spec.ProjectGroupMetaData metaData = await spec.ProjectGroupMetaData
-        .fromDefaultProjectGroupYamlFile(gitDir.path);
+//    final spec.ProjectGroupMetaData metaData = await spec.ProjectGroupMetaData
+//        .fromDefaultProjectGroupYamlFile(gitDir.path);
 
-    final projectGroup =
-        new ProjectGroupImpl(gitUri, metaData, directoryLayout);
+    final projectGroup = await load(directoryLayout.containerDirectory);
+//        new ProjectGroupImpl(gitUri, metaData, directoryLayout);
 
     final projectGroupInstallFutures = projectGroup.childGroups.map((ref) =>
         projectGroup._installChildGroup(ref.name, ref.gitUri, updateIfExists));
@@ -148,8 +147,9 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     await Future
         .wait(concat([projectGroupInstallFutures, projectInstallFutures]));
 
-    _log.info(
-        'Completed installing group $workspaceName from $gitUri into $parentDir');
+    _log.info('Completed initialising group with gitUri: $gitUri and '
+        'installDirectory: $dir');
+
     return projectGroup;
   }
 
@@ -239,6 +239,37 @@ class GroupDirectoryLayout {
     }
 
     return basename.replaceAll(_containerSuffix, '');
+  }
+
+  static Future<GroupDirectoryLayout> resolve(
+      Directory directory, String gitUri) async {
+    // TODO: should check if gitUri is the uri for the current group too
+    return ((await isExistingContainerDirectory(directory)) && gitUri == null)
+        ? new GroupDirectoryLayout.withDefaultName(directory)
+        : new GroupDirectoryLayout.fromParent(
+            directory, gitWorkspaceName(gitUri));
+  }
+
+  static Future<bool> isExistingContainerDirectory(Directory directory) async {
+    bool looksLikeAContainer = (await directory.exists() &&
+        p.basename(directory.path).endsWith(_containerSuffix));
+
+    if (!looksLikeAContainer) {
+      return false;
+    }
+
+    final groupName = _defaultGroupName(directory);
+
+    final Directory groupDirectory = _childDir(directory, groupName);
+    bool smellsLikeAContainer = await groupDirectory.exists();
+
+    if (!smellsLikeAContainer) {
+      return false;
+    }
+
+    bool isAContainer =
+        await new File(p.join(groupDirectory.path, 'jefe.yaml')).exists();
+    return isAContainer;
   }
 }
 
