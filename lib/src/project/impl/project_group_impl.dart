@@ -128,9 +128,11 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     final onExistsAction =
         updateIfExists ? OnExistsAction.pull : OnExistsAction.ignore;
 
-    final GitDir gitDir = await cloneOrPull(gitUri,
-        directoryLayout.containerDirectory, directoryLayout.groupDirectory,
-        onExistsAction);
+    final Directory projectGroupRoot =
+        await directoryLayout.containerDirectory.create(recursive: true);
+
+    final GitDir gitDir = await cloneOrPull(gitUri, projectGroupRoot,
+        directoryLayout.groupDirectory, onExistsAction);
 
     final spec.ProjectGroupMetaData metaData = await spec.ProjectGroupMetaData
         .fromDefaultProjectGroupYamlFile(gitDir.path);
