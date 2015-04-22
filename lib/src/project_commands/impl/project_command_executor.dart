@@ -25,9 +25,10 @@ class CommandExecutorImpl implements CommandExecutor {
 
   Future execute(ProjectCommand command,
       {ProjectFilter filter: _noOpFilter}) async {
+    final _filter = filter != null ? filter : _noOpFilter;
     return await _processDependenciesDepthFirst((Project project,
         Iterable<Project> dependencies) async {
-      if (filter(project)) {
+      if (_filter(project)) {
         return await command.process(project, dependencies: dependencies);
       }
     });
@@ -59,12 +60,13 @@ class CommandExecutorImpl implements CommandExecutor {
   Future executeAll(CompositeProjectCommand composite,
       {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand,
       ProjectFilter filter: _noOpFilter}) async {
+    final _filter = filter != null ? filter : _noOpFilter;
     if (concurrencyMode != CommandConcurrencyMode.serial &&
         composite.commands
             .every((c) => c.concurrencyMode != CommandConcurrencyMode.serial)) {
-      return _executeAllOnConcurrentProjects(composite, filter);
+      return _executeAllOnConcurrentProjects(composite, _filter);
     } else {
-      return _executeSerially(composite, filter);
+      return _executeSerially(composite, _filter);
     }
 
     // TODO: add support for concurrentCommand
@@ -116,10 +118,11 @@ class CommandExecutorImpl implements CommandExecutor {
   @override
   Future executeOnGraph(ProjectDependencyGraphCommand command,
       {ProjectFilter filter: _noOpFilter}) async {
+    final _filter = filter != null ? filter : _noOpFilter;
     final DependencyGraph graph =
         await getDependencyGraph(await _projectGroup.allProjects);
     return await command.process(
-        graph, _projectGroup.containerDirectory, filter);
+        graph, _projectGroup.containerDirectory, _filter);
   }
 }
 
