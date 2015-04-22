@@ -106,6 +106,21 @@ class Jefe {
             : CommandConcurrencyMode.concurrentProject);
   }
 
+  @SubCommand(help: 'Set dependencies between projects')
+  setDependencies(@Positional(
+      help: 'The type of dependency to set',
+      allowed: const ['git', 'path']) String type, {@Option(
+      help: 'The directory that contains the root of the projecs',
+      abbr: 'd') String rootDirectory: '.', @Option(
+      help: 'A project name filter. Only projects whose name contains the text will run',
+      abbr: 'p') String projects}) async {
+    final executor = await load(rootDirectory);
+    final command = type == 'git'
+        ? pubSpec.setToGitDependencies()
+        : pubSpec.setToPathDependencies();
+    await executor.execute(command, filter: projectNameFilter(projects));
+  }
+
   Future<CommandExecutor> load(String rootDirectory) async {
     final Directory installDir =
         rootDirectory == '.' ? Directory.current : new Directory(rootDirectory);
