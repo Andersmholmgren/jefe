@@ -98,12 +98,13 @@ class CommandExecutorImpl implements CommandExecutor {
 
   Future _executeOnConcurrentProjects(DependencyGraph projectGraph,
       ProjectCommand command, ProjectFilter filter) async {
-    return await new Stream.fromIterable(projectGraph.depthFirst)
-        .asyncMap((ProjectDependencies pd) {
+    return await new Stream.fromIterable(projectGraph.depthFirst
+        .map((ProjectDependencies pd) async {
       if (filter(pd.project)) {
-        return command.process(pd.project, dependencies: pd.directDependencies);
+        return await command.process(pd.project,
+            dependencies: pd.directDependencies);
       }
-    }).toList();
+    }).toList()).asyncMap((result) => result).toList();
   }
 
   @override

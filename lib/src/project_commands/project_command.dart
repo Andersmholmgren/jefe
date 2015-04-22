@@ -103,6 +103,8 @@ class _DefaultCommand implements ProjectCommand {
       {Iterable<Project> dependencies: const []}) async {
     final taskDescription = '$name for project ${project.name}';
     _log.info('Executing command "$taskDescription"');
+    final stopWatch = new Stopwatch();
+    stopWatch.start();
 
     if (function is! ProjectWithDependenciesFunction &&
         function is! ProjectFunction) {
@@ -111,7 +113,8 @@ class _DefaultCommand implements ProjectCommand {
     final result = await (function is ProjectWithDependenciesFunction
         ? function(project, dependencies)
         : function(project));
-    _log.finer('Completed command "$taskDescription"');
+    _log.finer('Completed command "$taskDescription" in ${stopWatch.elapsed}');
+    stopWatch.stop();
     return result;
   }
 }
@@ -135,10 +138,13 @@ class _DefaultProjectDependencyGraphCommand
   Future process(DependencyGraph graph, Directory rootDirectory,
       ProjectFilter filter) async {
     _log.info('Executing command "$name"');
+    final stopWatch = new Stopwatch();
+    stopWatch.start();
 
     final result = await function(graph, rootDirectory, filter);
 
-    _log.finer('Completed command "$name"');
+    _log.finer('Completed command "$name" in ${stopWatch.elapsed}');
+    stopWatch.stop();
     return result;
   }
 }

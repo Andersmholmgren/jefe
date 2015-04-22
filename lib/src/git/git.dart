@@ -69,8 +69,11 @@ Future gitCommit(GitDir gitDir, String message) async {
   }
 }
 
-Future gitCheckout(GitDir gitDir, String branchName) async =>
-    await gitDir.runCommand(['checkout', branchName]);
+Future gitCheckout(GitDir gitDir, String branchName) async {
+  await gitDir.runCommand(['checkout', branchName]);
+  await gitDir..runCommand(['branch', '-u', 'origin/$branchName']);
+  await gitDir..runCommand(['merge', 'origin/$branchName']);
+}
 
 Future gitTag(GitDir gitDir, String tag) async =>
     await gitDir.runCommand(['tag', tag]);
