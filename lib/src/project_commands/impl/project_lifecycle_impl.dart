@@ -88,12 +88,13 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
   @override
   ProjectCommand release({ReleaseType type: ReleaseType.minor}) {
-    return projectCommand('Release version type $type',
-        (Project project) async {
+    return projectCommandWithDependencies('Release version type $type',
+        (Project project, Set<Project> dependencies) async {
       final newVersion = type.bump(project.pubspec.version);
       await _gitFeature.releaseStart(newVersion.toString()).process(project);
       await project.updatePubspec(project.pubspec.copy(version: newVersion));
-      //    await setToGitDependencies(dependencies);
+      await _pubSpec.setToGitDependencies().process(project,
+          dependencies: dependencies);
       await _git.commit('releasing version $newVersion').process(project);
       await _gitFeature.releaseFinish(newVersion.toString()).process(project);
       await _git.push().process(project);
