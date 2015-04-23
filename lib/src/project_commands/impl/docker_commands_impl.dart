@@ -62,10 +62,23 @@ class DockerCommandsImpl implements DockerCommands {
           pathHandler.sourcePath(dir), pathHandler.targetPath(dir));
     });
 
-    _addTopLevelProjectFiles(dockerfile, serverProjectDeps, pathHandler);
+    final serverFiles =
+        new _TopLevelProjectFiles(dockerfile, serverProjectDeps, pathHandler);
+
+    final clientFiles =
+        new _TopLevelProjectFiles(dockerfile, clientProjectDeps, pathHandler);
+
+    serverFiles.addPubspecFiles();
     if (!omitClient) {
-      _addTopLevelProjectFiles(dockerfile, clientProjectDeps, pathHandler);
-      dockerfile.run('pub', args: ['build']);
+      clientFiles.addPubspecFiles();
+    }
+    serverFiles.pubGet();
+    if (!omitClient) {
+      clientFiles.pubGet();
+    }
+    serverFiles.addRemainder();
+    if (!omitClient) {
+      clientFiles.addRemainder();
     }
 
     dockerfile.envs(environment);
@@ -130,25 +143,6 @@ class DockerCommandsImpl implements DockerCommands {
         outputDirectory != null ? outputDirectory : rootDirectory;
     await dockerfile.save(saveDirectory);
   });
-
-  void _addTopLevelProjectFiles(Dockerfile dockerfile,
-      ProjectDependencies topLevelProjectDeps, _PathHandler pathHandler) {
-    final addHelper = new _AddHelper(pathHandler, dockerfile);
-    final dir = topLevelProjectDeps.project.installDirectory;
-    final dirPath = dir.path;
-
-    final pubspecYaml = p.join(dirPath, 'pubspec.yaml');
-    addHelper.add(pubspecYaml);
-
-    final pubspecLock = p.join(dirPath, 'pubspec.lock');
-    addHelper.add(pubspecLock);
-
-    dockerfile.workDir(pathHandler.targetPath(dirPath));
-    dockerfile.run('pub', args: ['get']);
-
-    addHelper.addDir(dirPath);
-    dockerfile.run('pub', args: ['get', '--offline']);
-  }
 
   Future _cloneTopLevelProject(Dockerfile dockerfile,
       ProjectDependencies topLevelProjectDeps, String gitRef,
@@ -243,28 +237,43 @@ class _AddHelper {
   }
 }
 
-/*
-ADD gitbacklog/gitbacklog_client/pubspec.yaml /app/client/
-ADD gitbacklog/gitbacklog_client/pubspec.lock /app/client/
+class _TopLevelProjectFiles {
+  final Dockerfile dockerfile;
+  final _PathHandler pathHandler;
+  final _AddHelper addHelper;
+  final String dirPath;
 
-WORKDIR /app/client
-RUN pub get
+  _TopLevelProjectFiles(Dockerfile dockerfile,
+      ProjectDependencies topLevelProjectDeps, _PathHandler pathHandler)
+      : this.dockerfile = dockerfile,
+        dirPath = topLevelProjectDeps.project.installDirectory.path,
+        this.pathHandler = pathHandler,
+        addHelper = new _AddHelper(pathHandler, dockerfile);
 
-ADD gitbacklog/gitbacklog_client /app/client/
-WORKDIR /app/client
-RUN pub get --offline
-RUN pub build
+  void addPubspecFiles() {
+    final pubspecYaml = p.join(dirPath, 'pubspec.yaml');
+    addHelper.add(pubspecYaml);
 
+    final pubspecLock = p.join(dirPath, 'pubspec.lock');
+    addHelper.add(pubspecLock);
+  }
 
+  void pubGet() {
+    dockerfile.workDir(pathHandler.targetPath(dirPath));
+    dockerfile.run('pub', args: ['get']);
+  }
 
-ADD gitbacklog/gitbacklog_server/pubspec.yaml /app/server/
-ADD gitbacklog/gitbacklog_server/pubspec.lock /app/server/
+  void pubGetOffline() {
+    dockerfile.workDir(pathHandler.targetPath(dirPath));
+    dockerfile.run('pub', args: ['get', '--offline']);
+  }
 
-WORKDIR /app/server
-RUN pub get
+  void addWholeDirectory() {
+    addHelper.addDir(dirPath);
+  }
 
-ADD gitbacklog/gitbacklog_server /app/server/
-WORKDIR /app/server
-RUN pub get --offline
-
- */
+  void addRemainder() {
+    addWholeDirectory();
+    pubGetOffline();
+  }
+}
