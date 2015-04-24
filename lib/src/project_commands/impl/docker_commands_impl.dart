@@ -32,54 +32,55 @@ class DockerCommandsImpl implements DockerCommands {
     final serverProjectDeps = graph.forProject(serverProjectName);
     final clientProjectDeps = graph.forProject(clientProjectName);
 
-    final serverPathDependentProjects =
-        _pathDependentProjects(serverProjectDeps);
-    final clientPathDependentProjects =
-        _pathDependentProjects(clientProjectDeps);
-
-    final omitClient = omitClientWhenPathDependencies &&
-        clientPathDependentProjects.isNotEmpty;
-
-    final pathDependentProjects = omitClient
-        ? serverPathDependentProjects
-        : concat([serverPathDependentProjects, clientPathDependentProjects])
-            .toSet();
-
-//    if (serverGitRef != null)
-
-    final pathHandler = new _PathHandler(
-        rootDirectory.path, targetRootPath, pathDependentProjects.isNotEmpty);
-
     final dockerfile = new Dockerfile();
 
     dockerfile.from('google/dart', tag: dartVersion);
 
     _setupForPrivateGit(setupForPrivateGit, dockerfile);
 
-    pathDependentProjects.forEach((prj) {
-      final dir = prj.installDirectory.path;
-      dockerfile.addDir(
-          pathHandler.sourcePath(dir), pathHandler.targetPath(dir));
-    });
+    final serverFiles = new _TopLevelProjectFiles(
+        dockerfile, serverProjectDeps, rootDirectory.path, targetRootPath);
 
-    final serverFiles =
-        new _TopLevelProjectFiles(dockerfile, serverProjectDeps, pathHandler);
+    final clientFiles = new _TopLevelProjectFiles(
+        dockerfile, clientProjectDeps, rootDirectory.path, targetRootPath);
 
-    final clientFiles =
-        new _TopLevelProjectFiles(dockerfile, clientProjectDeps, pathHandler);
+    final omitClient =
+        omitClientWhenPathDependencies && clientFiles.hasPathDependencies;
 
-    serverFiles.addPubspecFiles();
+    final excludedDependencies = serverFiles.addAll();
     if (!omitClient) {
-      clientFiles.addPubspecFiles();
+      clientFiles.addAll(excludeDependencies: excludedDependencies);
     }
-    serverFiles.pubGet();
-    if (!omitClient) {
-      clientFiles.pubGet();
-    }
-    serverFiles.addRemainder();
-    if (!omitClient) {
-      clientFiles.addRemainder();
-    }
+
+//    final pathDependentProjects = omitClient
+//        ? serverPathDependentProjects
+//        : concat([serverPathDependentProjects, clientPathDependentProjects])
+//            .toSet();
+
+//    if (serverGitRef != null)
+
+    final pathHandler = new _PathHandler(rootDirectory.path, targetRootPath,
+        serverFiles.hasPathDependencies && !omitClient);
+//
+//    pathDependentProjects.forEach((prj) {
+//      final dir = prj.installDirectory.path;
+//      dockerfile.addDir(
+//          pathHandler.sourcePath(dir), pathHandler.targetPath(dir));
+//    });
+
+//    serverFiles.addPubspecFiles();
+//    if (!omitClient) {
+//      clientFiles.addPubspecFiles();
+//    }
+//    serverFiles.pubGet();
+//    if (!omitClient) {
+//      clientFiles.pubGet();
+//    }
+//    serverFiles.addRemainder();
+//    if (!omitClient) {
+//      clientFiles.addRemainder();
+//      dockerfile.run('pub', args: ['build']);
+//    }
 
     dockerfile.envs(environment);
 
@@ -171,21 +172,21 @@ class DockerCommandsImpl implements DockerCommands {
     dockerfile.run('pub', args: ['get']);
   }
 
-  Set<Project> _pathDependentProjects(ProjectDependencies projectDependencies) {
-    final depMap = new Map.fromIterable(projectDependencies.allDependencies,
-        key: (project) => project.name);
-
-    final allProjects = concat(
-        [[projectDependencies.project], projectDependencies.allDependencies]);
-
-    final pathKeys = allProjects.expand((Project project) {
-      final deps = project.pubspec.dependencies;
-      return deps.keys.where(
-          (key) => deps[key] is PathReference && depMap.keys.contains(key));
-    });
-
-    return pathKeys.map((key) => depMap[key]).toSet();
-  }
+//  Set<Project> _pathDependentProjects(ProjectDependencies projectDependencies) {
+//    final depMap = new Map.fromIterable(projectDependencies.allDependencies,
+//        key: (project) => project.name);
+//
+//    final allProjects = concat(
+//        [[projectDependencies.project], projectDependencies.allDependencies]);
+//
+//    final pathKeys = allProjects.expand((Project project) {
+//      final deps = project.pubspec.dependencies;
+//      return deps.keys.where(
+//          (key) => deps[key] is PathReference && depMap.keys.contains(key));
+//    });
+//
+//    return pathKeys.map((key) => depMap[key]).toSet();
+//  }
 
   void _setupForPrivateGit(bool setupForPrivateGit, Dockerfile dockerfile) {
     if (setupForPrivateGit) {
@@ -240,15 +241,47 @@ class _AddHelper {
 class _TopLevelProjectFiles {
   final Dockerfile dockerfile;
   final _PathHandler pathHandler;
-  final _AddHelper addHelper;
+  _AddHelper get addHelper => new _AddHelper(pathHandler, dockerfile);
   final String dirPath;
+  final ProjectDependencies projectDependencies;
 
   _TopLevelProjectFiles(Dockerfile dockerfile,
-      ProjectDependencies topLevelProjectDeps, _PathHandler pathHandler)
+      ProjectDependencies projectDependencies, String rootDirectoryPath,
+      String targetRootPath)
       : this.dockerfile = dockerfile,
-        dirPath = topLevelProjectDeps.project.installDirectory.path,
-        this.pathHandler = pathHandler,
-        addHelper = new _AddHelper(pathHandler, dockerfile);
+        this.projectDependencies = projectDependencies,
+        dirPath = projectDependencies.project.installDirectory.path,
+        this.pathHandler = new _PathHandler(rootDirectoryPath, targetRootPath,
+            projectDependencies.directDependencies.isNotEmpty);
+
+  bool get hasPathDependencies => pathDependentProjects.isNotEmpty;
+
+  Set<Project> get pathDependentProjects {
+    final depMap = new Map.fromIterable(projectDependencies.allDependencies,
+        key: (project) => project.name);
+
+    final allProjects = concat(
+        [[projectDependencies.project], projectDependencies.allDependencies]);
+
+    final pathKeys = allProjects.expand((Project project) {
+      final deps = project.pubspec.dependencies;
+      return deps.keys.where(
+          (key) => deps[key] is PathReference && depMap.keys.contains(key));
+    });
+
+    return pathKeys.map((key) => depMap[key]).toSet();
+  }
+
+  void addPathDependentProjects(
+      {Iterable<Project> excludeDependencies: const []}) {
+    pathDependentProjects
+        .difference(excludeDependencies.toSet())
+        .forEach((prj) {
+      final dir = prj.installDirectory.path;
+      dockerfile.addDir(
+          pathHandler.sourcePath(dir), pathHandler.targetPath(dir));
+    });
+  }
 
   void addPubspecFiles() {
     final pubspecYaml = p.join(dirPath, 'pubspec.yaml');
@@ -258,13 +291,15 @@ class _TopLevelProjectFiles {
     addHelper.add(pubspecLock);
   }
 
+  String get workDir => pathHandler.targetPath(dirPath);
+
   void pubGet() {
-    dockerfile.workDir(pathHandler.targetPath(dirPath));
+    dockerfile.workDir(workDir);
     dockerfile.run('pub', args: ['get']);
   }
 
   void pubGetOffline() {
-    dockerfile.workDir(pathHandler.targetPath(dirPath));
+    dockerfile.workDir(workDir);
     dockerfile.run('pub', args: ['get', '--offline']);
   }
 
@@ -275,5 +310,14 @@ class _TopLevelProjectFiles {
   void addRemainder() {
     addWholeDirectory();
     pubGetOffline();
+  }
+
+  Set<Project> addAll({Iterable<Project> excludeDependencies: const []}) {
+    addPathDependentProjects(excludeDependencies: excludeDependencies);
+    addPubspecFiles();
+    pubGet();
+    addWholeDirectory();
+    pubGetOffline();
+    return concat([excludeDependencies, pathDependentProjects]).toSet();
   }
 }
