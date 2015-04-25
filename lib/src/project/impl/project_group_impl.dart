@@ -244,10 +244,17 @@ class GroupDirectoryLayout {
   static Future<GroupDirectoryLayout> resolve(
       Directory directory, String gitUri) async {
     // TODO: should check if gitUri is the uri for the current group too
-    return ((await isExistingContainerDirectory(directory)) && gitUri == null)
-        ? new GroupDirectoryLayout.withDefaultName(directory)
-        : new GroupDirectoryLayout.fromParent(
-            directory, gitWorkspaceName(gitUri));
+    if (gitUri == null) {
+      if (await isExistingContainerDirectory(directory)) {
+        return new GroupDirectoryLayout.withDefaultName(directory);
+      } else {
+        throw new ArgumentError('must either be in a container directory or '
+            'specify a gitUri');
+      }
+    } else {
+      return new GroupDirectoryLayout.fromParent(
+          directory, gitWorkspaceName(gitUri));
+    }
   }
 
   static Future<bool> isExistingContainerDirectory(Directory directory) async {
@@ -255,6 +262,8 @@ class GroupDirectoryLayout {
         p.basename(directory.path).endsWith(_containerSuffix));
 
     if (!looksLikeAContainer) {
+      _log.finest(
+          "$directory is not an existing directory ending with $_containerSuffix");
       return false;
     }
 
@@ -264,11 +273,17 @@ class GroupDirectoryLayout {
     bool smellsLikeAContainer = await groupDirectory.exists();
 
     if (!smellsLikeAContainer) {
+      _log.finest("$directory does not have an existing group directory called "
+          "$groupName");
       return false;
     }
 
-    bool isAContainer =
-        await new File(p.join(groupDirectory.path, 'jefe.yaml')).exists();
+    final jefeSpecFile = new File(p.join(groupDirectory.path, 'jefe.yaml'));
+    bool isAContainer = await jefeSpecFile.exists();
+    if (!isAContainer) {
+      _log.finest("$jefeSpecFile does not exist");
+    }
+
     return isAContainer;
   }
 }
