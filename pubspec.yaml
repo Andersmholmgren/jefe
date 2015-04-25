@@ -1,6 +1,6 @@
 name: jefe
 version: 0.0.4
-description: A library for maintaining sets of related Dart projects versioned in git
+description: A library for maintaining sets of related Dart projects versioned in git, in particular managing dependencies between them.
 author: Anders Holmgren <andersmholmgren@gmail.com>
 homepage: https://github.com/Andersmholmgren/dockerfile
 environment:
