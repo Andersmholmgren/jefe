@@ -66,6 +66,8 @@ class DockerCommandsImpl implements DockerCommands {
     final serverMain = p.join(
         serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
 
+    dockerfile.workDir(serverFiles.workDir);
+
     dockerfile.entryPoint('/usr/bin/dart',
         args: concat(
             [entryPointOptions, [pathHandler.targetPath(serverMain)]]));
@@ -107,6 +109,9 @@ class DockerCommandsImpl implements DockerCommands {
     dockerfile.expose(exposePorts);
 
     dockerfile.cmd([]);
+
+    dockerfile.workDir(pathHandler
+        .targetPath(serverProjectDeps.project.installDirectory.path));
 
     final serverMain = p.join(
         serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
