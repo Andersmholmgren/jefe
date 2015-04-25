@@ -91,6 +91,18 @@ abstract class CompositeProjectCommand {
   CommandConcurrencyMode get concurrencyMode;
 }
 
+class ProjectCommandError {
+  final ProjectCommand command;
+  final Project project;
+  final cause;
+
+  String get message => 'Error executing $command on $project. Cause: $cause';
+
+  ProjectCommandError(this.command, this.project, this.cause);
+
+  String toString() => 'ProjectCommandError: $message';
+}
+
 class _DefaultCommand implements ProjectCommand {
   final String name;
   final Function function;
@@ -110,13 +122,19 @@ class _DefaultCommand implements ProjectCommand {
         function is! ProjectFunction) {
       throw new ArgumentError('Invalid function passed into process');
     }
-    final result = await (function is ProjectWithDependenciesFunction
-        ? function(project, dependencies)
-        : function(project));
-    _log.finer('Completed command "$taskDescription" in ${stopWatch.elapsed}');
-    stopWatch.stop();
-    return result;
+    try {
+      final result = await (function is ProjectWithDependenciesFunction
+          ? function(project, dependencies)
+          : function(project));
+      _log.info('Completed command "$taskDescription" in ${stopWatch.elapsed}');
+      stopWatch.stop();
+      return result;
+    } catch (e, stackTrace) {
+      throw new ProjectCommandError(this, project, e);
+    }
   }
+
+  String toString() => "'$name'";
 }
 
 class _DefaultCompositeProjectCommand implements CompositeProjectCommand {

@@ -22,7 +22,7 @@ class Jefe {
       help: 'Manages a set of related Dart projects',
       plugins: const [const Completion()])
   Jefe() {
-    Logger.root.level = Level.INFO;
+    Logger.root.level = Level.FINEST;
     Logger.root.onRecord.listen((cr) {
       print('${cr.time}: ${cr.message}');
     });
@@ -44,10 +44,11 @@ class Jefe {
   }
 
   @SubCommand(help: 'Installs or updates a group of projects')
-  init(@Positional(help: 'The git Uri containing the jefe.yaml.') String gitUri,
-      {@Option(
-          help: 'The directory to install into',
-          abbr: 'd') String installDirectory: '.'}) async {
+  init({@Option(
+      help: 'The git Uri containing the jefe.yaml.',
+      abbr: 'g') String gitUri, @Option(
+      help: 'The directory to install into',
+      abbr: 'd') String installDirectory: '.'}) async {
     final Directory installDir = new Directory(installDirectory);
     final ProjectGroup projectGroup =
         await ProjectGroup.init(installDir, gitUri);
@@ -94,10 +95,32 @@ class Jefe {
       help: 'The directory that contains the root of the projecs',
       abbr: 'd') String rootDirectory: '.', @Option(
       help: 'A project name filter. Only projects whose name contains the text will run',
-      abbr: 'p') String projects}) async {
-    final executor = await load(rootDirectory);
+      abbr: 'p') String projects, @Flag(
+      help: 'Instead of running the commands concurrently on the projects, run only one command on one project at a time',
+      abbr: 's') bool executeSerially: false}) async {
+    final CommandExecutor executor = await load(rootDirectory);
     await executor.execute(process.process(command, args),
-        filter: projectNameFilter(projects));
+        filter: projectNameFilter(projects),
+        concurrencyMode: executeSerially
+            ? CommandConcurrencyMode.serial
+            : CommandConcurrencyMode.concurrentProject);
+  }
+
+  @SubCommand(help: 'Set dependencies between projects')
+  setDependencies(@Positional(
+      help: 'The type of dependency to set',
+      allowed: const ['git', 'path']) String type, {@Option(
+      help: 'The directory that contains the root of the projecs',
+      abbr: 'd') String rootDirectory: '.', @Option(
+      help: 'A project name filter. Only projects whose name contains the text will run',
+      abbr: 'p') String projects}) async {
+    final CommandExecutor executor = await load(rootDirectory);
+    final command = type == 'git'
+        ? pubSpec.setToGitDependencies()
+        : pubSpec.setToPathDependencies();
+    await executor.execute(command,
+        filter: projectNameFilter(projects),
+        concurrencyMode: CommandConcurrencyMode.serial);
   }
 
   Future<CommandExecutor> load(String rootDirectory) async {

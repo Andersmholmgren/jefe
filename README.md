@@ -1,12 +1,13 @@
 # jefe
 
-A library for maintaining sets of related Dart projects versioned in git.
+A library for maintaining sets of related Dart projects versioned in git, in particular managing dependencies between them.
 
 ## Usage
 
-For now the best place to learn about Jefe is this blog post.
+For now the best place to learn about Jefe is the 
+[introductory blog post](http://backlogio.blogspot.com/2015/04/managing-your-dart-projects-like-jefe.html).
 
-
+Jefe is designed to be used both as a command (called `jefe`) and as source (e.g. integrating with other tools like grinder)
 
 ### Installing
 

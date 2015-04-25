@@ -25,7 +25,8 @@ abstract class CommandExecutor {
 
   /// Excutes a single [ProjectCommand] on all the [Project]s in the group
   // TODO: should allow concurrencyMode here
-  Future execute(ProjectCommand command, {ProjectFilter filter});
+  Future execute(ProjectCommand command,
+      {CommandConcurrencyMode concurrencyMode, ProjectFilter filter});
 
   /// executes all the commands in [composite]. Optionally a [concurrencyMode]
   /// can be provided to run the commands in a more conservative concurrency

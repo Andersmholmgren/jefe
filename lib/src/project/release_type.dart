@@ -15,17 +15,22 @@ Version _bumpBreaking(Version v) => v.nextBreaking;
 /// Identifies a type of release
 class ReleaseType {
   final _VersionBumper _bump;
-  const ReleaseType._(this._bump);
+  final String _literal;
 
-  static const ReleaseType minor = const ReleaseType._(_bumpMinor);
+  const ReleaseType._(this._bump, this._literal);
 
-  static const ReleaseType major = const ReleaseType._(_bumpMajor);
+  static const ReleaseType minor = const ReleaseType._(_bumpMinor, 'minor');
 
-  static const ReleaseType patch = const ReleaseType._(_bumpPatch);
+  static const ReleaseType major = const ReleaseType._(_bumpMajor, 'major');
 
-  static const ReleaseType breaking = const ReleaseType._(_bumpBreaking);
+  static const ReleaseType patch = const ReleaseType._(_bumpPatch, 'patch');
+
+  static const ReleaseType breaking =
+      const ReleaseType._(_bumpBreaking, 'breaking');
 
   /// Returns a new [Version] that adjusts [version] according to the type
   /// of release
   Version bump(Version version) => _bump(version);
+
+  String toString() => _literal;
 }
