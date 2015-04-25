@@ -114,11 +114,13 @@ class Jefe {
       abbr: 'd') String rootDirectory: '.', @Option(
       help: 'A project name filter. Only projects whose name contains the text will run',
       abbr: 'p') String projects}) async {
-    final executor = await load(rootDirectory);
+    final CommandExecutor executor = await load(rootDirectory);
     final command = type == 'git'
         ? pubSpec.setToGitDependencies()
         : pubSpec.setToPathDependencies();
-    await executor.execute(command, filter: projectNameFilter(projects));
+    await executor.execute(command,
+        filter: projectNameFilter(projects),
+        concurrencyMode: CommandConcurrencyMode.serial);
   }
 
   Future<CommandExecutor> load(String rootDirectory) async {
