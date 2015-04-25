@@ -24,8 +24,12 @@ class CommandExecutorImpl implements CommandExecutor {
       ProjectFilter filter: _noOpFilter}) async {
     final _filter = filter != null ? filter : _noOpFilter;
 
-    if (concurrencyMode == CommandConcurrencyMode.concurrentProject ||
-        concurrencyMode == CommandConcurrencyMode.concurrentCommand) {
+    final executionMode = concurrencyMode.index < command.concurrencyMode.index
+        ? concurrencyMode
+        : command.concurrencyMode;
+
+    if (executionMode == CommandConcurrencyMode.concurrentProject ||
+        executionMode == CommandConcurrencyMode.concurrentCommand) {
       return await _executeOnConcurrentProjects(
           await _projectGroup.dependencyGraph, command, filter);
     } else {
