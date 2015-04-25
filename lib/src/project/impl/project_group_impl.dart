@@ -244,16 +244,18 @@ class GroupDirectoryLayout {
   static Future<GroupDirectoryLayout> resolve(
       Directory directory, String gitUri) async {
     // TODO: should check if gitUri is the uri for the current group too
+    final _directory = _tweakDirectory(directory);
+
     if (gitUri == null) {
-      if (await isExistingContainerDirectory(directory)) {
-        return new GroupDirectoryLayout.withDefaultName(directory);
+      if (await isExistingContainerDirectory(_directory)) {
+        return new GroupDirectoryLayout.withDefaultName(_directory);
       } else {
         throw new ArgumentError('must either be in a container directory or '
             'specify a gitUri');
       }
     } else {
       return new GroupDirectoryLayout.fromParent(
-          directory, gitWorkspaceName(gitUri));
+          _directory, gitWorkspaceName(gitUri));
     }
   }
 
@@ -290,3 +292,8 @@ class GroupDirectoryLayout {
 
 Directory _childDir(Directory parent, String childName) =>
     new Directory(p.join(parent.path, childName));
+
+Directory _tweakDirectory(Directory directory) => _toDirectory(directory.path);
+
+Directory _toDirectory(String path) =>
+    path == '.' ? Directory.current : new Directory(path);
