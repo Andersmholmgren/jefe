@@ -13,7 +13,7 @@ main(arguments) {
     new Script(Jefe).execute(arguments);
   }, onError: (error, stackChain) {
     print("Caught error $error\n"
-        "${stackChain.terse}");p
+        "${stackChain.terse}");
   });
 }
 
