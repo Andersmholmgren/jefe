@@ -13,7 +13,7 @@ main(arguments) {
     new Script(Jefe).execute(arguments);
   }, onError: (error, stackChain) {
     print("Caught error $error\n"
-        "${stackChain.terse}");
+        "${stackChain.terse}");p
   });
 }
 
@@ -22,7 +22,7 @@ class Jefe {
       help: 'Manages a set of related Dart projects',
       plugins: const [const Completion()])
   Jefe() {
-    Logger.root.level = Level.INFO;
+    Logger.root.level = Level.FINEST;
     Logger.root.onRecord.listen((cr) {
       print('${cr.time}: ${cr.message}');
     });
