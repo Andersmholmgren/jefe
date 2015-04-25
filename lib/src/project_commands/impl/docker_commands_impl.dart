@@ -50,37 +50,12 @@ class DockerCommandsImpl implements DockerCommands {
     final excludedDependencies = serverFiles.addAll();
     if (!omitClient) {
       clientFiles.addAll(excludeDependencies: excludedDependencies);
+      dockerfile.run('pub', args: ['build']);
     }
 
-//    final pathDependentProjects = omitClient
-//        ? serverPathDependentProjects
-//        : concat([serverPathDependentProjects, clientPathDependentProjects])
-//            .toSet();
-
-//    if (serverGitRef != null)
-
     final pathHandler = new _PathHandler(rootDirectory.path, targetRootPath,
-        serverFiles.hasPathDependencies && !omitClient);
-//
-//    pathDependentProjects.forEach((prj) {
-//      final dir = prj.installDirectory.path;
-//      dockerfile.addDir(
-//          pathHandler.sourcePath(dir), pathHandler.targetPath(dir));
-//    });
-
-//    serverFiles.addPubspecFiles();
-//    if (!omitClient) {
-//      clientFiles.addPubspecFiles();
-//    }
-//    serverFiles.pubGet();
-//    if (!omitClient) {
-//      clientFiles.pubGet();
-//    }
-//    serverFiles.addRemainder();
-//    if (!omitClient) {
-//      clientFiles.addRemainder();
-//      dockerfile.run('pub', args: ['build']);
-//    }
+        serverFiles.hasPathDependencies &&
+            (omitClient || clientFiles.hasPathDependencies));
 
     dockerfile.envs(environment);
 
@@ -240,19 +215,22 @@ class _AddHelper {
 
 class _TopLevelProjectFiles {
   final Dockerfile dockerfile;
-  final _PathHandler pathHandler;
-  _AddHelper get addHelper => new _AddHelper(pathHandler, dockerfile);
+  final String rootDirectoryPath;
+  final String targetRootPath;
   final String dirPath;
   final ProjectDependencies projectDependencies;
 
+  _PathHandler get pathHandler =>
+      new _PathHandler(rootDirectoryPath, targetRootPath, hasPathDependencies);
+
+  _AddHelper get addHelper => new _AddHelper(pathHandler, dockerfile);
+
   _TopLevelProjectFiles(Dockerfile dockerfile,
-      ProjectDependencies projectDependencies, String rootDirectoryPath,
-      String targetRootPath)
+      ProjectDependencies projectDependencies, this.rootDirectoryPath,
+      this.targetRootPath)
       : this.dockerfile = dockerfile,
         this.projectDependencies = projectDependencies,
-        dirPath = projectDependencies.project.installDirectory.path,
-        this.pathHandler = new _PathHandler(rootDirectoryPath, targetRootPath,
-            projectDependencies.directDependencies.isNotEmpty);
+        dirPath = projectDependencies.project.installDirectory.path;
 
   bool get hasPathDependencies => pathDependentProjects.isNotEmpty;
 
