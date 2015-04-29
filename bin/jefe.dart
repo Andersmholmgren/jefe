@@ -48,13 +48,15 @@ class Jefe {
       help: 'The git Uri containing the jefe.yaml.',
       abbr: 'g') String gitUri, @Option(
       help: 'The directory to install into',
-      abbr: 'd') String installDirectory: '.'}) async {
+      abbr: 'd') String installDirectory: '.', @Flag(
+      help: 'Skips the checkout of the develop branch',
+      abbr: 's') bool skipCheckout: false}) async {
     final Directory installDir = new Directory(installDirectory);
     final ProjectGroup projectGroup =
         await ProjectGroup.init(installDir, gitUri);
 
     final executor = new CommandExecutor(projectGroup);
-    await executor.executeAll(lifecycle.init());
+    await executor.executeAll(lifecycle.init(doCheckout: !skipCheckout));
   }
 
   @SubCommand(help: 'Sets up for the start of development on a new feature')

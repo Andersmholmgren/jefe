@@ -13,7 +13,7 @@ abstract class ProjectLifecycle {
   factory ProjectLifecycle(
       {GitFeatureCommandsFactory gitFeatureFactory}) = ProjectLifecycleImpl;
 
-  CompositeProjectCommand init();
+  CompositeProjectCommand init({bool doCheckout: true});
 
   /// A command to start a new feature, performing all the tasks necessary to
   /// put the projects within the group in the correct state, including the

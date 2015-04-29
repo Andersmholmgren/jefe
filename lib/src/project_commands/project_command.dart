@@ -27,14 +27,16 @@ enum CommandConcurrencyMode { serial, concurrentProject, concurrentCommand }
 
 /// A command that operates on a single [Project]
 ProjectCommand projectCommand(String name, ProjectFunction function,
-        {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand}) =>
-    new _DefaultCommand(name, function, concurrencyMode);
+    {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand,
+    Condition condition: _alwaysYes}) => new _DefaultCommand(
+    name, function, concurrencyMode, condition);
 
 /// A command that operates on a single [Project] and the projects it depends on
 ProjectCommand projectCommandWithDependencies(
         String name, ProjectWithDependenciesFunction function,
-        {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.serial}) =>
-    new _DefaultCommand(name, function, concurrencyMode);
+        {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.serial,
+        Condition condition: _alwaysYes}) =>
+    new _DefaultCommand(name, function, concurrencyMode, condition);
 
 /// A command that is made up of an ordered list of other commands.
 /// For a given [Project] the commands will be executed one at a time in the
@@ -61,12 +63,20 @@ typedef ProjectFunction(Project project);
 typedef ProjectWithDependenciesFunction(
     Project project, Iterable<Project> dependencies);
 
+typedef bool Condition();
+
+bool _alwaysYes() => true;
+
 /// A command that can be executed on a [Project] and optionally it's set of
 /// [dependencies]
 abstract class ProjectCommand {
   String get name;
   CommandConcurrencyMode get concurrencyMode;
+  Condition get condition;
   Future process(Project project, {Iterable<Project> dependencies});
+
+  ProjectCommand copy({String name, CommandConcurrencyMode concurrencyMode,
+      Condition condition});
 }
 
 /// a function that operates on the dependency graph as a whole
@@ -107,13 +117,20 @@ class _DefaultCommand implements ProjectCommand {
   final String name;
   final Function function;
   final CommandConcurrencyMode concurrencyMode;
+  final Condition condition;
 
-  _DefaultCommand(this.name, this.function, this.concurrencyMode);
+  _DefaultCommand(
+      this.name, this.function, this.concurrencyMode, this.condition);
 
   @override
   Future process(Project project,
       {Iterable<Project> dependencies: const []}) async {
     final taskDescription = '$name for project ${project.name}';
+    if (!condition()) {
+      _log.info(
+          'Skipping command "$taskDescription" as condition does not pass');
+    }
+
     _log.info('Executing command "$taskDescription"');
     final stopWatch = new Stopwatch();
     stopWatch.start();
@@ -135,6 +152,15 @@ class _DefaultCommand implements ProjectCommand {
   }
 
   String toString() => "'$name'";
+
+  @override
+  ProjectCommand copy({String name, CommandConcurrencyMode concurrencyMode,
+      Function function, Condition condition}) {
+    return new _DefaultCommand(name != null ? name : this.name,
+        function != null ? function : this.function,
+        concurrencyMode != null ? concurrencyMode : this.concurrencyMode,
+        condition != null ? condition : this.condition);
+  }
 }
 
 class _DefaultCompositeProjectCommand implements CompositeProjectCommand {
