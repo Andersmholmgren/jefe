@@ -24,7 +24,7 @@
 /// For example
 ///
 ///     final executor = await executorForDirectory('/Users/blah/myfoo_root');
-///     await executor.executeOnGraph(docker.generateProductionDockerfile(
+///     await executor.execute(docker.generateProductionDockerfile(
 ///       'my_server', 'my_client',
 ///       dartVersion: '1.9.3',
 ///       environment: {'MY_FOO': false},

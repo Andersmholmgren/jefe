@@ -113,7 +113,9 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
           await executor.execute(_gitFeature.currentFeatureName());
 
       if (currentFeatureNameOpt is Some) {
-        await executor.execute(startNewFeature(currentFeatureNameOpt.get()));
+        var currentFeatureName = currentFeatureNameOpt.get();
+        _log.info('Detected existing feature - $currentFeatureName');
+        await executor.execute(startNewFeature(currentFeatureName));
       } else {
         await executor.execute(_git
             .checkout(_gitFeature.developBranchName)

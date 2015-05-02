@@ -39,7 +39,7 @@ class Jefe {
         await ProjectGroup.install(installDir, gitUri);
 
     final executor = new CommandExecutor(projectGroup);
-    await executor.executeAll(lifecycle.init());
+    await executor.execute(lifecycle.init());
   }
 
   @u.SubCommand(help: 'Installs or updates a group of projects')
@@ -55,7 +55,7 @@ class Jefe {
         await ProjectGroup.init(installDir, gitUri);
 
     final executor = new CommandExecutor(projectGroup);
-    await executor.executeAll(lifecycle.init(doCheckout: !skipCheckout));
+    await executor.execute(lifecycle.init(doCheckout: !skipCheckout));
   }
 
   @u.SubCommand(help: 'Sets up for the start of development on a new feature')
@@ -65,7 +65,7 @@ class Jefe {
       help: 'A project name filter. Only projects whose name contains the text will run',
       abbr: 'p') String projects}) async {
     final executor = await _load(rootDirectory);
-    await executor.executeAll(lifecycle.startNewFeature(featureName),
+    await executor.execute(lifecycle.startNewFeature(featureName),
         filter: projectNameFilter(projects));
   }
 

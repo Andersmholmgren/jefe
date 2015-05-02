@@ -57,7 +57,8 @@ ProjectDependencyGraphCommand dependencyGraphCommand(
     new _DefaultProjectDependencyGraphCommand(name, function);
 
 ExecutorAwareProjectCommand executorAwareCommand(
-    String name, ExecutorAwareProjectFunction function) => null;
+        String name, ExecutorAwareProjectFunction function) =>
+    new _DefaultExecutorAwareProjectCommand(name, function);
 
 /// Some function applied to a [Project]
 typedef ProjectFunction(Project project);
@@ -208,6 +209,30 @@ class _DefaultProjectDependencyGraphCommand
     stopWatch.start();
 
     final result = await function(graph, rootDirectory, filter);
+
+    _log.finer('Completed command "$name" in ${stopWatch.elapsed}');
+    stopWatch.stop();
+    return result;
+  }
+}
+
+class _DefaultExecutorAwareProjectCommand
+    implements ExecutorAwareProjectCommand {
+  final String name;
+  final ExecutorAwareProjectFunction function;
+  // TODO: implement concurrencyMode
+  @override
+  CommandConcurrencyMode get concurrencyMode => null;
+
+  _DefaultExecutorAwareProjectCommand(this.name, this.function);
+
+  @override
+  Future process(CommandExecutor executor, {ProjectFilter filter}) async {
+    _log.info('Executing command "$name"');
+    final stopWatch = new Stopwatch();
+    stopWatch.start();
+
+    final result = await function(executor);
 
     _log.finer('Completed command "$name" in ${stopWatch.elapsed}');
     stopWatch.stop();
