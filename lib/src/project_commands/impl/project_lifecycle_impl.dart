@@ -3,7 +3,6 @@
 
 library jefe.project.commands.lifecycle.impl;
 
-import 'dart:async';
 import 'package:jefe/src/project_commands/git_feature.dart';
 import 'package:logging/logging.dart';
 import 'package:jefe/src/git/git.dart';

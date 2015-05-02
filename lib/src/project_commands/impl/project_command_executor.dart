@@ -23,19 +23,23 @@ class CommandExecutorImpl implements CommandExecutor {
   Future execute(Command command,
       {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentProject,
       ProjectFilter filter: _noOpFilter}) async {
-    return command is ProjectCommand
-        ? executeOnProject(command,
-            concurrencyMode: concurrencyMode, filter: filter)
-        : command is CompositeProjectCommand
-            ? executeAll(command,
-                concurrencyMode: concurrencyMode, filter: filter)
-            : command is ProjectDependencyGraphCommand
-                ? executeOnGraph(command,
-                    /*concurrencyMode: concurrencyMode,*/ filter: filter)
-                : command is ExecutorAwareProjectCommand
-                    ? executeWithExecutor(command,
-                        /*concurrencyMode: concurrencyMode,*/ filter: filter)
-                    : new Future.error('command type not implemented');
+    if (command is ProjectCommand) {
+      return executeOnProject(command,
+          concurrencyMode: concurrencyMode, filter: filter);
+    } else if (command is CompositeProjectCommand) {
+      return executeAll(command,
+          concurrencyMode: concurrencyMode, filter: filter);
+    } else if (command is ProjectDependencyGraphCommand) {
+      return executeOnGraph(command,
+          /*concurrencyMode: concurrencyMode,*/
+          filter: filter);
+    } else if (command is ExecutorAwareProjectCommand) {
+      return executeWithExecutor(command,
+          /*concurrencyMode: concurrencyMode,*/
+          filter: filter);
+    } else {
+      throw new StateError('command type not implemented');
+    }
   }
 
   Future executeOnProject(ProjectCommand command,

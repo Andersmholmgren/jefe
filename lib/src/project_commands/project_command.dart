@@ -75,9 +75,9 @@ bool _alwaysYes() => true;
 abstract class Command {
   String get name;
 
-  CommandConcurrencyMode get concurrencyMode;
+//  CommandConcurrencyMode get concurrencyMode;
 
-  Condition get condition;
+//  Condition get condition;
 }
 
 /// A command that can be executed on a [Project] and optionally it's set of
@@ -114,6 +114,7 @@ abstract class CompositeProjectCommand extends Command {
   CommandConcurrencyMode get concurrencyMode;
 }
 
+/// a [Command] that controls the execution of other commands.
 abstract class ExecutorAwareProjectCommand extends Command {
   // Or maybe command.process can return more commands to execute.
   // A composite would be very useful here or at least a common base class
@@ -167,7 +168,7 @@ class _DefaultCommand implements ProjectCommand {
       _log.info('Completed command "$taskDescription" in ${stopWatch.elapsed}');
       stopWatch.stop();
       return result;
-    } catch (e, stackTrace) {
+    } catch (e) {
       throw new ProjectCommandError(this, project, e);
     }
   }

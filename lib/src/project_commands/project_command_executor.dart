@@ -23,28 +23,8 @@ ProjectFilter projectNameFilter(String pattern) =>
 abstract class CommandExecutor {
   factory CommandExecutor(ProjectGroup projectGroup) = CommandExecutorImpl;
 
-  /// Excutes a single [ProjectCommand] on all the [Project]s in the group
-  // TODO: should allow concurrencyMode here
+  /// Executes the [Command] on all the [Project]s in the group that match
+  /// the [filter].
   Future execute(Command command,
       {CommandConcurrencyMode concurrencyMode, ProjectFilter filter});
-
-//  /// executes all the commands in [composite]. Optionally a [concurrencyMode]
-//  /// can be provided to run the commands in a more conservative concurrency
-//  /// mode than may be supported by the underlying commands
-//  Future executeAll(CompositeProjectCommand composite,
-//      {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand,
-//      ProjectFilter filter});
-//
-//  /// Executes the [ProjectCommand] on a single poject with the name [projectName]
-//  /// TODO: maybe projectName should be a pattern instead
-//  Future executeOn(ProjectCommand command, String projectName);
-//
-//  /// Executes the [ProjectDependencyGraphCommand] on the [DependencyGraph]
-//  /// of the project group
-//  Future executeOnGraph(ProjectDependencyGraphCommand command,
-//      {ProjectFilter filter});
-//
-//  // TODO: this seems pretty daft
-//  Future executeWithExecutor(ExecutorAwareProjectCommand command,
-//      {ProjectFilter filter});
 }
