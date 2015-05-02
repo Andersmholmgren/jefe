@@ -4,6 +4,8 @@
 library jefe.project.spec.impl;
 
 import '../jefe_spec.dart';
+import 'package:jefe/src/project/project.dart';
+import 'package:jefe/src/project/project_group.dart';
 
 class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {
   final String name;
@@ -26,14 +28,15 @@ abstract class _BaseRef<T> implements ProjectEntityIdentifier<T> {
   int get hashCode => name.hashCode;
 }
 
-class ProjectGroupIdentifierImpl extends _BaseRef
+class ProjectGroupIdentifierImpl extends _BaseRef<ProjectGroup>
     implements ProjectGroupIdentifier {
   ProjectGroupIdentifierImpl(String name, String gitUri) : super(name, gitUri);
 
   String toString() => 'ProjectGroupRef($name, $gitUri)';
 }
 
-class ProjectIdentifierImpl extends _BaseRef implements ProjectIdentifier {
+class ProjectIdentifierImpl extends _BaseRef<Project>
+    implements ProjectIdentifier {
   ProjectIdentifierImpl(String name, String gitUri) : super(name, gitUri);
 
   String toString() => 'ProjectRef($name, $gitUri)';

@@ -74,6 +74,7 @@ class _ProjectDependencies {
 /// Represents a [Project] and all the projects it depends on directly and
 /// indirectly
 abstract class ProjectDependencies implements _ProjectDependencies {
+  Project get project;
   Set<Project> get indirectDependencies;
   Set<Project> get allDependencies;
 }

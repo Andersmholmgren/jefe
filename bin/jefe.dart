@@ -48,13 +48,15 @@ class Jefe {
       help: 'The git Uri containing the jefe.yaml.',
       abbr: 'g') String gitUri, @Option(
       help: 'The directory to install into',
-      abbr: 'd') String installDirectory: '.'}) async {
+      abbr: 'd') String installDirectory: '.', @Flag(
+      help: 'Skips the checkout of the develop branch',
+      abbr: 's') bool skipCheckout: false}) async {
     final Directory installDir = new Directory(installDirectory);
     final ProjectGroup projectGroup =
         await ProjectGroup.init(installDir, gitUri);
 
     final executor = new CommandExecutor(projectGroup);
-    await executor.executeAll(lifecycle.init());
+    await executor.executeAll(lifecycle.init(doCheckout: !skipCheckout));
   }
 
   @SubCommand(help: 'Sets up for the start of development on a new feature')
@@ -63,7 +65,7 @@ class Jefe {
       abbr: 'd') String rootDirectory: '.', @Option(
       help: 'A project name filter. Only projects whose name contains the text will run',
       abbr: 'p') String projects}) async {
-    final executor = await load(rootDirectory);
+    final executor = await _load(rootDirectory);
     await executor.executeAll(lifecycle.startNewFeature(featureName),
         filter: projectNameFilter(projects));
   }
@@ -74,7 +76,7 @@ class Jefe {
       abbr: 'd') String rootDirectory: '.', @Option(
       help: 'A project name filter. Only projects whose name contains the text will run',
       abbr: 'p') String projects}) async {
-    final executor = await load(rootDirectory);
+    final executor = await _load(rootDirectory);
     await executor.execute(lifecycle.completeFeature(featureName),
         filter: projectNameFilter(projects));
   }
@@ -85,7 +87,7 @@ class Jefe {
       abbr: 'd') String rootDirectory: '.', @Option(
       help: 'A project name filter. Only projects whose name contains the text will run',
       abbr: 'p') String projects}) async {
-    final executor = await load(rootDirectory);
+    final executor = await _load(rootDirectory);
     await executor.execute(lifecycle.release(),
         filter: projectNameFilter(projects));
   }
@@ -98,7 +100,7 @@ class Jefe {
       abbr: 'p') String projects, @Flag(
       help: 'Instead of running the commands concurrently on the projects, run only one command on one project at a time',
       abbr: 's') bool executeSerially: false}) async {
-    final CommandExecutor executor = await load(rootDirectory);
+    final CommandExecutor executor = await _load(rootDirectory);
     await executor.execute(process.process(command, args),
         filter: projectNameFilter(projects),
         concurrencyMode: executeSerially
@@ -114,7 +116,7 @@ class Jefe {
       abbr: 'd') String rootDirectory: '.', @Option(
       help: 'A project name filter. Only projects whose name contains the text will run',
       abbr: 'p') String projects}) async {
-    final CommandExecutor executor = await load(rootDirectory);
+    final CommandExecutor executor = await _load(rootDirectory);
     final command = type == 'git'
         ? pubSpec.setToGitDependencies()
         : pubSpec.setToPathDependencies();
@@ -123,7 +125,7 @@ class Jefe {
         concurrencyMode: CommandConcurrencyMode.serial);
   }
 
-  Future<CommandExecutor> load(String rootDirectory) async {
+  Future<CommandExecutor> _load(String rootDirectory) async {
     final Directory installDir =
         rootDirectory == '.' ? Directory.current : new Directory(rootDirectory);
     final ProjectGroup projectGroup = await ProjectGroup.load(installDir);

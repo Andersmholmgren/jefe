@@ -42,7 +42,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       _pubSpec.setToPathDependencies(),
       _pub.get(),
       _git.commit('$featureStartCommitPrefix $featureName'),
-      new OptionalPush(doPush, _git.push())
+      _git.push().copy(condition: () => doPush)
     ]);
   }
 
@@ -102,32 +102,13 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   }
 
   @override
-  CompositeProjectCommand init() {
+  CompositeProjectCommand init({bool doCheckout: true}) {
     return projectCommandGroup('Initialising for development', [
       _gitFeature.init(),
       _git.fetch(),
-      _git.checkout(_gitFeature.developBranchName)
+      _git
+          .checkout(_gitFeature.developBranchName)
+          .copy(condition: () => doCheckout)
     ]);
-  }
-}
-
-class OptionalPush implements ProjectCommand {
-  final bool doPush;
-  final ProjectCommand realPush;
-
-  OptionalPush(this.doPush, this.realPush);
-
-  @override
-  CommandConcurrencyMode get concurrencyMode => realPush.concurrencyMode;
-
-  // TODO: implement name
-  @override
-  String get name => '';
-
-  @override
-  Future process(Project project, {Iterable<Project> dependencies}) async {
-    if (doPush) {
-      await realPush.process(project, dependencies: dependencies);
-    }
   }
 }
