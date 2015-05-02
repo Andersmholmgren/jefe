@@ -152,6 +152,7 @@ class _DefaultCommand implements ProjectCommand {
     if (!condition()) {
       _log.info(
           'Skipping command "$taskDescription" as condition does not pass');
+      return null;
     }
 
     _log.info('Executing command "$taskDescription"');

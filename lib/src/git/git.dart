@@ -132,12 +132,21 @@ Future<String> gitCurrentBranchName(GitDir gitDir) async =>
 
 Future<Option<String>> gitFlowCurrentFeatureName(GitDir gitDir) async {
   final branchName = await gitCurrentBranchName(gitDir);
-  if (branchName.startsWith('feature/')) {
-    return new Some(branchName.replaceFirst('feature/', ''));
+  if (branchName.startsWith(featureBranchPrefix)) {
+    return new Some(branchName.replaceFirst(featureBranchPrefix, ''));
   } else {
     return const None();
   }
 }
 
+Future<Iterable<String>> gitFlowFeatureNames(GitDir gitDir) async {
+  final Iterable<String> branchNames = await gitDir.getBranchNames();
+  return branchNames
+      .where((n) => n.startsWith(featureBranchPrefix))
+      .map((n) => n.substring(featureBranchPrefix.length));
+}
+
 Future<Option<String>> gitCurrentTagName(GitDir gitDir) async => new Option(
     (await gitDir.runCommand(['describe', 'HEAD', '--tags'])).stdout.trim());
+
+const String featureBranchPrefix = 'feature/';

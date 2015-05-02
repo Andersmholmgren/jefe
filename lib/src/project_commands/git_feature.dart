@@ -24,7 +24,11 @@ abstract class GitFeatureCommands {
   ProjectCommand init();
 
   /// Creates a new feature branch based on the [featureName]
-  ProjectCommand featureStart(String featureName);
+  /// If [throwIfExists] is true then it is treated as an error if the feature
+  /// branch already exists. Otherwise, it will check out the feature branch.
+  /// TODO: Ideally we should check that the feature branch is correctly based
+  /// off the develop branch and either throw, merge or rebase otherwise
+  ProjectCommand featureStart(String featureName, {bool throwIfExists: false});
 
   /// Merges the feature branch back on to the [developBranchName].
   /// Optionally [excludeOnlyCommitIf] may be passed to exclude an automatically
