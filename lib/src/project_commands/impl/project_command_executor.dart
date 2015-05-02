@@ -19,7 +19,26 @@ class CommandExecutorImpl implements CommandExecutor {
 
   CommandExecutorImpl(this._projectGroup);
 
-  Future execute(ProjectCommand command,
+  @override
+  Future execute(Command command,
+      {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentProject,
+      ProjectFilter filter: _noOpFilter}) async {
+    return command is ProjectCommand
+        ? executeOnProject(command,
+            concurrencyMode: concurrencyMode, filter: filter)
+        : command is CompositeProjectCommand
+            ? executeAll(command,
+                concurrencyMode: concurrencyMode, filter: filter)
+            : command is ProjectDependencyGraphCommand
+                ? executeOnGraph(command,
+                    /*concurrencyMode: concurrencyMode,*/ filter: filter)
+                : command is ExecutorAwareProjectCommand
+                    ? executeWithExecutor(command,
+                        /*concurrencyMode: concurrencyMode,*/ filter: filter)
+                    : new Future.error('command type not implemented');
+  }
+
+  Future executeOnProject(ProjectCommand command,
       {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentProject,
       ProjectFilter filter: _noOpFilter}) async {
     final _filter = filter != null ? filter : _noOpFilter;
@@ -64,7 +83,6 @@ class CommandExecutorImpl implements CommandExecutor {
 //  // More efficient thought is if projects loaded once and then each command run
 //  // on them in turn
 
-  @override
   Future executeAll(CompositeProjectCommand composite,
       {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand,
       ProjectFilter filter: _noOpFilter}) async {
@@ -115,7 +133,6 @@ class CommandExecutorImpl implements CommandExecutor {
     }).toList()).asyncMap((result) => result).toList();
   }
 
-  @override
   Future executeOn(ProjectCommand command, String projectName) async {
     final DependencyGraph graph =
         await getDependencyGraph(await _projectGroup.allProjects);
@@ -124,7 +141,6 @@ class CommandExecutorImpl implements CommandExecutor {
         dependencies: projectDependencies.directDependencies);
   }
 
-  @override
   Future executeOnGraph(ProjectDependencyGraphCommand command,
       {ProjectFilter filter: _noOpFilter}) async {
     final _filter = filter != null ? filter : _noOpFilter;
@@ -133,6 +149,9 @@ class CommandExecutorImpl implements CommandExecutor {
     return await command.process(
         graph, _projectGroup.containerDirectory, _filter);
   }
+
+  Future executeWithExecutor(ExecutorAwareProjectCommand command,
+      {ProjectFilter filter}) => command.process(this, filter: filter);
 }
 
 typedef Future CommandExecutorFunction(ProjectCommand command);

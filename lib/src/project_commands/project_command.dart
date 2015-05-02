@@ -56,6 +56,9 @@ ProjectDependencyGraphCommand dependencyGraphCommand(
         String name, ProjectDependencyGraphFunction function) =>
     new _DefaultProjectDependencyGraphCommand(name, function);
 
+ExecutorAwareProjectCommand executorAwareCommand(
+    String name, ExecutorAwareProjectFunction function) => null;
+
 /// Some function applied to a [Project]
 typedef ProjectFunction(Project project);
 
@@ -63,13 +66,23 @@ typedef ProjectFunction(Project project);
 typedef ProjectWithDependenciesFunction(
     Project project, Iterable<Project> dependencies);
 
+typedef ExecutorAwareProjectFunction(CommandExecutor executor);
+
 typedef bool Condition();
 
 bool _alwaysYes() => true;
 
+abstract class Command {
+  String get name;
+
+  CommandConcurrencyMode get concurrencyMode;
+
+  Condition get condition;
+}
+
 /// A command that can be executed on a [Project] and optionally it's set of
 /// [dependencies]
-abstract class ProjectCommand {
+abstract class ProjectCommand extends Command {
   String get name;
   CommandConcurrencyMode get concurrencyMode;
   Condition get condition;
@@ -84,7 +97,7 @@ typedef Future ProjectDependencyGraphFunction(
     DependencyGraph graph, Directory rootDirectory, ProjectFilter filter);
 
 /// a command that operates on the dependency graph as a whole
-abstract class ProjectDependencyGraphCommand {
+abstract class ProjectDependencyGraphCommand extends Command {
   String get name;
   Future process(
       DependencyGraph graph, Directory rootDirectory, ProjectFilter filter);
@@ -95,10 +108,18 @@ abstract class ProjectDependencyGraphCommand {
 /// the CompositeProjectCommand's value and the ProjectCommand's value.
 /// TODO: this is not currently a composite. Either make it one or rename to
 /// ProjectCommandGroup or something
-abstract class CompositeProjectCommand {
+abstract class CompositeProjectCommand extends Command {
   String get name;
   Iterable<ProjectCommand> get commands;
   CommandConcurrencyMode get concurrencyMode;
+}
+
+abstract class ExecutorAwareProjectCommand extends Command {
+  // Or maybe command.process can return more commands to execute.
+  // A composite would be very useful here or at least a common base class
+  String get name;
+  CommandConcurrencyMode get concurrencyMode;
+  Future process(CommandExecutor executor, {ProjectFilter filter});
 }
 
 class ProjectCommandError {
