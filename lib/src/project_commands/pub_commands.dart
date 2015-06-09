@@ -11,5 +11,5 @@ abstract class PubCommands {
 
   ProjectCommand get();
 
-  ProjectCommand hostedDetails();
+  ProjectCommand fetchPackageVersions();
 }
