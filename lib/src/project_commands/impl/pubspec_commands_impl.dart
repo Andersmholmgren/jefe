@@ -43,21 +43,21 @@ class PubSpecCommandsImpl implements PubSpecCommands {
   @override
   ProjectCommand setToHostedDependencies({bool useGitIfNotHosted: true}) =>
       projectCommandWithDependencies('change to hosted dependencies',
-          (Project p, Iterable<Project> dependencies) async {
-    final Option<HostedPackageVersions> packageVersionsOpt =
-        await pub.fetchPackageVersions(p.name);
-    if (packageVersionsOpt is Some) {
-      final Version version = packageVersionsOpt.get().latest.version;
-      final versionConstraint = new VersionConstraint.compatibleWith(version);
-      await _setDependencies(p, 'hosted', dependencies,
-          (Project p) async => await new HostedReference(versionConstraint));
-    } else if (useGitIfNotHosted) {
-      await _setDependencies(p, 'git', dependencies, (Project p) async =>
-          await new GitReference(p.gitUri, await p.currentGitCommitHash));
-    } else {
-      throw new ArgumentError(
-          'attempt to set to hosted dependency for package not hosted on pub');
-    }
+          (Project project, Iterable<Project> dependencies) async {
+    await _setDependencies(project, 'hosted', dependencies, (Project p) async {
+      final Option<HostedPackageVersions> packageVersionsOpt =
+          await pub.fetchPackageVersions(p.name);
+      if (packageVersionsOpt is Some) {
+        final Version version = packageVersionsOpt.get().latest.version;
+        final versionConstraint = new VersionConstraint.compatibleWith(version);
+        return await new HostedReference(versionConstraint);
+      } else if (useGitIfNotHosted) {
+        return await new GitReference(p.gitUri, await p.currentGitCommitHash);
+      } else {
+        throw new ArgumentError(
+            'attempt to set to hosted dependency for package not hosted on pub');
+      }
+    });
   });
 }
 
