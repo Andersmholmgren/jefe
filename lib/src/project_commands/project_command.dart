@@ -56,6 +56,10 @@ ProjectDependencyGraphCommand dependencyGraphCommand(
         String name, ProjectDependencyGraphFunction function) =>
     new _DefaultProjectDependencyGraphCommand(name, function);
 
+ExecutorAwareProjectCommand executorAwareCommand(
+        String name, ExecutorAwareProjectFunction function) =>
+    new _DefaultExecutorAwareProjectCommand(name, function);
+
 /// Some function applied to a [Project]
 typedef ProjectFunction(Project project);
 
@@ -63,13 +67,23 @@ typedef ProjectFunction(Project project);
 typedef ProjectWithDependenciesFunction(
     Project project, Iterable<Project> dependencies);
 
+typedef ExecutorAwareProjectFunction(CommandExecutor executor);
+
 typedef bool Condition();
 
 bool _alwaysYes() => true;
 
+abstract class Command {
+  String get name;
+
+//  CommandConcurrencyMode get concurrencyMode;
+
+//  Condition get condition;
+}
+
 /// A command that can be executed on a [Project] and optionally it's set of
 /// [dependencies]
-abstract class ProjectCommand {
+abstract class ProjectCommand extends Command {
   String get name;
   CommandConcurrencyMode get concurrencyMode;
   Condition get condition;
@@ -84,7 +98,7 @@ typedef Future ProjectDependencyGraphFunction(
     DependencyGraph graph, Directory rootDirectory, ProjectFilter filter);
 
 /// a command that operates on the dependency graph as a whole
-abstract class ProjectDependencyGraphCommand {
+abstract class ProjectDependencyGraphCommand extends Command {
   String get name;
   Future process(
       DependencyGraph graph, Directory rootDirectory, ProjectFilter filter);
@@ -95,10 +109,19 @@ abstract class ProjectDependencyGraphCommand {
 /// the CompositeProjectCommand's value and the ProjectCommand's value.
 /// TODO: this is not currently a composite. Either make it one or rename to
 /// ProjectCommandGroup or something
-abstract class CompositeProjectCommand {
+abstract class CompositeProjectCommand extends Command {
   String get name;
   Iterable<ProjectCommand> get commands;
   CommandConcurrencyMode get concurrencyMode;
+}
+
+/// a [Command] that controls the execution of other commands.
+abstract class ExecutorAwareProjectCommand extends Command {
+  // Or maybe command.process can return more commands to execute.
+  // A composite would be very useful here or at least a common base class
+  String get name;
+  CommandConcurrencyMode get concurrencyMode;
+  Future process(CommandExecutor executor, {ProjectFilter filter});
 }
 
 class ProjectCommandError {
@@ -129,6 +152,7 @@ class _DefaultCommand implements ProjectCommand {
     if (!condition()) {
       _log.info(
           'Skipping command "$taskDescription" as condition does not pass');
+      return null;
     }
 
     _log.info('Executing command "$taskDescription"');
@@ -146,7 +170,7 @@ class _DefaultCommand implements ProjectCommand {
       _log.info('Completed command "$taskDescription" in ${stopWatch.elapsed}');
       stopWatch.stop();
       return result;
-    } catch (e, stackTrace) {
+    } catch (e) {
       throw new ProjectCommandError(this, project, e);
     }
   }
@@ -186,6 +210,30 @@ class _DefaultProjectDependencyGraphCommand
     stopWatch.start();
 
     final result = await function(graph, rootDirectory, filter);
+
+    _log.finer('Completed command "$name" in ${stopWatch.elapsed}');
+    stopWatch.stop();
+    return result;
+  }
+}
+
+class _DefaultExecutorAwareProjectCommand
+    implements ExecutorAwareProjectCommand {
+  final String name;
+  final ExecutorAwareProjectFunction function;
+  // TODO: implement concurrencyMode
+  @override
+  CommandConcurrencyMode get concurrencyMode => null;
+
+  _DefaultExecutorAwareProjectCommand(this.name, this.function);
+
+  @override
+  Future process(CommandExecutor executor, {ProjectFilter filter}) async {
+    _log.info('Executing command "$name"');
+    final stopWatch = new Stopwatch();
+    stopWatch.start();
+
+    final result = await function(executor);
 
     _log.finer('Completed command "$name" in ${stopWatch.elapsed}');
     stopWatch.stop();

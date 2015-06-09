@@ -3,7 +3,6 @@
 
 library jefe.project.commands.lifecycle.impl;
 
-import 'dart:async';
 import 'package:jefe/src/project_commands/git_feature.dart';
 import 'package:logging/logging.dart';
 import 'package:jefe/src/git/git.dart';
@@ -15,6 +14,8 @@ import 'package:jefe/src/project_commands/pub_commands.dart';
 import 'package:jefe/src/project_commands/pubspec_commands.dart';
 import 'package:jefe/src/project/release_type.dart';
 import 'package:git/git.dart';
+import 'package:jefe/src/project_commands/project_command_executor.dart';
+import 'package:option/option.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
@@ -102,13 +103,24 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   }
 
   @override
-  CompositeProjectCommand init({bool doCheckout: true}) {
-    return projectCommandGroup('Initialising for development', [
-      _gitFeature.init(),
-      _git.fetch(),
-      _git
-          .checkout(_gitFeature.developBranchName)
-          .copy(condition: () => doCheckout)
-    ]);
+  ExecutorAwareProjectCommand init({bool doCheckout: true}) {
+    return executorAwareCommand('Initialising for development',
+        (CommandExecutor executor) async {
+      await executor.execute(projectCommandGroup(
+          'Initialising for development', [_gitFeature.init(), _git.fetch()]));
+
+      final currentFeatureNameOpt =
+          await executor.execute(_gitFeature.currentFeatureName());
+
+      if (currentFeatureNameOpt is Some) {
+        var currentFeatureName = currentFeatureNameOpt.get();
+        _log.info('Detected existing feature - $currentFeatureName');
+        await executor.execute(startNewFeature(currentFeatureName));
+      } else {
+        await executor.execute(_git
+            .checkout(_gitFeature.developBranchName)
+            .copy(condition: () => doCheckout));
+      }
+    });
   }
 }

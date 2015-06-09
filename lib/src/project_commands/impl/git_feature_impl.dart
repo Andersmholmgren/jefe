@@ -21,9 +21,46 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
     await initGitFlow(await p.gitDir);
   });
 
-  ProjectCommand featureStart(String featureName) => projectCommand(
-      'git flow feature start', (Project p) async {
-    await gitFlowFeatureStart(await p.gitDir, featureName);
+  ProjectCommand featureStart(String featureName,
+      {bool throwIfExists: false}) => projectCommand('git flow feature start',
+          (Project p) async {
+    final gitDir = await p.gitDir;
+    if (!throwIfExists) {
+      Future<bool> checkoutFeatureBranchIfExists() async {
+        final Iterable<String> featureNames = await gitFlowFeatureNames(gitDir);
+        if (featureNames.contains(featureName)) {
+          await gitCheckout(gitDir, '$featureBranchPrefix$featureName');
+          return true;
+        } else {
+          return false;
+        }
+      }
+
+      final currentFeatureOpt = await gitFlowCurrentFeatureName(gitDir);
+      if (currentFeatureOpt is Some) {
+        if (currentFeatureOpt.get() != featureName) {
+          _log.info('${p.name} currently on a different feature branch - '
+              '${currentFeatureOpt.get()}');
+          // see if feature branch exists
+          if (await checkoutFeatureBranchIfExists()) {
+            return;
+          }
+        } else {
+          // correct feature
+          // TODO: could check the branch is correctly based off develop
+          _log.info('${p.name} already on correct feature branch');
+          return;
+        }
+      } else {
+        // no current feature
+        // see if feature branch exists
+        if (await checkoutFeatureBranchIfExists()) {
+          return;
+        }
+      }
+    }
+
+    await gitFlowFeatureStart(gitDir, featureName);
   });
 
   ProjectCommand featureFinish(String featureName,

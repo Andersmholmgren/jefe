@@ -32,13 +32,13 @@ main() async {
   final executor = new CommandExecutor(projectGroup);
 
   // initialise it (sets it on develop branch etc)
-  await executor.executeAll(lifecycle.init());
+  await executor.execute(lifecycle.init());
 
   // start a new feature
   // All projects will be on a feature branch called feacha,
   // will have the dependencies to other projects in this group set as
   // path dependencies, and will have pub get called
-  await executor.executeAll(lifecycle.startNewFeature('feacha'));
+  await executor.execute(lifecycle.startNewFeature('feacha'));
 
   // Code something awesome
 
@@ -65,7 +65,7 @@ main() async {
 main() async {
   final executor = await executorForDirectory('/Users/blah/myfoo_root');
 
-  await executor.executeOnGraph(docker.generateProductionDockerfile(
+  await executor.execute(docker.generateProductionDockerfile(
       'my_server', 'my_client',
       outputDirectory: new Directory('/tmp'),
       dartVersion: '1.9.3',
