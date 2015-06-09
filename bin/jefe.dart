@@ -110,7 +110,7 @@ class Jefe {
   @u.SubCommand(help: 'Set dependencies between projects')
   setDependencies(@u.Positional(
       help: 'The type of dependency to set',
-      allowed: const ['git', 'path']) String type, {@u.Option(
+      allowed: const ['git', 'path', 'hosted']) String type, {@u.Option(
       help: 'The directory that contains the root of the projecs',
       abbr: 'd') String rootDirectory: '.', @u.Option(
       help: 'A project name filter. Only projects whose name contains the text will run',
@@ -118,7 +118,9 @@ class Jefe {
     final CommandExecutor executor = await _load(rootDirectory);
     final command = type == 'git'
         ? pubSpec.setToGitDependencies()
-        : pubSpec.setToPathDependencies();
+        : type == 'hosted'
+            ? pubSpec.setToHostedDependencies()
+            : pubSpec.setToPathDependencies();
     await executor.execute(command,
         filter: projectNameFilter(projects),
         concurrencyMode: CommandConcurrencyMode.serial);

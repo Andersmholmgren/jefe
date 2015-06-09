@@ -29,6 +29,15 @@ class PubSpecCommandsImpl implements PubSpecCommands {
     await _setDependencies(p, 'git', dependencies, (Project p) async =>
         await new GitReference(p.gitUri, await p.currentGitCommitHash));
   });
+
+  // Note: this must run serially
+  @override
+  ProjectCommand setToHostedDependencies({bool useGitIfNotHosted: true}) =>
+      projectCommandWithDependencies('change to hosted dependencies',
+          (Project p, Iterable<Project> dependencies) async {
+    await _setDependencies(p, 'hosted', dependencies, (Project p) async =>
+        await new HostedReference(p.gitUri, await p.currentGitCommitHash));
+  });
 }
 
 Future _setDependencies(Project project, String type,

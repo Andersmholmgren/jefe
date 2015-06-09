@@ -10,4 +10,6 @@ abstract class PubCommands {
   factory PubCommands() = PubCommandsImpl;
 
   ProjectCommand get();
+
+  ProjectCommand hostedDetails();
 }
