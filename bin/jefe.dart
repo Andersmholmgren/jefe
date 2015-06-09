@@ -116,11 +116,7 @@ class Jefe {
       help: 'A project name filter. Only projects whose name contains the text will run',
       abbr: 'p') String projects}) async {
     final CommandExecutor executor = await _load(rootDirectory);
-    final command = type == 'git'
-        ? pubSpec.setToGitDependencies()
-        : type == 'hosted'
-            ? pubSpec.setToHostedDependencies()
-            : pubSpec.setToPathDependencies();
+    final command = _setToDependencyCommand(type);
     await executor.execute(command,
         filter: projectNameFilter(projects),
         concurrencyMode: CommandConcurrencyMode.serial);
@@ -133,5 +129,17 @@ class Jefe {
 
     final executor = new CommandExecutor(projectGroup);
     return executor;
+  }
+
+  ProjectCommand _setToDependencyCommand(String type) {
+    switch (type) {
+      case 'git':
+        return pubSpec.setToGitDependencies();
+      case 'hosted':
+        return pubSpec.setToHostedDependencies();
+      case 'path':
+      default:
+        return pubSpec.setToPathDependencies();
+    }
   }
 }
