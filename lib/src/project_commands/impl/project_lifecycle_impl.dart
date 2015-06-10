@@ -18,6 +18,7 @@ import 'package:jefe/src/project_commands/project_command_executor.dart';
 import 'package:option/option.dart';
 import 'package:jefe/src/pub/pub_version.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'dart:async';
 
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
@@ -89,11 +90,21 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     });
   }
 
+  Future<bool> _hasCommitsSince(GitDir gitDir, Version sinceVersion) async {
+    return (await commitCountSince(gitDir, sinceVersion.toString())) > 0;
+  }
+
   @override
   ProjectCommand release({ReleaseType type: ReleaseType.minor}) {
     return projectCommandWithDependencies('Release version type $type',
         (Project project, Set<Project> dependencies) async {
       final GitDir gitDir = await project.gitDir;
+
+      final currentPubspecVersion = project.pubspec.version;
+
+      final Version latestTaggedVersion =
+          (await _gitFeature.getReleaseVersionTags().process(project)).last;
+
       final Option<HostedPackageVersions> publishedVersionsOpt =
           await _pub.fetchPackageVersions().process(project);
 
@@ -101,21 +112,12 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
           .map((HostedPackageVersions versions) => versions.latest.version);
 
       if (latestPublishedVersionOpt is Some) {
-        // hosted package
-        // check if version has changed
-        //   if not then check diff from version tag
-        //     if different then ERROR. hosted packages must be manually bumped
-
         final latestPublishedVersion = latestPublishedVersionOpt.get();
-        final currentPubspecVersion = project.pubspec.version;
         if (latestPublishedVersion < currentPubspecVersion) {
-          // ok can publish
-
           await _pub.publish().process(project);
         } else {
-          final hasChangesSinceLastPublish = (await commitCountSince(
-                  gitDir, currentPubspecVersion.toString())) >
-              0;
+          final hasChangesSinceLastPublish =
+              await _hasCommitsSince(gitDir, latestPublishedVersion);
 
           if (hasChangesSinceLastPublish /* &&
               latestPublishedVersion == currentPubspecVersion */
@@ -129,16 +131,30 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
             // nothing to do here as nothing has changed.
           }
         }
+      } else {
+        // handle git dependency
+        final Option<Version> releaseVersionOpt = await _getReleaseVersion(
+            latestTaggedVersion, currentPubspecVersion, gitDir, type);
+        ////// TODO: need to fold the hosted handling into this. Both cases
+        /// need the git flow & tag stuff
+        if (releaseVersionOpt is Some) {
+          final releaseVersion = releaseVersionOpt.get();
+          await _gitFeature
+              .releaseStart(releaseVersion.toString())
+              .process(project);
+          await project
+              .updatePubspec(project.pubspec.copy(version: releaseVersion));
+          await _pubSpec.setToHostedDependencies().process(project,
+              dependencies: dependencies);
+          await _git
+              .commit('releasing version $releaseVersion')
+              .process(project);
+          await _gitFeature
+              .releaseFinish(releaseVersion.toString())
+              .process(project);
+          await _git.push().process(project);
+        }
       }
-
-      final newVersion = type.bump(project.pubspec.version);
-      await _gitFeature.releaseStart(newVersion.toString()).process(project);
-      await project.updatePubspec(project.pubspec.copy(version: newVersion));
-      await _pubSpec.setToHostedDependencies().process(project,
-          dependencies: dependencies);
-      await _git.commit('releasing version $newVersion').process(project);
-      await _gitFeature.releaseFinish(newVersion.toString()).process(project);
-      await _git.push().process(project);
     });
   }
 
@@ -162,5 +178,27 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
             .copy(condition: () => doCheckout));
       }
     });
+  }
+
+  Future<Option<Version>> _getReleaseVersion(Version latestTaggedVersion,
+      Version currentPubspecVersion, GitDir gitDir, ReleaseType type) async {
+    if (latestTaggedVersion > currentPubspecVersion) {
+      throw new StateError('the latest tagged version $latestTaggedVersion'
+          ' is greater than the current pubspec version $currentPubspecVersion');
+    } else {
+      if (latestTaggedVersion < currentPubspecVersion) {
+        // manually bumped version
+        return await new Some(currentPubspecVersion);
+      } else {
+        final hasChangesSinceLatestTaggedVersion =
+            await _hasCommitsSince(gitDir, latestTaggedVersion);
+
+        if (hasChangesSinceLatestTaggedVersion) {
+          return new Some(type.bump(currentPubspecVersion));
+        } else {
+          return const None();
+        }
+      }
+    }
   }
 }
