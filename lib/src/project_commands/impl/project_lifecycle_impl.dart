@@ -90,10 +90,6 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     });
   }
 
-  Future<bool> _hasCommitsSince(GitDir gitDir, Version sinceVersion) async {
-    return (await commitCountSince(gitDir, sinceVersion.toString())) > 0;
-  }
-
   @override
   ProjectCommand release({ReleaseType type: ReleaseType.minor}) {
     return projectCommandWithDependencies('Release version type $type',
@@ -105,55 +101,51 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       final Version latestTaggedVersion =
           (await _gitFeature.getReleaseVersionTags().process(project)).last;
 
-      final Option<HostedPackageVersions> publishedVersionsOpt =
-          await _pub.fetchPackageVersions().process(project);
+      final Option<Version> latestPublishedVersionOpt =
+          await _latestPublishedVersion(project);
 
-      final Option<Version> latestPublishedVersionOpt = publishedVersionsOpt
-          .map((HostedPackageVersions versions) => versions.latest.version);
+      final isHosted = latestPublishedVersionOpt is Some;
 
-      if (latestPublishedVersionOpt is Some) {
-        final latestPublishedVersion = latestPublishedVersionOpt.get();
-        if (latestPublishedVersion < currentPubspecVersion) {
-          await _pub.publish().process(project);
-        } else {
-          final hasChangesSinceLastPublish =
-              await _hasCommitsSince(gitDir, latestPublishedVersion);
+      _log.fine('pubspec version: $currentPubspecVersion; '
+          'tagged version: $latestTaggedVersion; '
+          'published version: $latestPublishedVersionOpt');
 
-          if (hasChangesSinceLastPublish /* &&
-              latestPublishedVersion == currentPubspecVersion */
-              ) {
-            // Hosted packages must observe semantic versioning so not sensible
-            // to try to automatically bump version
-            throw new ArgumentError(
-                '${project.name} is hosted and has changes. '
-                'The version must be manually changed for hosted packages');
-          } else {
-            // nothing to do here as nothing has changed.
-          }
-        }
+      final Option<Version> releaseVersionOpt = await _getReleaseVersion(
+          latestTaggedVersion, currentPubspecVersion, latestPublishedVersionOpt,
+          gitDir, type, project);
+
+      if (releaseVersionOpt is None) {
+        // no release needed
+        _log.fine('no changes needing release for ${project.name}');
+        return;
       } else {
-        // handle git dependency
-        final Option<Version> releaseVersionOpt = await _getReleaseVersion(
-            latestTaggedVersion, currentPubspecVersion, gitDir, type);
-        ////// TODO: need to fold the hosted handling into this. Both cases
-        /// need the git flow & tag stuff
-        if (releaseVersionOpt is Some) {
-          final releaseVersion = releaseVersionOpt.get();
-          await _gitFeature
-              .releaseStart(releaseVersion.toString())
-              .process(project);
+        final releaseVersion = releaseVersionOpt.get();
+
+        _log.fine('new release version $releaseVersion');
+
+        await _gitFeature
+            .releaseStart(releaseVersion.toString())
+            .process(project);
+
+        if (releaseVersion != currentPubspecVersion) {
           await project
               .updatePubspec(project.pubspec.copy(version: releaseVersion));
-          await _pubSpec.setToHostedDependencies().process(project,
-              dependencies: dependencies);
-          await _git
-              .commit('releasing version $releaseVersion')
-              .process(project);
-          await _gitFeature
-              .releaseFinish(releaseVersion.toString())
-              .process(project);
-          await _git.push().process(project);
         }
+
+        await _pubSpec.setToHostedDependencies().process(project,
+            dependencies: dependencies);
+
+        await _git.commit('releasing version $releaseVersion').process(project);
+
+        if (isHosted) {
+          await _pub.publish();
+        }
+
+        await _gitFeature
+            .releaseFinish(releaseVersion.toString())
+            .process(project);
+
+        await _git.push().process(project);
       }
     });
   }
@@ -181,7 +173,14 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   }
 
   Future<Option<Version>> _getReleaseVersion(Version latestTaggedVersion,
-      Version currentPubspecVersion, GitDir gitDir, ReleaseType type) async {
+      Version currentPubspecVersion, Option<Version> latestPublishedVersionOpt,
+      GitDir gitDir, ReleaseType type, Project project) async {
+    final isHosted = latestPublishedVersionOpt is Some;
+
+    final latestReleasedVersion = latestPublishedVersionOpt
+        .map((lpv) => lpv >= latestTaggedVersion ? lpv : latestTaggedVersion)
+        .getOrDefault(latestTaggedVersion);
+
     if (latestTaggedVersion > currentPubspecVersion) {
       throw new StateError('the latest tagged version $latestTaggedVersion'
           ' is greater than the current pubspec version $currentPubspecVersion');
@@ -190,15 +189,36 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         // manually bumped version
         return await new Some(currentPubspecVersion);
       } else {
+        // latest released version is same as pubspec version
         final hasChangesSinceLatestTaggedVersion =
             await _hasCommitsSince(gitDir, latestTaggedVersion);
 
         if (hasChangesSinceLatestTaggedVersion) {
-          return new Some(type.bump(currentPubspecVersion));
+          if (isHosted) {
+            // Hosted packages must observe semantic versioning so not sensible
+            // to try to automatically bump version
+            throw new ArgumentError(
+                '${project.name} is hosted and has changes. '
+                'The version must be manually changed for hosted packages');
+          } else {
+            return new Some(type.bump(currentPubspecVersion));
+          }
         } else {
           return const None();
         }
       }
     }
+  }
+
+  Future<bool> _hasCommitsSince(GitDir gitDir, Version sinceVersion) async {
+    return (await commitCountSince(gitDir, sinceVersion.toString())) > 0;
+  }
+
+  Future<Option<Version>> _latestPublishedVersion(Project project) async {
+    final Option<HostedPackageVersions> publishedVersionsOpt =
+        await _pub.fetchPackageVersions().process(project);
+
+    return publishedVersionsOpt
+        .map((HostedPackageVersions versions) => versions.latest.version);
   }
 }
