@@ -77,7 +77,7 @@ Future gitCheckout(GitDir gitDir, String branchName) async {
 }
 
 Future gitTag(GitDir gitDir, String tag) async =>
-    await gitDir.runCommand(['tag', tag]);
+    await gitDir.runCommand(['tag', '-a', '-m', 'release $tag', tag]);
 
 Future<Iterable<Version>> gitFetchVersionTags(GitDir gitDir) async =>
     (await gitDir.getTags()).map((Tag tag) {

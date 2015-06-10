@@ -93,7 +93,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   @override
   ProjectCommand release({ReleaseType type: ReleaseType.minor}) {
     return projectCommandWithDependencies('Release version type $type',
-        (Project project, Set<Project> dependencies) async {
+        (Project project, Iterable<Project> dependencies) async {
       final GitDir gitDir = await project.gitDir;
 
       final currentPubspecVersion = project.pubspec.version;
@@ -138,7 +138,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         await _git.commit('releasing version $releaseVersion').process(project);
 
         if (isHosted) {
-          await _pub.publish();
+          await _pub.publish().process(project);
         }
 
         await _gitFeature

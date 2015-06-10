@@ -118,7 +118,7 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
 
   ProjectCommand<Iterable<Version>> getReleaseVersionTags() => projectCommand(
       'fetch git release version tags', (Project p) async {
-    var gitDir = await p.gitDir;
+    final gitDir = await p.gitDir;
     return await gitFetchVersionTags(gitDir);
   });
 }
