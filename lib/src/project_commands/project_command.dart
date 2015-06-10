@@ -83,11 +83,12 @@ abstract class Command {
 
 /// A command that can be executed on a [Project] and optionally it's set of
 /// [dependencies]
-abstract class ProjectCommand extends Command {
+abstract class ProjectCommand<T> extends Command {
   String get name;
   CommandConcurrencyMode get concurrencyMode;
   Condition get condition;
-  Future process(Project project, {Iterable<Project> dependencies});
+
+  Future<T> process(Project project, {Iterable<Project> dependencies});
 
   ProjectCommand copy({String name, CommandConcurrencyMode concurrencyMode,
       Condition condition});

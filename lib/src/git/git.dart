@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 Logger _log = new Logger('jefe.git');
 
@@ -77,6 +78,15 @@ Future gitCheckout(GitDir gitDir, String branchName) async {
 
 Future gitTag(GitDir gitDir, String tag) async =>
     await gitDir.runCommand(['tag', tag]);
+
+Future<Iterable<Version>> gitFetchVersionTags(GitDir gitDir) async =>
+    (await gitDir.getTags()).map((Tag tag) {
+  try {
+    return new Some(new Version.parse(tag.tag));
+  } on FormatException catch (_) {
+    return const None();
+  }
+}).where((o) => o is Some).map((o) => o.get()).toList()..sort();
 
 Future gitPush(GitDir gitDir) async {
   final BranchReference current = await gitDir.getCurrentBranch();

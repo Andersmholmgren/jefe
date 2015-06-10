@@ -13,6 +13,7 @@ import 'dart:io';
 import 'package:option/option.dart';
 import 'dart:async';
 import 'package:git/git.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
@@ -113,6 +114,12 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
     } else {
       throw new StateError('more than one current feature $featureNames');
     }
+  });
+
+  ProjectCommand<Iterable<Version>> getReleaseVersionTags() => projectCommand(
+      'fetch git release version tags', (Project p) async {
+    var gitDir = await p.gitDir;
+    return await gitFetchVersionTags(gitDir);
   });
 }
 bool _dontExclude(Commit c) => false;
