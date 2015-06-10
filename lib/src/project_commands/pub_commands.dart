@@ -11,5 +11,7 @@ abstract class PubCommands {
 
   ProjectCommand get();
 
+  ProjectCommand publish();
+
   ProjectCommand fetchPackageVersions();
 }

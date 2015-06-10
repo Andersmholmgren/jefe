@@ -14,6 +14,9 @@ import 'dart:convert';
 Future get(Directory projectDirectory) =>
     runCommand('pub', ['get'], processWorkingDir: projectDirectory.path);
 
+Future publish(Directory projectDirectory) => runCommand(
+    'pub', ['publish', '--force'], processWorkingDir: projectDirectory.path);
+
 Future<Option<HostedPackageVersions>> fetchPackageVersions(
     String packageName) async {
   final http.Response response =

@@ -16,6 +16,8 @@ import 'package:jefe/src/project/release_type.dart';
 import 'package:git/git.dart';
 import 'package:jefe/src/project_commands/project_command_executor.dart';
 import 'package:option/option.dart';
+import 'package:jefe/src/pub/pub_version.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
@@ -91,10 +93,48 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   ProjectCommand release({ReleaseType type: ReleaseType.minor}) {
     return projectCommandWithDependencies('Release version type $type',
         (Project project, Set<Project> dependencies) async {
+      final GitDir gitDir = await project.gitDir;
+      final Option<HostedPackageVersions> publishedVersionsOpt =
+          await _pub.fetchPackageVersions().process(project);
+
+      final Option<Version> latestPublishedVersionOpt = publishedVersionsOpt
+          .map((HostedPackageVersions versions) => versions.latest.version);
+
+      if (latestPublishedVersionOpt is Some) {
+        // hosted package
+        // check if version has changed
+        //   if not then check diff from version tag
+        //     if different then ERROR. hosted packages must be manually bumped
+
+        final latestPublishedVersion = latestPublishedVersionOpt.get();
+        final currentPubspecVersion = project.pubspec.version;
+        if (latestPublishedVersion < currentPubspecVersion) {
+          // ok can publish
+
+          await _pub.publish().process(project);
+        } else {
+          final hasChangesSinceLastPublish = (await commitCountSince(
+                  gitDir, currentPubspecVersion.toString())) >
+              0;
+
+          if (hasChangesSinceLastPublish /* &&
+              latestPublishedVersion == currentPubspecVersion */
+              ) {
+            // Hosted packages must observe semantic versioning so not sensible
+            // to try to automatically bump version
+            throw new ArgumentError(
+                '${project.name} is hosted and has changes. '
+                'The version must be manually changed for hosted packages');
+          } else {
+            // nothing to do here as nothing has changed.
+          }
+        }
+      }
+
       final newVersion = type.bump(project.pubspec.version);
       await _gitFeature.releaseStart(newVersion.toString()).process(project);
       await project.updatePubspec(project.pubspec.copy(version: newVersion));
-      await _pubSpec.setToGitDependencies().process(project,
+      await _pubSpec.setToHostedDependencies().process(project,
           dependencies: dependencies);
       await _git.commit('releasing version $newVersion').process(project);
       await _gitFeature.releaseFinish(newVersion.toString()).process(project);

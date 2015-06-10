@@ -104,6 +104,9 @@ Future<String> getFirstRemote(GitDir gitDir) async {
   return firstLine.split(new RegExp(r'\s+')).elementAt(1);
 }
 
+Future<int> commitCountSince(GitDir gitDir, String ref) async =>
+    await gitDir.getCommitCount('$ref..HEAD');
+
 Future initGitFlow(GitDir gitDir) async =>
     await gitDir.runCommand(['flow', 'init', '-d']);
 
