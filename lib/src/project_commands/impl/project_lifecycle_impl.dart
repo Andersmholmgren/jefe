@@ -91,8 +91,12 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   }
 
   @override
+  ProjectCommand preRelease() =>
+      projectCommandGroup('Pre release checks', [_pub.test()]);
+
+  @override
   ProjectCommand release({ReleaseType type: ReleaseType.minor}) {
-    return projectCommandWithDependencies('Release version type $type',
+    return projectCommandWithDependencies('Release version: type $type',
         (Project project, Iterable<Project> dependencies) async {
       final ProjectVersions projectVersions =
           await getCurrentProjectVersion(project, type);

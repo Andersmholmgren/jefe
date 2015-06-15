@@ -87,6 +87,10 @@ class Jefe {
       help: 'A project name filter. Only projects whose name contains the text will run',
       abbr: 'p') String projects}) async {
     final executor = await _load(rootDirectory);
+    // TODO: would be nice to leverage grinder here (command dependencies)
+    // somehow
+    await executor.execute(lifecycle.preRelease(),
+        filter: projectNameFilter(projects));
     await executor.execute(lifecycle.release(),
         filter: projectNameFilter(projects));
   }
