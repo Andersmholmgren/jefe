@@ -24,4 +24,8 @@ class PubCommandsImpl implements PubCommands {
   @override
   ProjectCommand publish() => projectCommand('pub publish',
       (Project p) async => await pub.publish(p.installDirectory));
+
+  @override
+  ProjectCommand test() => projectCommand(
+      'pub run test', (Project p) async => await pub.test(p.installDirectory));
 }

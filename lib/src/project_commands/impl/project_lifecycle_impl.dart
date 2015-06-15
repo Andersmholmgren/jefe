@@ -94,32 +94,15 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   ProjectCommand release({ReleaseType type: ReleaseType.minor}) {
     return projectCommandWithDependencies('Release version type $type',
         (Project project, Iterable<Project> dependencies) async {
-      final GitDir gitDir = await project.gitDir;
+      final ProjectVersions projectVersions =
+          await getCurrentProjectVersion(project, type);
 
-      final currentPubspecVersion = project.pubspec.version;
-
-      final Version latestTaggedVersion =
-          (await _gitFeature.getReleaseVersionTags().process(project)).last;
-
-      final Option<Version> latestPublishedVersionOpt =
-          await _latestPublishedVersion(project);
-
-      final isHosted = latestPublishedVersionOpt is Some;
-
-      _log.fine('pubspec version: $currentPubspecVersion; '
-          'tagged version: $latestTaggedVersion; '
-          'published version: $latestPublishedVersionOpt');
-
-      final Option<Version> releaseVersionOpt = await _getReleaseVersion(
-          latestTaggedVersion, currentPubspecVersion, latestPublishedVersionOpt,
-          gitDir, type, project);
-
-      if (releaseVersionOpt is None) {
+      if (!projectVersions.newReleaseRequired) {
         // no release needed
         _log.fine('no changes needing release for ${project.name}');
         return;
       } else {
-        final releaseVersion = releaseVersionOpt.get();
+        final releaseVersion = projectVersions.newReleaseVersion.get();
 
         _log.fine('new release version $releaseVersion');
 
@@ -127,7 +110,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
             .releaseStart(releaseVersion.toString())
             .process(project);
 
-        if (releaseVersion != currentPubspecVersion) {
+        if (releaseVersion != projectVersions.pubspecVersion) {
           await project
               .updatePubspec(project.pubspec.copy(version: releaseVersion));
         }
@@ -137,7 +120,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
         await _git.commit('releasing version $releaseVersion').process(project);
 
-        if (isHosted) {
+        if (projectVersions.isHosted) {
           await _pub.publish().process(project);
         }
 
@@ -172,14 +155,50 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     });
   }
 
+  Future<bool> _hasCommitsSince(GitDir gitDir, Version sinceVersion) async {
+    return (await commitCountSince(gitDir, sinceVersion.toString())) > 0;
+  }
+
+  Future<Option<Version>> _latestPublishedVersion(Project project) async {
+    final Option<HostedPackageVersions> publishedVersionsOpt =
+        await _pub.fetchPackageVersions().process(project);
+
+    return publishedVersionsOpt
+        .map((HostedPackageVersions versions) => versions.latest.version);
+  }
+
+  Future<ProjectVersions> getCurrentProjectVersion(
+      Project project, ReleaseType type) async {
+    final GitDir gitDir = await project.gitDir;
+
+    final currentPubspecVersion = project.pubspec.version;
+
+    final Version latestTaggedVersion =
+        (await _gitFeature.getReleaseVersionTags().process(project)).last;
+
+    final Option<Version> latestPublishedVersionOpt =
+        await _latestPublishedVersion(project);
+
+    _log.fine('pubspec version: $currentPubspecVersion; '
+        'tagged version: $latestTaggedVersion; '
+        'published version: $latestPublishedVersionOpt');
+
+    final Option<Version> releaseVersionOpt = await _getReleaseVersion(
+        latestTaggedVersion, currentPubspecVersion, latestPublishedVersionOpt,
+        gitDir, type, project);
+
+    return new ProjectVersions(currentPubspecVersion, latestTaggedVersion,
+        latestPublishedVersionOpt, releaseVersionOpt);
+  }
+
   Future<Option<Version>> _getReleaseVersion(Version latestTaggedVersion,
       Version currentPubspecVersion, Option<Version> latestPublishedVersionOpt,
       GitDir gitDir, ReleaseType type, Project project) async {
     final isHosted = latestPublishedVersionOpt is Some;
 
-    final latestReleasedVersion = latestPublishedVersionOpt
-        .map((lpv) => lpv >= latestTaggedVersion ? lpv : latestTaggedVersion)
-        .getOrDefault(latestTaggedVersion);
+//    final latestReleasedVersion = latestPublishedVersionOpt
+//    .map((lpv) => lpv >= latestTaggedVersion ? lpv : latestTaggedVersion)
+//    .getOrDefault(latestTaggedVersion);
 
     if (latestTaggedVersion > currentPubspecVersion) {
       throw new StateError('the latest tagged version $latestTaggedVersion'
@@ -209,16 +228,17 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       }
     }
   }
+}
 
-  Future<bool> _hasCommitsSince(GitDir gitDir, Version sinceVersion) async {
-    return (await commitCountSince(gitDir, sinceVersion.toString())) > 0;
-  }
+class ProjectVersions {
+  final Version pubspecVersion;
+  final Version taggedGitVersion;
+  final Option<Version> publishedVersion;
+  final Option<Version> newReleaseVersion;
 
-  Future<Option<Version>> _latestPublishedVersion(Project project) async {
-    final Option<HostedPackageVersions> publishedVersionsOpt =
-        await _pub.fetchPackageVersions().process(project);
+  bool get isHosted => publishedVersion is Some;
+  bool get newReleaseRequired => newReleaseVersion is Some;
 
-    return publishedVersionsOpt
-        .map((HostedPackageVersions versions) => versions.latest.version);
-  }
+  ProjectVersions(this.pubspecVersion, this.taggedGitVersion,
+      this.publishedVersion, this.newReleaseVersion);
 }

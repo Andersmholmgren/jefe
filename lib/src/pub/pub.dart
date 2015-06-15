@@ -14,6 +14,9 @@ import 'dart:convert';
 Future get(Directory projectDirectory) =>
     runCommand('pub', ['get'], processWorkingDir: projectDirectory.path);
 
+Future test(Directory projectDirectory) => runCommand('pub', ['run', 'test'],
+    processWorkingDir: projectDirectory.path);
+
 Future publish(Directory projectDirectory) => runCommand(
     'pub', ['publish', '--force'], processWorkingDir: projectDirectory.path);
 
