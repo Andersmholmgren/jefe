@@ -85,14 +85,20 @@ class Jefe {
       help: 'The directory that contains the root of the projecs',
       abbr: 'd') String rootDirectory: '.', @u.Option(
       help: 'A project name filter. Only projects whose name contains the text will run',
-      abbr: 'p') String projects}) async {
+      abbr: 'p') String projects, @u.Flag(
+      help: 'if true then only pre release verification steps are executed',
+      defaultsTo: false) bool preReleaseOnly: false}) async {
     final executor = await _load(rootDirectory);
     // TODO: would be nice to leverage grinder here (command dependencies)
     // somehow
     await executor.execute(lifecycle.preRelease(),
         filter: projectNameFilter(projects));
-    await executor.execute(lifecycle.release(),
-        filter: projectNameFilter(projects));
+    if (!preReleaseOnly) {
+      await executor.execute(lifecycle.release(),
+          filter: projectNameFilter(projects));
+    } else {
+      print('-------');
+    }
   }
 
   @u.SubCommand(help: 'Runs the given command in all projects')

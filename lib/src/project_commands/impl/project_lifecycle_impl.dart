@@ -91,7 +91,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   }
 
   @override
-  ProjectCommand preRelease() =>
+  CompositeProjectCommand preRelease() =>
       projectCommandGroup('Pre release checks', [_pub.test()]);
 
   @override
