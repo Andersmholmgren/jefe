@@ -91,8 +91,16 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   }
 
   @override
-  CompositeProjectCommand preRelease() =>
-      projectCommandGroup('Pre release checks', [_pub.test()]);
+  CompositeProjectCommand preRelease({ReleaseType type: ReleaseType.minor}) =>
+      projectCommandGroup('Pre release checks', [
+    checkReleaseVersions(type: type),
+    _pub.test()
+  ]);
+
+  ProjectCommand checkReleaseVersions({ReleaseType type: ReleaseType.minor}) =>
+      projectCommand('check release versions', (Project project) async {
+    await getCurrentProjectVersion(project, type);
+  });
 
   @override
   ProjectCommand release({ReleaseType type: ReleaseType.minor}) {
