@@ -10,12 +10,17 @@ import 'package:http/http.dart' as http;
 import 'package:jefe/src/pub/pub_version.dart';
 import 'package:option/option.dart';
 import 'dart:convert';
+import 'package:path/path.dart' as p;
 
 Future get(Directory projectDirectory) =>
     runCommand('pub', ['get'], processWorkingDir: projectDirectory.path);
 
-Future test(Directory projectDirectory) => runCommand('pub', ['run', 'test'],
-    processWorkingDir: projectDirectory.path);
+Future test(Directory projectDirectory) async {
+  if (await new Directory(p.join(projectDirectory.path, 'test')).exists()) {
+    return runCommand('pub', ['run', 'test'],
+        processWorkingDir: projectDirectory.path);
+  }
+}
 
 Future publish(Directory projectDirectory) => runCommand(
     'pub', ['publish', '--force'], processWorkingDir: projectDirectory.path);
