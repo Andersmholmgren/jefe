@@ -99,7 +99,17 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
   ProjectCommand checkReleaseVersions({ReleaseType type: ReleaseType.minor}) =>
       projectCommand('check release versions', (Project project) async {
-    await getCurrentProjectVersion(project, type);
+    final ProjectVersions versions =
+        await getCurrentProjectVersion(project, type);
+    if (versions.newReleaseVersion is Some) {
+      _log.info('project ${project.name} will be upgraded from version: '
+          '${versions.pubspecVersion} '
+          'to: ${versions.newReleaseVersion.get()}. '
+          'It will ${versions.isHosted ? "" : "NOT "} be published to pub');
+    } else {
+      _log.info('project ${project.name} will NOT be upgraded. '
+          'It will remain at version: ${versions.pubspecVersion}');
+    }
   });
 
   @override
