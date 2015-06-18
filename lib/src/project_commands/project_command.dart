@@ -171,7 +171,8 @@ class _DefaultCommand implements ProjectCommand {
       _log.info('Completed command "$taskDescription" in ${stopWatch.elapsed}');
       stopWatch.stop();
       return result;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print(stackTrace);
       throw new ProjectCommandError(this, project, e);
     }
   }

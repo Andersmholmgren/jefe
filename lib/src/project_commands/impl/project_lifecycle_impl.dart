@@ -103,9 +103,9 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         await getCurrentProjectVersion(project, type);
     if (versions.newReleaseVersion is Some) {
       _log.info('project ${project.name} will be upgraded from version: '
-          '${versions.pubspecVersion} '
+          '${versions.taggedGitVersion} '
           'to: ${versions.newReleaseVersion.get()}. '
-          'It will ${versions.isHosted ? "" : "NOT "} be published to pub');
+          'It will ${versions.isHosted ? "" : "NOT "}be published to pub');
     } else {
       _log.info('project ${project.name} will NOT be upgraded. '
           'It will remain at version: ${versions.pubspecVersion}');
@@ -201,7 +201,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     final Option<Version> latestPublishedVersionOpt =
         await _latestPublishedVersion(project);
 
-    _log.fine('pubspec version: $currentPubspecVersion; '
+    _log.fine('${project.name}: pubspec version: $currentPubspecVersion; '
         'tagged version: $latestTaggedVersion; '
         'published version: $latestPublishedVersionOpt');
 
