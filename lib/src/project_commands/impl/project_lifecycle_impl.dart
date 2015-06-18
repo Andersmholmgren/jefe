@@ -195,32 +195,40 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
     final currentPubspecVersion = project.pubspec.version;
 
-    final Version latestTaggedVersion =
-        (await _gitFeature.getReleaseVersionTags().process(project)).last;
+    final taggedVersions =
+        await _gitFeature.getReleaseVersionTags().process(project);
+
+    final Option<Version> latestTaggedVersionOpt = taggedVersions.isNotEmpty
+        ? new Some(taggedVersions.last)
+        : const None();
 
     final Option<Version> latestPublishedVersionOpt =
         await _latestPublishedVersion(project);
 
     _log.fine('${project.name}: pubspec version: $currentPubspecVersion; '
-        'tagged version: $latestTaggedVersion; '
+        'tagged version: $latestTaggedVersionOpt; '
         'published version: $latestPublishedVersionOpt');
 
     final Option<Version> releaseVersionOpt = await _getReleaseVersion(
-        latestTaggedVersion, currentPubspecVersion, latestPublishedVersionOpt,
-        gitDir, type, project);
+        latestTaggedVersionOpt, currentPubspecVersion,
+        latestPublishedVersionOpt, gitDir, type, project);
 
-    return new ProjectVersions(currentPubspecVersion, latestTaggedVersion,
+    return new ProjectVersions(currentPubspecVersion, latestTaggedVersionOpt,
         latestPublishedVersionOpt, releaseVersionOpt);
   }
 
-  Future<Option<Version>> _getReleaseVersion(Version latestTaggedVersion,
-      Version currentPubspecVersion, Option<Version> latestPublishedVersionOpt,
-      GitDir gitDir, ReleaseType type, Project project) async {
+  Future<Option<Version>> _getReleaseVersion(
+      Option<Version> latestTaggedVersionOpt, Version currentPubspecVersion,
+      Option<Version> latestPublishedVersionOpt, GitDir gitDir,
+      ReleaseType type, Project project) async {
     final isHosted = latestPublishedVersionOpt is Some;
 
 //    final latestReleasedVersion = latestPublishedVersionOpt
 //    .map((lpv) => lpv >= latestTaggedVersion ? lpv : latestTaggedVersion)
 //    .getOrDefault(latestTaggedVersion);
+
+    final latestTaggedVersion =
+        latestTaggedVersionOpt.getOrElse(() => new Version(0, 0, 1));
 
     if (latestTaggedVersion > currentPubspecVersion) {
       throw new StateError('the latest tagged version $latestTaggedVersion'
@@ -254,7 +262,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
 class ProjectVersions {
   final Version pubspecVersion;
-  final Version taggedGitVersion;
+  final Option<Version> taggedGitVersion;
   final Option<Version> publishedVersion;
   final Option<Version> newReleaseVersion;
 
