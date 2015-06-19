@@ -108,7 +108,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 
     final GitDir gitDir = results.first;
 
-    final String gitUri = await getFirstRemote(gitDir);
+    final String gitUri = await getOriginOrFirstRemote(gitDir);
     return new ProjectGroupImpl(gitUri, results.elementAt(1), directoryLayout);
   }
 

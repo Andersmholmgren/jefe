@@ -107,15 +107,21 @@ Future gitMerge(GitDir gitDir, String commit) async {
 Future<String> currentCommitHash(GitDir gitDir) async =>
     (await gitDir.runCommand(['rev-parse', 'HEAD'])).stdout.trim();
 
-// TODO: should generalise into fetching all remotes if any etc
-Future<String> getFirstRemote(GitDir gitDir) async {
+Future<String> getOriginOrFirstRemote(GitDir gitDir) async {
+  final remotes = await getRemotes(gitDir);
+  return remotes.firstWhere((r) => r.name == 'origin',
+      orElse: () => remotes.first).uri;
+}
+
+Future<Iterable<GitRemote>> getRemotes(GitDir gitDir) async {
   final ProcessResult result = await gitDir.runCommand(['remote', '-v']);
 
   final String remotesStr = result.stdout;
 
-  final firstLine = remotesStr.split('\n').first;
+  final lines = remotesStr.split('\n');
 
-  return firstLine.split(new RegExp(r'\s+')).elementAt(1);
+  return lines.map((l) => l.split(new RegExp(r'\s+'))).map(
+      (Iterable<String> kv) => new GitRemote(kv.elementAt(0), kv.elementAt(1)));
 }
 
 Future<int> commitCountSince(GitDir gitDir, String ref) async =>
@@ -167,3 +173,10 @@ Future<Option<String>> gitCurrentTagName(GitDir gitDir) async => new Option(
     (await gitDir.runCommand(['describe', 'HEAD', '--tags'])).stdout.trim());
 
 const String featureBranchPrefix = 'feature/';
+
+class GitRemote {
+  final String name;
+  final String uri;
+
+  GitRemote(this.name, this.uri);
+}
