@@ -12,8 +12,12 @@ main(arguments) {
   Chain.capture(() {
     new u.Script(Jefe).execute(arguments);
   }, onError: (error, stackChain) {
-    print("Caught error $error\n"
-        "${stackChain.terse}");
+    if (error is ProjectCommandError) {
+      print(error.cause);
+    } else {
+      print("Caught error $error\n"
+          "${stackChain.terse}");
+    }
   });
 }
 

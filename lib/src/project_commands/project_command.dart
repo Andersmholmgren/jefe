@@ -172,7 +172,7 @@ class _DefaultCommand implements ProjectCommand {
       stopWatch.stop();
       return result;
     } catch (e, stackTrace) {
-      print(stackTrace);
+//      print(stackTrace);
       throw new ProjectCommandError(this, project, e);
     }
   }

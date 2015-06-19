@@ -97,7 +97,11 @@ Future gitPush(GitDir gitDir) async {
 }
 
 Future gitFetch(GitDir gitDir) async {
-  await gitDir.runCommand(['fetch']);
+  await gitDir.runCommand(['fetch', '--tags']);
+}
+
+Future gitMerge(GitDir gitDir, String commit) async {
+  await gitDir.runCommand(['merge', '--ff-only', commit]);
 }
 
 Future<String> currentCommitHash(GitDir gitDir) async =>
