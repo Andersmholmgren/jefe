@@ -42,6 +42,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       {bool doPush: false, bool recursive: true}) {
     return projectCommandGroup('set up project for new feature "$featureName"',
         [
+      _git.assertWorkingTreeClean(),
       _gitFeature.featureStart(featureName),
       _pubSpec.setToPathDependencies(),
       _pub.get(),
@@ -70,6 +71,8 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     return projectCommandWithDependencies(
         'complete development of feature $featureName',
         (Project project, Iterable<Project> dependencies) async {
+      await _git.assertWorkingTreeClean().process(project);
+
       final currentBranchName =
           await gitCurrentBranchName(await project.gitDir);
       if (!(currentBranchName == _gitFeature.developBranchName)) {
