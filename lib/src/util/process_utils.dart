@@ -11,7 +11,7 @@ int _processCount = 0;
 Future<ProcessResult> runCommand(String command, List<String> args,
     {bool throwOnError: true, String processWorkingDir}) async {
   _processCount++;
-  print('---- num running processes: $_processCount');
+//  print('---- num running processes: $_processCount');
 
   final result =
       await Process.run(command, args, workingDirectory: processWorkingDir);
