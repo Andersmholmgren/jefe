@@ -111,7 +111,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     final ProjectVersions versions =
         await getCurrentProjectVersion(project, type);
     if (versions.newReleaseVersion is Some) {
-      _log.info('project ${project.name} will be upgraded from version: '
+      _log.info('==> project ${project.name} will be upgraded from version: '
           '${versions.taggedGitVersion} '
           'to: ${versions.newReleaseVersion.get()}. '
           'It will ${versions.isHosted ? "" : "NOT "}be published to pub');

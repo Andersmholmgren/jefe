@@ -6,16 +6,22 @@ library jefe.utils;
 import 'dart:async';
 import 'dart:io';
 
+int _processCount = 0;
+
 Future<ProcessResult> runCommand(String command, List<String> args,
-    {bool throwOnError: true, String processWorkingDir}) {
-  return Process
-      .run(command, args, workingDirectory: processWorkingDir)
-      .then((ProcessResult pr) {
-    if (throwOnError) {
-      _throwIfProcessFailed(pr, command, args);
-    }
-    return pr;
-  });
+    {bool throwOnError: true, String processWorkingDir}) async {
+  _processCount++;
+  print('---- num running processes: $_processCount');
+
+  final result =
+      await Process.run(command, args, workingDirectory: processWorkingDir);
+
+  _processCount--;
+
+  if (throwOnError) {
+    _throwIfProcessFailed(result, command, args);
+  }
+  return result;
 }
 
 void _throwIfProcessFailed(

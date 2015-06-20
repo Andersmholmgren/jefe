@@ -13,7 +13,7 @@ main(arguments) {
     new u.Script(Jefe).execute(arguments);
   }, onError: (error, stackChain) {
     if (error is ProjectCommandError) {
-      print(error.cause);
+      print(error);
     } else {
       print("Caught error $error\n"
           "${stackChain.terse}");
