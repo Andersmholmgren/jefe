@@ -195,8 +195,8 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     final Option<HostedPackageVersions> publishedVersionsOpt =
         await _pub.fetchPackageVersions().process(project);
 
-    return publishedVersionsOpt
-        .map((HostedPackageVersions versions) => versions.latest.version);
+    return publishedVersionsOpt.map(
+        (HostedPackageVersions versions) => versions.versions.last.version);
   }
 
   Future<ProjectVersions> getCurrentProjectVersion(

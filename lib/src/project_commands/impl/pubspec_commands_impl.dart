@@ -48,7 +48,7 @@ class PubSpecCommandsImpl implements PubSpecCommands {
       final Option<HostedPackageVersions> packageVersionsOpt =
           await pub.fetchPackageVersions(p.name);
       if (packageVersionsOpt is Some) {
-        final Version version = packageVersionsOpt.get().latest.version;
+        final Version version = packageVersionsOpt.get().versions.last.version;
         final versionConstraint = new VersionConstraint.compatibleWith(version);
         return await new HostedReference(versionConstraint);
       } else if (useGitIfNotHosted) {
