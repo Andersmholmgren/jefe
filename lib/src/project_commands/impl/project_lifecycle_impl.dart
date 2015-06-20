@@ -187,10 +187,6 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     });
   }
 
-  Future<bool> _hasCommitsSince(GitDir gitDir, Version sinceVersion) async {
-    return (await commitCountSince(gitDir, sinceVersion.toString())) > 0;
-  }
-
   Future<Option<Version>> _latestPublishedVersion(Project project) async {
     final Option<HostedPackageVersions> publishedVersionsOpt =
         await _pub.fetchPackageVersions().process(project);
@@ -250,7 +246,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       } else {
         // latest released version is same as pubspec version
         final hasChangesSinceLatestTaggedVersion =
-            await _hasCommitsSince(gitDir, latestTaggedVersion);
+            await _hasChangesSince(gitDir, latestTaggedVersion);
 
         if (hasChangesSinceLatestTaggedVersion) {
           if (isHosted) {
@@ -267,6 +263,14 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         }
       }
     }
+  }
+
+  Future<bool> _hasCommitsSince(GitDir gitDir, Version sinceVersion) async {
+    return (await commitCountSince(gitDir, sinceVersion.toString())) > 0;
+  }
+
+  Future<bool> _hasChangesSince(GitDir gitDir, Version sinceVersion) async {
+    return (await diffSummarySince(gitDir, sinceVersion.toString())) is Some;
   }
 }
 

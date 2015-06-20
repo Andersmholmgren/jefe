@@ -127,6 +127,40 @@ Future<Iterable<GitRemote>> getRemotes(GitDir gitDir) async {
 Future<int> commitCountSince(GitDir gitDir, String ref) async =>
     await gitDir.getCommitCount('$ref..HEAD');
 
+Future<Option<DiffSummary>> diffSummarySince(GitDir gitDir, String ref) async {
+  final line = (await gitDir.runCommand(['diff', '--shortstat', ref])).stdout;
+  return line != null && line.trim().isNotEmpty
+      ? new Some(new DiffSummary.parse(line))
+      : const None();
+}
+
+class DiffSummary {
+  static final RegExp _diffRegExp = new RegExp(
+      r'^\s*(\d+) files changed, (\d+) insertions\(\+\), (\d+) deletions\(\-\)\s*$');
+
+//  4 files changed, 7 insertions(+), 9 deletions(-)
+  final int filesChangedCount;
+  final int insertionCount;
+  final int deletionCount;
+
+  DiffSummary(this.filesChangedCount, this.insertionCount, this.deletionCount);
+
+  factory DiffSummary.parse(String line) {
+    final matches = _diffRegExp.allMatches(line);
+    assert(matches.length == 1);
+    var match = matches.first;
+    assert(match.groupCount == 3);
+
+    int nth(int index) => int.parse(match.group(index));
+
+    return new DiffSummary(nth(1), nth(2), nth(3));
+  }
+
+  String toString() =>
+      '$filesChangedCount files changed, $insertionCount insertions(+), '
+      '$deletionCount deletions(-)';
+}
+
 Future initGitFlow(GitDir gitDir) async =>
     await gitDir.runCommand(['flow', 'init', '-d']);
 
