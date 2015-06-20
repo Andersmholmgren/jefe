@@ -97,6 +97,7 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
   @override
   String get developBranchName => 'develop';
 
+  @override
   ProjectDependencyGraphCommand currentFeatureName() => dependencyGraphCommand(
       'Get current feature name',
       (DependencyGraph graph, Directory rootDirectory, _) async {
@@ -116,10 +117,21 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
     }
   });
 
+  @override
   ProjectCommand<Iterable<Version>> getReleaseVersionTags() => projectCommand(
       'fetch git release version tags', (Project p) async {
     final gitDir = await p.gitDir;
     return await gitFetchVersionTags(gitDir);
+  });
+
+  @override
+  ProjectCommand assertNoActiveReleases() => projectCommand(
+      'check no active releases', (Project p) async {
+    final releaseNames = await gitFlowReleaseNames(await p.gitDir);
+    if (releaseNames.isNotEmpty) {
+      throw new StateError(
+          '${p.name} has an existing release branch. Must finish all active releases first');
+    }
   });
 }
 bool _dontExclude(Commit c) => false;

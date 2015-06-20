@@ -51,4 +51,6 @@ abstract class GitFeatureCommands {
 
   /// Fetch release version tags
   ProjectCommand<Iterable<Version>> getReleaseVersionTags();
+
+  ProjectCommand assertNoActiveReleases();
 }

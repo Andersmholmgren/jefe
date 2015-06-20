@@ -97,6 +97,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   CompositeProjectCommand preRelease({ReleaseType type: ReleaseType.minor}) =>
       projectCommandGroup('Pre release checks', [
     _git.assertWorkingTreeClean(),
+    _gitFeature.assertNoActiveReleases(),
     _git.assertOnBranch(_gitFeature.developBranchName),
     _git.fetch(),
     _git.updateFromRemote('master'),

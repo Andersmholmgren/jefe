@@ -162,17 +162,25 @@ Future<Option<String>> gitFlowCurrentFeatureName(GitDir gitDir) async {
   }
 }
 
-Future<Iterable<String>> gitFlowFeatureNames(GitDir gitDir) async {
+Future<Iterable<String>> gitFlowFeatureNames(GitDir gitDir) async =>
+    _gitFlowBranchNames(gitDir, featureBranchPrefix);
+
+Future<Iterable<String>> gitFlowReleaseNames(GitDir gitDir) async =>
+    _gitFlowBranchNames(gitDir, releaseBranchPrefix);
+
+Future<Iterable<String>> _gitFlowBranchNames(
+    GitDir gitDir, String branchPrefix) async {
   final Iterable<String> branchNames = await gitDir.getBranchNames();
   return branchNames
-      .where((n) => n.startsWith(featureBranchPrefix))
-      .map((n) => n.substring(featureBranchPrefix.length));
+      .where((n) => n.startsWith(branchPrefix))
+      .map((n) => n.substring(branchPrefix.length));
 }
 
 Future<Option<String>> gitCurrentTagName(GitDir gitDir) async => new Option(
     (await gitDir.runCommand(['describe', 'HEAD', '--tags'])).stdout.trim());
 
 const String featureBranchPrefix = 'feature/';
+const String releaseBranchPrefix = 'release/';
 
 class GitRemote {
   final String name;
