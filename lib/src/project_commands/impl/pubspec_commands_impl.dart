@@ -23,21 +23,92 @@ class PubSpecCommandsImpl implements PubSpecCommands {
   PubSpecCommandsImpl() : this._pub = new PubCommands();
 
   @override
-  ProjectCommand setToPathDependencies() => _setToDependencies('path',
-      (Project p) =>
-          new Future.value(new PathReference(p.installDirectory.path)));
+  ProjectCommand setToPathDependencies() =>
+      _setToDependenciesCommand(DependencyType.path, false);
 
   // Note: this must run serially
   @override
-  ProjectCommand setToGitDependencies() => _setToDependencies('git',
-      (Project p) async =>
-          await new GitReference(p.gitUri, await p.currentGitCommitHash));
+  ProjectCommand setToGitDependencies() =>
+      _setToDependenciesCommand(DependencyType.git, false);
 
   // Note: this must run serially
   @override
   ProjectCommand setToHostedDependencies({bool useGitIfNotHosted: true}) =>
-      _setToDependencies('hosted',
-          (Project p) async => _getHostedReference(p, useGitIfNotHosted));
+      _setToDependenciesCommand(DependencyType.hosted, useGitIfNotHosted);
+
+  ProjectCommand _setToDependenciesCommand(
+          DependencyType type, bool useGitIfNotHosted) =>
+      projectCommandWithDependencies('change to $type dependencies',
+          (Project p, Iterable<Project> dependencies) async {
+    await _setToDependencies(p, dependencies, type, useGitIfNotHosted);
+  });
+
+  @override
+  ProjectCommand<bool> haveDependenciesChanged(DependencyType type,
+      {bool useGitIfNotHosted: true}) => projectCommandWithDependencies(
+          'checking if $type dependencies have changed',
+          (Project project, Iterable<Project> dependencies) async {
+    final expectedDependencies = await _createDependencyReferences(
+        project, dependencies, type, useGitIfNotHosted);
+
+    final actualDependencies = project.pubspec.dependencies;
+
+    final dependenciesChanged = expectedDependencies.keys
+        .any((k) => expectedDependencies[k] != actualDependencies[k]);
+
+    _log.info('dependencies for ${project.name} have '
+        '${dependenciesChanged ? "" : "NOT "}changed');
+    return dependenciesChanged;
+  });
+
+  Future _setToDependencies(Project project, Iterable<Project> dependencies,
+      DependencyType type, bool useGitIfNotHosted) async {
+    _log.info('Setting up $type dependencies for project ${project.name}');
+    final newDependencies = await _createDependencyReferences(
+        project, dependencies, type, useGitIfNotHosted);
+
+    final newPubspec = project.pubspec.copy(dependencies: newDependencies);
+    await project.updatePubspec(newPubspec);
+    _log.finer(
+        'Finished setting up $type dependencies for project ${project.name}');
+  }
+
+  Future<Map<String, DependencyReference>> _createDependencyReferences(
+      Project project, Iterable<Project> dependencies, DependencyType type,
+      bool useGitIfNotHosted) async {
+    if (dependencies.isEmpty) {
+      _log.finest('No depenencies for project ${project.name}');
+      return await const {};
+    }
+
+    final newDependencies = new Map.from(project.pubspec.dependencies);
+
+    await Future.wait(dependencies.map((p) async {
+      final ref = await _createDependencyReference(p, type, useGitIfNotHosted);
+      _log.finest('created reference $ref for project ${project.name}');
+      newDependencies[p.name] = ref;
+    }));
+
+    return newDependencies;
+  }
+
+  Future<DependencyReference> _createDependencyReference(
+      Project project, DependencyType type, bool useGitIfNotHosted) async {
+    switch (type) {
+      case DependencyType.path:
+        return new PathReference(project.installDirectory.path);
+
+      case DependencyType.git:
+        return new GitReference(
+            project.gitUri, await project.currentGitCommitHash);
+
+      case DependencyType.hosted:
+        return _getHostedReference(project, useGitIfNotHosted);
+
+      default:
+        throw new StateError('unsupported type $type');
+    }
+  }
 
   Future<DependencyReference> _getHostedReference(
       Project project, bool useGitIfNotHosted) async {
@@ -54,62 +125,5 @@ class PubSpecCommandsImpl implements PubSpecCommands {
       throw new ArgumentError(
           'attempt to create hosted dependency for package not hosted on pub');
     }
-  }
-
-  ProjectCommand _setToDependencies(String type,
-          Future<DependencyReference> createReferenceTo(Project p)) =>
-      projectCommandWithDependencies('change to $type dependencies',
-          (Project p, Iterable<Project> dependencies) async {
-    await _setDependencies(p, type, dependencies, createReferenceTo);
-  });
-
-  ProjectCommand<bool> _haveDependenciesChanged(String type,
-          Future<DependencyReference> createReferenceTo(Project p)) =>
-      projectCommandWithDependencies(
-          'checking if $type dependencies have changed',
-          (Project project, Iterable<Project> dependencies) async {
-    final expectedDependencies = await _getDependenciesAsType(
-        project, type, dependencies, createReferenceTo);
-
-    final actualDependencies = project.pubspec.dependencies;
-
-    final dependenciesChanged = expectedDependencies.keys
-        .any((k) => expectedDependencies[k] != actualDependencies[k]);
-
-    _log.info('dependencies for project ${project.name} have '
-        '${dependenciesChanged ? "" : "NOT"}changed');
-    return dependenciesChanged;
-  });
-
-  Future _setDependencies(Project project, String type,
-      Iterable<Project> dependencies,
-      Future<DependencyReference> createReferenceTo(Project p)) async {
-    _log.info('Setting up $type dependencies for project ${project.name}');
-    final newDependencies = await _getDependenciesAsType(
-        project, type, dependencies, createReferenceTo);
-
-    final newPubspec = project.pubspec.copy(dependencies: newDependencies);
-    await project.updatePubspec(newPubspec);
-    _log.finer(
-        'Finished setting up $type dependencies for project ${project.name}');
-  }
-
-  Future<Map<String, DependencyReference>> _getDependenciesAsType(
-      Project project, String type, Iterable<Project> dependencies,
-      Future<DependencyReference> createReferenceTo(Project p)) async {
-    if (dependencies.isEmpty) {
-      _log.finest('No depenencies for project ${project.name}');
-      return await const {};
-    }
-
-    final newDependencies = new Map.from(project.pubspec.dependencies);
-
-    await Future.wait(dependencies.map((p) async {
-      final ref = await createReferenceTo(p);
-      _log.finest('created reference $ref for project ${project.name}');
-      newDependencies[p.name] = ref;
-    }));
-
-    return newDependencies;
   }
 }

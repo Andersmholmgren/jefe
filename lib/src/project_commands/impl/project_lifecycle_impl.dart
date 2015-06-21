@@ -248,7 +248,12 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         final hasChangesSinceLatestTaggedVersion =
             await _hasChangesSince(gitDir, latestTaggedVersion);
 
-        if (hasChangesSinceLatestTaggedVersion) {
+        final hasChanges = hasChangesSinceLatestTaggedVersion ||
+            (await _pubSpec
+                .haveDependenciesChanged(DependencyType.hosted)
+                .process(project));
+
+        if (hasChanges) {
           if (isHosted) {
             // Hosted packages must observe semantic versioning so not sensible
             // to try to automatically bump version

@@ -25,4 +25,11 @@ abstract class PubSpecCommands {
   /// If not hosted then will fall back to git if [useGitIfNotHosted] is true
   /// or throw an error otherwise
   ProjectCommand setToHostedDependencies({bool useGitIfNotHosted: true});
+
+  // TODO: this only makes sense to run on a single project at a time, so
+  // making it a command is kinda weird
+  ProjectCommand<bool> haveDependenciesChanged(DependencyType type,
+      {bool useGitIfNotHosted: true});
 }
+
+enum DependencyType { path, git, hosted }
