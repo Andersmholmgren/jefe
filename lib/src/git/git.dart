@@ -212,7 +212,31 @@ Future<Iterable<String>> _gitFlowBranchNames(
       .map((n) => n.substring(branchPrefix.length));
 }
 
-Future<Option<String>> gitCurrentTagName(GitDir gitDir) async => new Option(
+Future<Option<String>> gitCurrentTagName(GitDir gitDir) async {
+  final currentTagOpt = await _gitCurrentTagName(gitDir);
+
+  if (currentTagOpt is None) {
+    return const None();
+  }
+
+  // to complicated with futures inside options for my little brain
+  final String currentTag = currentTagOpt.get();
+
+  final versionTags = await gitFetchVersionTags(gitDir);
+
+  // find longest matching version name
+  final matchingVersions = versionTags
+      .where((t) => currentTag.startsWith(t.toString()))
+      .toList()
+    ..sort((Version v1, Version v2) =>
+        v1.toString().length.compareTo(v2.toString().length));
+
+  return matchingVersions.isNotEmpty
+      ? new Some(matchingVersions.first.toString())
+      : const None();
+}
+
+Future<Option<String>> _gitCurrentTagName(GitDir gitDir) async => new Option(
     (await gitDir.runCommand(['describe', 'HEAD', '--tags'])).stdout.trim());
 
 const String featureBranchPrefix = 'feature/';
