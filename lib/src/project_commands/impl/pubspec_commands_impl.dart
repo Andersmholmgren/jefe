@@ -37,9 +37,9 @@ class PubSpecCommandsImpl implements PubSpecCommands {
   @override
   ProjectCommand setToHostedDependencies({bool useGitIfNotHosted: true}) =>
       _setToDependencies('hosted',
-          (Project p) async => getHostedReference(p, useGitIfNotHosted));
+          (Project p) async => _getHostedReference(p, useGitIfNotHosted));
 
-  Future<DependencyReference> getHostedReference(
+  Future<DependencyReference> _getHostedReference(
       Project project, bool useGitIfNotHosted) async {
     final Option<HostedPackageVersions> packageVersionsOpt =
         await pub.fetchPackageVersions(project.name);
@@ -62,36 +62,54 @@ class PubSpecCommandsImpl implements PubSpecCommands {
           (Project p, Iterable<Project> dependencies) async {
     await _setDependencies(p, type, dependencies, createReferenceTo);
   });
-}
 
-Future _setDependencies(Project project, String type,
-    Iterable<Project> dependencies,
-    Future<DependencyReference> createReferenceTo(Project p)) async {
-  _log.info('Setting up $type dependencies for project ${project.name}');
-  final newDependencies = await _getDependenciesAsType(
-      project, type, dependencies, createReferenceTo);
+  ProjectCommand<bool> _haveDependenciesChanged(String type,
+          Future<DependencyReference> createReferenceTo(Project p)) =>
+      projectCommandWithDependencies(
+          'checking if $type dependencies have changed',
+          (Project project, Iterable<Project> dependencies) async {
+    final expectedDependencies = await _getDependenciesAsType(
+        project, type, dependencies, createReferenceTo);
 
-  final newPubspec = project.pubspec.copy(dependencies: newDependencies);
-  await project.updatePubspec(newPubspec);
-  _log.finer(
-      'Finished setting up $type dependencies for project ${project.name}');
-}
+    final actualDependencies = project.pubspec.dependencies;
 
-Future<Map<String, DependencyReference>> _getDependenciesAsType(Project project,
-    String type, Iterable<Project> dependencies,
-    Future<DependencyReference> createReferenceTo(Project p)) async {
-  if (dependencies.isEmpty) {
-    _log.finest('No depenencies for project ${project.name}');
-    return await const {};
+    final dependenciesChanged = expectedDependencies.keys
+        .any((k) => expectedDependencies[k] != actualDependencies[k]);
+
+    _log.info('dependencies for project ${project.name} have '
+        '${dependenciesChanged ? "" : "NOT"}changed');
+    return dependenciesChanged;
+  });
+
+  Future _setDependencies(Project project, String type,
+      Iterable<Project> dependencies,
+      Future<DependencyReference> createReferenceTo(Project p)) async {
+    _log.info('Setting up $type dependencies for project ${project.name}');
+    final newDependencies = await _getDependenciesAsType(
+        project, type, dependencies, createReferenceTo);
+
+    final newPubspec = project.pubspec.copy(dependencies: newDependencies);
+    await project.updatePubspec(newPubspec);
+    _log.finer(
+        'Finished setting up $type dependencies for project ${project.name}');
   }
 
-  final newDependencies = new Map.from(project.pubspec.dependencies);
+  Future<Map<String, DependencyReference>> _getDependenciesAsType(
+      Project project, String type, Iterable<Project> dependencies,
+      Future<DependencyReference> createReferenceTo(Project p)) async {
+    if (dependencies.isEmpty) {
+      _log.finest('No depenencies for project ${project.name}');
+      return await const {};
+    }
 
-  await Future.wait(dependencies.map((p) async {
-    final ref = await createReferenceTo(p);
-    _log.finest('created reference $ref for project ${project.name}');
-    newDependencies[p.name] = ref;
-  }));
+    final newDependencies = new Map.from(project.pubspec.dependencies);
 
-  return newDependencies;
+    await Future.wait(dependencies.map((p) async {
+      final ref = await createReferenceTo(p);
+      _log.finest('created reference $ref for project ${project.name}');
+      newDependencies[p.name] = ref;
+    }));
+
+    return newDependencies;
+  }
 }
