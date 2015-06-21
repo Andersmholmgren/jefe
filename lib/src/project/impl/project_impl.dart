@@ -65,7 +65,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
     final PubSpec pubspec = await PubSpec.load(installDirectory);
 
-    final String gitUri = await getFirstRemote(gitDir);
+    final String gitUri = await getOriginOrFirstRemote(gitDir);
     return new ProjectImpl(gitUri, installDirectory, pubspec);
   }
 

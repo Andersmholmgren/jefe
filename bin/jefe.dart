@@ -12,8 +12,12 @@ main(arguments) {
   Chain.capture(() {
     new u.Script(Jefe).execute(arguments);
   }, onError: (error, stackChain) {
-    print("Caught error $error\n"
-        "${stackChain.terse}");
+    if (error is ProjectCommandError) {
+      print(error);
+    } else {
+      print("Caught error $error\n"
+          "${stackChain.terse}");
+    }
   });
 }
 
@@ -85,10 +89,20 @@ class Jefe {
       help: 'The directory that contains the root of the projecs',
       abbr: 'd') String rootDirectory: '.', @u.Option(
       help: 'A project name filter. Only projects whose name contains the text will run',
-      abbr: 'p') String projects}) async {
+      abbr: 'p') String projects, @u.Flag(
+      help: 'if true then only pre release verification steps are executed',
+      defaultsTo: false) bool preReleaseOnly: false}) async {
     final executor = await _load(rootDirectory);
-    await executor.execute(lifecycle.release(),
+    // TODO: would be nice to leverage grinder here (command dependencies)
+    // somehow
+    await executor.execute(lifecycle.preRelease(),
         filter: projectNameFilter(projects));
+    if (!preReleaseOnly) {
+      await executor.execute(lifecycle.release(),
+          filter: projectNameFilter(projects));
+    } else {
+      print('-------');
+    }
   }
 
   @u.SubCommand(help: 'Runs the given command in all projects')
@@ -110,15 +124,13 @@ class Jefe {
   @u.SubCommand(help: 'Set dependencies between projects')
   setDependencies(@u.Positional(
       help: 'The type of dependency to set',
-      allowed: const ['git', 'path']) String type, {@u.Option(
+      allowed: const ['git', 'path', 'hosted']) String type, {@u.Option(
       help: 'The directory that contains the root of the projecs',
       abbr: 'd') String rootDirectory: '.', @u.Option(
       help: 'A project name filter. Only projects whose name contains the text will run',
       abbr: 'p') String projects}) async {
     final CommandExecutor executor = await _load(rootDirectory);
-    final command = type == 'git'
-        ? pubSpec.setToGitDependencies()
-        : pubSpec.setToPathDependencies();
+    final command = _setToDependencyCommand(type);
     await executor.execute(command,
         filter: projectNameFilter(projects),
         concurrencyMode: CommandConcurrencyMode.serial);
@@ -131,5 +143,17 @@ class Jefe {
 
     final executor = new CommandExecutor(projectGroup);
     return executor;
+  }
+
+  ProjectCommand _setToDependencyCommand(String type) {
+    switch (type) {
+      case 'git':
+        return pubSpec.setToGitDependencies();
+      case 'hosted':
+        return pubSpec.setToHostedDependencies();
+      case 'path':
+      default:
+        return pubSpec.setToPathDependencies();
+    }
   }
 }

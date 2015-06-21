@@ -15,5 +15,14 @@ abstract class GitCommands {
 
   ProjectCommand fetch();
 
+  ProjectCommand merge(String commit);
+
+  ProjectCommand updateFromRemote(String branchName,
+      [String remoteName = 'origin']);
+
+  ProjectCommand assertWorkingTreeClean();
+
+  ProjectCommand assertOnBranch(String branchName);
+
   ProjectCommand checkout(String branchName);
 }

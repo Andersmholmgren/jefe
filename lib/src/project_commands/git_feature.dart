@@ -6,6 +6,7 @@ library jefe.project.commands.git.feature;
 import 'impl/git_feature_impl.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:git/git.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 typedef GitFeatureCommands GitFeatureCommandsFactory();
 
@@ -41,10 +42,15 @@ abstract class GitFeatureCommands {
   /// error if different projects are on different feature branches
   ProjectDependencyGraphCommand currentFeatureName();
 
-  /// Initates a release which may involve creating a release branch
+  /// Initiates a release which may involve creating a release branch
   ProjectCommand releaseStart(String version);
 
   /// Completes a release which may involve merging the development branch
   /// on a master branch and tagging the version.
   ProjectCommand releaseFinish(String version);
+
+  /// Fetch release version tags
+  ProjectCommand<Iterable<Version>> getReleaseVersionTags();
+
+  ProjectCommand assertNoActiveReleases();
 }
