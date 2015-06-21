@@ -85,7 +85,7 @@ class PubSpecCommandsImpl implements PubSpecCommands {
 
     await Future.wait(dependencies.map((p) async {
       final ref = await _createDependencyReference(p, type, useGitIfNotHosted);
-      _log.finest('created reference $ref for project ${project.name}');
+      _log.finest('created reference $ref to project ${p.name}');
       newDependencies[p.name] = ref;
     }));
 
