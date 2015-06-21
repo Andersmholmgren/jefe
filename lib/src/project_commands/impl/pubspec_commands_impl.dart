@@ -23,41 +23,44 @@ class PubSpecCommandsImpl implements PubSpecCommands {
   PubSpecCommandsImpl() : this._pub = new PubCommands();
 
   @override
-  ProjectCommand setToPathDependencies() => projectCommandWithDependencies(
-      'change to path dependencies',
-      (Project p, Iterable<Project> dependencies) async {
-    await _setDependencies(p, 'path', dependencies, (Project p) =>
-        new Future.value(new PathReference(p.installDirectory.path)));
-  }, concurrencyMode: CommandConcurrencyMode.concurrentCommand);
+  ProjectCommand setToPathDependencies() => _setToDependencies('path',
+      (Project p) =>
+          new Future.value(new PathReference(p.installDirectory.path)));
 
   // Note: this must run serially
   @override
-  ProjectCommand setToGitDependencies() => projectCommandWithDependencies(
-      'change to git dependencies',
-      (Project p, Iterable<Project> dependencies) async {
-    await _setDependencies(p, 'git', dependencies, (Project p) async =>
-        await new GitReference(p.gitUri, await p.currentGitCommitHash));
-  });
+  ProjectCommand setToGitDependencies() => _setToDependencies('git',
+      (Project p) async =>
+          await new GitReference(p.gitUri, await p.currentGitCommitHash));
 
   // Note: this must run serially
   @override
   ProjectCommand setToHostedDependencies({bool useGitIfNotHosted: true}) =>
-      projectCommandWithDependencies('change to hosted dependencies',
-          (Project project, Iterable<Project> dependencies) async {
-    await _setDependencies(project, 'hosted', dependencies, (Project p) async {
-      final Option<HostedPackageVersions> packageVersionsOpt =
-          await pub.fetchPackageVersions(p.name);
-      if (packageVersionsOpt is Some) {
-        final Version version = packageVersionsOpt.get().versions.last.version;
-        final versionConstraint = new VersionConstraint.compatibleWith(version);
-        return await new HostedReference(versionConstraint);
-      } else if (useGitIfNotHosted) {
-        return await new GitReference(p.gitUri, await p.currentGitCommitHash);
-      } else {
-        throw new ArgumentError(
-            'attempt to set to hosted dependency for package not hosted on pub');
-      }
-    });
+      _setToDependencies('hosted',
+          (Project p) async => getHostedReference(p, useGitIfNotHosted));
+
+  Future<DependencyReference> getHostedReference(
+      Project project, bool useGitIfNotHosted) async {
+    final Option<HostedPackageVersions> packageVersionsOpt =
+        await pub.fetchPackageVersions(project.name);
+    if (packageVersionsOpt is Some) {
+      final Version version = packageVersionsOpt.get().versions.last.version;
+      final versionConstraint = new VersionConstraint.compatibleWith(version);
+      return await new HostedReference(versionConstraint);
+    } else if (useGitIfNotHosted) {
+      return await new GitReference(
+          project.gitUri, await project.currentGitCommitHash);
+    } else {
+      throw new ArgumentError(
+          'attempt to create hosted dependency for package not hosted on pub');
+    }
+  }
+
+  ProjectCommand _setToDependencies(String type,
+          Future<DependencyReference> createReferenceTo(Project p)) =>
+      projectCommandWithDependencies('change to $type dependencies',
+          (Project p, Iterable<Project> dependencies) async {
+    await _setDependencies(p, type, dependencies, createReferenceTo);
   });
 }
 
@@ -65,9 +68,21 @@ Future _setDependencies(Project project, String type,
     Iterable<Project> dependencies,
     Future<DependencyReference> createReferenceTo(Project p)) async {
   _log.info('Setting up $type dependencies for project ${project.name}');
+  final newDependencies = await _getDependenciesAsType(
+      project, type, dependencies, createReferenceTo);
+
+  final newPubspec = project.pubspec.copy(dependencies: newDependencies);
+  await project.updatePubspec(newPubspec);
+  _log.finer(
+      'Finished setting up $type dependencies for project ${project.name}');
+}
+
+Future<Map<String, DependencyReference>> _getDependenciesAsType(Project project,
+    String type, Iterable<Project> dependencies,
+    Future<DependencyReference> createReferenceTo(Project p)) async {
   if (dependencies.isEmpty) {
     _log.finest('No depenencies for project ${project.name}');
-    return;
+    return await const {};
   }
 
   final newDependencies = new Map.from(project.pubspec.dependencies);
@@ -78,8 +93,5 @@ Future _setDependencies(Project project, String type,
     newDependencies[p.name] = ref;
   }));
 
-  final newPubspec = project.pubspec.copy(dependencies: newDependencies);
-  await project.updatePubspec(newPubspec);
-  _log.finer(
-      'Finished setting up $type dependencies for project ${project.name}');
+  return newDependencies;
 }

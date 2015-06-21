@@ -142,7 +142,6 @@ class DiffSummary {
   static final RegExp _insertionsRegExp = new RegExp(r'.*, (\d+) insertion.*');
   static final RegExp _deletionsRegExp = new RegExp(r'.*, (\d+) deletion.*');
 
-//  4 files changed, 7 insertions(+), 9 deletions(-)
   final int filesChangedCount;
   final int insertionCount;
   final int deletionCount;
