@@ -18,4 +18,11 @@ abstract class PubSpecCommands {
   /// Sets the dependencies between [Project]s within the group to use git
   /// dependencies, based on the current commit hash of the respective projects
   ProjectCommand setToGitDependencies();
+
+  /// Sets the dependencies between [Project]s within the group to use hosted
+  /// dependencies (if the package is hosted).
+  ///
+  /// If not hosted then will fall back to git if [useGitIfNotHosted] is true
+  /// or throw an error otherwise
+  ProjectCommand setToHostedDependencies({bool useGitIfNotHosted: true});
 }

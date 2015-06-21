@@ -27,6 +27,10 @@ abstract class ProjectLifecycle {
   ProjectCommand completeFeature(String featureName,
       {bool doPush: false, bool recursive: true});
 
+  /// Performs checks that things are in a healthy state for a release. e.g.
+  /// make sure all tests pass
+  CompositeProjectCommand preRelease({ReleaseType type: ReleaseType.minor});
+
   /// Create a release of the project group, including tagging, merging etc
   ProjectCommand release({ReleaseType type: ReleaseType.minor});
 }

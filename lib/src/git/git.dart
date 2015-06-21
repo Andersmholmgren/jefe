@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 Logger _log = new Logger('jefe.git');
 
@@ -76,7 +77,16 @@ Future gitCheckout(GitDir gitDir, String branchName) async {
 }
 
 Future gitTag(GitDir gitDir, String tag) async =>
-    await gitDir.runCommand(['tag', tag]);
+    await gitDir.runCommand(['tag', '-a', '-m', 'release $tag', tag]);
+
+Future<Iterable<Version>> gitFetchVersionTags(GitDir gitDir) async =>
+    (await gitDir.getTags()).map((Tag tag) {
+  try {
+    return new Some(new Version.parse(tag.tag));
+  } on FormatException catch (_) {
+    return const None();
+  }
+}).where((o) => o is Some).map((o) => o.get()).toList()..sort();
 
 Future gitPush(GitDir gitDir) async {
   final BranchReference current = await gitDir.getCurrentBranch();
@@ -87,21 +97,68 @@ Future gitPush(GitDir gitDir) async {
 }
 
 Future gitFetch(GitDir gitDir) async {
-  await gitDir.runCommand(['fetch']);
+  await gitDir.runCommand(['fetch', '--tags']);
+}
+
+Future gitMerge(GitDir gitDir, String commit) async {
+  await gitDir.runCommand(['merge', '--ff-only', commit]);
 }
 
 Future<String> currentCommitHash(GitDir gitDir) async =>
     (await gitDir.runCommand(['rev-parse', 'HEAD'])).stdout.trim();
 
-// TODO: should generalise into fetching all remotes if any etc
-Future<String> getFirstRemote(GitDir gitDir) async {
+Future<String> getOriginOrFirstRemote(GitDir gitDir) async {
+  final remotes = await getRemotes(gitDir);
+  return remotes.firstWhere((r) => r.name == 'origin',
+      orElse: () => remotes.first).uri;
+}
+
+Future<Iterable<GitRemote>> getRemotes(GitDir gitDir) async {
   final ProcessResult result = await gitDir.runCommand(['remote', '-v']);
 
   final String remotesStr = result.stdout;
 
-  final firstLine = remotesStr.split('\n').first;
+  final lines = remotesStr.split('\n');
 
-  return firstLine.split(new RegExp(r'\s+')).elementAt(1);
+  return lines.map((l) => l.split(new RegExp(r'\s+'))).map(
+      (Iterable<String> kv) => new GitRemote(kv.elementAt(0), kv.elementAt(1)));
+}
+
+Future<int> commitCountSince(GitDir gitDir, String ref) async =>
+    await gitDir.getCommitCount('$ref..HEAD');
+
+Future<Option<DiffSummary>> diffSummarySince(GitDir gitDir, String ref) async {
+  final line = (await gitDir.runCommand(['diff', '--shortstat', ref])).stdout;
+  return line != null && line.trim().isNotEmpty
+      ? new Some(new DiffSummary.parse(line))
+      : const None();
+}
+
+class DiffSummary {
+  static final RegExp _diffRegExp = new RegExp(
+      r'^\s*(\d+) files changed, (\d+) insertions\(\+\), (\d+) deletions\(\-\)\s*$');
+
+//  4 files changed, 7 insertions(+), 9 deletions(-)
+  final int filesChangedCount;
+  final int insertionCount;
+  final int deletionCount;
+
+  DiffSummary(this.filesChangedCount, this.insertionCount, this.deletionCount);
+
+  factory DiffSummary.parse(String line) {
+    final matches = _diffRegExp.allMatches(line);
+    assert(matches.length == 1);
+    var match = matches.first;
+    assert(match.groupCount == 3);
+
+    int nth(int index) => int.parse(match.group(index));
+
+    return new DiffSummary(nth(1), nth(2), nth(3));
+  }
+
+  String toString() =>
+      '$filesChangedCount files changed, $insertionCount insertions(+), '
+      '$deletionCount deletions(-)';
 }
 
 Future initGitFlow(GitDir gitDir) async =>
@@ -139,14 +196,29 @@ Future<Option<String>> gitFlowCurrentFeatureName(GitDir gitDir) async {
   }
 }
 
-Future<Iterable<String>> gitFlowFeatureNames(GitDir gitDir) async {
+Future<Iterable<String>> gitFlowFeatureNames(GitDir gitDir) async =>
+    _gitFlowBranchNames(gitDir, featureBranchPrefix);
+
+Future<Iterable<String>> gitFlowReleaseNames(GitDir gitDir) async =>
+    _gitFlowBranchNames(gitDir, releaseBranchPrefix);
+
+Future<Iterable<String>> _gitFlowBranchNames(
+    GitDir gitDir, String branchPrefix) async {
   final Iterable<String> branchNames = await gitDir.getBranchNames();
   return branchNames
-      .where((n) => n.startsWith(featureBranchPrefix))
-      .map((n) => n.substring(featureBranchPrefix.length));
+      .where((n) => n.startsWith(branchPrefix))
+      .map((n) => n.substring(branchPrefix.length));
 }
 
 Future<Option<String>> gitCurrentTagName(GitDir gitDir) async => new Option(
     (await gitDir.runCommand(['describe', 'HEAD', '--tags'])).stdout.trim());
 
 const String featureBranchPrefix = 'feature/';
+const String releaseBranchPrefix = 'release/';
+
+class GitRemote {
+  final String name;
+  final String uri;
+
+  GitRemote(this.name, this.uri);
+}

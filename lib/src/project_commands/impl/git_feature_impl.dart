@@ -13,6 +13,7 @@ import 'dart:io';
 import 'package:option/option.dart';
 import 'dart:async';
 import 'package:git/git.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
@@ -96,6 +97,7 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
   @override
   String get developBranchName => 'develop';
 
+  @override
   ProjectDependencyGraphCommand currentFeatureName() => dependencyGraphCommand(
       'Get current feature name',
       (DependencyGraph graph, Directory rootDirectory, _) async {
@@ -112,6 +114,23 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
       return new Some(featureNames.first);
     } else {
       throw new StateError('more than one current feature $featureNames');
+    }
+  });
+
+  @override
+  ProjectCommand<Iterable<Version>> getReleaseVersionTags() => projectCommand(
+      'fetch git release version tags', (Project p) async {
+    final gitDir = await p.gitDir;
+    return await gitFetchVersionTags(gitDir);
+  });
+
+  @override
+  ProjectCommand assertNoActiveReleases() => projectCommand(
+      'check no active releases', (Project p) async {
+    final releaseNames = await gitFlowReleaseNames(await p.gitDir);
+    if (releaseNames.isNotEmpty) {
+      throw new StateError(
+          '${p.name} has an existing release branch. Must finish all active releases first');
     }
   });
 }

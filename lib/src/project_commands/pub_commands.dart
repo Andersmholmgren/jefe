@@ -10,4 +10,10 @@ abstract class PubCommands {
   factory PubCommands() = PubCommandsImpl;
 
   ProjectCommand get();
+
+  ProjectCommand publish();
+
+  ProjectCommand fetchPackageVersions();
+
+  ProjectCommand test();
 }
