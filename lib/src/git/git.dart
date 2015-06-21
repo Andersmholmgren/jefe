@@ -135,8 +135,12 @@ Future<Option<DiffSummary>> diffSummarySince(GitDir gitDir, String ref) async {
 }
 
 class DiffSummary {
-  static final RegExp _diffRegExp = new RegExp(
-      r'^\s*(\d+) files changed, (\d+) insertions\(\+\), (\d+) deletions\(\-\)\s*$');
+//  static final RegExp _diffRegExp = new RegExp(
+//      r'^\s*(\d+) file[s]? changed, (\d+) insertions\(\+\), (\d+) deletions\(\-\)\s*$');
+
+  static final RegExp _filesRegExp = new RegExp(r'\s*(\d+) file[s]? changed.*');
+  static final RegExp _insertionsRegExp = new RegExp(r'.*, (\d+) insertion.*');
+  static final RegExp _deletionsRegExp = new RegExp(r'.*, (\d+) deletion.*');
 
 //  4 files changed, 7 insertions(+), 9 deletions(-)
   final int filesChangedCount;
@@ -146,14 +150,13 @@ class DiffSummary {
   DiffSummary(this.filesChangedCount, this.insertionCount, this.deletionCount);
 
   factory DiffSummary.parse(String line) {
-    final matches = _diffRegExp.allMatches(line);
-    assert(matches.length == 1);
-    var match = matches.first;
-    assert(match.groupCount == 3);
+    int value(RegExp regExp) {
+      final match = regExp.firstMatch(line);
+      return match != null ? int.parse(match.group(1)) : 0;
+    }
 
-    int nth(int index) => int.parse(match.group(index));
-
-    return new DiffSummary(nth(1), nth(2), nth(3));
+    return new DiffSummary(
+        value(_filesRegExp), value(_insertionsRegExp), value(_deletionsRegExp));
   }
 
   String toString() =>
