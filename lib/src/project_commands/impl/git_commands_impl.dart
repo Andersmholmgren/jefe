@@ -38,7 +38,7 @@ class GitCommandsImpl implements GitCommands {
 
   @override
   ProjectCommand assertOnBranch(String branchName) => projectCommand(
-      'git assertOnBranch', (Project p) async {
+      'git assertOnBranch $branchName', (Project p) async {
     var currentBranchName =
         (await (await p.gitDir).getCurrentBranch()).branchName;
     if (currentBranchName != branchName) {
