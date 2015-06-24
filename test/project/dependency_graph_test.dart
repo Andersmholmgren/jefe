@@ -25,8 +25,10 @@ main() async {
 //
 //runDaTests() {
   group('depthFirst', () {
-    group('when no projects provided', () =>
-        expectThat(withTheseProjects: () => [], weGetTheseInvocations: []));
+    group(
+        'when no projects provided',
+        () =>
+            expectThat(withTheseProjects: () => [], weGetTheseInvocations: []));
 
     group('for a single project that has no dependencies', () {
       final project1 = aProject('project1');
@@ -34,8 +36,8 @@ main() async {
       expectThat(
           withTheseProjects: () => [project1],
           weGetTheseInvocations: [
-        () => new TestProcessInvocation(project1, const [])
-      ]);
+            () => new TestProcessInvocation(project1, const [])
+          ]);
     });
 
     group('for two projects with a single dependency', () {
@@ -45,9 +47,9 @@ main() async {
       expectThat(
           withTheseProjects: () => [project1, project2],
           weGetTheseInvocations: [
-        () => new TestProcessInvocation(project1, []),
-        () => new TestProcessInvocation(project2, [project1])
-      ]);
+            () => new TestProcessInvocation(project1, []),
+            () => new TestProcessInvocation(project2, [project1])
+          ]);
     });
 
     group('for 4 projects with a several dependency', () {
@@ -59,11 +61,11 @@ main() async {
       expectThat(
           withTheseProjects: () => [project1, project4, project3, project2],
           weGetTheseInvocations: [
-        () => new TestProcessInvocation(project3, []),
-        () => new TestProcessInvocation(project1, []),
-        () => new TestProcessInvocation(project2, [project1]),
-        () => new TestProcessInvocation(project4, [project2, project3])
-      ]);
+            () => new TestProcessInvocation(project3, []),
+            () => new TestProcessInvocation(project1, []),
+            () => new TestProcessInvocation(project2, [project1]),
+            () => new TestProcessInvocation(project4, [project2, project3])
+          ]);
     });
   });
 }
@@ -111,7 +113,9 @@ class TestProcessInvocation {
   }
 }
 
-expectThat({String thatWhen, Iterable<Project> withTheseProjects(),
+expectThat(
+    {String thatWhen,
+    Iterable<Project> withTheseProjects(),
     List<TestProcessInvocationFactory> weGetTheseInvocations}) {
   TestProcessor processor;
   Iterable<Project> theProjects;

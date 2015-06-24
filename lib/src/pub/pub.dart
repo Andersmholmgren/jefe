@@ -22,8 +22,9 @@ Future test(Directory projectDirectory) async {
   }
 }
 
-Future publish(Directory projectDirectory) => runCommand(
-    'pub', ['publish', '--force'], processWorkingDir: projectDirectory.path);
+Future publish(Directory projectDirectory) =>
+    runCommand('pub', ['publish', '--force'],
+        processWorkingDir: projectDirectory.path);
 
 Future<Option<HostedPackageVersions>> fetchPackageVersions(
     String packageName) async {
