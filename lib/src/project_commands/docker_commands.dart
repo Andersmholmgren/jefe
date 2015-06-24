@@ -16,11 +16,13 @@ abstract class DockerCommands {
   /// managed by jefe then those dependent projects are added first
   ProjectDependencyGraphCommand generateDockerfile(
       String serverProjectName, String clientProjectName,
-      {Directory outputDirectory, String dartVersion: 'latest',
+      {Directory outputDirectory,
+      String dartVersion: 'latest',
       Map<String, dynamic> environment: const {},
       Iterable<int> exposePorts: const [],
       Iterable<String> entryPointOptions: const [],
-      bool omitClientWhenPathDependencies: true, bool setupForPrivateGit: true,
+      bool omitClientWhenPathDependencies: true,
+      bool setupForPrivateGit: true,
       String targetRootPath: '/app'});
 
   /// Generates a Dockerfile based on the provided [serverProjectName]
@@ -28,9 +30,12 @@ abstract class DockerCommands {
   /// The client and server projects will be cloned within the docker file
   /// base on a git tag
   ProjectDependencyGraphCommand generateProductionDockerfile(
-      String serverProjectName, String clientProjectName, {String serverGitRef,
-      String clientGitRef, Directory outputDirectory,
-      String dartVersion: 'latest', Map<String, dynamic> environment: const {},
+      String serverProjectName, String clientProjectName,
+      {String serverGitRef,
+      String clientGitRef,
+      Directory outputDirectory,
+      String dartVersion: 'latest',
+      Map<String, dynamic> environment: const {},
       Iterable<int> exposePorts: const [],
       Iterable<String> entryPointOptions: const [],
       String targetRootPath: '/app'});

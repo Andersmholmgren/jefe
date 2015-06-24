@@ -14,7 +14,7 @@ Logger _log = new Logger('jefe.project.commands.process.impl');
 class ProcessCommandsImpl implements ProcessCommands {
   @override
   ProjectCommand process(String command, List<String> args) => projectCommand(
-      '$command ${args.join(" ")}', (Project p) async => (await runCommand(
-              command, args, processWorkingDir: p.installDirectory.path)).stdout
-          .trim());
+      '$command ${args.join(" ")}',
+      (Project p) async => (await runCommand(command, args,
+          processWorkingDir: p.installDirectory.path)).stdout.trim());
 }

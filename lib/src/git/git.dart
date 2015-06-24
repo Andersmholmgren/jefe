@@ -26,7 +26,6 @@ enum OnExistsAction { pull, ignore }
 
 Future<GitDir> cloneOrPull(String gitUri, Directory containerDirectory,
     Directory groupDirectory, OnExistsAction onExistsAction) async {
-
 //  _log.fine(
 //      'checking if $gitDirPath is a git workspace - git repo: $gitUri; parent directory $parentDirectory');
   if (await groupDirectory.exists() &&
@@ -81,12 +80,12 @@ Future gitTag(GitDir gitDir, String tag) async =>
 
 Future<Iterable<Version>> gitFetchVersionTags(GitDir gitDir) async =>
     (await gitDir.getTags()).map((Tag tag) {
-  try {
-    return new Some(new Version.parse(tag.tag));
-  } on FormatException catch (_) {
-    return const None();
-  }
-}).where((o) => o is Some).map((o) => o.get()).toList()..sort();
+      try {
+        return new Some(new Version.parse(tag.tag));
+      } on FormatException catch (_) {
+        return const None();
+      }
+    }).where((o) => o is Some).map((o) => o.get()).toList()..sort();
 
 Future gitPush(GitDir gitDir) async {
   final BranchReference current = await gitDir.getCurrentBranch();
@@ -109,8 +108,9 @@ Future<String> currentCommitHash(GitDir gitDir) async =>
 
 Future<String> getOriginOrFirstRemote(GitDir gitDir) async {
   final remotes = await getRemotes(gitDir);
-  return remotes.firstWhere((r) => r.name == 'origin',
-      orElse: () => remotes.first).uri;
+  return remotes
+      .firstWhere((r) => r.name == 'origin', orElse: () => remotes.first)
+      .uri;
 }
 
 Future<Iterable<GitRemote>> getRemotes(GitDir gitDir) async {
@@ -173,16 +173,16 @@ Future gitFlowFeatureFinish(GitDir gitDir, String featureName) async =>
 Future gitFlowReleaseStart(GitDir gitDir, String version) async =>
     await gitDir.runCommand(['flow', 'release', 'start', version]);
 
-Future gitFlowReleaseFinish(GitDir gitDir, String version) async => await gitDir
-    .runCommand([
-  'flow',
-  'release',
-  'finish',
+Future gitFlowReleaseFinish(GitDir gitDir, String version) async =>
+    await gitDir.runCommand([
+      'flow',
+      'release',
+      'finish',
 //  '-m',
 //  '"released version $version"',
-  '-n',
-  version
-]);
+      '-n',
+      version
+    ]);
 
 Future<String> gitCurrentBranchName(GitDir gitDir) async =>
     (await gitDir.getCurrentBranch()).branchName;
