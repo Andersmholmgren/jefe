@@ -13,6 +13,8 @@ import 'package:jefe/src/project/impl/project_group_impl.dart';
 import 'dart:io';
 import 'package:pubspec/pubspec.dart';
 import 'core_impl.dart';
+import 'package:analyzer/analyzer.dart';
+import 'package:path/path.dart' as p;
 
 Logger _log = new Logger('jefe.project.impl');
 
@@ -82,6 +84,13 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   @override
   Future<String> get currentGitCommitHash async =>
       currentCommitHash(await gitDir);
+
+  @override
+  CompilationUnit get compilationUnit {
+    final mainLibraryPath =
+        p.join(installDirectory.path, 'lib', '${name}.dart');
+    return parseDartFile(mainLibraryPath);
+  }
 
   String toString() => 'Project($name, $gitUri)';
 }
