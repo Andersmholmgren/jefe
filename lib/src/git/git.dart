@@ -10,6 +10,7 @@ import 'package:path/path.dart' as p;
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:quiver/iterables.dart';
 
 Logger _log = new Logger('jefe.git');
 
@@ -100,8 +101,10 @@ Future gitFetch(GitDir gitDir) async {
   await gitDir.runCommand(['fetch', '--tags']);
 }
 
-Future gitMerge(GitDir gitDir, String commit) async {
-  await gitDir.runCommand(['merge', '--ff-only', commit]);
+Future gitMerge(GitDir gitDir, String commit, {bool ffOnly: true}) async {
+  final flags = ffOnly ? ['--ff-only'] : [];
+  final command = concat([['merge'], flags, [commit]]);
+  await gitDir.runCommand(command);
 }
 
 Future<String> currentCommitHash(GitDir gitDir) async =>
