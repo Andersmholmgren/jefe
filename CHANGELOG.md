@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2
+
+* tighter constraints for exported packages
+
 ## 0.2.0
 
 * support for hosted packages
