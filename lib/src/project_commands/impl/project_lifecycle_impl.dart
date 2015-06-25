@@ -136,8 +136,8 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       bool autoUpdateHostedVersions: false}) {
     return projectCommandWithDependencies('Release version: type $type',
         (Project project, Iterable<Project> dependencies) async {
-      final ProjectVersions projectVersions =
-          await getCurrentProjectVersion(project, dependencies, type);
+      final ProjectVersions projectVersions = await getCurrentProjectVersion(
+          project, dependencies, type, autoUpdateHostedVersions);
 
       if (!projectVersions.newReleaseRequired) {
         // no release needed
