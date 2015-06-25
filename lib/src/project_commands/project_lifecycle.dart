@@ -29,8 +29,12 @@ abstract class ProjectLifecycle {
 
   /// Performs checks that things are in a healthy state for a release. e.g.
   /// make sure all tests pass
-  CompositeProjectCommand preRelease({ReleaseType type: ReleaseType.minor});
+  CompositeProjectCommand preRelease(
+      {ReleaseType type: ReleaseType.minor,
+      bool autoUpdateHostedVersions: false});
 
   /// Create a release of the project group, including tagging, merging etc
-  ProjectCommand release({ReleaseType type: ReleaseType.minor});
+  ProjectCommand release(
+      {ReleaseType type: ReleaseType.minor,
+      bool autoUpdateHostedVersions: false});
 }
