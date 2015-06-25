@@ -40,8 +40,8 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   @override
   CompositeProjectCommand startNewFeature(String featureName,
       {bool doPush: false, bool recursive: true}) {
-    return projectCommandGroup('set up project for new feature "$featureName"',
-        [
+    return projectCommandGroup(
+        'set up project for new feature "$featureName"', [
       _git.assertWorkingTreeClean(),
       _gitFeature.featureStart(featureName),
       _pubSpec.setToPathDependencies(),
@@ -83,8 +83,9 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
             .process(project);
       }
 
-      await _pubSpec.setToGitDependencies().process(project,
-          dependencies: dependencies);
+      await _pubSpec
+          .setToGitDependencies()
+          .process(project, dependencies: dependencies);
       await _pub.get().process(project);
       await _git
           .commit('completed development of feature $featureName')
@@ -96,31 +97,32 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   @override
   CompositeProjectCommand preRelease({ReleaseType type: ReleaseType.minor}) =>
       projectCommandGroup('Pre release checks', [
-    _git.assertWorkingTreeClean(),
-    _gitFeature.assertNoActiveReleases(),
-    _git.assertOnBranch(_gitFeature.developBranchName),
-    _git.fetch(),
-    _git.updateFromRemote('master'),
-    _git.updateFromRemote(_gitFeature.developBranchName),
-    _git.merge('master'),
-    checkReleaseVersions(type: type),
-    _pub.test()
-  ]);
+        _git.assertWorkingTreeClean(),
+        _gitFeature.assertNoActiveReleases(),
+        _git.assertOnBranch(_gitFeature.developBranchName),
+        _git.fetch(),
+        _git.updateFromRemote('master'),
+        _git.updateFromRemote(_gitFeature.developBranchName),
+        _git.merge('master'),
+        checkReleaseVersions(type: type),
+        _pub.test()
+      ]);
 
   ProjectCommand checkReleaseVersions({ReleaseType type: ReleaseType.minor}) =>
       projectCommand('check release versions', (Project project) async {
-    final ProjectVersions versions =
-        await getCurrentProjectVersion(project, type);
-    if (versions.newReleaseVersion is Some) {
-      _log.info('==> project ${project.name} will be upgraded from version: '
-          '${versions.taggedGitVersion} '
-          'to: ${versions.newReleaseVersion.get()}. '
-          'It will ${versions.isHosted ? "" : "NOT "}be published to pub');
-    } else {
-      _log.info('project ${project.name} will NOT be upgraded. '
-          'It will remain at version: ${versions.pubspecVersion}');
-    }
-  });
+        final ProjectVersions versions =
+            await getCurrentProjectVersion(project, type);
+        if (versions.newReleaseVersion is Some) {
+          _log.info(
+              '==> project ${project.name} will be upgraded from version: '
+              '${versions.taggedGitVersion} '
+              'to: ${versions.newReleaseVersion.get()}. '
+              'It will ${versions.isHosted ? "" : "NOT "}be published to pub');
+        } else {
+          _log.info('project ${project.name} will NOT be upgraded. '
+              'It will remain at version: ${versions.pubspecVersion}');
+        }
+      });
 
   @override
   ProjectCommand release({ReleaseType type: ReleaseType.minor}) {
@@ -147,8 +149,9 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
               .updatePubspec(project.pubspec.copy(version: releaseVersion));
         }
 
-        await _pubSpec.setToHostedDependencies().process(project,
-            dependencies: dependencies);
+        await _pubSpec
+            .setToHostedDependencies()
+            .process(project, dependencies: dependencies);
 
         await _git.commit('releasing version $releaseVersion').process(project);
 
@@ -167,8 +170,8 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
   @override
   ExecutorAwareProjectCommand init({bool doCheckout: true}) {
-    return executorAwareCommand('Initialising for development',
-        (CommandExecutor executor) async {
+    return executorAwareCommand(
+        'Initialising for development', (CommandExecutor executor) async {
       await executor.execute(projectCommandGroup(
           'Initialising for development', [_gitFeature.init(), _git.fetch()]));
 
@@ -216,17 +219,24 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         'published version: $latestPublishedVersionOpt');
 
     final Option<Version> releaseVersionOpt = await _getReleaseVersion(
-        latestTaggedVersionOpt, currentPubspecVersion,
-        latestPublishedVersionOpt, gitDir, type, project);
+        latestTaggedVersionOpt,
+        currentPubspecVersion,
+        latestPublishedVersionOpt,
+        gitDir,
+        type,
+        project);
 
     return new ProjectVersions(currentPubspecVersion, latestTaggedVersionOpt,
         latestPublishedVersionOpt, releaseVersionOpt);
   }
 
   Future<Option<Version>> _getReleaseVersion(
-      Option<Version> latestTaggedVersionOpt, Version currentPubspecVersion,
-      Option<Version> latestPublishedVersionOpt, GitDir gitDir,
-      ReleaseType type, Project project) async {
+      Option<Version> latestTaggedVersionOpt,
+      Version currentPubspecVersion,
+      Option<Version> latestPublishedVersionOpt,
+      GitDir gitDir,
+      ReleaseType type,
+      Project project) async {
     final isHosted = latestPublishedVersionOpt is Some;
 
 //    final latestReleasedVersion = latestPublishedVersionOpt

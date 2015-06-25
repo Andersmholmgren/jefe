@@ -26,42 +26,62 @@ class PubSpecCommandsImpl implements PubSpecCommands {
   ProjectCommand setToPathDependencies() => projectCommandWithDependencies(
       'change to path dependencies',
       (Project p, Iterable<Project> dependencies) async {
-    await _setDependencies(p, 'path', dependencies, (Project p) =>
-        new Future.value(new PathReference(p.installDirectory.path)));
-  }, concurrencyMode: CommandConcurrencyMode.concurrentCommand);
+        await _setDependencies(
+            p,
+            'path',
+            dependencies,
+            (Project p) =>
+                new Future.value(new PathReference(p.installDirectory.path)));
+      },
+      concurrencyMode: CommandConcurrencyMode.concurrentCommand);
 
   // Note: this must run serially
   @override
   ProjectCommand setToGitDependencies() => projectCommandWithDependencies(
-      'change to git dependencies',
-      (Project p, Iterable<Project> dependencies) async {
-    await _setDependencies(p, 'git', dependencies, (Project p) async =>
-        await new GitReference(p.gitUri, await p.currentGitCommitHash));
-  });
+          'change to git dependencies',
+          (Project p, Iterable<Project> dependencies) async {
+        await _setDependencies(
+            p,
+            'git',
+            dependencies,
+            (Project p) async =>
+                await new GitReference(p.gitUri, await p.currentGitCommitHash));
+      });
 
   // Note: this must run serially
   @override
   ProjectCommand setToHostedDependencies({bool useGitIfNotHosted: true}) =>
       projectCommandWithDependencies('change to hosted dependencies',
           (Project project, Iterable<Project> dependencies) async {
-    await _setDependencies(project, 'hosted', dependencies, (Project p) async {
-      final Option<HostedPackageVersions> packageVersionsOpt =
-          await pub.fetchPackageVersions(p.name);
-      if (packageVersionsOpt is Some) {
-        final Version version = packageVersionsOpt.get().versions.last.version;
-        final versionConstraint = new VersionConstraint.compatibleWith(version);
-        return await new HostedReference(versionConstraint);
-      } else if (useGitIfNotHosted) {
-        return await new GitReference(p.gitUri, await p.currentGitCommitHash);
-      } else {
-        throw new ArgumentError(
-            'attempt to set to hosted dependency for package not hosted on pub');
-      }
-    });
-  });
+        final exportedDependencyNames = project.exportedDependencyNames;
+
+        await _setDependencies(
+            project, 'hosted', dependencies, (Project p) async {
+          final Option<HostedPackageVersions> packageVersionsOpt =
+              await pub.fetchPackageVersions(p.name);
+          if (packageVersionsOpt is Some) {
+            final Version version =
+                packageVersionsOpt.get().versions.last.version;
+            final isExported = exportedDependencyNames.contains(p.name);
+            final versionConstraint = isExported
+                ? new VersionRange(
+                    min: version, max: version.nextPatch, includeMin: true)
+                : new VersionConstraint.compatibleWith(version);
+            return await new HostedReference(versionConstraint);
+          } else if (useGitIfNotHosted) {
+            return await new GitReference(
+                p.gitUri, await p.currentGitCommitHash);
+          } else {
+            throw new ArgumentError(
+                'attempt to set to hosted dependency for package not hosted on pub');
+          }
+        });
+      });
 }
 
-Future _setDependencies(Project project, String type,
+Future _setDependencies(
+    Project project,
+    String type,
     Iterable<Project> dependencies,
     Future<DependencyReference> createReferenceTo(Project p)) async {
   _log.info('Setting up $type dependencies for project ${project.name}');
@@ -74,7 +94,7 @@ Future _setDependencies(Project project, String type,
 
   await Future.wait(dependencies.map((p) async {
     final ref = await createReferenceTo(p);
-    _log.finest('created reference $ref for project ${project.name}');
+    _log.finest('created reference $ref to project ${p.name}');
     newDependencies[p.name] = ref;
   }));
 

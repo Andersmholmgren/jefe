@@ -13,6 +13,8 @@ import 'package:jefe/src/project/impl/project_group_impl.dart';
 import 'dart:io';
 import 'package:pubspec/pubspec.dart';
 import 'core_impl.dart';
+import 'package:analyzer/analyzer.dart';
+import 'package:path/path.dart' as p;
 
 Logger _log = new Logger('jefe.project.impl');
 
@@ -50,7 +52,9 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
     final projectParentDir = await parentDir.create(recursive: true);
 
-    final GitDir gitDir = await cloneOrPull(gitUri, projectParentDir,
+    final GitDir gitDir = await cloneOrPull(
+        gitUri,
+        projectParentDir,
         new Directory(gitWorkspacePath(gitUri, projectParentDir)),
         OnExistsAction.ignore);
 
@@ -81,5 +85,27 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   Future<String> get currentGitCommitHash async =>
       currentCommitHash(await gitDir);
 
+  @override
+  CompilationUnit get compilationUnit {
+    final mainLibraryPath =
+        p.join(installDirectory.path, 'lib', '${name}.dart');
+    return parseDartFile(mainLibraryPath);
+  }
+
   String toString() => 'Project($name, $gitUri)';
+
+  @override
+  Iterable<String> get exportedDependencyNames {
+    final exports =
+        compilationUnit.directives.where((d) => d is ExportDirective);
+
+    final exportedPackageNames = exports
+        .map((exp) => exp.uri.stringValue)
+        .where((uri) => uri.startsWith('package:'))
+        .map((String uri) => uri.substring('package:'.length, uri.indexOf('/')))
+        .toSet();
+
+    return pubspec.dependencies.keys
+        .where((n) => exportedPackageNames.contains(n));
+  }
 }

@@ -111,8 +111,11 @@ class _DependencyNode implements ProjectDependencies {
 
 Future<Set<_ProjectDependencies>> _determineDependencies(
         Set<Project> projects) async =>
-    (await Future.wait(projects.map((p) => _resolveDependencies(
-        p, new Map.fromIterable(projects, key: (p) => p.name))))).toSet();
+    (await Future.wait(
+            projects.map(
+                (p) => _resolveDependencies(
+                    p, new Map.fromIterable(projects, key: (p) => p.name)))))
+        .toSet();
 
 Future<_ProjectDependencies> _resolveDependencies(
     Project project, Map<String, Project> projects) async {

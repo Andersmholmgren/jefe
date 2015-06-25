@@ -9,6 +9,7 @@ import 'impl/project_impl.dart';
 import '../spec/jefe_spec.dart';
 import 'core.dart';
 import 'package:pubspec/pubspec.dart';
+import 'package:analyzer/analyzer.dart';
 
 abstract class ProjectReference implements ProjectEntityReference<Project> {}
 
@@ -17,6 +18,8 @@ abstract class ProjectReference implements ProjectEntityReference<Project> {}
 abstract class Project extends ProjectEntity {
   PubSpec get pubspec;
   ProjectIdentifier get id;
+  CompilationUnit get compilationUnit;
+  Iterable<String> get exportedDependencyNames;
 
   /// Installs a Project from the [gitUri] into the [parentDirectory]
   static Future<Project> install(

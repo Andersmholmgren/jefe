@@ -12,7 +12,6 @@ import 'project.dart';
 /// A reference to a [ProjectEntity]. The actual entity is fetched via [get]
 abstract class ProjectEntityReference<T extends ProjectEntity>
     extends ProjectEntityIdentifier {
-
   /// retrieve the entity
   Future<T> get();
 }
@@ -20,7 +19,6 @@ abstract class ProjectEntityReference<T extends ProjectEntity>
 /// an entity that is a member of a [ProjectGroup]. This includes both
 /// [Project]s and [ProjectGroup]s
 abstract class ProjectEntity {
-
   /// The name of the entity
   String get name;
 
