@@ -35,9 +35,10 @@ class Jefe {
 
   @u.SubCommand(help: 'Installs a group of projects')
   install(@u.Positional(
-      help: 'The git Uri containing the jefe.yaml.') String gitUri, {@u.Option(
-      help: 'The directory to install into',
-      abbr: 'd') String installDirectory: '.'}) async {
+          help: 'The git Uri containing the jefe.yaml.') String gitUri,
+      {@u.Option(
+          help: 'The directory to install into',
+          abbr: 'd') String installDirectory: '.'}) async {
     final Directory installDir = new Directory(installDirectory);
     final ProjectGroup projectGroup =
         await ProjectGroup.install(installDir, gitUri);
@@ -47,13 +48,16 @@ class Jefe {
   }
 
   @u.SubCommand(help: 'Installs or updates a group of projects')
-  init({@u.Option(
-      help: 'The git Uri containing the jefe.yaml.',
-      abbr: 'g') String gitUri, @u.Option(
-      help: 'The directory to install into',
-      abbr: 'd') String installDirectory: '.', @u.Flag(
-      help: 'Skips the checkout of the develop branch',
-      abbr: 's') bool skipCheckout: false}) async {
+  init(
+      {@u.Option(
+          help: 'The git Uri containing the jefe.yaml.',
+          abbr: 'g') String gitUri,
+      @u.Option(
+          help: 'The directory to install into',
+          abbr: 'd') String installDirectory: '.',
+      @u.Flag(
+          help: 'Skips the checkout of the develop branch',
+          abbr: 's') bool skipCheckout: false}) async {
     final Directory installDir = new Directory(installDirectory);
     final ProjectGroup projectGroup =
         await ProjectGroup.init(installDir, gitUri);
@@ -63,35 +67,42 @@ class Jefe {
   }
 
   @u.SubCommand(help: 'Sets up for the start of development on a new feature')
-  start(String featureName, {@u.Option(
-      help: 'The directory that contains the root of the projecs',
-      abbr: 'd') String rootDirectory: '.', @u.Option(
-      help: 'A project name filter. Only projects whose name contains the text will run',
-      abbr: 'p') String projects}) async {
+  start(String featureName,
+      {@u.Option(
+          help: 'The directory that contains the root of the projecs',
+          abbr: 'd') String rootDirectory: '.',
+      @u.Option(
+          help: 'A project name filter. Only projects whose name contains the text will run',
+          abbr: 'p') String projects}) async {
     final executor = await _load(rootDirectory);
     await executor.execute(lifecycle.startNewFeature(featureName),
         filter: projectNameFilter(projects));
   }
 
   @u.SubCommand(help: 'Completes feature and returns to development branch')
-  finish(String featureName, {@u.Option(
-      help: 'The directory that contains the root of the projects',
-      abbr: 'd') String rootDirectory: '.', @u.Option(
-      help: 'A project name filter. Only projects whose name contains the text will run',
-      abbr: 'p') String projects}) async {
+  finish(String featureName,
+      {@u.Option(
+          help: 'The directory that contains the root of the projects',
+          abbr: 'd') String rootDirectory: '.',
+      @u.Option(
+          help: 'A project name filter. Only projects whose name contains the text will run',
+          abbr: 'p') String projects}) async {
     final executor = await _load(rootDirectory);
     await executor.execute(lifecycle.completeFeature(featureName),
         filter: projectNameFilter(projects));
   }
 
   @u.SubCommand(help: 'Create a release of all the projects')
-  release({@u.Option(
-      help: 'The directory that contains the root of the projecs',
-      abbr: 'd') String rootDirectory: '.', @u.Option(
-      help: 'A project name filter. Only projects whose name contains the text will run',
-      abbr: 'p') String projects, @u.Flag(
-      help: 'if true then only pre release verification steps are executed',
-      defaultsTo: false) bool preReleaseOnly: false}) async {
+  release(
+      {@u.Option(
+          help: 'The directory that contains the root of the projecs',
+          abbr: 'd') String rootDirectory: '.',
+      @u.Option(
+          help: 'A project name filter. Only projects whose name contains the text will run',
+          abbr: 'p') String projects,
+      @u.Flag(
+          help: 'if true then only pre release verification steps are executed',
+          defaultsTo: false) bool preReleaseOnly: false}) async {
     final executor = await _load(rootDirectory);
     // TODO: would be nice to leverage grinder here (command dependencies)
     // somehow
@@ -106,13 +117,16 @@ class Jefe {
   }
 
   @u.SubCommand(help: 'Runs the given command in all projects')
-  exec(String command, @u.Rest() List<String> args, {@u.Option(
-      help: 'The directory that contains the root of the projecs',
-      abbr: 'd') String rootDirectory: '.', @u.Option(
-      help: 'A project name filter. Only projects whose name contains the text will run',
-      abbr: 'p') String projects, @u.Flag(
-      help: 'Instead of running the commands concurrently on the projects, run only one command on one project at a time',
-      abbr: 's') bool executeSerially: false}) async {
+  exec(String command, @u.Rest() List<String> args,
+      {@u.Option(
+          help: 'The directory that contains the root of the projecs',
+          abbr: 'd') String rootDirectory: '.',
+      @u.Option(
+          help: 'A project name filter. Only projects whose name contains the text will run',
+          abbr: 'p') String projects,
+      @u.Flag(
+          help: 'Instead of running the commands concurrently on the projects, run only one command on one project at a time',
+          abbr: 's') bool executeSerially: false}) async {
     final CommandExecutor executor = await _load(rootDirectory);
     await executor.execute(process.process(command, args),
         filter: projectNameFilter(projects),
@@ -123,12 +137,14 @@ class Jefe {
 
   @u.SubCommand(help: 'Set dependencies between projects')
   setDependencies(@u.Positional(
-      help: 'The type of dependency to set',
-      allowed: const ['git', 'path', 'hosted']) String type, {@u.Option(
-      help: 'The directory that contains the root of the projecs',
-      abbr: 'd') String rootDirectory: '.', @u.Option(
-      help: 'A project name filter. Only projects whose name contains the text will run',
-      abbr: 'p') String projects}) async {
+          help: 'The type of dependency to set',
+          allowed: const ['git', 'path', 'hosted']) String type,
+      {@u.Option(
+          help: 'The directory that contains the root of the projecs',
+          abbr: 'd') String rootDirectory: '.',
+      @u.Option(
+          help: 'A project name filter. Only projects whose name contains the text will run',
+          abbr: 'p') String projects}) async {
     final CommandExecutor executor = await _load(rootDirectory);
     final command = _setToDependencyCommand(type);
     await executor.execute(command,

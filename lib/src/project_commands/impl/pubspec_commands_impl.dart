@@ -40,26 +40,27 @@ class PubSpecCommandsImpl implements PubSpecCommands {
           DependencyType type, bool useGitIfNotHosted) =>
       projectCommandWithDependencies('change to $type dependencies',
           (Project p, Iterable<Project> dependencies) async {
-    await _setToDependencies(p, dependencies, type, useGitIfNotHosted);
-  });
+        await _setToDependencies(p, dependencies, type, useGitIfNotHosted);
+      });
 
   @override
   ProjectCommand<bool> haveDependenciesChanged(DependencyType type,
-      {bool useGitIfNotHosted: true}) => projectCommandWithDependencies(
+          {bool useGitIfNotHosted: true}) =>
+      projectCommandWithDependencies(
           'checking if $type dependencies have changed',
           (Project project, Iterable<Project> dependencies) async {
-    final expectedDependencies = await _createDependencyReferences(
-        project, dependencies, type, useGitIfNotHosted);
+        final expectedDependencies = await _createDependencyReferences(
+            project, dependencies, type, useGitIfNotHosted);
 
-    final actualDependencies = project.pubspec.dependencies;
+        final actualDependencies = project.pubspec.dependencies;
 
-    final dependenciesChanged = expectedDependencies.keys
-        .any((k) => expectedDependencies[k] != actualDependencies[k]);
+        final dependenciesChanged = expectedDependencies.keys
+            .any((k) => expectedDependencies[k] != actualDependencies[k]);
 
-    _log.info('dependencies for ${project.name} have '
-        '${dependenciesChanged ? "" : "NOT "}changed');
-    return dependenciesChanged;
-  });
+        _log.info('dependencies for ${project.name} have '
+            '${dependenciesChanged ? "" : "NOT "}changed');
+        return dependenciesChanged;
+      });
 
   Future _setToDependencies(Project project, Iterable<Project> dependencies,
       DependencyType type, bool useGitIfNotHosted) async {
@@ -74,7 +75,9 @@ class PubSpecCommandsImpl implements PubSpecCommands {
   }
 
   Future<Map<String, DependencyReference>> _createDependencyReferences(
-      Project project, Iterable<Project> dependencies, DependencyType type,
+      Project project,
+      Iterable<Project> dependencies,
+      DependencyType type,
       bool useGitIfNotHosted) async {
     if (dependencies.isEmpty) {
       _log.finest('No depenencies for project ${project.name}');

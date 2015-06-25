@@ -102,10 +102,12 @@ class TestProjectEntityReferenceFactory
   }
 
   ProjectGroupReference createGroupReference(
-      ProjectGroupImpl group, ProjectGroupIdentifier id) => _groupMap[id];
+          ProjectGroupImpl group, ProjectGroupIdentifier id) =>
+      _groupMap[id];
 
   ProjectReference createProjectReference(
-      ProjectGroupImpl group, ProjectIdentifier id) => _projectMap[id];
+          ProjectGroupImpl group, ProjectIdentifier id) =>
+      _projectMap[id];
 }
 
 class TestProjectGroupReference implements ProjectGroupReference {

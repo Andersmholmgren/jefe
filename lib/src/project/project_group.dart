@@ -33,7 +33,8 @@ abstract class ProjectGroup extends ProjectEntity {
 
   /// Will git pull any existing project groups, and install any that are missing
   static Future<ProjectGroup> init(Directory parentDir, String gitUri,
-      {String name}) => ProjectGroupImpl.init(parentDir, gitUri, name: name);
+          {String name}) =>
+      ProjectGroupImpl.init(parentDir, gitUri, name: name);
 
   /// References to the [Project]s contained directly within this group.
   /// This excludes those contained in child groups

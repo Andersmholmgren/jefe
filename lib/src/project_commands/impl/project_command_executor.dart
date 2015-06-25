@@ -56,8 +56,8 @@ class CommandExecutorImpl implements CommandExecutor {
       return await _executeOnConcurrentProjects(
           await _projectGroup.dependencyGraph, command, filter);
     } else {
-      return await _processDependenciesDepthFirst((Project project,
-          Iterable<Project> dependencies) async {
+      return await _processDependenciesDepthFirst(
+          (Project project, Iterable<Project> dependencies) async {
         if (_filter(project)) {
           return await command.process(project, dependencies: dependencies);
         }
@@ -128,8 +128,8 @@ class CommandExecutorImpl implements CommandExecutor {
 
   Future _executeOnConcurrentProjects(DependencyGraph projectGraph,
       ProjectCommand command, ProjectFilter filter) async {
-    return await new Stream.fromIterable(projectGraph.depthFirst
-        .map((ProjectDependencies pd) async {
+    return await new Stream.fromIterable(
+        projectGraph.depthFirst.map((ProjectDependencies pd) async {
       if (filter(pd.project)) {
         return await command.process(pd.project,
             dependencies: pd.directDependencies);
@@ -155,7 +155,8 @@ class CommandExecutorImpl implements CommandExecutor {
   }
 
   Future executeWithExecutor(ExecutorAwareProjectCommand command,
-      {ProjectFilter filter}) => command.process(this, filter: filter);
+          {ProjectFilter filter}) =>
+      command.process(this, filter: filter);
 }
 
 typedef Future CommandExecutorFunction(ProjectCommand command);

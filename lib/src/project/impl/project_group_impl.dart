@@ -141,8 +141,8 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 
     final projectGroupInstallFutures = projectGroup.childGroups.map((ref) =>
         projectGroup._installChildGroup(ref.name, ref.gitUri, updateIfExists));
-    final projectInstallFutures = projectGroup.projects.map(
-        (ref) => projectGroup._installChildProject(
+    final projectInstallFutures = projectGroup.projects.map((ref) =>
+        projectGroup._installChildProject(
             ref.name, ref.gitUri, updateIfExists));
     await Future
         .wait(concat([projectGroupInstallFutures, projectInstallFutures]));
@@ -166,13 +166,13 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
       ProjectImpl.load(directoryLayout.projectDirectory(name));
 
   Future<ProjectGroupImpl> _installChildGroup(
-      String name, String gitUri, bool updateIfExists) => _installOrUpdate(
-          directoryLayout.containerDirectory, gitUri,
+          String name, String gitUri, bool updateIfExists) =>
+      _installOrUpdate(directoryLayout.containerDirectory, gitUri,
           name: name, updateIfExists: updateIfExists);
 
   Future<ProjectImpl> _installChildProject(
-      String name, String gitUri, bool updateIfExists) => ProjectImpl.install(
-          directoryLayout.containerDirectory, name, gitUri,
+          String name, String gitUri, bool updateIfExists) =>
+      ProjectImpl.install(directoryLayout.containerDirectory, name, gitUri,
           updateIfExists: updateIfExists);
 
   @override
@@ -213,9 +213,9 @@ class GroupDirectoryLayout {
   GroupDirectoryLayout.fromParent(Directory parent, String groupName)
       : this(_childDir(parent, _containerName(groupName)), groupName);
 
-  GroupDirectoryLayout.withDefaultName(Directory containerDirectory) : this(
-          containerDirectory.absolute,
-          _defaultGroupName(containerDirectory.absolute));
+  GroupDirectoryLayout.withDefaultName(Directory containerDirectory)
+      : this(containerDirectory.absolute,
+            _defaultGroupName(containerDirectory.absolute));
 
   Directory get groupDirectory => _childDir(containerDirectory, groupName);
 

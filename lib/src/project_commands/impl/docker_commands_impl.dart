@@ -20,113 +20,126 @@ Logger _log = new Logger('jefe.project.commands.docker.impl');
 
 class DockerCommandsImpl implements DockerCommands {
   ProjectDependencyGraphCommand generateDockerfile(
-      String serverProjectName, String clientProjectName,
-      {Directory outputDirectory, String dartVersion: 'latest',
-      Map<String, dynamic> environment: const {},
-      Iterable<int> exposePorts: const [],
-      Iterable<String> entryPointOptions: const [],
-      bool omitClientWhenPathDependencies: true, bool setupForPrivateGit: true,
-      String targetRootPath: '/app'}) => dependencyGraphCommand(
-          'generate Dockerfile',
+          String serverProjectName, String clientProjectName,
+          {Directory outputDirectory,
+          String dartVersion: 'latest',
+          Map<String, dynamic> environment: const {},
+          Iterable<int> exposePorts: const [],
+          Iterable<String> entryPointOptions: const [],
+          bool omitClientWhenPathDependencies: true,
+          bool setupForPrivateGit: true,
+          String targetRootPath: '/app'}) =>
+      dependencyGraphCommand('generate Dockerfile',
           (DependencyGraph graph, Directory rootDirectory, _) async {
-    final serverProjectDeps = graph.forProject(serverProjectName);
-    final clientProjectDeps = graph.forProject(clientProjectName);
+        final serverProjectDeps = graph.forProject(serverProjectName);
+        final clientProjectDeps = graph.forProject(clientProjectName);
 
-    final dockerfile = new Dockerfile();
+        final dockerfile = new Dockerfile();
 
-    dockerfile.from('google/dart', tag: dartVersion);
+        dockerfile.from('google/dart', tag: dartVersion);
 
-    _setupForPrivateGit(setupForPrivateGit, dockerfile);
+        _setupForPrivateGit(setupForPrivateGit, dockerfile);
 
-    final serverFiles = new _TopLevelProjectFiles(
-        dockerfile, serverProjectDeps, rootDirectory.path, targetRootPath);
+        final serverFiles = new _TopLevelProjectFiles(
+            dockerfile, serverProjectDeps, rootDirectory.path, targetRootPath);
 
-    final clientFiles = new _TopLevelProjectFiles(
-        dockerfile, clientProjectDeps, rootDirectory.path, targetRootPath);
+        final clientFiles = new _TopLevelProjectFiles(
+            dockerfile, clientProjectDeps, rootDirectory.path, targetRootPath);
 
-    final omitClient =
-        omitClientWhenPathDependencies && clientFiles.hasPathDependencies;
+        final omitClient =
+            omitClientWhenPathDependencies && clientFiles.hasPathDependencies;
 
-    final excludedDependencies = serverFiles.addAll();
-    if (!omitClient) {
-      clientFiles.addAll(excludeDependencies: excludedDependencies);
-      dockerfile.run('pub', args: ['build']);
-    }
+        final excludedDependencies = serverFiles.addAll();
+        if (!omitClient) {
+          clientFiles.addAll(excludeDependencies: excludedDependencies);
+          dockerfile.run('pub', args: ['build']);
+        }
 
-    final pathHandler = new _PathHandler(rootDirectory.path, targetRootPath,
-        serverFiles.hasPathDependencies &&
-            (omitClient || clientFiles.hasPathDependencies));
+        final pathHandler = new _PathHandler(
+            rootDirectory.path,
+            targetRootPath,
+            serverFiles.hasPathDependencies &&
+                (omitClient || clientFiles.hasPathDependencies));
 
-    dockerfile.envs(environment);
+        dockerfile.envs(environment);
 
-    dockerfile.expose(exposePorts);
+        dockerfile.expose(exposePorts);
 
-    dockerfile.cmd([]);
+        dockerfile.cmd([]);
 
-    final serverMain = p.join(
-        serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
+        final serverMain = p.join(
+            serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
 
-    dockerfile.workDir(serverFiles.workDir);
+        dockerfile.workDir(serverFiles.workDir);
 
-    dockerfile.entryPoint('/usr/bin/dart',
-        args: concat(
-            [entryPointOptions, [pathHandler.targetPath(serverMain)]]));
+        dockerfile.entryPoint('/usr/bin/dart',
+            args: concat([
+              entryPointOptions,
+              [pathHandler.targetPath(serverMain)]
+            ]));
 
-    final saveDirectory =
-        outputDirectory != null ? outputDirectory : rootDirectory;
-    await dockerfile.save(saveDirectory);
-  });
+        final saveDirectory =
+            outputDirectory != null ? outputDirectory : rootDirectory;
+        await dockerfile.save(saveDirectory);
+      });
 
   ProjectDependencyGraphCommand generateProductionDockerfile(
-      String serverProjectName, String clientProjectName, {String serverGitRef,
-      String clientGitRef, Directory outputDirectory,
-      String dartVersion: 'latest', Map<String, dynamic> environment: const {},
-      Iterable<int> exposePorts: const [],
-      Iterable<String> entryPointOptions: const [],
-      String targetRootPath: '/app'}) => dependencyGraphCommand(
-          'generate Dockerfile',
+          String serverProjectName, String clientProjectName,
+          {String serverGitRef,
+          String clientGitRef,
+          Directory outputDirectory,
+          String dartVersion: 'latest',
+          Map<String, dynamic> environment: const {},
+          Iterable<int> exposePorts: const [],
+          Iterable<String> entryPointOptions: const [],
+          String targetRootPath: '/app'}) =>
+      dependencyGraphCommand('generate Dockerfile',
           (DependencyGraph graph, Directory rootDirectory, _) async {
-    final serverProjectDeps = graph.forProject(serverProjectName);
-    final clientProjectDeps = graph.forProject(clientProjectName);
+        final serverProjectDeps = graph.forProject(serverProjectName);
+        final clientProjectDeps = graph.forProject(clientProjectName);
 
-    final pathHandler =
-        new _PathHandler(rootDirectory.path, targetRootPath, false);
+        final pathHandler =
+            new _PathHandler(rootDirectory.path, targetRootPath, false);
 
-    final dockerfile = new Dockerfile();
+        final dockerfile = new Dockerfile();
 
-    dockerfile.from('google/dart', tag: dartVersion);
+        dockerfile.from('google/dart', tag: dartVersion);
 
-    _setupForPrivateGit(true, dockerfile);
+        _setupForPrivateGit(true, dockerfile);
 
-    await _cloneTopLevelProject(
-        dockerfile, serverProjectDeps, serverGitRef, pathHandler);
-    await _cloneTopLevelProject(
-        dockerfile, clientProjectDeps, clientGitRef, pathHandler);
-    dockerfile.run('pub', args: ['build']);
+        await _cloneTopLevelProject(
+            dockerfile, serverProjectDeps, serverGitRef, pathHandler);
+        await _cloneTopLevelProject(
+            dockerfile, clientProjectDeps, clientGitRef, pathHandler);
+        dockerfile.run('pub', args: ['build']);
 
-    dockerfile.envs(environment);
+        dockerfile.envs(environment);
 
-    dockerfile.expose(exposePorts);
+        dockerfile.expose(exposePorts);
 
-    dockerfile.cmd([]);
+        dockerfile.cmd([]);
 
-    dockerfile.workDir(pathHandler
-        .targetPath(serverProjectDeps.project.installDirectory.path));
+        dockerfile.workDir(pathHandler
+            .targetPath(serverProjectDeps.project.installDirectory.path));
 
-    final serverMain = p.join(
-        serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
+        final serverMain = p.join(
+            serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
 
-    dockerfile.entryPoint('/usr/bin/dart',
-        args: concat(
-            [entryPointOptions, [pathHandler.targetPath(serverMain)]]));
+        dockerfile.entryPoint('/usr/bin/dart',
+            args: concat([
+              entryPointOptions,
+              [pathHandler.targetPath(serverMain)]
+            ]));
 
-    final saveDirectory =
-        outputDirectory != null ? outputDirectory : rootDirectory;
-    await dockerfile.save(saveDirectory);
-  });
+        final saveDirectory =
+            outputDirectory != null ? outputDirectory : rootDirectory;
+        await dockerfile.save(saveDirectory);
+      });
 
-  Future _cloneTopLevelProject(Dockerfile dockerfile,
-      ProjectDependencies topLevelProjectDeps, String gitRef,
+  Future _cloneTopLevelProject(
+      Dockerfile dockerfile,
+      ProjectDependencies topLevelProjectDeps,
+      String gitRef,
       _PathHandler pathHandler) async {
     final ref = gitRef != null
         ? gitRef
@@ -137,8 +150,7 @@ class DockerCommandsImpl implements DockerCommands {
     final dirPath = dir.path;
 
     final targetPath = pathHandler.targetPath(dirPath);
-    dockerfile.run('git',
-        args: [
+    dockerfile.run('git', args: [
       'clone',
       '-q',
       '-b',
@@ -212,6 +224,7 @@ class _AddHelper {
   void add(String path) {
     dockerfile.add(pathHandler.sourcePath(path), pathHandler.targetPath(path));
   }
+
   void addDir(String path) {
     dockerfile.addDir(
         pathHandler.sourcePath(path), pathHandler.targetPath(path));
@@ -230,8 +243,10 @@ class _TopLevelProjectFiles {
 
   _AddHelper get addHelper => new _AddHelper(pathHandler, dockerfile);
 
-  _TopLevelProjectFiles(Dockerfile dockerfile,
-      ProjectDependencies projectDependencies, this.rootDirectoryPath,
+  _TopLevelProjectFiles(
+      Dockerfile dockerfile,
+      ProjectDependencies projectDependencies,
+      this.rootDirectoryPath,
       this.targetRootPath)
       : this.dockerfile = dockerfile,
         this.projectDependencies = projectDependencies,
@@ -243,8 +258,10 @@ class _TopLevelProjectFiles {
     final depMap = new Map.fromIterable(projectDependencies.allDependencies,
         key: (project) => project.name);
 
-    final allProjects = concat(
-        [[projectDependencies.project], projectDependencies.allDependencies]);
+    final allProjects = concat([
+      [projectDependencies.project],
+      projectDependencies.allDependencies
+    ]);
 
     final pathKeys = allProjects.expand((Project project) {
       final deps = project.pubspec.dependencies;

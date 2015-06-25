@@ -27,9 +27,9 @@ enum CommandConcurrencyMode { serial, concurrentProject, concurrentCommand }
 
 /// A command that operates on a single [Project]
 ProjectCommand projectCommand(String name, ProjectFunction function,
-    {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand,
-    Condition condition: _alwaysYes}) => new _DefaultCommand(
-    name, function, concurrencyMode, condition);
+        {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand,
+        Condition condition: _alwaysYes}) =>
+    new _DefaultCommand(name, function, concurrencyMode, condition);
 
 /// A command that operates on a single [Project] and the projects it depends on
 ProjectCommand projectCommandWithDependencies(
@@ -90,7 +90,9 @@ abstract class ProjectCommand<T> extends Command {
 
   Future<T> process(Project project, {Iterable<Project> dependencies});
 
-  ProjectCommand copy({String name, CommandConcurrencyMode concurrencyMode,
+  ProjectCommand copy(
+      {String name,
+      CommandConcurrencyMode concurrencyMode,
       Condition condition});
 }
 
@@ -180,9 +182,13 @@ class _DefaultCommand implements ProjectCommand {
   String toString() => "'$name'";
 
   @override
-  ProjectCommand copy({String name, CommandConcurrencyMode concurrencyMode,
-      Function function, Condition condition}) {
-    return new _DefaultCommand(name != null ? name : this.name,
+  ProjectCommand copy(
+      {String name,
+      CommandConcurrencyMode concurrencyMode,
+      Function function,
+      Condition condition}) {
+    return new _DefaultCommand(
+        name != null ? name : this.name,
         function != null ? function : this.function,
         concurrencyMode != null ? concurrencyMode : this.concurrencyMode,
         condition != null ? condition : this.condition);

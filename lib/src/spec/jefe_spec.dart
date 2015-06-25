@@ -19,7 +19,8 @@ abstract class ProjectGroupMetaData {
 
   Iterable<ProjectIdentifier> get projects;
 
-  factory ProjectGroupMetaData(String name,
+  factory ProjectGroupMetaData(
+      String name,
       Iterable<ProjectGroupIdentifier> childGroups,
       Iterable<ProjectIdentifier> projects) = ProjectGroupMetaDataImpl;
 
