@@ -85,9 +85,11 @@ class PubSpecCommandsImpl implements PubSpecCommands {
 //    }
 
     final newDependencies = new Map.from(project.pubspec.dependencies);
+    final exportedDependencyNames = project.exportedDependencyNames.toSet();
 
     await Future.wait(dependencies.map((p) async {
-      final ref = await _createDependencyReference(p, type, useGitIfNotHosted);
+      final ref = await _createDependencyReference(
+          p, type, useGitIfNotHosted, exportedDependencyNames);
       _log.finest('created reference $ref to project ${p.name}');
       newDependencies[p.name] = ref;
     }));
@@ -96,7 +98,10 @@ class PubSpecCommandsImpl implements PubSpecCommands {
   }
 
   Future<DependencyReference> _createDependencyReference(
-      Project project, DependencyType type, bool useGitIfNotHosted) async {
+      Project project,
+      DependencyType type,
+      bool useGitIfNotHosted,
+      Set<String> exportedDependencyNames) async {
     switch (type) {
       case DependencyType.path:
         return new PathReference(project.installDirectory.path);
@@ -106,20 +111,19 @@ class PubSpecCommandsImpl implements PubSpecCommands {
             project.gitUri, await project.currentGitCommitHash);
 
       case DependencyType.hosted:
-        return _getHostedReference(project, useGitIfNotHosted);
+        return _getHostedReference(
+            project, useGitIfNotHosted, exportedDependencyNames);
 
       default:
         throw new StateError('unsupported type $type');
     }
   }
 
-  Future<DependencyReference> _getHostedReference(
-      Project project, bool useGitIfNotHosted) async {
+  Future<DependencyReference> _getHostedReference(Project project,
+      bool useGitIfNotHosted, Set<String> exportedDependencyNames) async {
     final Option<HostedPackageVersions> packageVersionsOpt =
         await pub.fetchPackageVersions(project.name);
     if (packageVersionsOpt is Some) {
-      final exportedDependencyNames = project.exportedDependencyNames;
-
       final Version version = packageVersionsOpt.get().versions.last.version;
       final isExported = exportedDependencyNames.contains(project.name);
       final versionConstraint = isExported
