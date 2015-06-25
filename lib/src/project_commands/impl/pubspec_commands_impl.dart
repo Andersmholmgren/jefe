@@ -53,6 +53,8 @@ class PubSpecCommandsImpl implements PubSpecCommands {
   ProjectCommand setToHostedDependencies({bool useGitIfNotHosted: true}) =>
       projectCommandWithDependencies('change to hosted dependencies',
           (Project project, Iterable<Project> dependencies) async {
+        final exportedDependencyNames = project.exportedDependencyNames;
+
         await _setDependencies(
             project, 'hosted', dependencies, (Project p) async {
           final Option<HostedPackageVersions> packageVersionsOpt =
@@ -60,8 +62,11 @@ class PubSpecCommandsImpl implements PubSpecCommands {
           if (packageVersionsOpt is Some) {
             final Version version =
                 packageVersionsOpt.get().versions.last.version;
-            final versionConstraint =
-                new VersionConstraint.compatibleWith(version);
+            final isExported = exportedDependencyNames.contains(p.name);
+            final versionConstraint = isExported
+                ? new VersionRange(
+                    min: version, max: version.nextPatch, includeMin: true)
+                : new VersionConstraint.compatibleWith(version);
             return await new HostedReference(versionConstraint);
           } else if (useGitIfNotHosted) {
             return await new GitReference(
@@ -89,7 +94,7 @@ Future _setDependencies(
 
   await Future.wait(dependencies.map((p) async {
     final ref = await createReferenceTo(p);
-    _log.finest('created reference $ref for project ${project.name}');
+    _log.finest('created reference $ref to project ${p.name}');
     newDependencies[p.name] = ref;
   }));
 
