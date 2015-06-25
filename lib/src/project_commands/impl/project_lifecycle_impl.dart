@@ -161,9 +161,9 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
             .setToHostedDependencies()
             .process(project, dependencies: dependencies);
 
-        await _git.commit('releasing version $releaseVersion').process(project);
-
         await _pub.get().process(project);
+
+        await _git.commit('releasing version $releaseVersion').process(project);
 
         if (projectVersions.isHosted) {
           await _pub.publish().process(project);
