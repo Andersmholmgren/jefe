@@ -109,9 +109,10 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       ]);
 
   ProjectCommand checkReleaseVersions({ReleaseType type: ReleaseType.minor}) =>
-      projectCommand('check release versions', (Project project) async {
+      projectCommandWithDependencies('check release versions',
+          (Project project, Iterable<Project> dependencies) async {
         final ProjectVersions versions =
-            await getCurrentProjectVersion(project, type);
+            await getCurrentProjectVersion(project, dependencies, type);
         if (versions.newReleaseVersion is Some) {
           _log.info(
               '==> project ${project.name} will be upgraded from version: '
@@ -129,7 +130,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     return projectCommandWithDependencies('Release version: type $type',
         (Project project, Iterable<Project> dependencies) async {
       final ProjectVersions projectVersions =
-          await getCurrentProjectVersion(project, type);
+          await getCurrentProjectVersion(project, dependencies, type);
 
       if (!projectVersions.newReleaseRequired) {
         // no release needed
@@ -154,6 +155,8 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
             .process(project, dependencies: dependencies);
 
         await _git.commit('releasing version $releaseVersion').process(project);
+
+        await _pub.get().process(project);
 
         if (projectVersions.isHosted) {
           await _pub.publish().process(project);
@@ -199,7 +202,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   }
 
   Future<ProjectVersions> getCurrentProjectVersion(
-      Project project, ReleaseType type) async {
+      Project project, Iterable<Project> dependencies, ReleaseType type) async {
     final GitDir gitDir = await project.gitDir;
 
     final currentPubspecVersion = project.pubspec.version;
@@ -224,7 +227,8 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         latestPublishedVersionOpt,
         gitDir,
         type,
-        project);
+        project,
+        dependencies);
 
     return new ProjectVersions(currentPubspecVersion, latestTaggedVersionOpt,
         latestPublishedVersionOpt, releaseVersionOpt);
@@ -236,7 +240,8 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       Option<Version> latestPublishedVersionOpt,
       GitDir gitDir,
       ReleaseType type,
-      Project project) async {
+      Project project,
+      Iterable<Project> dependencies) async {
     final isHosted = latestPublishedVersionOpt is Some;
 
 //    final latestReleasedVersion = latestPublishedVersionOpt
@@ -258,7 +263,12 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         final hasChangesSinceLatestTaggedVersion =
             await _hasChangesSince(gitDir, latestTaggedVersion);
 
-        if (hasChangesSinceLatestTaggedVersion) {
+        final hasChanges = hasChangesSinceLatestTaggedVersion ||
+            (await _pubSpec
+                .haveDependenciesChanged(DependencyType.hosted)
+                .process(project, dependencies: dependencies));
+
+        if (hasChanges) {
           if (isHosted) {
             // Hosted packages must observe semantic versioning so not sensible
             // to try to automatically bump version
