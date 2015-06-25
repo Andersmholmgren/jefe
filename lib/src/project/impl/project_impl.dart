@@ -93,4 +93,19 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   }
 
   String toString() => 'Project($name, $gitUri)';
+
+  @override
+  Iterable<String> get exportedDependencyNames {
+    final exports =
+        compilationUnit.directives.where((d) => d is ExportDirective);
+
+    final exportedPackageNames = exports
+        .map((exp) => exp.uri.stringValue)
+        .where((uri) => uri.startsWith('package:'))
+        .map((String uri) => uri.substring('package:'.length, uri.indexOf('/')))
+        .toSet();
+
+    return pubspec.dependencies.keys
+        .where((n) => exportedPackageNames.contains(n));
+  }
 }
