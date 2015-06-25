@@ -10,6 +10,7 @@ import 'package:path/path.dart' as p;
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:quiver/iterables.dart';
 
 Logger _log = new Logger('jefe.git');
 
@@ -99,8 +100,14 @@ Future gitFetch(GitDir gitDir) async {
   await gitDir.runCommand(['fetch', '--tags']);
 }
 
-Future gitMerge(GitDir gitDir, String commit) async {
-  await gitDir.runCommand(['merge', '--ff-only', commit]);
+Future gitMerge(GitDir gitDir, String commit, {bool ffOnly: true}) async {
+  final flags = ffOnly ? ['--ff-only'] : [];
+  final command = concat([
+    ['merge'],
+    flags,
+    [commit]
+  ]);
+  await gitDir.runCommand(command);
 }
 
 Future<String> currentCommitHash(GitDir gitDir) async =>
@@ -135,10 +142,13 @@ Future<Option<DiffSummary>> diffSummarySince(GitDir gitDir, String ref) async {
 }
 
 class DiffSummary {
-  static final RegExp _diffRegExp = new RegExp(
-      r'^\s*(\d+) files changed, (\d+) insertions\(\+\), (\d+) deletions\(\-\)\s*$');
+//  static final RegExp _diffRegExp = new RegExp(
+//      r'^\s*(\d+) file[s]? changed, (\d+) insertions\(\+\), (\d+) deletions\(\-\)\s*$');
 
-//  4 files changed, 7 insertions(+), 9 deletions(-)
+  static final RegExp _filesRegExp = new RegExp(r'\s*(\d+) file[s]? changed.*');
+  static final RegExp _insertionsRegExp = new RegExp(r'.*, (\d+) insertion.*');
+  static final RegExp _deletionsRegExp = new RegExp(r'.*, (\d+) deletion.*');
+
   final int filesChangedCount;
   final int insertionCount;
   final int deletionCount;
@@ -146,14 +156,13 @@ class DiffSummary {
   DiffSummary(this.filesChangedCount, this.insertionCount, this.deletionCount);
 
   factory DiffSummary.parse(String line) {
-    final matches = _diffRegExp.allMatches(line);
-    assert(matches.length == 1);
-    var match = matches.first;
-    assert(match.groupCount == 3);
+    int value(RegExp regExp) {
+      final match = regExp.firstMatch(line);
+      return match != null ? int.parse(match.group(1)) : 0;
+    }
 
-    int nth(int index) => int.parse(match.group(index));
-
-    return new DiffSummary(nth(1), nth(2), nth(3));
+    return new DiffSummary(
+        value(_filesRegExp), value(_insertionsRegExp), value(_deletionsRegExp));
   }
 
   String toString() =>
@@ -210,7 +219,31 @@ Future<Iterable<String>> _gitFlowBranchNames(
       .map((n) => n.substring(branchPrefix.length));
 }
 
-Future<Option<String>> gitCurrentTagName(GitDir gitDir) async => new Option(
+Future<Option<String>> gitCurrentTagName(GitDir gitDir) async {
+  final currentTagOpt = await _gitCurrentTagName(gitDir);
+
+  if (currentTagOpt is None) {
+    return const None();
+  }
+
+  // to complicated with futures inside options for my little brain
+  final String currentTag = currentTagOpt.get();
+
+  final versionTags = await gitFetchVersionTags(gitDir);
+
+  // find longest matching version name
+  final matchingVersions = versionTags
+      .where((t) => currentTag.startsWith(t.toString()))
+      .toList()
+        ..sort((Version v1, Version v2) =>
+            v1.toString().length.compareTo(v2.toString().length));
+
+  return matchingVersions.isNotEmpty
+      ? new Some(matchingVersions.first.toString())
+      : const None();
+}
+
+Future<Option<String>> _gitCurrentTagName(GitDir gitDir) async => new Option(
     (await gitDir.runCommand(['describe', 'HEAD', '--tags'])).stdout.trim());
 
 const String featureBranchPrefix = 'feature/';

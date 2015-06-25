@@ -94,6 +94,9 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
         var gitDir = await p.gitDir;
         await gitFlowReleaseFinish(gitDir, releaseName);
         await gitTag(gitDir, releaseName);
+        await gitPush(gitDir);
+        await gitCheckout(gitDir, developBranchName);
+        await gitMerge(gitDir, 'master', ffOnly: false);
       });
 
   @override
