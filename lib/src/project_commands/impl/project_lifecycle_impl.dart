@@ -95,7 +95,9 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   }
 
   @override
-  CompositeProjectCommand preRelease({ReleaseType type: ReleaseType.minor}) =>
+  CompositeProjectCommand preRelease(
+          {ReleaseType type: ReleaseType.minor,
+          bool autoUpdateHostedVersions: false}) =>
       projectCommandGroup('Pre release checks', [
         _git.assertWorkingTreeClean(),
         _gitFeature.assertNoActiveReleases(),
@@ -104,15 +106,18 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         _git.updateFromRemote('master'),
         _git.updateFromRemote(_gitFeature.developBranchName),
         _git.merge('master'),
-        checkReleaseVersions(type: type),
+        checkReleaseVersions(
+            type: type, autoUpdateHostedVersions: autoUpdateHostedVersions),
         _pub.test()
       ]);
 
-  ProjectCommand checkReleaseVersions({ReleaseType type: ReleaseType.minor}) =>
+  ProjectCommand checkReleaseVersions(
+          {ReleaseType type: ReleaseType.minor,
+          bool autoUpdateHostedVersions: false}) =>
       projectCommandWithDependencies('check release versions',
           (Project project, Iterable<Project> dependencies) async {
-        final ProjectVersions versions =
-            await getCurrentProjectVersion(project, dependencies, type);
+        final ProjectVersions versions = await getCurrentProjectVersion(
+            project, dependencies, type, autoUpdateHostedVersions);
         if (versions.newReleaseVersion is Some) {
           _log.info(
               '==> project ${project.name} will be upgraded from version: '
@@ -126,11 +131,13 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       });
 
   @override
-  ProjectCommand release({ReleaseType type: ReleaseType.minor}) {
+  ProjectCommand release(
+      {ReleaseType type: ReleaseType.minor,
+      bool autoUpdateHostedVersions: false}) {
     return projectCommandWithDependencies('Release version: type $type',
         (Project project, Iterable<Project> dependencies) async {
-      final ProjectVersions projectVersions =
-          await getCurrentProjectVersion(project, dependencies, type);
+      final ProjectVersions projectVersions = await getCurrentProjectVersion(
+          project, dependencies, type, autoUpdateHostedVersions);
 
       if (!projectVersions.newReleaseRequired) {
         // no release needed
@@ -154,9 +161,11 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
             .setToHostedDependencies()
             .process(project, dependencies: dependencies);
 
-        await _git.commit('releasing version $releaseVersion').process(project);
-
         await _pub.get().process(project);
+
+        await _pub.test().process(project);
+
+        await _git.commit('releasing version $releaseVersion').process(project);
 
         if (projectVersions.isHosted) {
           await _pub.publish().process(project);
@@ -202,7 +211,10 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   }
 
   Future<ProjectVersions> getCurrentProjectVersion(
-      Project project, Iterable<Project> dependencies, ReleaseType type) async {
+      Project project,
+      Iterable<Project> dependencies,
+      ReleaseType type,
+      bool autoUpdateHostedVersions) async {
     final GitDir gitDir = await project.gitDir;
 
     final currentPubspecVersion = project.pubspec.version;
@@ -225,6 +237,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         latestTaggedVersionOpt,
         currentPubspecVersion,
         latestPublishedVersionOpt,
+        autoUpdateHostedVersions,
         gitDir,
         type,
         project,
@@ -238,6 +251,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       Option<Version> latestTaggedVersionOpt,
       Version currentPubspecVersion,
       Option<Version> latestPublishedVersionOpt,
+      bool autoUpdateHostedVersions,
       GitDir gitDir,
       ReleaseType type,
       Project project,
@@ -269,9 +283,10 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
                 .process(project, dependencies: dependencies));
 
         if (hasChanges) {
-          if (isHosted) {
+          if (isHosted && !autoUpdateHostedVersions) {
             // Hosted packages must observe semantic versioning so not sensible
-            // to try to automatically bump version
+            // to try to automatically bump version, unless the user explicitly
+            // requests it
             throw new ArgumentError(
                 '${project.name} is hosted and has changes. '
                 'The version must be manually changed for hosted packages');
@@ -285,9 +300,9 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     }
   }
 
-  Future<bool> _hasCommitsSince(GitDir gitDir, Version sinceVersion) async {
-    return (await commitCountSince(gitDir, sinceVersion.toString())) > 0;
-  }
+//  Future<bool> _hasCommitsSince(GitDir gitDir, Version sinceVersion) async {
+//    return (await commitCountSince(gitDir, sinceVersion.toString())) > 0;
+//  }
 
   Future<bool> _hasChangesSince(GitDir gitDir, Version sinceVersion) async {
     return (await diffSummarySince(gitDir, sinceVersion.toString())) is Some;
