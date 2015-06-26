@@ -300,9 +300,9 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     }
   }
 
-  Future<bool> _hasCommitsSince(GitDir gitDir, Version sinceVersion) async {
-    return (await commitCountSince(gitDir, sinceVersion.toString())) > 0;
-  }
+//  Future<bool> _hasCommitsSince(GitDir gitDir, Version sinceVersion) async {
+//    return (await commitCountSince(gitDir, sinceVersion.toString())) > 0;
+//  }
 
   Future<bool> _hasChangesSince(GitDir gitDir, Version sinceVersion) async {
     return (await diffSummarySince(gitDir, sinceVersion.toString())) is Some;

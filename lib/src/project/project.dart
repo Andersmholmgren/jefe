@@ -10,6 +10,7 @@ import '../spec/jefe_spec.dart';
 import 'core.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:analyzer/analyzer.dart';
+import 'package:option/option.dart';
 
 abstract class ProjectReference implements ProjectEntityReference<Project> {}
 

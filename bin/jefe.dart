@@ -100,7 +100,8 @@ class Jefe {
       @u.Option(
           help: 'The type of release',
           abbr: 't',
-          defaultsTo: ReleaseType.lowest) ReleaseType type: ReleaseType.lowest,
+          defaultsTo: ReleaseType.lowest,
+          parser: _parseReleaseType) ReleaseType type: ReleaseType.lowest,
       @u.Option(
           help: 'A project name filter. Only projects whose name contains the text will run',
           abbr: 'p') String projects,
@@ -182,3 +183,5 @@ class Jefe {
     }
   }
 }
+
+ReleaseType _parseReleaseType(String str) => ReleaseType.fromLiteral(str).get();
