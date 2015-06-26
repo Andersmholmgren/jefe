@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.3
+
+* support auto update of hosted versions
+
 ## 0.2.2
 
 * tighter constraints for exported packages

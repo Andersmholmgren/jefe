@@ -15,6 +15,7 @@ import 'package:pubspec/pubspec.dart';
 import 'core_impl.dart';
 import 'package:analyzer/analyzer.dart';
 import 'package:path/path.dart' as p;
+import 'package:option/option.dart';
 
 Logger _log = new Logger('jefe.project.impl');
 
@@ -86,20 +87,22 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
       currentCommitHash(await gitDir);
 
   @override
-  CompilationUnit get compilationUnit {
+  Future<Option<CompilationUnit>> get compilationUnit async {
     final mainLibraryPath =
         p.join(installDirectory.path, 'lib', '${name}.dart');
-    return parseDartFile(mainLibraryPath);
+    final exists = await new File(mainLibraryPath).exists();
+    return exists ? new Some(parseDartFile(mainLibraryPath)) : const None();
   }
 
   String toString() => 'Project($name, $gitUri)';
 
   @override
-  Iterable<String> get exportedDependencyNames {
-    final exports =
-        compilationUnit.directives.where((d) => d is ExportDirective);
+  Future<Iterable<String>> get exportedDependencyNames async {
+    final Iterable<Directive> exports = (await compilationUnit)
+        .map((cu) => cu.directives.where((d) => d is ExportDirective))
+        .getOrDefault(const []);
 
-    final exportedPackageNames = exports
+    final exportedPackageNames = await exports
         .map((exp) => exp.uri.stringValue)
         .where((uri) => uri.startsWith('package:'))
         .map((String uri) => uri.substring('package:'.length, uri.indexOf('/')))
