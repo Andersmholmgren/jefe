@@ -85,7 +85,8 @@ class PubSpecCommandsImpl implements PubSpecCommands {
 //    }
 
     final newDependencies = new Map.from(project.pubspec.dependencies);
-    final exportedDependencyNames = project.exportedDependencyNames.toSet();
+    final exportedDependencyNames =
+        (await project.exportedDependencyNames).toSet();
 
     await Future.wait(dependencies.map((p) async {
       final ref = await _createDependencyReference(
