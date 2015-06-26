@@ -109,14 +109,20 @@ class Jefe {
           help: 'if true then only pre release verification steps are executed',
           defaultsTo: false) bool preReleaseOnly: false,
       @u.Flag(
+          help: 'if true then the pre release verification steps are skipped',
+          defaultsTo: false) bool skipPreRelease: false,
+      @u.Flag(
           help: 'if true then version numbers of hosted packages will also be updated',
           defaultsTo: false) bool autoUpdateHostedVersions: false}) async {
     final executor = await _load(rootDirectory);
     // TODO: would be nice to leverage grinder here (command dependencies)
     // somehow
-    await executor.execute(lifecycle.preRelease(
-            type: type, autoUpdateHostedVersions: autoUpdateHostedVersions),
-        filter: projectNameFilter(projects));
+    if (!skipPreRelease) {
+      await executor.execute(lifecycle.preRelease(
+              type: type, autoUpdateHostedVersions: autoUpdateHostedVersions),
+          filter: projectNameFilter(projects));
+    }
+
     if (!preReleaseOnly) {
       await executor.execute(lifecycle.release(
               type: type, autoUpdateHostedVersions: autoUpdateHostedVersions),
