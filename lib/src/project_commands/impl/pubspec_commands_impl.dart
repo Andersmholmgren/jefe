@@ -79,11 +79,6 @@ class PubSpecCommandsImpl implements PubSpecCommands {
       Iterable<Project> dependencies,
       DependencyType type,
       bool useGitIfNotHosted) async {
-//    if (dependencies.isEmpty) {
-//      _log.finest('No dependencies for project ${project.name}');
-//      return await project.pubspec.dependencies;
-//    }
-
     final newDependencies = new Map.from(project.pubspec.dependencies);
     final exportedDependencyNames =
         (await project.exportedDependencyNames).toSet();
