@@ -104,7 +104,8 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   Future<Iterable<String>> get exportedDevDependencyNames async =>
       _exportedDependencyNames(pubspec.devDependencies.keys);
 
-  Future<Set<Directive>> get exportedPackageNames async {
+  @override
+  Future<Set<String>> get exportedPackageNames async {
     final Iterable<Directive> exports = (await compilationUnit)
         .map((cu) => cu.directives.where((d) => d is ExportDirective))
         .getOrDefault(const []);

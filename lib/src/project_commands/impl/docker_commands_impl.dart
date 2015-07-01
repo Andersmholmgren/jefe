@@ -255,7 +255,8 @@ class _TopLevelProjectFiles {
   bool get hasPathDependencies => pathDependentProjects.isNotEmpty;
 
   Set<Project> get pathDependentProjects {
-    final depMap = new Map.fromIterable(projectDependencies.allDependencies,
+    final dependencyMap = new Map.fromIterable(
+        projectDependencies.allDependencies,
         key: (project) => project.name);
 
     final allProjects = concat([
@@ -264,12 +265,13 @@ class _TopLevelProjectFiles {
     ]);
 
     final pathKeys = allProjects.expand((Project project) {
-      final deps = project.pubspec.dependencies;
-      return deps.keys.where(
-          (key) => deps[key] is PathReference && depMap.keys.contains(key));
+      final dependencies = project.pubspec.allDependencies;
+      return dependencies.keys.where((key) =>
+          dependencies[key] is PathReference &&
+              dependencyMap.keys.contains(key));
     });
 
-    return pathKeys.map((key) => depMap[key]).toSet();
+    return pathKeys.map((key) => dependencyMap[key]).toSet();
   }
 
   void addPathDependentProjects(

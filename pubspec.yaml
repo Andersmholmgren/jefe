@@ -25,5 +25,8 @@ dev_dependencies:
   unittest: '^0.11.5+4'
   scheduled_test: '0.11.8'
   mockito: '^0.8.2'
+dependency_overrides:
+  pubspec:
+    path: ../pubspec
 executables:
   jefe:

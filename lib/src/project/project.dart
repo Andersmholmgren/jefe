@@ -20,6 +20,7 @@ abstract class Project extends ProjectEntity {
   PubSpec get pubspec;
   ProjectIdentifier get id;
   Future<Option<CompilationUnit>> get compilationUnit;
+  Future<Set<String>> get exportedPackageNames;
   Future<Iterable<String>> get exportedDependencyNames;
   Future<Iterable<String>> get exportedDevDependencyNames;
 

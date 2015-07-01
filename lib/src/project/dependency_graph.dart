@@ -119,8 +119,9 @@ Future<Set<_ProjectDependencies>> _determineDependencies(
 
 Future<_ProjectDependencies> _resolveDependencies(
     Project project, Map<String, Project> projects) async {
-  final PubSpec pubspec = await project.pubspec;
-  final dependencies = pubspec.dependencies.keys
+  final PubSpec pubspec = project.pubspec;
+
+  final dependencies = pubspec.allDependencies.keys
       .map((name) => projects[name])
       .where((v) => v != null)
       .toSet();
