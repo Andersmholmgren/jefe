@@ -56,7 +56,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
     final GitDir gitDir = await cloneOrPull(
         gitUri,
         projectParentDir,
-        new Directory(gitWorkspacePath(gitUri, projectParentDir)),
+        new Directory(p.join(projectParentDir.path, name)),
         OnExistsAction.ignore);
 
     final installDirectory = new Directory(gitDir.path);
