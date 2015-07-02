@@ -49,10 +49,17 @@ class PubSpecCommandsImpl implements PubSpecCommands {
       projectCommandWithDependencies(
           'checking if $type dependencies have changed',
           (Project project, Iterable<Project> dependencies) async {
-        final expectedDependencies = await _createDependencyReferences(
-            project, dependencies, type, useGitIfNotHosted);
+        final exportedPackageNames = await project.exportedPackageNames;
 
-        final actualDependencies = project.pubspec.dependencies;
+        final actualDependencies = project.pubspec.allDependencies;
+
+        final expectedDependencies = await _createDependencyReferences(
+            project,
+            dependencies,
+            actualDependencies,
+            exportedPackageNames,
+            type,
+            useGitIfNotHosted);
 
         final dependenciesChanged = expectedDependencies.keys
             .any((k) => expectedDependencies[k] != actualDependencies[k]);
@@ -65,10 +72,27 @@ class PubSpecCommandsImpl implements PubSpecCommands {
   Future _setToDependencies(Project project, Iterable<Project> dependencies,
       DependencyType type, bool useGitIfNotHosted) async {
     _log.info('Setting up $type dependencies for project ${project.name}');
-    final newDependencies = await _createDependencyReferences(
-        project, dependencies, type, useGitIfNotHosted);
+    final exportedPackageNames = await project.exportedPackageNames;
 
-    final newPubspec = project.pubspec.copy(dependencies: newDependencies);
+    final newDependencies = await _createDependencyReferences(
+        project,
+        dependencies,
+        project.pubspec.dependencies,
+        exportedPackageNames,
+        type,
+        useGitIfNotHosted);
+
+    final newDevDependencies = await _createDependencyReferences(
+        project,
+        dependencies,
+        project.pubspec.devDependencies,
+        exportedPackageNames,
+        type,
+        useGitIfNotHosted);
+
+    final newPubspec = project.pubspec.copy(
+        dependencies: newDependencies, devDependencies: newDevDependencies);
+
     await project.updatePubspec(newPubspec);
     _log.finer(
         'Finished setting up $type dependencies for project ${project.name}');
@@ -76,21 +100,21 @@ class PubSpecCommandsImpl implements PubSpecCommands {
 
   Future<Map<String, DependencyReference>> _createDependencyReferences(
       Project project,
-      Iterable<Project> dependencies,
+      Iterable<Project> allDependencies,
+      Map<String, DependencyReference> dependencyRefs,
+      Set<String> exportedPackageNames,
       DependencyType type,
       bool useGitIfNotHosted) async {
-//    if (dependencies.isEmpty) {
-//      _log.finest('No dependencies for project ${project.name}');
-//      return await project.pubspec.dependencies;
-//    }
+    final newDependencies = new Map.from(dependencyRefs);
 
-    final newDependencies = new Map.from(project.pubspec.dependencies);
-    final exportedDependencyNames =
-        (await project.exportedDependencyNames).toSet();
+    final pubspecProjectNames = dependencyRefs.keys.toSet();
 
-    await Future.wait(dependencies.map((p) async {
+    final pubspecDependencies =
+        allDependencies.where((p) => pubspecProjectNames.contains(p.name));
+
+    await Future.wait(pubspecDependencies.map((p) async {
       final ref = await _createDependencyReference(
-          p, type, useGitIfNotHosted, exportedDependencyNames);
+          p, type, useGitIfNotHosted, exportedPackageNames);
       _log.finest('created reference $ref to project ${p.name}');
       newDependencies[p.name] = ref;
     }));

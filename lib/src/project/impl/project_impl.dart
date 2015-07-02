@@ -56,7 +56,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
     final GitDir gitDir = await cloneOrPull(
         gitUri,
         projectParentDir,
-        new Directory(gitWorkspacePath(gitUri, projectParentDir)),
+        new Directory(p.join(projectParentDir.path, name)),
         OnExistsAction.ignore);
 
     final installDirectory = new Directory(gitDir.path);
@@ -97,7 +97,15 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   String toString() => 'Project($name, $gitUri)';
 
   @override
-  Future<Iterable<String>> get exportedDependencyNames async {
+  Future<Iterable<String>> get exportedDependencyNames async =>
+      _exportedDependencyNames(pubspec.dependencies.keys);
+
+  @override
+  Future<Iterable<String>> get exportedDevDependencyNames async =>
+      _exportedDependencyNames(pubspec.devDependencies.keys);
+
+  @override
+  Future<Set<String>> get exportedPackageNames async {
     final Iterable<Directive> exports = (await compilationUnit)
         .map((cu) => cu.directives.where((d) => d is ExportDirective))
         .getOrDefault(const []);
@@ -107,8 +115,13 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
         .where((uri) => uri.startsWith('package:'))
         .map((String uri) => uri.substring('package:'.length, uri.indexOf('/')))
         .toSet();
+    return exportedPackageNames;
+  }
 
-    return pubspec.dependencies.keys
-        .where((n) => exportedPackageNames.contains(n));
+  Future<Iterable<String>> _exportedDependencyNames(
+      Iterable<String> dependencyNames) async {
+    final exported = await exportedPackageNames;
+
+    return dependencyNames.where((n) => exported.contains(n));
   }
 }

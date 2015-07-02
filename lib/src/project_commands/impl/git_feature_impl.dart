@@ -97,6 +97,7 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
         await gitPush(gitDir);
         await gitCheckout(gitDir, developBranchName);
         await gitMerge(gitDir, 'master', ffOnly: false);
+        await gitDir.runCommand(['push', 'origin', 'master']);
       });
 
   @override

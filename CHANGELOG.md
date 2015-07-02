@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.4
+
+* added `jefe test` which runs `pub run test` on all projects that have a test
+dir
+
+* added `dev_dependencies` to the project dependencies that `jefe` manages
+
 ## 0.2.3
 
 * support auto update of hosted versions
