@@ -16,8 +16,8 @@ dependencies:
   frappe: '^0.4.0+4'
   unscripted: '^0.6.0'
   stack_trace: '^1.3.1'
-  pubspec: '^0.0.3'
-  yamlicious: '^0.0.1'
+  pubspec: '^0.0.4'
+  yamlicious: '^0.0.3'
   dockerfile: '^0.0.1'
   http: '^0.11.2'
 #  den_api: any
