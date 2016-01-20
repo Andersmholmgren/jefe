@@ -3,7 +3,7 @@
 
 library jefe.project.group.test;
 
-import 'package:scheduled_test/scheduled_test.dart';
+import 'package:test/test.dart';
 import 'package:jefe/src/project/project.dart';
 import 'dart:async';
 import 'package:logging/logging.dart';
