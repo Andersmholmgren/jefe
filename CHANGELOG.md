@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.7
+
+* Fix to work with normal tags (non annotated) too
+* Don't run tests if project doesn't use test package
+
 ## 0.2.4
 
 * added `jefe test` which runs `pub run test` on all projects that have a test

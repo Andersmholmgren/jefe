@@ -4,7 +4,7 @@
 library jefe.project.dependency.test;
 
 import 'package:jefe/src/project/dependency_graph.dart';
-import 'package:scheduled_test/scheduled_test.dart';
+import 'package:test/test.dart';
 import 'package:jefe/src/project/project.dart';
 import 'package:logging/logging.dart';
 import 'test_helpers.dart';
@@ -33,11 +33,9 @@ main() async {
     group('for a single project that has no dependencies', () {
       final project1 = aProject('project1');
 
-      expectThat(
-          withTheseProjects: () => [project1],
-          weGetTheseInvocations: [
-            () => new TestProcessInvocation(project1, const [])
-          ]);
+      expectThat(withTheseProjects: () => [project1], weGetTheseInvocations: [
+        () => new TestProcessInvocation(project1, const [])
+      ]);
     });
 
     group('for two projects with a single dependency', () {
@@ -79,8 +77,7 @@ class TestProcessor {
   static createTests(
       TestProcessor processor(), List<TestProcessInvocationFactory> expected) {
     test('has expected number of invocations', () {
-      schedule(
-          () => expect(processor().invocations, hasLength(expected.length)));
+      expect(processor().invocations, hasLength(expected.length));
     });
 
     group('each invocation matches expectation', () {
@@ -103,12 +100,11 @@ class TestProcessInvocation {
   static createTests(
       TestProcessInvocation actual(), TestProcessInvocationFactory expected) {
     test('invocation has expected project', () {
-      schedule(() => expect(actual().project, equals(expected().project)));
+      expect(actual().project, equals(expected().project));
     });
 
     test('invocation has expected dependencies', () {
-      schedule(() => expect(
-          actual().dependencies, unorderedEquals(expected().dependencies)));
+      expect(actual().dependencies, unorderedEquals(expected().dependencies));
     });
   }
 }
@@ -120,14 +116,11 @@ expectThat(
   TestProcessor processor;
   Iterable<Project> theProjects;
 
-  scheduleForProjects(Iterable<Project> projects()) {
-    return schedule(() async {
-      theProjects = projects();
-      processor = new TestProcessor();
-      final DependencyGraph graph =
-          await getDependencyGraph(theProjects.toSet());
-      return graph.processDepthFirst(processor);
-    });
+  scheduleForProjects(Iterable<Project> projects()) async {
+    theProjects = projects();
+    processor = new TestProcessor();
+    final DependencyGraph graph = await getDependencyGraph(theProjects.toSet());
+    return graph.processDepthFirst(processor);
   }
 
   setUpForProjects(Iterable<Project> projects()) {

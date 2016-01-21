@@ -182,8 +182,8 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
   @override
   ExecutorAwareProjectCommand init({bool doCheckout: true}) {
-    return executorAwareCommand(
-        'Initialising for development', (CommandExecutor executor) async {
+    return executorAwareCommand('Initialising for development',
+        (CommandExecutor executor) async {
       await executor.execute(projectCommandGroup(
           'Initialising for development', [_gitFeature.init(), _git.fetch()]));
 
@@ -258,44 +258,56 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       Iterable<Project> dependencies) async {
     final isHosted = latestPublishedVersionOpt is Some;
 
-//    final latestReleasedVersion = latestPublishedVersionOpt
-//    .map((lpv) => lpv >= latestTaggedVersion ? lpv : latestTaggedVersion)
-//    .getOrDefault(latestTaggedVersion);
-
-    final latestTaggedVersion =
-        latestTaggedVersionOpt.getOrElse(() => new Version(0, 0, 1));
-
-    if (latestTaggedVersion > currentPubspecVersion) {
-      throw new StateError('the latest tagged version $latestTaggedVersion'
-          ' is greater than the current pubspec version $currentPubspecVersion');
-    } else {
-      if (latestTaggedVersion < currentPubspecVersion) {
-        // manually bumped version
-        return await new Some(currentPubspecVersion);
+    if (latestTaggedVersionOpt is Some) {
+      final latestTaggedVersion = latestTaggedVersionOpt.get();
+      if (latestTaggedVersion > currentPubspecVersion) {
+        throw new StateError('the latest tagged version $latestTaggedVersion'
+            ' is greater than the current pubspec version $currentPubspecVersion');
       } else {
-        // latest released version is same as pubspec version
-        final hasChangesSinceLatestTaggedVersion =
-            await _hasChangesSince(gitDir, latestTaggedVersion);
-
-        final hasChanges = hasChangesSinceLatestTaggedVersion ||
-            (await _pubSpec
-                .haveDependenciesChanged(DependencyType.hosted)
-                .process(project, dependencies: dependencies));
-
-        if (hasChanges) {
-          if (isHosted && !autoUpdateHostedVersions) {
-            // Hosted packages must observe semantic versioning so not sensible
-            // to try to automatically bump version, unless the user explicitly
-            // requests it
-            throw new ArgumentError(
-                '${project.name} is hosted and has changes. '
-                'The version must be manually changed for hosted packages');
-          } else {
-            return new Some(type.bump(currentPubspecVersion));
-          }
+        if (latestTaggedVersion < currentPubspecVersion) {
+          // manually bumped version
+          return new Some(currentPubspecVersion);
         } else {
+          // latest released version is same as pubspec version
+          final hasChangesSinceLatestTaggedVersion =
+              await _hasChangesSince(gitDir, latestTaggedVersion);
+
+          final hasChanges = hasChangesSinceLatestTaggedVersion ||
+              (await _pubSpec
+                  .haveDependenciesChanged(DependencyType.hosted)
+                  .process(project, dependencies: dependencies));
+
+          if (hasChanges) {
+            if (isHosted && !autoUpdateHostedVersions) {
+              // Hosted packages must observe semantic versioning so not sensible
+              // to try to automatically bump version, unless the user explicitly
+              // requests it
+              throw new ArgumentError(
+                  '${project.name} is hosted and has changes. '
+                  'The version must be manually changed for hosted packages');
+            } else {
+              return new Some(type.bump(currentPubspecVersion));
+            }
+          } else {
+            return const None();
+          }
+        }
+      }
+    } else {
+      // never been tagged
+      if (isHosted) {
+        if (currentPubspecVersion > latestPublishedVersionOpt.get()) {
+          return new Some(currentPubspecVersion);
+        } else {
+          _log.warning(() =>
+              "Project ${project.name} is hosted but has never been tagged in git. "
+              "Can't tell if there are unpublished changes. "
+              "Will not release as pubspec version is not greater than hosted version");
           return const None();
         }
+      } else {
+        // never tagged and never published. Assume it needs releasing
+        return new Some(currentPubspecVersion);
       }
     }
   }
@@ -320,4 +332,9 @@ class ProjectVersions {
 
   ProjectVersions(this.pubspecVersion, this.taggedGitVersion,
       this.publishedVersion, this.newReleaseVersion);
+}
+
+main() {
+  print(new Version(0, 0, 1) > new Version(0, 0, 1, build: '2'));
+  print(new Version(0, 0, 1, build: '2') > new Version(0, 0, 1));
 }

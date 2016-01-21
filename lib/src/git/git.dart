@@ -11,6 +11,7 @@ import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:quiver/iterables.dart';
+import 'dart:convert';
 
 Logger _log = new Logger('jefe.git');
 
@@ -79,14 +80,28 @@ Future gitCheckout(GitDir gitDir, String branchName) async {
 Future gitTag(GitDir gitDir, String tag) async =>
     await gitDir.runCommand(['tag', '-a', '-m', 'release $tag', tag]);
 
+//Future<Iterable<Version>> gitFetchVersionTags(GitDir gitDir) async =>
+//    _extractVersions(await gitDir.getTags()).map((Tag tag) => tag.tag);
+
 Future<Iterable<Version>> gitFetchVersionTags(GitDir gitDir) async =>
-    (await gitDir.getTags()).map((Tag tag) {
+    _extractVersions(await _getTagNames(gitDir));
+
+Future<Iterable<String>> _getTagNames(GitDir gitDir) async {
+  final String out = (await gitDir.runCommand(['tag'])).stdout.trim();
+  return LineSplitter.split(out);
+}
+
+Iterable<Version> _extractVersions(Iterable<String> tagNames) => tagNames
+    .map((String tagName) {
       try {
-        return new Some(new Version.parse(tag.tag));
+        return new Some(new Version.parse(tagName));
       } on FormatException catch (_) {
         return const None();
       }
-    }).where((o) => o is Some).map((o) => o.get()).toList()..sort();
+    })
+    .where((o) => o is Some)
+    .map((o) => o.get())
+    .toList()..sort();
 
 Future gitPush(GitDir gitDir) async {
   final BranchReference current = await gitDir.getCurrentBranch();

@@ -26,6 +26,13 @@ class PubCommandsImpl implements PubCommands {
       (Project p) async => await pub.publish(p.installDirectory));
 
   @override
-  ProjectCommand test() => projectCommand(
-      'pub run test', (Project p) async => await pub.test(p.installDirectory));
+  ProjectCommand test() => projectCommand('pub run test', (Project p) async {
+        final hasTestPackage = p.pubspec.allDependencies.containsKey('test');
+        if (hasTestPackage) {
+          return await pub.test(p.installDirectory);
+        } else {
+          _log.warning(() =>
+              "Ignoring tests for project ${p.name} as doesn't use test package");
+        }
+      });
 }
