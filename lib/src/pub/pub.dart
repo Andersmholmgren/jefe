@@ -27,9 +27,11 @@ Future publish(Directory projectDirectory) =>
         processWorkingDir: projectDirectory.path);
 
 Future<Option<HostedPackageVersions>> fetchPackageVersions(
-    String packageName) async {
+    String packageName, {Uri publishToUrl}) async {
+  final baseUrl = publishToUrl?.toString() ?? 'https://pub.dartlang.org';
+
   final http.Response response =
-      await http.get('https://pub.dartlang.org/api/packages/$packageName');
+      await http.get('$baseUrl/api/packages/$packageName');
 
   switch (response.statusCode) {
     case 200:
