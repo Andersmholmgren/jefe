@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.7
+
+* Fix to work with normal tags (non annotated) too
+
 ## 0.2.4
 
 * added `jefe test` which runs `pub run test` on all projects that have a test
