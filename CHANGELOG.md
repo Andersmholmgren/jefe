@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.8
+
+* Support third party pub repos via publish_to pubspec property
+
 ## 0.2.7
 
 * Fix to work with normal tags (non annotated) too
