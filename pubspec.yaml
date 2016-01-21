@@ -6,6 +6,7 @@ version: 0.2.6
 dependencies: 
   analyzer: '>=0.25.0+1'
   frappe: '^0.4.0+4'
+  git: '^0.4.4+1'
   http: '^0.11.2'
   logging: '^0.10.0'
   option: '^1.1.0'
@@ -18,11 +19,7 @@ dependencies:
     git: 
       ref: cb21b1b6528a4335e0f04adf65e1de770e807e9a
       url: git@github.com:Andersmholmgren/dockerfile.git
-  git: 
-    git: 
-      ref: 8b7a8bf7e07d04c0d767660967060f44571060c1
-      url: git@github.com:Andersmholmgren/git.dart.git
-  pubspec: 
+  pubspec:
     git: 
       ref: d5de83e80058fcec5428a9aa17db3d38c092293b
       url: git@github.com:Andersmholmgren/pubspec.git
