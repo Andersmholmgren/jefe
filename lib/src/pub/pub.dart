@@ -11,6 +11,9 @@ import 'package:jefe/src/pub/pub_version.dart';
 import 'package:option/option.dart';
 import 'dart:convert';
 import 'package:path/path.dart' as p;
+import 'package:logging/logging.dart';
+
+final Logger _log = new Logger('jefe.pub');
 
 Future get(Directory projectDirectory) =>
     runCommand('pub', ['get'], processWorkingDir: projectDirectory.path);
@@ -26,12 +29,17 @@ Future publish(Directory projectDirectory) =>
     runCommand('pub', ['publish', '--force'],
         processWorkingDir: projectDirectory.path);
 
-Future<Option<HostedPackageVersions>> fetchPackageVersions(
-    String packageName, {Uri publishToUrl}) async {
+Future<Option<HostedPackageVersions>> fetchPackageVersions(String packageName,
+    {Uri publishToUrl}) async {
   final baseUrl = publishToUrl?.toString() ?? 'https://pub.dartlang.org';
 
-  final http.Response response =
-      await http.get('$baseUrl/api/packages/$packageName');
+  final packageDetailsUrl = '$baseUrl/api/packages/$packageName';
+
+  _log.finest('Attempting to fetch published versions from $packageDetailsUrl');
+
+  final http.Response response = await http.get(packageDetailsUrl);
+
+  _log.finest('Received response code (${response.statusCode}) from $packageDetailsUrl');
 
   switch (response.statusCode) {
     case 200:
