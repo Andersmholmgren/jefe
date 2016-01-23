@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.9
+
+* Bug fix. Missed case for using `publish_to` property when fetching versions
+
 ## 0.2.8
 
 * Support third party pub repos via publish_to pubspec property

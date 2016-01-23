@@ -2,7 +2,7 @@ author: "Anders Holmgren <andersmholmgren@gmail.com>"
 description: "A library for maintaining sets of related Dart projects versioned in git, in particular managing dependencies between them."
 homepage: "https://github.com/Andersmholmgren/jefe"
 name: "jefe"
-version: "0.2.8"
+version: "0.2.9"
 dependencies: 
   analyzer: ">=0.25.0+1"
   frappe: "^0.4.0+4"
