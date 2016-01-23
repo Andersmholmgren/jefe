@@ -147,7 +147,9 @@ class PubSpecCommandsImpl implements PubSpecCommands {
   Future<DependencyReference> _getHostedReference(Project project,
       bool useGitIfNotHosted, Set<String> exportedDependencyNames) async {
     final Option<HostedPackageVersions> packageVersionsOpt =
-        await pub.fetchPackageVersions(project.name);
+        await pub.fetchPackageVersions(project.name,
+            publishToUrl: project.pubspec.publishTo);
+
     if (packageVersionsOpt is Some) {
       final Version version = packageVersionsOpt.get().versions.last.version;
       final isExported = exportedDependencyNames.contains(project.name);
