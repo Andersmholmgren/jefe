@@ -39,14 +39,19 @@ Future<Option<HostedPackageVersions>> fetchPackageVersions(String packageName,
 
   final http.Response response = await http.get(packageDetailsUrl);
 
-  _log.finest('Received response code (${response.statusCode}) from $packageDetailsUrl');
+  _log.finest(
+      'Received response code (${response.statusCode}) from $packageDetailsUrl');
 
   switch (response.statusCode) {
     case 200:
+      _log.finer('Found published package versions. '
+          'Assuming package $packageName is hosted');
       return new Some(
           new HostedPackageVersions.fromJson(JSON.decode(response.body)));
 
     case 404:
+      _log.finer('Found NO published package versions. '
+          'Assuming package $packageName is NOT hosted');
       return const None();
 
     default:
