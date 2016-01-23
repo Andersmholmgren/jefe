@@ -17,7 +17,7 @@ dependencies:
   yaml: "^2.0.1+1"
   dockerfile: 
     git: 
-      ref: "6d92930851f412f5690a6081d3de2c2645564b9a"
+      ref: "e5caad7c3e7a6e7965b76cb73edd152f2415c418"
       url: "git@github.com:Andersmholmgren/dockerfile.git"
   pubspec: 
     git: 
