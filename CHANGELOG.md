@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.10
+
+* Updated pubspec dependency
+
 ## 0.2.9
 
 * Bug fix. Missed case for using `publish_to` property when fetching versions
