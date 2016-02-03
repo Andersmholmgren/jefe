@@ -123,7 +123,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
               '==> project ${project.name} will be upgraded from version: '
               '${versions.taggedGitVersion} '
               'to: ${versions.newReleaseVersion.get()}. '
-              'It will ${versions.isHosted ? "" : "NOT "}be published to pub');
+              'It will ${versions.hasBeenPublished ? "" : "NOT "}be published to pub');
         } else {
           _log.info('project ${project.name} will NOT be upgraded. '
               'It will remain at version: ${versions.pubspecVersion}');
@@ -167,7 +167,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
         await _git.commit('releasing version $releaseVersion').process(project);
 
-        if (projectVersions.isHosted) {
+        if (projectVersions.hasBeenPublished) {
           await _pub.publish().process(project);
         }
 
@@ -332,7 +332,7 @@ class ProjectVersions {
   final Option<Version> publishedVersion;
   final Option<Version> newReleaseVersion;
 
-  bool get isHosted => publishedVersion is Some;
+  bool get hasBeenPublished => publishedVersion is Some;
   bool get newReleaseRequired => newReleaseVersion is Some;
 
   ProjectVersions(this.pubspecVersion, this.taggedGitVersion,
