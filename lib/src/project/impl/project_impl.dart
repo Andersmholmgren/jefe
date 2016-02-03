@@ -6,7 +6,7 @@ library jefe.project.impl;
 import 'dart:async';
 import '../project.dart';
 import 'package:git/git.dart';
-import '../../git/git.dart';
+import '../../git/git.dart' as git;
 import 'package:logging/logging.dart';
 import '../../spec/jefe_spec.dart';
 import 'package:jefe/src/project/impl/project_group_impl.dart';
@@ -65,11 +65,11 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
     final projectParentDir = await parentDir.create(recursive: true);
 
-    final GitDir gitDir = await cloneOrPull(
+    final GitDir gitDir = await git.cloneOrPull(
         gitUri,
         projectParentDir,
         new Directory(p.join(projectParentDir.path, name)),
-        OnExistsAction.ignore);
+        git.OnExistsAction.ignore);
 
     final installDirectory = new Directory(gitDir.path);
     return new ProjectImpl(
@@ -82,7 +82,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
     final PubSpec pubspec = await PubSpec.load(installDirectory);
 
-    final String gitUri = await getOriginOrFirstRemote(gitDir);
+    final String gitUri = await git.getOriginOrFirstRemote(gitDir);
     return new ProjectImpl(gitUri, installDirectory, pubspec);
   }
 
@@ -96,7 +96,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   @override
   Future<String> get currentGitCommitHash async =>
-      currentCommitHash(await gitDir);
+      git.currentCommitHash(await gitDir);
 
   @override
   Future<Option<CompilationUnit>> get compilationUnit async {
@@ -146,11 +146,8 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
     return latestTaggedVersionOpt;
   }
 
-  Future<Iterable<Version>> get taggedGitVersions =>
-      projectCommand('fetch git release version tags', (Project p) async {
-        final gitDir = await p.gitDir;
-        return await gitFetchVersionTags(gitDir);
-      });
+  Future<Iterable<Version>> get taggedGitVersions async =>
+      git.gitFetchVersionTags(await gitDir);
 
   Future<Option<Version>> get latestPublishedVersion async {
     return (await publishedVersions).map(
