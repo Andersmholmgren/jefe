@@ -256,7 +256,12 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       ReleaseType type,
       Project project,
       Iterable<Project> dependencies) async {
-    final isHosted = latestPublishedVersionOpt is Some;
+    final hasBeenPublished = latestPublishedVersionOpt is Some;
+    final hostedMode = project.hostedMode != HostedMode.inferred
+        ? project.hostedMode
+        : hasBeenPublished ? HostedMode.hosted : HostedMode.notHosted;
+
+    final isHosted = hostedMode == HostedMode.hosted;
 
     if (latestTaggedVersionOpt is Some) {
       final latestTaggedVersion = latestTaggedVersionOpt.get();
@@ -295,7 +300,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       }
     } else {
       // never been tagged
-      if (isHosted) {
+      if (hasBeenPublished) {
         if (currentPubspecVersion > latestPublishedVersionOpt.get()) {
           return new Some(currentPubspecVersion);
         } else {
