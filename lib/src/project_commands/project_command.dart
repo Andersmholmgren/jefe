@@ -180,21 +180,17 @@ class _DefaultCommand implements ProjectCommand {
       return null;
     }
 
-    _log.info('Executing command "$taskDescription"');
-    final stopWatch = new Stopwatch();
-    stopWatch.start();
-
     if (function is! ProjectWithDependenciesFunction &&
         function is! ProjectFunction) {
       throw new ArgumentError('Invalid function passed into process');
     }
+
+    final Callable callable = () => (function is ProjectWithDependenciesFunction
+        ? function(project, dependencies)
+        : function(project));
+
     try {
-      final result = await (function is ProjectWithDependenciesFunction
-          ? function(project, dependencies)
-          : function(project));
-      _log.info('Completed command "$taskDescription" in ${stopWatch.elapsed}');
-      stopWatch.stop();
-      return result;
+      return executeCallable(callable, taskDescription);
     } catch (e) {
 //      print(stackTrace);
       throw new ProjectCommandError(this, project, e);
