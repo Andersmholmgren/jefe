@@ -137,11 +137,6 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
     return dependencyNames.where((n) => exported.contains(n));
   }
 
-  Future<Option<Version>> get latestPublishedVersion async {
-    return (await publishedVersions).map(
-        (HostedPackageVersions versions) => versions.versions.last.version);
-  }
-
   Future<Option<Version>> get latestTaggedGitVersion async {
     final _taggedVersions = await taggedGitVersions;
 
@@ -156,6 +151,11 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
         final gitDir = await p.gitDir;
         return await gitFetchVersionTags(gitDir);
       });
+
+  Future<Option<Version>> get latestPublishedVersion async {
+    return (await publishedVersions).map(
+        (HostedPackageVersions versions) => versions.versions.last.version);
+  }
 
   Future<Option<HostedPackageVersions>> get publishedVersions async {}
 }
