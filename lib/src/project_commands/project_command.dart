@@ -27,7 +27,8 @@ enum CommandConcurrencyMode { serial, concurrentProject, concurrentCommand }
 
 /// A command that operates on a single [Project]
 ProjectCommand projectCommand(String name, ProjectFunction function,
-        {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand,
+        {CommandConcurrencyMode concurrencyMode:
+            CommandConcurrencyMode.concurrentCommand,
         Condition condition: _alwaysYes}) =>
     new _DefaultCommand(name, function, concurrencyMode, condition);
 
@@ -45,7 +46,8 @@ ProjectCommand projectCommandWithDependencies(
 /// [Project]s in the group simultaneously
 CompositeProjectCommand projectCommandGroup(
     String name, Iterable<ProjectCommand> commands,
-    {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand}) {
+    {CommandConcurrencyMode concurrencyMode:
+        CommandConcurrencyMode.concurrentCommand}) {
   return new _DefaultCompositeProjectCommand(name, commands, concurrencyMode);
 }
 
@@ -137,6 +139,26 @@ class ProjectCommandError {
   ProjectCommandError(this.command, this.project, this.cause);
 
   String toString() => 'ProjectCommandError: $message';
+}
+
+typedef Future<T> Callable<T>();
+
+Future /*<T>*/ executeCallable /*<T>*/ (
+    Callable /*<T>*/ callable, String taskDescription) async {
+  _log.info('Executing command "$taskDescription"');
+  final stopWatch = new Stopwatch();
+  stopWatch.start();
+
+  try {
+    final result = await callable();
+    _log.info('Completed command "$taskDescription" in ${stopWatch.elapsed}');
+    stopWatch.stop();
+    return result;
+  } catch (e) {
+    _log.warning('Failed command "$taskDescription" in ${stopWatch.elapsed}. '
+        'Exception thrown: $e');
+    rethrow;
+  }
 }
 
 class _DefaultCommand implements ProjectCommand {
