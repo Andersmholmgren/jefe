@@ -219,12 +219,8 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
     final currentPubspecVersion = project.pubspec.version;
 
-    final taggedVersions =
-        await _gitFeature.getReleaseVersionTags().process(project);
-
-    final Option<Version> latestTaggedVersionOpt = taggedVersions.isNotEmpty
-        ? new Some(taggedVersions.last)
-        : const None();
+    final Option<Version> latestTaggedVersionOpt =
+        await _latestTaggedVersion(project);
 
     final Option<Version> latestPublishedVersionOpt =
         await _latestPublishedVersion(project);
@@ -245,6 +241,16 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
     return new ProjectVersions(currentPubspecVersion, latestTaggedVersionOpt,
         latestPublishedVersionOpt, releaseVersionOpt);
+  }
+
+  Future<Option<Version>> _latestTaggedVersion(Project project) async {
+    final taggedVersions =
+        await _gitFeature.getReleaseVersionTags().process(project);
+
+    final Option<Version> latestTaggedVersionOpt = taggedVersions.isNotEmpty
+        ? new Some(taggedVersions.last)
+        : const None();
+    return latestTaggedVersionOpt;
   }
 
   Future<Option<Version>> _getReleaseVersion(

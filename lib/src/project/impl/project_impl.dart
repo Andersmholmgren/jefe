@@ -16,6 +16,8 @@ import 'core_impl.dart';
 import 'package:analyzer/analyzer.dart';
 import 'package:path/path.dart' as p;
 import 'package:option/option.dart';
+import 'package:jefe/src/pub/pub_version.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 Logger _log = new Logger('jefe.project.impl');
 
@@ -134,4 +136,27 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
     return dependencyNames.where((n) => exported.contains(n));
   }
+
+  Future<Option<Version>> get latestPublishedVersion async {
+    final Option<HostedPackageVersions> publishedVersionsOpt =
+        await _pub.fetchPackageVersions().process(this);
+
+    return publishedVersionsOpt.map(
+        (HostedPackageVersions versions) => versions.versions.last.version);
+  }
+
+  Future<Option<Version>> get latestTaggedGitVersion async {
+    final _taggedVersions = await taggedGitVersions;
+
+    final Option<Version> latestTaggedVersionOpt = _taggedVersions.isNotEmpty
+        ? new Some(_taggedVersions.last)
+        : const None();
+    return latestTaggedVersionOpt;
+  }
+
+  Future<Iterable<Version>> get taggedGitVersions =>
+      projectCommand('fetch git release version tags', (Project p) async {
+        final gitDir = await p.gitDir;
+        return await gitFetchVersionTags(gitDir);
+      });
 }
