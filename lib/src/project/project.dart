@@ -23,6 +23,7 @@ abstract class Project extends ProjectEntity {
   Future<Set<String>> get exportedPackageNames;
   Future<Iterable<String>> get exportedDependencyNames;
   Future<Iterable<String>> get exportedDevDependencyNames;
+  HostedMode get hostedMode;
 
   /// Installs a Project from the [gitUri] into the [parentDirectory]
   static Future<Project> install(
@@ -36,3 +37,5 @@ abstract class Project extends ProjectEntity {
 
   Future updatePubspec(PubSpec newSpec);
 }
+
+enum HostedMode { hosted, notHosted, inferred }
