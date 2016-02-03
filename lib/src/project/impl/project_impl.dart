@@ -7,6 +7,7 @@ import 'dart:async';
 import '../project.dart';
 import 'package:git/git.dart';
 import '../../git/git.dart' as git;
+import '../../pub/pub.dart' as pub;
 import 'package:logging/logging.dart';
 import '../../spec/jefe_spec.dart';
 import 'package:jefe/src/project/impl/project_group_impl.dart';
@@ -154,5 +155,6 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
         (HostedPackageVersions versions) => versions.versions.last.version);
   }
 
-  Future<Option<HostedPackageVersions>> get publishedVersions async {}
+  Future<Option<HostedPackageVersions>> get publishedVersions async =>
+      pub.fetchPackageVersions(name, publishToUrl: pubspec.publishTo);
 }
