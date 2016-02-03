@@ -131,13 +131,6 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
     return exportedPackageNames;
   }
 
-  Future<Iterable<String>> _exportedDependencyNames(
-      Iterable<String> dependencyNames) async {
-    final exported = await exportedPackageNames;
-
-    return dependencyNames.where((n) => exported.contains(n));
-  }
-
   Future<Option<Version>> get latestTaggedGitVersion async {
     final _taggedVersions = await taggedGitVersions;
 
@@ -157,4 +150,11 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   Future<Option<HostedPackageVersions>> get publishedVersions async =>
       pub.fetchPackageVersions(name, publishToUrl: pubspec.publishTo);
+
+  Future<Iterable<String>> _exportedDependencyNames(
+      Iterable<String> dependencyNames) async {
+    final exported = await exportedPackageNames;
+
+    return dependencyNames.where((n) => exported.contains(n));
+  }
 }
