@@ -152,12 +152,13 @@ Future /*<T>*/ executeCallable /*<T>*/ (
   try {
     final result = await callable();
     _log.info('Completed command "$taskDescription" in ${stopWatch.elapsed}');
-    stopWatch.stop();
     return result;
   } catch (e) {
     _log.warning('Failed command "$taskDescription" in ${stopWatch.elapsed}. '
         'Exception thrown: $e');
     rethrow;
+  } finally {
+    stopWatch.stop();
   }
 }
 
