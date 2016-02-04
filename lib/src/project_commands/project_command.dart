@@ -162,7 +162,7 @@ Future /*<T>*/ executeCallable /*<T>*/ (
   }
 }
 
-class _DefaultCommand implements ProjectCommand {
+class _DefaultCommand<T> implements ProjectCommand<T> {
   final String name;
   final Function function;
   final CommandConcurrencyMode concurrencyMode;
@@ -172,7 +172,7 @@ class _DefaultCommand implements ProjectCommand {
       this.name, this.function, this.concurrencyMode, this.condition);
 
   @override
-  Future process(Project project,
+  Future<T> process(Project project,
       {Iterable<Project> dependencies: const []}) async {
     final taskDescription = '$name for project ${project.name}';
     if (!condition()) {
@@ -186,7 +186,7 @@ class _DefaultCommand implements ProjectCommand {
       throw new ArgumentError('Invalid function passed into process');
     }
 
-    final Callable callable = () => (function is ProjectWithDependenciesFunction
+    final Callable<T> callable = () => (function is ProjectWithDependenciesFunction
         ? function(project, dependencies)
         : function(project));
 
