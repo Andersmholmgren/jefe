@@ -254,14 +254,11 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       Project project,
       Iterable<Project> dependencies) async {
     final hasBeenPublished = currentVersions.hasBeenPublished;
-    final hostedMode = project.hostedMode != HostedMode.inferred
-        ? project.hostedMode
-        : currentVersions.hasBeenPublished ? HostedMode.hosted : HostedMode.notHosted;
+    final isHosted = currentVersions.isHosted;
+    final currentPubspecVersion = currentVersions.pubspecVersion;
 
-    final isHosted = hostedMode == HostedMode.hosted;
-
-    if (latestTaggedVersionOpt is Some) {
-      final latestTaggedVersion = latestTaggedVersionOpt.get();
+    if (currentVersions.hasBeenGitTagged) {
+      final latestTaggedVersion = currentVersions.taggedGitVersion.get();
       if (latestTaggedVersion > currentPubspecVersion) {
         throw new StateError('the latest tagged version $latestTaggedVersion'
             ' is greater than the current pubspec version $currentPubspecVersion');
@@ -298,7 +295,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     } else {
       // never been tagged
       if (hasBeenPublished) {
-        if (currentPubspecVersion > latestPublishedVersionOpt.get()) {
+        if (currentPubspecVersion > currentVersions.publishedVersion.get()) {
           return new Some(currentPubspecVersion);
         } else {
           _log.warning(() =>

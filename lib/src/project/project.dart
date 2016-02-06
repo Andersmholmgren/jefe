@@ -56,9 +56,10 @@ class ProjectVersions2 {
   final Option<Version> taggedGitVersion;
   final Option<Version> publishedVersion;
 
+  bool get hasBeenGitTagged => taggedGitVersion is Some;
   bool get hasBeenPublished => publishedVersion is Some;
 
-  final bool isHosted;
+  final bool isHosted; // hmmm doesn't make sense in ProjectVersions2
 
   ProjectVersions2(this.pubspecVersion, this.taggedGitVersion,
       this.publishedVersion, this.isHosted);
