@@ -11,6 +11,8 @@ import 'core.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:analyzer/analyzer.dart';
 import 'package:option/option.dart';
+import 'package:pub_semver/pub_semver.dart';
+import 'package:jefe/src/pub/pub_version.dart';
 
 abstract class ProjectReference implements ProjectEntityReference<Project> {}
 
@@ -24,6 +26,12 @@ abstract class Project extends ProjectEntity {
   Future<Iterable<String>> get exportedDependencyNames;
   Future<Iterable<String>> get exportedDevDependencyNames;
   HostedMode get hostedMode;
+
+  Future<Option<Version>> get latestTaggedGitVersion;
+  Future<Iterable<Version>> get taggedGitVersions;
+
+  Future<Option<Version>> get latestPublishedVersion;
+  Future<Option<HostedPackageVersions>> get publishedVersions;
 
   /// Installs a Project from the [gitUri] into the [parentDirectory]
   static Future<Project> install(

@@ -132,6 +132,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
     return exportedPackageNames;
   }
 
+  @override
   Future<Option<Version>> get latestTaggedGitVersion async {
     final _taggedVersions = await taggedGitVersions;
 
@@ -141,14 +142,17 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
     return latestTaggedVersionOpt;
   }
 
+  @override
   Future<Iterable<Version>> get taggedGitVersions async =>
       git.gitFetchVersionTags(await gitDir);
 
+  @override
   Future<Option<Version>> get latestPublishedVersion async {
     return (await publishedVersions).map(
         (HostedPackageVersions versions) => versions.versions.last.version);
   }
 
+  @override
   Future<Option<HostedPackageVersions>> get publishedVersions async =>
       pub.fetchPackageVersions(name, publishToUrl: pubspec.publishTo);
 
