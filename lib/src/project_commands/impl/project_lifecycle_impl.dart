@@ -116,7 +116,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
           bool autoUpdateHostedVersions: false}) =>
       projectCommandWithDependencies('check release versions',
           (Project project, Iterable<Project> dependencies) async {
-        final ProjectVersions versions = await getCurrentProjectVersion(
+        final ProjectVersions versions = await getCurrentProjectVersions(
             project, dependencies, type, autoUpdateHostedVersions);
         if (versions.newReleaseVersion is Some) {
           _log.info(
@@ -136,7 +136,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       bool autoUpdateHostedVersions: false}) {
     return projectCommandWithDependencies('Release version: type $type',
         (Project project, Iterable<Project> dependencies) async {
-      final ProjectVersions projectVersions = await getCurrentProjectVersion(
+      final ProjectVersions projectVersions = await getCurrentProjectVersions(
           project, dependencies, type, autoUpdateHostedVersions);
 
       if (!projectVersions.newReleaseRequired) {
@@ -202,7 +202,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     });
   }
 
-  Future<ProjectVersions> getCurrentProjectVersion(
+  Future<ProjectVersions> getCurrentProjectVersions(
       Project project,
       Iterable<Project> dependencies,
       ReleaseType type,
