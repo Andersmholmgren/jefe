@@ -144,7 +144,7 @@ class ProjectCommandError {
 
 typedef Future<T> Callable<T>();
 
-Future /*<T>*/ executeCallable /*<T>*/ (
+Future /*<T>*/ executeTask /*<T>*/ (
     Callable /*<T>*/ callable, String taskDescription) async {
   _log.info('Executing command "$taskDescription"');
   final stopWatch = new Stopwatch();
@@ -193,7 +193,7 @@ class _DefaultCommand<T> implements ProjectCommand<T> {
             : function(project));
 
     try {
-      return executeCallable(callable, taskDescription);
+      return executeTask(callable, taskDescription);
     } catch (e) {
 //      print(stackTrace);
       throw new ProjectCommandError(this, project, e);
