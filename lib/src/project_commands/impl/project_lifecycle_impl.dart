@@ -219,22 +219,20 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
     final currentProjectVersions = await project.projectVersions;
 
-    final currentPubspecVersion = currentProjectVersions.pubspecVersion;
-
-    final Option<Version> latestTaggedVersionOpt =
-        currentProjectVersions.taggedGitVersion;
-
-    final Option<Version> latestPublishedVersionOpt =
-        currentProjectVersions.publishedVersion;
+//    final currentPubspecVersion = currentProjectVersions.pubspecVersion;
+//
+//    final Option<Version> latestTaggedVersionOpt =
+//        currentProjectVersions.taggedGitVersion;
+//
+//    final Option<Version> latestPublishedVersionOpt =
+//        currentProjectVersions.publishedVersion;
 
     _log.fine('${project.name}: pubspec version: $currentPubspecVersion; '
         'tagged version: $latestTaggedVersionOpt; '
         'published version: $latestPublishedVersionOpt');
 
     final Option<Version> releaseVersionOpt = await _getReleaseVersion(
-        latestTaggedVersionOpt,
-        currentPubspecVersion,
-        latestPublishedVersionOpt,
+        currentProjectVersions,
         autoUpdateHostedVersions,
         gitDir,
         type,
@@ -245,29 +243,20 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         latestPublishedVersionOpt, releaseVersionOpt);
   }
 
-  Future<Option<Version>> _latestTaggedVersion(Project project) async {
-    final taggedVersions =
-        await _gitFeature.getReleaseVersionTags().process(project);
-
-    final Option<Version> latestTaggedVersionOpt = taggedVersions.isNotEmpty
-        ? new Some(taggedVersions.last)
-        : const None();
-    return latestTaggedVersionOpt;
-  }
-
   Future<Option<Version>> _getReleaseVersion(
-      Option<Version> latestTaggedVersionOpt,
-      Version currentPubspecVersion,
-      Option<Version> latestPublishedVersionOpt,
+      ProjectVersions2 currentVersions,
+//      Option<Version> latestTaggedVersionOpt,
+//      Version currentPubspecVersion,
+//      Option<Version> latestPublishedVersionOpt,
       bool autoUpdateHostedVersions,
       GitDir gitDir,
       ReleaseType type,
       Project project,
       Iterable<Project> dependencies) async {
-    final hasBeenPublished = latestPublishedVersionOpt is Some;
+    final hasBeenPublished = currentVersions.hasBeenPublished;
     final hostedMode = project.hostedMode != HostedMode.inferred
         ? project.hostedMode
-        : hasBeenPublished ? HostedMode.hosted : HostedMode.notHosted;
+        : currentVersions.hasBeenPublished ? HostedMode.hosted : HostedMode.notHosted;
 
     final isHosted = hostedMode == HostedMode.hosted;
 

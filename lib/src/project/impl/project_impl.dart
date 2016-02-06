@@ -162,13 +162,30 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
               pub.fetchPackageVersions(name, publishToUrl: pubspec.publishTo),
           'fetch package versions');
 
+  @override
   Future<ProjectVersions2> get projectVersions async {
-    final versions = await Future.wait(<Future<Option<Version>>>[
+    final _latestPublishedVersionFuture = latestPublishedVersion;
+    final isHostedFuture = _latestPublishedVersionFuture.then((o) {
+      final hasBeenPublished = o is Some;
+
+      final _hostedMode = hostedMode != HostedMode.inferred
+          ? hostedMode
+          : hasBeenPublished ? HostedMode.hosted : HostedMode.notHosted;
+
+      return _hostedMode == HostedMode.hosted;
+    });
+    final versions = await Future.wait([
       latestTaggedGitVersion,
-      latestPublishedVersion
+      _latestPublishedVersionFuture,
+      isHostedFuture
     ]);
-    return new ProjectVersions2(pubspec.version, versions[0], versions[1]);
+    return new ProjectVersions2(pubspec.version, versions[0] as Option<Version>,
+        versions[1] as Option<Version>, versions[2] as bool);
   }
+
+//  @override
+//  Future<bool> get hasChangesSinceLatestTaggedVersion async=>
+//     hasChangesSince(gitDir, await latestTaggedGitVersion);
 
   Future<Iterable<String>> _exportedDependencyNames(
       Iterable<String> dependencyNames) async {

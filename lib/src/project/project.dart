@@ -58,6 +58,13 @@ class ProjectVersions2 {
 
   bool get hasBeenPublished => publishedVersion is Some;
 
-  ProjectVersions2(
-      this.pubspecVersion, this.taggedGitVersion, this.publishedVersion);
+  final bool isHosted;
+
+  ProjectVersions2(this.pubspecVersion, this.taggedGitVersion,
+      this.publishedVersion, this.isHosted);
+}
+
+class ProjectStatus {
+  final ProjectVersions2 versions;
+  final bool hasChangesSinceLastGitVersion;
 }
