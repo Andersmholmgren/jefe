@@ -221,8 +221,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         project,
         dependencies);
 
-    return new ProjectVersions(currentPubspecVersion, latestTaggedVersionOpt,
-        latestPublishedVersionOpt, releaseVersionOpt);
+    return new ProjectVersions(currentProjectVersions, releaseVersionOpt);
   }
 
   Future<Option<Version>> _getReleaseVersion(
@@ -297,16 +296,17 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 }
 
 class ProjectVersions {
-  final Version pubspecVersion;
-  final Option<Version> taggedGitVersion;
-  final Option<Version> publishedVersion;
+  final ProjectVersions2 currentVersions;
   final Option<Version> newReleaseVersion;
+
+  Version get pubspecVersion => currentVersions.pubspecVersion;
+  Option<Version> get taggedGitVersion => currentVersions.taggedGitVersion;
+  Option<Version> get publishedVersion => currentVersions.publishedVersion;
 
   bool get hasBeenPublished => publishedVersion is Some;
   bool get newReleaseRequired => newReleaseVersion is Some;
 
-  ProjectVersions(this.pubspecVersion, this.taggedGitVersion,
-      this.publishedVersion, this.newReleaseVersion);
+  ProjectVersions(this.currentVersions, this.newReleaseVersion);
 }
 
 main() {
