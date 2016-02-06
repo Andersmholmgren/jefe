@@ -33,6 +33,9 @@ abstract class Project extends ProjectEntity {
   Future<Option<Version>> get latestPublishedVersion;
   Future<Option<HostedPackageVersions>> get publishedVersions;
 
+  /// Fetches versions concurrently
+  Future<ProjectVersions2> get projectVersions;
+
   /// Installs a Project from the [gitUri] into the [parentDirectory]
   static Future<Project> install(
           Directory parentDirectory, String name, String gitUri) =>
@@ -47,3 +50,14 @@ abstract class Project extends ProjectEntity {
 }
 
 enum HostedMode { hosted, notHosted, inferred }
+
+class ProjectVersions2 {
+  final Version pubspecVersion;
+  final Option<Version> taggedGitVersion;
+  final Option<Version> publishedVersion;
+
+  bool get hasBeenPublished => publishedVersion is Some;
+
+  ProjectVersions2(
+      this.pubspecVersion, this.taggedGitVersion, this.publishedVersion);
+}

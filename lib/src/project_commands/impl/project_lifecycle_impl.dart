@@ -217,13 +217,15 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       bool autoUpdateHostedVersions) async {
     final GitDir gitDir = await project.gitDir;
 
-    final currentPubspecVersion = project.pubspec.version;
+    final currentProjectVersions = await project.projectVersions;
+
+    final currentPubspecVersion = currentProjectVersions.pubspecVersion;
 
     final Option<Version> latestTaggedVersionOpt =
-        await _latestTaggedVersion(project);
+        currentProjectVersions.taggedGitVersion;
 
     final Option<Version> latestPublishedVersionOpt =
-        await _latestPublishedVersion(project);
+        currentProjectVersions.publishedVersion;
 
     _log.fine('${project.name}: pubspec version: $currentPubspecVersion; '
         'tagged version: $latestTaggedVersionOpt; '

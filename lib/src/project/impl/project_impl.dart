@@ -162,6 +162,14 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
               pub.fetchPackageVersions(name, publishToUrl: pubspec.publishTo),
           'fetch package versions');
 
+  Future<ProjectVersions2> get projectVersions async {
+    final versions = await Future.wait(<Future<Option<Version>>>[
+      latestTaggedGitVersion,
+      latestPublishedVersion
+    ]);
+    return new ProjectVersions2(pubspec.version, versions[0], versions[1]);
+  }
+
   Future<Iterable<String>> _exportedDependencyNames(
       Iterable<String> dependencyNames) async {
     final exported = await exportedPackageNames;
