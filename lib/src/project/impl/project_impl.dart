@@ -120,8 +120,9 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   @override
   Future<Set<String>> get exportedPackageNames async {
     final Iterable<Directive> exports = (await compilationUnit)
-        .map((cu) => cu.directives.where((d) => d is ExportDirective))
-        .getOrDefault(const []);
+        .map /*<Iterable<Directive>>*/ (
+            (cu) => cu.directives.where((d) => d is ExportDirective))
+        .getOrDefault(<Directive>[]);
 
     final exportedPackageNames = await exports
         .map((exp) => exp.uri.stringValue)
