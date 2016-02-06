@@ -63,6 +63,10 @@ class ProjectVersions2 {
 
   ProjectVersions2(this.pubspecVersion, this.taggedGitVersion,
       this.publishedVersion, this.isHosted);
+
+  String toString() => 'pubspec version: $pubspecVersion; '
+      'tagged version: $taggedGitVersion; '
+      'published version: $publishedVersion';
 }
 
 class ProjectStatus {

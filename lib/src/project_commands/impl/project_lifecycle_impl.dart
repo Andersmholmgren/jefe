@@ -202,14 +202,6 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     });
   }
 
-  Future<Option<Version>> _latestPublishedVersion(Project project) async {
-    final Option<HostedPackageVersions> publishedVersionsOpt =
-        await _pub.fetchPackageVersions().process(project);
-
-    return publishedVersionsOpt.map(
-        (HostedPackageVersions versions) => versions.versions.last.version);
-  }
-
   Future<ProjectVersions> getCurrentProjectVersion(
       Project project,
       Iterable<Project> dependencies,
@@ -219,17 +211,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
     final currentProjectVersions = await project.projectVersions;
 
-//    final currentPubspecVersion = currentProjectVersions.pubspecVersion;
-//
-//    final Option<Version> latestTaggedVersionOpt =
-//        currentProjectVersions.taggedGitVersion;
-//
-//    final Option<Version> latestPublishedVersionOpt =
-//        currentProjectVersions.publishedVersion;
-
-    _log.fine('${project.name}: pubspec version: $currentPubspecVersion; '
-        'tagged version: $latestTaggedVersionOpt; '
-        'published version: $latestPublishedVersionOpt');
+    _log.fine('${project.name}: $currentProjectVersions');
 
     final Option<Version> releaseVersionOpt = await _getReleaseVersion(
         currentProjectVersions,
@@ -245,9 +227,6 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
   Future<Option<Version>> _getReleaseVersion(
       ProjectVersions2 currentVersions,
-//      Option<Version> latestTaggedVersionOpt,
-//      Version currentPubspecVersion,
-//      Option<Version> latestPublishedVersionOpt,
       bool autoUpdateHostedVersions,
       GitDir gitDir,
       ReleaseType type,
