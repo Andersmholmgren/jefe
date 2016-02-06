@@ -19,6 +19,8 @@ import 'package:path/path.dart' as p;
 import 'package:option/option.dart';
 import 'package:jefe/src/pub/pub_version.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:jefe/src/project_commands/project_command.dart'
+    show executeTask;
 
 Logger _log = new Logger('jefe.project.impl');
 
@@ -143,8 +145,9 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   }
 
   @override
-  Future<Iterable<Version>> get taggedGitVersions async =>
-      git.gitFetchVersionTags(await gitDir);
+  Future<Iterable<Version>> get taggedGitVersions => executeTask(
+      () async => git.gitFetchVersionTags(await gitDir),
+      'fetch git release version tags');
 
   @override
   Future<Option<Version>> get latestPublishedVersion async {
@@ -154,7 +157,10 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   @override
   Future<Option<HostedPackageVersions>> get publishedVersions async =>
-      pub.fetchPackageVersions(name, publishToUrl: pubspec.publishTo);
+      executeTask(
+          () async =>
+              pub.fetchPackageVersions(name, publishToUrl: pubspec.publishTo),
+          'fetch package versions');
 
   Future<Iterable<String>> _exportedDependencyNames(
       Iterable<String> dependencyNames) async {
