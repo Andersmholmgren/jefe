@@ -207,8 +207,6 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       Iterable<Project> dependencies,
       ReleaseType type,
       bool autoUpdateHostedVersions) async {
-    final GitDir gitDir = await project.gitDir;
-
     final currentProjectVersions = await project.projectVersions;
 
     _log.fine('${project.name}: $currentProjectVersions');
@@ -216,7 +214,6 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     final Option<Version> releaseVersionOpt = await _getReleaseVersion(
         currentProjectVersions,
         autoUpdateHostedVersions,
-        gitDir,
         type,
         project,
         dependencies);
@@ -227,7 +224,6 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   Future<Option<Version>> _getReleaseVersion(
       ProjectVersions2 currentVersions,
       bool autoUpdateHostedVersions,
-      GitDir gitDir,
       ReleaseType type,
       Project project,
       Iterable<Project> dependencies) async {
@@ -247,7 +243,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         } else {
           // latest released version is same as pubspec version
           final hasChangesSinceLatestTaggedVersion =
-              await hasChangesSince(gitDir, latestTaggedVersion);
+              await hasChangesSince(await project.gitDir, latestTaggedVersion);
 
           final hasChanges = hasChangesSinceLatestTaggedVersion ||
               (await _pubSpec
