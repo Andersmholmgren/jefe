@@ -3,12 +3,13 @@
 
 library jefe.project.commands.core;
 
-import 'package:jefe/src/project/project.dart';
 import 'dart:async';
-import 'package:logging/logging.dart';
-import 'package:jefe/src/project/dependency_graph.dart';
 import 'dart:io';
+
+import 'package:jefe/src/project/dependency_graph.dart';
+import 'package:jefe/src/project/project.dart';
 import 'package:jefe/src/project_commands/project_command_executor.dart';
+import 'package:logging/logging.dart';
 
 Logger _log = new Logger('jefe.project.commands.core');
 
@@ -186,9 +187,10 @@ class _DefaultCommand<T> implements ProjectCommand<T> {
       throw new ArgumentError('Invalid function passed into process');
     }
 
-    final Callable<T> callable = () => (function is ProjectWithDependenciesFunction
-        ? function(project, dependencies)
-        : function(project));
+    final Callable<T> callable = () =>
+        (function is ProjectWithDependenciesFunction
+            ? function(project, dependencies)
+            : function(project));
 
     try {
       return executeCallable(callable, taskDescription);
@@ -201,16 +203,13 @@ class _DefaultCommand<T> implements ProjectCommand<T> {
   String toString() => "'$name'";
 
   @override
-  ProjectCommand copy(
+  ProjectCommand<T> copy(
       {String name,
       CommandConcurrencyMode concurrencyMode,
       Function function,
       Condition condition}) {
-    return new _DefaultCommand(
-        name != null ? name : this.name,
-        function != null ? function : this.function,
-        concurrencyMode != null ? concurrencyMode : this.concurrencyMode,
-        condition != null ? condition : this.condition);
+    return new _DefaultCommand<T>(name ?? this.name, function ?? this.function,
+        concurrencyMode ?? this.concurrencyMode, condition ?? this.condition);
   }
 }
 
