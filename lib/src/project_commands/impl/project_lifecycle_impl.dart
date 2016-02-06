@@ -283,7 +283,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         } else {
           // latest released version is same as pubspec version
           final hasChangesSinceLatestTaggedVersion =
-              await _hasChangesSince(gitDir, latestTaggedVersion);
+              await hasChangesSince(gitDir, latestTaggedVersion);
 
           final hasChanges = hasChangesSinceLatestTaggedVersion ||
               (await _pubSpec
@@ -329,9 +329,6 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 //    return (await commitCountSince(gitDir, sinceVersion.toString())) > 0;
 //  }
 
-  Future<bool> _hasChangesSince(GitDir gitDir, Version sinceVersion) async {
-    return (await diffSummarySince(gitDir, sinceVersion.toString())) is Some;
-  }
 }
 
 class ProjectVersions {

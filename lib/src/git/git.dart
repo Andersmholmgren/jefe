@@ -149,6 +149,10 @@ Future<Iterable<GitRemote>> getRemotes(GitDir gitDir) async {
 Future<int> commitCountSince(GitDir gitDir, String ref) async =>
     await gitDir.getCommitCount('$ref..HEAD');
 
+Future<bool> hasChangesSince(GitDir gitDir, Version sinceVersion) async {
+  return (await diffSummarySince(gitDir, sinceVersion.toString())) is Some;
+}
+
 Future<Option<DiffSummary>> diffSummarySince(GitDir gitDir, String ref) async {
   final line = (await gitDir.runCommand(['diff', '--shortstat', ref])).stdout;
   return line != null && line.trim().isNotEmpty
