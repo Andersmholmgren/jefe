@@ -60,6 +60,6 @@ abstract class JefeProjectGraphMixin extends JefeProjectGraph {
   Future processDepthFirst(
       process(JefeProject project, Iterable<JefeProject> dependencies)) async {
     await Future.forEach(
-        depthFirst, (JefeProject pd) => process(pd, pd.directDependencies));
+        depthFirst, (JefeProject p) => process(p, p.directDependencies));
   }
 }

@@ -38,7 +38,7 @@ class JefeProjectImpl extends ProjectImpl
             project.pubspec);
 
   @override
-  Iterable<JefeProject> get depthFirst => directDependencies.depthFirst;
+  Iterable<JefeProject> get depthFirst => getDepthFirst(new Set<JefeProject>());
 
 //  @override
 //  Future processDepthFirst(
