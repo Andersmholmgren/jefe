@@ -38,8 +38,15 @@ abstract class JefeProjectGraph {
   /// Iterates over [depthFirst] invoking [process] for each
   Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ process);
 
-  /// Invokes [process] on this project and all reachable dependencies
+  /// Invokes [process] on this project and all reachable dependencies.
+  ///
+  /// An optional [filter] can be provided to limit which projects the [process]
+  /// is executed on.
   Future/*<T>*/ processAllConcurrently/*<T>*/(ProjectFunction/*<T>*/ process,
+      {ProjectFilter filter: _noOpFilter});
+
+  /// Invokes [process] on this project and all reachable dependencies
+  Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ process,
       {ProjectFilter filter: _noOpFilter});
 }
 
