@@ -11,6 +11,8 @@ import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:jefe/src/project_commands/project_command_executor.dart';
 import 'package:jefe/src/project/dependency_graph.dart';
 import 'package:jefe/src/project/project_group.dart';
+import 'package:jefe/src/project/jefe_project.dart';
+import 'package:option/option.dart';
 
 Logger _log = new Logger('jefe.project.commands.impl');
 
@@ -21,7 +23,8 @@ class CommandExecutorImpl implements CommandExecutor {
 
   @override
   Future execute(Command command,
-      {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentProject,
+      {CommandConcurrencyMode concurrencyMode:
+          CommandConcurrencyMode.concurrentProject,
       ProjectFilter filter: _noOpFilter}) async {
     if (command is ProjectCommand) {
       return executeOnProject(command,
@@ -43,7 +46,8 @@ class CommandExecutorImpl implements CommandExecutor {
   }
 
   Future executeOnProject(ProjectCommand command,
-      {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentProject,
+      {CommandConcurrencyMode concurrencyMode:
+          CommandConcurrencyMode.concurrentProject,
       ProjectFilter filter: _noOpFilter}) async {
     final _filter = filter != null ? filter : _noOpFilter;
 
@@ -88,7 +92,8 @@ class CommandExecutorImpl implements CommandExecutor {
 //  // on them in turn
 
   Future executeAll(CompositeProjectCommand composite,
-      {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.concurrentCommand,
+      {CommandConcurrencyMode concurrencyMode:
+          CommandConcurrencyMode.concurrentCommand,
       ProjectFilter filter: _noOpFilter}) async {
     final _filter = filter != null ? filter : _noOpFilter;
     if (concurrencyMode != CommandConcurrencyMode.serial &&
@@ -126,23 +131,30 @@ class CommandExecutorImpl implements CommandExecutor {
     _log.finer('Completed composite command "${composite.name}"');
   }
 
-  Future _executeOnConcurrentProjects(DependencyGraph projectGraph,
+  Future _executeOnConcurrentProjects(JefeProjectGraph projectGraph,
       ProjectCommand command, ProjectFilter filter) async {
     return await new Stream.fromIterable(
-        projectGraph.depthFirst.map((ProjectDependencies pd) async {
-      if (filter(pd.project)) {
-        return await command.process(pd.project,
-            dependencies: pd.directDependencies);
+            projectGraph.depthFirst.map((JefeProject pd) async {
+      if (filter(pd)) {
+        return await command.process(pd, dependencies: pd.directDependencies);
       }
-    }).toList()).asyncMap((result) => result).toList();
+    }).toList())
+        .asyncMap((result) => result)
+        .toList();
   }
 
   Future executeOn(ProjectCommand command, String projectName) async {
-    final DependencyGraph graph =
-        await getDependencyGraph(await _projectGroup.allProjects);
-    final projectDependencies = graph.forProject(projectName);
-    return await command.process(projectDependencies.project,
-        dependencies: projectDependencies.directDependencies);
+    final JefeProjectGraph graph =
+        await getRootProjects(await _projectGroup.allProjects);
+    final jefeProjectOpt = graph.getProjectByName(projectName);
+    if (jefeProjectOpt is None) {
+      throw new ArgumentError.value(
+          projectName, 'projectName', 'No such project found');
+    }
+    final jefeProject = jefeProjectOpt.get();
+
+    return await command.process(jefeProject.project,
+        dependencies: jefeProject.directDependencies);
   }
 
   Future executeOnGraph(ProjectDependencyGraphCommand command,
