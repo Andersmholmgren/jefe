@@ -3,16 +3,15 @@
 
 library jefe.project.jefe.impl;
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:jefe/src/project/impl/project_impl.dart';
 import 'package:jefe/src/project/jefe_project.dart';
-import 'package:logging/logging.dart';
-import 'package:pubspec/pubspec.dart';
-import 'dart:async';
 import 'package:jefe/src/project/project.dart';
+import 'package:logging/logging.dart';
 import 'package:option/option.dart';
-import 'package:collection/collection.dart';
+import 'package:pubspec/pubspec.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
@@ -71,10 +70,3 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
           : directDependencies.getProjectByName(projectName);
 }
 
-class JefeProjectSet extends DelegatingSet<JefeProject> {
-  JefeProjectSet(Set<JefeProject> base) : super(base);
-
-  Option<JefeProject> getProjectByName(String projectName) =>
-      map((c) => c.getProjectByName(projectName))
-          .firstWhere((o) => o is Some, orElse: () => const None());
-}

@@ -6,6 +6,7 @@ library jefe.project.jefe;
 import 'package:jefe/src/project/project.dart';
 import 'dart:async';
 import 'package:option/option.dart';
+import 'package:collection/collection.dart';
 
 /// A [Project] managed by Jefe
 abstract class JefeProject extends Project {
@@ -24,8 +25,15 @@ abstract class JefeProject extends Project {
   /// or one of it's dependencies (direct or indirect)
   Option<JefeProject> getProjectByName(String projectName);
 
-
-    /// Iterates over [depthFirst] invoking process for each
+  /// Iterates over [depthFirst] invoking process for each
   Future processDepthFirst(
       process(JefeProject project, Iterable<JefeProject> dependencies));
+}
+
+class JefeProjectSet extends DelegatingSet<JefeProject> {
+  JefeProjectSet(Set<JefeProject> base) : super(base);
+
+  Option<JefeProject> getProjectByName(String projectName) =>
+      map((c) => c.getProjectByName(projectName))
+          .firstWhere((o) => o is Some, orElse: () => const None());
 }
