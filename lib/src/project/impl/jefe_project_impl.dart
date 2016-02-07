@@ -3,7 +3,6 @@
 
 library jefe.project.jefe.impl;
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:jefe/src/project/impl/project_impl.dart';
