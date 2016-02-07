@@ -63,8 +63,6 @@ class JefeProjectSetImpl extends DelegatingSet<JefeProject>
     implements JefeProjectSet {
   JefeProjectSetImpl(Set<JefeProject> base) : super(base);
 
-  JefeProjectSetImpl get directDependencies => this;
-
   Option<JefeProject> getProjectByName(String projectName) =>
       map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
           .firstWhere((o) => o is Some, orElse: () => const None());

@@ -34,10 +34,6 @@ abstract class JefeProjectGraph {
 }
 
 abstract class JefeProjectSet implements Set<JefeProject>, JefeProjectGraph {
-  JefeProjectSet(Set<JefeProject> base) : super(base);
-
-  JefeProjectSet get directDependencies => this;
-
   Option<JefeProject> getProjectByName(String projectName) =>
       map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
           .firstWhere((o) => o is Some, orElse: () => const None());
@@ -45,4 +41,3 @@ abstract class JefeProjectSet implements Set<JefeProject>, JefeProjectGraph {
   Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) =>
       expand/*<JefeProject>*/((n) => n.getDepthFirst(visited));
 }
-
