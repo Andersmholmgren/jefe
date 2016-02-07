@@ -15,6 +15,7 @@ abstract class JefeProject extends Project implements JefeProjectGraph {
   Set<JefeProject> get allDependencies;
 }
 
+/// A graph of [JefeProject] ordered by their dependencies
 abstract class JefeProjectGraph {
   /// Navigates the graph of [JefeProject] depthFirst such that those
   /// with no dependencies are returned first and those projects that are
