@@ -9,11 +9,14 @@ import 'package:option/option.dart';
 import 'package:collection/collection.dart';
 
 /// A [Project] managed by Jefe
-abstract class JefeProject extends Project {
+abstract class JefeProject extends Project implements JefeProjectGraph {
   JefeProjectSet get directDependencies;
   Set<JefeProject> get indirectDependencies;
   Set<JefeProject> get allDependencies;
+}
 
+abstract class JefeProjectGraph {
+//  JefeProjectSet get directDependencies;
   /// Navigates the graph of [JefeProject] depthFirst such that those
   /// with no dependencies are returned first and those projects that are
   /// depended upon by other projects are returned before those projects
@@ -26,17 +29,6 @@ abstract class JefeProject extends Project {
   Option<JefeProject> getProjectByName(String projectName);
 
   /// Iterates over [depthFirst] invoking process for each
-  Future processDepthFirst(
-      process(JefeProject project, Iterable<JefeProject> dependencies));
-}
-
-abstract class JefeProjectGraph {
-  JefeProjectSet get directDependencies;
-
-  Iterable<JefeProject> get depthFirst;
-
-  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited);
-
   Future processDepthFirst(
       process(JefeProject project, Iterable<JefeProject> dependencies));
 }
