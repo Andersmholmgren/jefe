@@ -16,7 +16,7 @@ import 'package:collection/collection.dart';
 Logger _log = new Logger('jefe.project.jefe.impl');
 
 class JefeProjectImpl extends ProjectImpl
-    with JefeProjectGraphMixin
+    with _JefeProjectGraphMixin
     implements JefeProject, JefeProjectGraph {
   @override
   final JefeProjectSet directDependencies;
@@ -59,7 +59,7 @@ class JefeProjectImpl extends ProjectImpl
 }
 
 class JefeProjectSetImpl extends DelegatingSet<JefeProject>
-    with JefeProjectGraphMixin
+    with _JefeProjectGraphMixin
     implements JefeProjectSet {
   JefeProjectSetImpl(Set<JefeProject> base) : super(base);
 
@@ -73,18 +73,12 @@ class JefeProjectSetImpl extends DelegatingSet<JefeProject>
       expand/*<JefeProject>*/((n) => n.getDepthFirst(visited));
 }
 
-abstract class JefeProjectGraphMixin extends JefeProjectGraph {
-//  Option<JefeProject> getProjectByName(String projectName) =>
-//      map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
-//          .firstWhere((o) => o is Some, orElse: () => const None());
-
-  Iterable<JefeProject> get depthFirst {
-    return getDepthFirst(new Set<JefeProject>());
-  }
+abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
+  Iterable<JefeProject> get depthFirst => getDepthFirst(new Set<JefeProject>());
 
   Future processDepthFirst(
       process(JefeProject project, Iterable<JefeProject> dependencies)) async {
-    await Future.forEach(
+    return await Future.forEach(
         depthFirst, (JefeProject p) => process(p, p.directDependencies));
   }
 }
