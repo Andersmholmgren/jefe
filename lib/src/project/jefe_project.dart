@@ -33,4 +33,5 @@ abstract class JefeProjectGraph {
       process(JefeProject project, Iterable<JefeProject> dependencies));
 }
 
+/// A [Set] of [JefeProject] that supports [JefeProjectGraph] operations
 abstract class JefeProjectSet implements Set<JefeProject>, JefeProjectGraph {}
