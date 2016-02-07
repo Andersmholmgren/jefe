@@ -16,7 +16,7 @@ import 'package:pubspec/pubspec.dart';
 Logger _log = new Logger('jefe.project.jefe.impl');
 
 class JefeProjectImpl extends ProjectImpl
-    with JefeProjectMixin
+    with JefeProjectGraphMixin
     implements JefeProject, JefeProjectGraph {
   @override
   final JefeProjectSet directDependencies;

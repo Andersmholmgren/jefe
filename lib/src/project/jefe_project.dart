@@ -40,7 +40,7 @@ abstract class JefeProjectGraph {
 }
 
 class JefeProjectSet extends DelegatingSet<JefeProject>
-    with JefeProjectMixin
+    with JefeProjectGraphMixin
     implements JefeProjectGraph {
   JefeProjectSet(Set<JefeProject> base) : super(base);
 
@@ -53,7 +53,7 @@ class JefeProjectSet extends DelegatingSet<JefeProject>
 
 }
 
-abstract class JefeProjectMixin {
+abstract class JefeProjectGraphMixin {
 //  Option<JefeProject> getProjectByName(String projectName) =>
 //      map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
 //          .firstWhere((o) => o is Some, orElse: () => const None());
