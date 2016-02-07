@@ -36,7 +36,7 @@ ProjectCommand /*<T>*/ projectCommand /*<T>*/ (
 
 /// A command that operates on a single [Project] and the projects it depends on
 ProjectCommand /*<T>*/ projectCommandWithDependencies /*<T>*/ (
-        String name, ProjectWithDependenciesFunction function,
+        String name, ProjectWithDependenciesFunction /*<T>*/ function,
         {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.serial,
         Condition condition: _alwaysYes}) =>
     new _DefaultCommand /*<T>*/ (name, function, concurrencyMode, condition);

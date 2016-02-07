@@ -46,28 +46,28 @@ class PubSpecCommandsImpl implements PubSpecCommands {
   @override
   ProjectCommand<bool> haveDependenciesChanged(DependencyType type,
           {bool useGitIfNotHosted: true}) =>
-      projectCommandWithDependencies(
+      projectCommandWithDependencies /*<bool>*/ (
           'checking if $type dependencies have changed',
           (Project project, Iterable<Project> dependencies) async {
-        final exportedPackageNames = await project.exportedPackageNames;
+            final exportedPackageNames = await project.exportedPackageNames;
 
-        final actualDependencies = project.pubspec.allDependencies;
+            final actualDependencies = project.pubspec.allDependencies;
 
-        final expectedDependencies = await _createDependencyReferences(
-            project,
-            dependencies,
-            actualDependencies,
-            exportedPackageNames,
-            type,
-            useGitIfNotHosted);
+            final expectedDependencies = await _createDependencyReferences(
+                project,
+                dependencies,
+                actualDependencies,
+                exportedPackageNames,
+                type,
+                useGitIfNotHosted);
 
-        final dependenciesChanged = expectedDependencies.keys
-            .any((k) => expectedDependencies[k] != actualDependencies[k]);
+            final dependenciesChanged = expectedDependencies.keys
+                .any((k) => expectedDependencies[k] != actualDependencies[k]);
 
-        _log.info('dependencies for ${project.name} have '
-            '${dependenciesChanged ? "" : "NOT "}changed');
-        return dependenciesChanged;
-      });
+            _log.info('dependencies for ${project.name} have '
+                '${dependenciesChanged ? "" : "NOT "}changed');
+            return dependenciesChanged;
+          } as ProjectWithDependenciesFunction<bool>);
 
   Future _setToDependencies(Project project, Iterable<Project> dependencies,
       DependencyType type, bool useGitIfNotHosted) async {
