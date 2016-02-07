@@ -16,7 +16,6 @@ abstract class JefeProject extends Project implements JefeProjectGraph {
 }
 
 abstract class JefeProjectGraph {
-//  JefeProjectSet get directDependencies;
   /// Navigates the graph of [JefeProject] depthFirst such that those
   /// with no dependencies are returned first and those projects that are
   /// depended upon by other projects are returned before those projects
@@ -33,11 +32,4 @@ abstract class JefeProjectGraph {
       process(JefeProject project, Iterable<JefeProject> dependencies));
 }
 
-abstract class JefeProjectSet implements Set<JefeProject>, JefeProjectGraph {
-  Option<JefeProject> getProjectByName(String projectName) =>
-      map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
-          .firstWhere((o) => o is Some, orElse: () => const None());
-
-  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) =>
-      expand/*<JefeProject>*/((n) => n.getDepthFirst(visited));
-}
+abstract class JefeProjectSet implements Set<JefeProject>, JefeProjectGraph {}
