@@ -11,11 +11,16 @@ import 'package:pubspec/pubspec.dart';
 
 import 'project.dart';
 
+Future<Set<JefeProject>> getRootProjects(Set<Project> projects) async =>
+    (await getDependencyGraph(projects)).rootNodes;
+
 /// Returns a [DependencyGraph] for the set of [projects]
+@deprecated
 Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>
     new DependencyGraph._(await _determineDependencies(projects));
 
 /// Represents a graph of dependencies between [Project]s
+@deprecated
 class DependencyGraph {
   // root nodes are those that nothing else depends on
   Set<JefeProject> get rootNodes =>

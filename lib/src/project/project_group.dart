@@ -48,6 +48,7 @@ abstract class ProjectGroup extends ProjectEntity {
   Future<Iterable<Project>> get allProjects;
 
   /// Creates a graph of the dependency relationships for [allProjects]
+  @deprecated
   Future<DependencyGraph> get dependencyGraph;
 
   /// The directory that acts as the container for all the groups project

@@ -13,6 +13,7 @@ Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>
     new DependencyGraph._(await _determineDependencies(projects));
 
 /// Represents a graph of dependencies between [Project]s
+@deprecated
 class DependencyGraph {
   // root nodes are those that nothing else depends on
   Set<_DependencyNode> get _rootNodes => _rootNodeMap.values.toSet();
