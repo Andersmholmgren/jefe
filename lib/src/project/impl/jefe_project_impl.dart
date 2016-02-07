@@ -18,7 +18,8 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
   final Set<JefeProject> directDependencies;
 
   @override
-  Set<JefeProject> get allDependencies => null;
+  Set<JefeProject> get allDependencies =>
+      getDepthFirst(new Set<JefeProject>()).toSet();
 
   @override
   Set<JefeProject> get indirectDependencies =>
@@ -30,8 +31,8 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
 
   @override
   Iterable<JefeProject> get depthFirst {
-    Set<JefeProject> visited = new Set();
-    return _rootNodes.expand((n) => n.getDepthFirst(visited));
+    final visited = new Set<JefeProject>();
+    return _rootNodes.expand((n) => n._getDepthFirst(visited));
   }
 
 //  /// The [JefeProject] for the given [projectName]
@@ -45,17 +46,16 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
         depthFirst, (JefeProject pd) => process(pd, pd.directDependencies));
   }
 
-//  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) {
-//    final children = _dependencies.expand((n) => n.getDepthFirst(visited));
-//
-//    Iterable us() sync* {
-//      if (!visited.contains((project))) {
-//        visited.add(project);
-//        yield this;
-//      }
-//    }
-//
-//    return concat([children, us()]);
-//  }
+  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) {
+    final children = _dependencies.expand((n) => n.getDepthFirst(visited));
 
+    Iterable us() sync* {
+      if (!visited.contains((project))) {
+        visited.add(project);
+        yield this;
+      }
+    }
+
+    return concat([children, us()]);
+  }
 }
