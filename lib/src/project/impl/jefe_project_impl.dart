@@ -11,6 +11,7 @@ import 'package:jefe/src/project/project.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pubspec/pubspec.dart';
+import 'package:collection/collection.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
@@ -87,3 +88,4 @@ abstract class JefeProjectGraphMixin extends JefeProjectGraph {
         depthFirst, (JefeProject p) => process(p, p.directDependencies));
   }
 }
+;
