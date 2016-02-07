@@ -74,9 +74,13 @@ class JefeProjectSetImpl extends DelegatingSet<JefeProject>
 abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
   Iterable<JefeProject> get depthFirst => getDepthFirst(new Set<JefeProject>());
 
-  Future processDepthFirst(
-      process(JefeProject project, Iterable<JefeProject> dependencies)) async {
-    return await Future.forEach(
-        depthFirst, (JefeProject p) => process(p, p.directDependencies));
+  Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ command) async {
+    return await Future.forEach(depthFirst, (JefeProject p) => command(p));
   }
+
+  Future/*<T>*/ processAllConcurrently/*<T>*/(ProjectFunction/*<T>*/ command,
+      {ProjectFilter filter: _noOpFilter});
+
+  Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ command,
+      {ProjectFilter filter: _noOpFilter});
 }
