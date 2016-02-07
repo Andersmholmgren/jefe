@@ -35,18 +35,18 @@ abstract class JefeProjectGraph {
   /// or one of it's dependencies (direct or indirect)
   Option<JefeProject> getProjectByName(String projectName);
 
-  /// Iterates over [depthFirst] invoking [process] for each
-  Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ process);
+  /// Iterates over [depthFirst] invoking [command] for each
+  Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ command);
 
-  /// Invokes [process] on this project and all reachable dependencies.
+  /// Invokes [command] on this project and all reachable dependencies.
   ///
-  /// An optional [filter] can be provided to limit which projects the [process]
+  /// An optional [filter] can be provided to limit which projects the [command]
   /// is executed on.
-  Future/*<T>*/ processAllConcurrently/*<T>*/(ProjectFunction/*<T>*/ process,
+  Future/*<T>*/ processAllConcurrently/*<T>*/(ProjectFunction/*<T>*/ command,
       {ProjectFilter filter: _noOpFilter});
 
-  /// Invokes [process] on this project and all reachable dependencies
-  Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ process,
+  /// Invokes [command] on this project and all reachable dependencies
+  Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ command,
       {ProjectFilter filter: _noOpFilter});
 }
 
