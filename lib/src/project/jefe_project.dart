@@ -34,6 +34,6 @@ class JefeProjectSet extends DelegatingSet<JefeProject> {
   JefeProjectSet(Set<JefeProject> base) : super(base);
 
   Option<JefeProject> getProjectByName(String projectName) =>
-      map((c) => c.getProjectByName(projectName))
+      map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
           .firstWhere((o) => o is Some, orElse: () => const None());
 }
