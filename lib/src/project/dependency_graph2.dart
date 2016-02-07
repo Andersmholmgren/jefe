@@ -5,11 +5,11 @@ library jefe.project.dependency;
 
 import 'dart:async';
 
+import 'package:jefe/src/project/impl/jefe_project_impl.dart';
+import 'package:jefe/src/project/jefe_project.dart';
 import 'package:pubspec/pubspec.dart';
 
 import 'project.dart';
-import 'package:jefe/src/project/jefe_project.dart';
-import 'package:jefe/src/project/impl/jefe_project_impl.dart';
 
 /// Returns a [DependencyGraph] for the set of [projects]
 Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>
@@ -36,25 +36,6 @@ class DependencyGraph {
 
     dependencies.forEach((p) => _rootNodeMap.remove(p));
   }
-
-  /// Navigates the graph of [ProjectDependencies] depthFirst such that those
-  /// with no dependencies are returned first and those projects that are
-  /// depended upon by other projects are returned before those projects
-//  Iterable<ProjectDependencies> get depthFirst {
-//    Set<Project> visited = new Set();
-//    return _rootNodes.expand((n) => n.getDepthFirst(visited));
-//  }
-//
-//  /// The [ProjectDependencies] for the given [projectName]
-//  ProjectDependencies forProject(String projectName) =>
-//      depthFirst.firstWhere((pd) => pd.project.name == projectName);
-//
-//  /// Iterates over [depthFirst] invoking process for each
-//  Future processDepthFirst(
-//      process(Project project, Iterable<Project> dependencies)) async {
-//    await Future.forEach(depthFirst,
-//        (ProjectDependencies pd) => process(pd.project, pd.directDependencies));
-//  }
 
   _DependencyNode _getOrCreateNode(Project project) {
     var node = _nodeMap[project]; // TODO: is this possible?
