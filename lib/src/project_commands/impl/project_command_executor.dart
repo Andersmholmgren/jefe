@@ -160,8 +160,8 @@ class CommandExecutorImpl implements CommandExecutor {
   Future executeOnGraph(ProjectDependencyGraphCommand command,
       {ProjectFilter filter: _noOpFilter}) async {
     final _filter = filter != null ? filter : _noOpFilter;
-    final DependencyGraph graph =
-        await getDependencyGraph(await _projectGroup.allProjects);
+    final JefeProjectGraph graph =
+        await getRootProjects(await _projectGroup.allProjects);
     return await command.process(
         graph, _projectGroup.containerDirectory, _filter);
   }
