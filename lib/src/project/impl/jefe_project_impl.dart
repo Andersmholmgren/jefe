@@ -80,4 +80,3 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
         depthFirst, (JefeProject p) => process(p, p.directDependencies));
   }
 }
-;
