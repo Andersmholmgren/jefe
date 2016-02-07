@@ -39,13 +39,16 @@ abstract class JefeProjectGraph {
   Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ command);
 
   /// Invokes [command] on this project and all reachable dependencies.
-  ///
+  /// [command] is executed concurrently on all projects.
   /// An optional [filter] can be provided to limit which projects the [command]
   /// is executed on.
   Future/*<T>*/ processAllConcurrently/*<T>*/(ProjectFunction/*<T>*/ command,
       {ProjectFilter filter: _noOpFilter});
 
   /// Invokes [command] on this project and all reachable dependencies
+  /// [command] is executed one project at a time.
+  /// An optional [filter] can be provided to limit which projects the [command]
+  /// is executed on.
   Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ command,
       {ProjectFilter filter: _noOpFilter});
 }
