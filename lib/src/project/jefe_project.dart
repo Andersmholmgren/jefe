@@ -36,4 +36,18 @@ class JefeProjectSet extends DelegatingSet<JefeProject> {
   Option<JefeProject> getProjectByName(String projectName) =>
       map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
           .firstWhere((o) => o is Some, orElse: () => const None());
+
+  Iterable<JefeProject> get depthFirst =>
+      expand/*<JefeProject>*/((n) => n.getDepthFirst(new Set<JefeProject>()));
+
+//  /// The [ProjectDependencies] for the given [projectName]
+//  ProjectDependencies forProject(String projectName) =>
+//    depthFirst.firstWhere((pd) => pd.project.name == projectName);
+
+  /// Iterates over [depthFirst] invoking process for each
+  Future processDepthFirst(
+      process(Project project, Iterable<Project> dependencies)) async {
+    await Future.forEach(depthFirst,
+        (ProjectDependencies pd) => process(pd.project, pd.directDependencies));
+  }
 }

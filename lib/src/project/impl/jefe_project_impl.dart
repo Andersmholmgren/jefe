@@ -36,8 +36,7 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
             project.pubspec);
 
   @override
-  Iterable<JefeProject> get depthFirst => directDependencies
-      .expand/*<JefeProject>*/((n) => n.getDepthFirst(new Set<JefeProject>()));
+  Iterable<JefeProject> get depthFirst => directDependencies.depthFirst;
 
 //  /// The [JefeProject] for the given [projectName]
 //  JefeProject forProject(String projectName) =>
