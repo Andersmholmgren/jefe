@@ -40,14 +40,22 @@ class JefeProjectSet extends DelegatingSet<JefeProject> {
   Iterable<JefeProject> get depthFirst =>
       expand/*<JefeProject>*/((n) => n.getDepthFirst(new Set<JefeProject>()));
 
-//  /// The [ProjectDependencies] for the given [projectName]
-//  ProjectDependencies forProject(String projectName) =>
-//    depthFirst.firstWhere((pd) => pd.project.name == projectName);
-
-  /// Iterates over [depthFirst] invoking process for each
   Future processDepthFirst(
-      process(Project project, Iterable<Project> dependencies)) async {
-    await Future.forEach(depthFirst,
-        (ProjectDependencies pd) => process(pd.project, pd.directDependencies));
+    process(JefeProject project, Iterable<JefeProject> dependencies)) async {
+    await Future.forEach(
+      depthFirst, (JefeProject pd) => process(pd, pd.directDependencies));
+  }
+
+  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) {
+    final children = expand((n) => n.getDepthFirst(visited));
+
+    Iterable us() sync* {
+      if (!visited.contains((this))) {
+        visited.add(this);
+        yield this;
+      }
+    }
+
+    return concat(<JefeProject>[children, us()]);
   }
 }

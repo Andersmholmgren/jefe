@@ -38,29 +38,13 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
   @override
   Iterable<JefeProject> get depthFirst => directDependencies.depthFirst;
 
-//  /// The [JefeProject] for the given [projectName]
-//  JefeProject forProject(String projectName) =>
-//    depthFirst.firstWhere((pd) => pd.name == projectName);
-
   @override
   Future processDepthFirst(
-      process(JefeProject project, Iterable<JefeProject> dependencies)) async {
-    await Future.forEach(
-        depthFirst, (JefeProject pd) => process(pd, pd.directDependencies));
-  }
+          process(JefeProject project, Iterable<JefeProject> dependencies)) =>
+      directDependencies.processDepthFirst(process);
 
-  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) {
-    final children = directDependencies.expand((n) => n.getDepthFirst(visited));
-
-    Iterable us() sync* {
-      if (!visited.contains((this))) {
-        visited.add(this);
-        yield this;
-      }
-    }
-
-    return concat(<JefeProject>[children, us()]);
-  }
+  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) =>
+      directDependencies.getDepthFirst(visited);
 
   @override
   Option<JefeProject> getProjectByName(String projectName) =>
@@ -68,4 +52,3 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
           ? new Some<JefeProject>(this)
           : directDependencies.getProjectByName(projectName);
 }
-
