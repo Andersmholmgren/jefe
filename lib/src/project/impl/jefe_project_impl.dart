@@ -15,7 +15,9 @@ import 'package:pubspec/pubspec.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
-class JefeProjectImpl extends ProjectImpl implements JefeProject {
+class JefeProjectImpl extends ProjectImpl
+    with JefeProjectMixin
+    implements JefeProject, JefeProjectGraph {
   @override
   final JefeProjectSet directDependencies;
 
@@ -38,14 +40,14 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
   @override
   Iterable<JefeProject> get depthFirst => directDependencies.depthFirst;
 
-  @override
-  Future processDepthFirst(
-          process(JefeProject project, Iterable<JefeProject> dependencies)) =>
-      directDependencies.processDepthFirst(process);
+//  @override
+//  Future processDepthFirst(
+//          process(JefeProject project, Iterable<JefeProject> dependencies)) =>
+//      directDependencies.processDepthFirst(process);
 
   @override
   Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) {
-    final children = expand((n) => n.getDepthFirst(visited));
+    final children = directDependencies.expand((n) => n.getDepthFirst(visited));
 
     Iterable us() sync* {
       if (!visited.contains((this))) {

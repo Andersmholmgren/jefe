@@ -57,7 +57,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   HostedMode get hostedMode => _hostedMode ?? _pubSpecHostedMode;
 
   ProjectImpl(String gitUri, Directory installDirectory, this._pubspec,
-      {HostedMode hostedMode})
+      HostedMode hostedMode)
       : this._hostedMode = hostedMode,
         super(gitUri, installDirectory);
 
@@ -122,7 +122,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   @override
   Future<Set<String>> get exportedPackageNames async {
     final Iterable<Directive> exports = (await compilationUnit)
-        .map /*<Iterable<Directive>>*/ (
+        .map/*<Iterable<Directive>>*/(
             (cu) => cu.directives.where((d) => d is ExportDirective))
         .getOrDefault(<Directive>[]);
 
