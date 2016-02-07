@@ -33,12 +33,25 @@ abstract class JefeProjectGraph {
       process(JefeProject project, Iterable<JefeProject> dependencies));
 }
 
-class JefeProjectSet extends DelegatingSet<JefeProject>
-    with JefeProjectGraphMixin
-    implements JefeProjectGraph {
+abstract class JefeProjectSet implements Set<JefeProject>, JefeProjectGraph {
   JefeProjectSet(Set<JefeProject> base) : super(base);
 
   JefeProjectSet get directDependencies => this;
+
+  Option<JefeProject> getProjectByName(String projectName) =>
+      map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
+          .firstWhere((o) => o is Some, orElse: () => const None());
+
+  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) =>
+      expand/*<JefeProject>*/((n) => n.getDepthFirst(visited));
+}
+
+class JefeProjectSetImpl extends DelegatingSet<JefeProject>
+    with JefeProjectGraphMixin
+    implements JefeProjectSet {
+  JefeProjectSetImpl(Set<JefeProject> base) : super(base);
+
+  JefeProjectSetImpl get directDependencies => this;
 
   Option<JefeProject> getProjectByName(String projectName) =>
       map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
