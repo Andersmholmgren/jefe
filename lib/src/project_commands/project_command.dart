@@ -32,14 +32,14 @@ ProjectCommand /*<T>*/ projectCommand /*<T>*/ (
         {CommandConcurrencyMode concurrencyMode:
             CommandConcurrencyMode.concurrentCommand,
         Condition condition: _alwaysYes}) =>
-    new _DefaultCommand(name, function, concurrencyMode, condition);
+    new _DefaultCommand /*<T>*/ (name, function, concurrencyMode, condition);
 
 /// A command that operates on a single [Project] and the projects it depends on
-ProjectCommand projectCommandWithDependencies(
+ProjectCommand /*<T>*/ projectCommandWithDependencies /*<T>*/ (
         String name, ProjectWithDependenciesFunction function,
         {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.serial,
         Condition condition: _alwaysYes}) =>
-    new _DefaultCommand(name, function, concurrencyMode, condition);
+    new _DefaultCommand /*<T>*/ (name, function, concurrencyMode, condition);
 
 /// A command that is made up of an ordered list of other commands.
 /// For a given [Project] the commands will be executed one at a time in the
@@ -56,13 +56,13 @@ CompositeProjectCommand projectCommandGroup(
 /// A command that operates on a [DependencyGraph]. Unlike the other commands,
 /// a ProjectDependencyGraphCommand is for tasks that require interacting with
 /// several projects at once
-ProjectDependencyGraphCommand dependencyGraphCommand(
-        String name, ProjectDependencyGraphFunction function) =>
-    new _DefaultProjectDependencyGraphCommand(name, function);
+ProjectDependencyGraphCommand /*<T>*/ dependencyGraphCommand /*<T>*/ (
+        String name, ProjectDependencyGraphFunction /*<T>*/ function) =>
+    new _DefaultProjectDependencyGraphCommand /*<T>*/ (name, function);
 
-ExecutorAwareProjectCommand executorAwareCommand(
-        String name, ExecutorAwareProjectFunction function) =>
-    new _DefaultExecutorAwareProjectCommand(name, function);
+ExecutorAwareProjectCommand /*<T>*/ executorAwareCommand /*<T>*/ (
+        String name, ExecutorAwareProjectFunction /*<T>*/ function) =>
+    new _DefaultExecutorAwareProjectCommand /*<T>*/ (name, function);
 
 /// Some function applied to a [Project]
 typedef Future<T> ProjectFunction<T>(Project project);
@@ -223,15 +223,15 @@ class _DefaultCompositeProjectCommand implements CompositeProjectCommand {
       this.name, this.commands, this.concurrencyMode);
 }
 
-class _DefaultProjectDependencyGraphCommand
-    implements ProjectDependencyGraphCommand {
+class _DefaultProjectDependencyGraphCommand<T>
+    implements ProjectDependencyGraphCommand<T> {
   final String name;
-  final ProjectDependencyGraphFunction function;
+  final ProjectDependencyGraphFunction<T> function;
 
   _DefaultProjectDependencyGraphCommand(this.name, this.function);
 
   @override
-  Future process(DependencyGraph graph, Directory rootDirectory,
+  Future<T> process(DependencyGraph graph, Directory rootDirectory,
       ProjectFilter filter) async {
     _log.info('Executing command "$name"');
     final stopWatch = new Stopwatch();
@@ -245,10 +245,10 @@ class _DefaultProjectDependencyGraphCommand
   }
 }
 
-class _DefaultExecutorAwareProjectCommand
-    implements ExecutorAwareProjectCommand {
+class _DefaultExecutorAwareProjectCommand<T>
+    implements ExecutorAwareProjectCommand<T> {
   final String name;
-  final ExecutorAwareProjectFunction function;
+  final ExecutorAwareProjectFunction<T> function;
   // TODO: implement concurrencyMode
   @override
   CommandConcurrencyMode get concurrencyMode => null;
@@ -256,7 +256,7 @@ class _DefaultExecutorAwareProjectCommand
   _DefaultExecutorAwareProjectCommand(this.name, this.function);
 
   @override
-  Future process(CommandExecutor executor, {ProjectFilter filter}) async {
+  Future<T> process(CommandExecutor executor, {ProjectFilter filter}) async {
     _log.info('Executing command "$name"');
     final stopWatch = new Stopwatch();
     stopWatch.start();
