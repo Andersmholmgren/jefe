@@ -10,6 +10,7 @@ import '../spec/jefe_spec.dart';
 import 'project.dart';
 import 'core.dart';
 import 'package:jefe/src/project/dependency_graph.dart';
+import 'package:jefe/src/project/jefe_project.dart';
 
 abstract class ProjectGroupReference
     implements ProjectEntityReference<ProjectGroup> {}
@@ -51,7 +52,7 @@ abstract class ProjectGroup extends ProjectEntity {
   @deprecated
   Future<DependencyGraph> get dependencyGraph;
 
-  Future<Set<JefeProject>> get rootJefeProjects;
+  Future<JefeProjectSet> get rootJefeProjects;
 
   /// The directory that acts as the container for all the groups project
   /// and metadata directories. These are named with a '_root' suffix

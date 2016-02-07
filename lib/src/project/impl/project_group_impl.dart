@@ -18,6 +18,7 @@ import '../../spec/jefe_spec.dart' as spec;
 import 'project_impl.dart';
 import '../../spec/jefe_spec.dart';
 import 'core_impl.dart';
+import 'package:jefe/src/project/jefe_project.dart';
 
 Logger _log = new Logger('jefe.project.group.impl');
 
@@ -82,7 +83,8 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 
   ProjectGroupImpl(
       String gitUri, this.metaData, GroupDirectoryLayout directoryLayout,
-      {ProjectEntityReferenceFactory referenceFactory: const DefaultProjectEntityReferenceFactory()})
+      {ProjectEntityReferenceFactory referenceFactory:
+          const DefaultProjectEntityReferenceFactory()})
       : this.directoryLayout = directoryLayout,
         this._referenceFactory = referenceFactory,
         super(gitUri, directoryLayout.groupDirectory);
@@ -197,6 +199,9 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 
   Future<DependencyGraph> get dependencyGraph async =>
       getDependencyGraph(await allProjects);
+
+  Future<JefeProjectSet> get rootJefeProjects async =>
+      getRootProjects(await allProjects);
 
   String toString() =>
       'ProjectGroup: $name; gitUri: $gitUri; installed: $installDirectory\n'
