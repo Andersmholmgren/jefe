@@ -9,6 +9,7 @@ import 'package:pubspec/pubspec.dart';
 
 import 'project.dart';
 import 'package:jefe/src/project/jefe_project.dart';
+import 'package:jefe/src/project/impl/jefe_project_impl.dart';
 
 /// Returns a [DependencyGraph] for the set of [projects]
 Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>
@@ -17,9 +18,9 @@ Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>
 /// Represents a graph of dependencies between [Project]s
 class DependencyGraph {
   // root nodes are those that nothing else depends on
-  Set<JefeProject> get rootNodes {
-    return _rootNodeMap.values.toSet();
-  }
+  Set<JefeProject> get rootNodes =>
+      _rootNodeMap.values.map((n) => n.toJefeProject()).toSet();
+
   Map<Project, _DependencyNode> _rootNodeMap = {};
 
   Map<Project, _DependencyNode> _nodeMap = {};
@@ -67,7 +68,6 @@ class DependencyGraph {
   }
 }
 
-
 class _DependencyNode {
   final Project project;
   final Set<_DependencyNode> _dependencies = new Set();
@@ -75,6 +75,9 @@ class _DependencyNode {
       _dependencies.map((n) => n.project);
 
   _DependencyNode(this.project);
+
+  JefeProject toJefeProject() => new JefeProjectImpl.from(
+      _dependencies.map((n) => n.toJefeProject()), project);
 
 //  Iterable<ProjectDependencies> getDepthFirst(Set<Project> visited) {
 //    final children = _dependencies.expand((n) => n.getDepthFirst(visited));

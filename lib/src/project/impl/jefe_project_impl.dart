@@ -10,6 +10,7 @@ import 'package:jefe/src/project/jefe_project.dart';
 import 'package:logging/logging.dart';
 import 'package:pubspec/pubspec.dart';
 import 'dart:async';
+import 'package:jefe/src/project/project.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
@@ -28,6 +29,10 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
   JefeProjectImpl(this.directDependencies, String gitUri,
       Directory installDirectory, PubSpec pubspec)
       : super(gitUri, installDirectory, pubspec);
+
+  JefeProjectImpl.from(Set<JefeProject> directDependencies, Project project)
+      : this(directDependencies, project.gitUri, project.installDirectory,
+            project.pubspec);
 
   @override
   Iterable<JefeProject> get depthFirst =>
