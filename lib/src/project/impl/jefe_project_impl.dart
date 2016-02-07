@@ -12,6 +12,8 @@ import 'package:pubspec/pubspec.dart';
 import 'dart:async';
 import 'package:jefe/src/project/project.dart';
 import 'package:option/option.dart';
+import 'dart:collection';
+import 'package:collection/wrappers.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
@@ -71,4 +73,13 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
           : directDependencies
               .map((c) => c.getProjectByName(projectName))
               .firstWhere((o) => o is Some, orElse: () => const None());
+}
+
+class JefeProjectSet extends DelegatingSet<JefeProject> {
+  JefeProjectSet(Set<JefeProject> base) : super(base);
+
+  Option<JefeProject> getProjectByName(String projectName) =>
+      map((c) => c.getProjectByName(projectName))
+      .firstWhere((o) => o is Some, orElse: () => const None());
+
 }
