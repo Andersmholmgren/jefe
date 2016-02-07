@@ -10,7 +10,7 @@ import 'package:collection/collection.dart';
 
 /// A [Project] managed by Jefe
 abstract class JefeProject extends Project {
-  Set<JefeProject> get directDependencies;
+  JefeProjectSet get directDependencies;
   Set<JefeProject> get indirectDependencies;
   Set<JefeProject> get allDependencies;
 
