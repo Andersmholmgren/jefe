@@ -20,7 +20,8 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
   Set<JefeProject> get allDependencies => null;
 
   @override
-  Set<JefeProject> get indirectDependencies => null;
+  Set<JefeProject> get indirectDependencies =>
+      allDependencies.difference(directDependencies);
 
   JefeProjectImpl(this.directDependencies, String gitUri,
       Directory installDirectory, PubSpec pubspec)
