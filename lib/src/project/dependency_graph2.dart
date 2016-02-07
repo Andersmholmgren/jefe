@@ -11,7 +11,7 @@ import 'package:pubspec/pubspec.dart';
 
 import 'project.dart';
 
-Future<Set<JefeProject>> getRootProjects(Set<Project> projects) async =>
+Future<JefeProjectSet> getRootProjects(Set<Project> projects) async =>
     (await getDependencyGraph(projects)).rootNodes;
 
 /// Returns a [DependencyGraph] for the set of [projects]
@@ -33,8 +33,8 @@ class DependencyGraph {
     dependencySet.forEach((ds) => _add(ds.project, ds.directDependencies));
   }
 
-  Option<JefeProject> getProjectByName(String projectName) =>
-      rootNodes.getProjectByName(projectName);
+//  Option<JefeProject> getProjectByName(String projectName) =>
+//      rootNodes.getProjectByName(projectName);
 
 //  Option<JefeProject> getProjectByName(String projectName) =>
 
