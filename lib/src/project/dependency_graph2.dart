@@ -25,7 +25,7 @@ class DependencyGraph {
 
   Map<Project, _DependencyNode> _nodeMap = {};
 
-  DependencyGraph._(Set<_DependencyNode> dependencySet) {
+  DependencyGraph._(Set<_ProjectDependencies> dependencySet) {
     dependencySet.forEach((ds) => _add(ds.project, ds.directDependencies));
   }
 
@@ -48,8 +48,14 @@ class DependencyGraph {
     return node;
   }
 }
+class _ProjectDependencies {
+  final Project project;
+  final Set<Project> directDependencies;
 
-class _DependencyNode {
+  _ProjectDependencies(this.project, this.directDependencies);
+}
+
+class _DependencyNode implements _ProjectDependencies {
   final Project project;
   final Set<_DependencyNode> _dependencies;
   Iterable<Project> get directDependencies =>
@@ -61,13 +67,13 @@ class _DependencyNode {
       _dependencies.map((n) => n.toJefeProject()), project);
 }
 
-Future<Set<_DependencyNode>> _determineDependencies(
+Future<Set<_ProjectDependencies>> _determineDependencies(
         Set<Project> projects) async =>
     (await Future.wait(projects.map((p) => _resolveDependencies(
             p, new Map.fromIterable(projects, key: (p) => p.name)))))
         .toSet();
 
-Future<_DependencyNode> _resolveDependencies(
+Future<_ProjectDependencies> _resolveDependencies(
     Project project, Map<String, Project> projects) async {
   final PubSpec pubspec = project.pubspec;
 
@@ -76,5 +82,5 @@ Future<_DependencyNode> _resolveDependencies(
       .where((v) => v != null)
       .toSet();
 
-  return new _DependencyNode(project, dependencies);
+  return new _ProjectDependencies(project, dependencies);
 }
