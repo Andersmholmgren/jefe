@@ -72,15 +72,8 @@ class _ProjectDependencies {
   _ProjectDependencies(this.project, this.directDependencies);
 }
 
-/// Represents a [Project] and all the projects it depends on directly and
-/// indirectly
-abstract class ProjectDependencies implements _ProjectDependencies {
-  Project get project;
-//  Set<Project> get indirectDependencies;
-//  Set<Project> get allDependencies;
-}
 
-class _DependencyNode implements ProjectDependencies {
+class _DependencyNode {
   final Project project;
   final Set<_DependencyNode> _dependencies = new Set();
   Iterable<Project> get directDependencies =>
