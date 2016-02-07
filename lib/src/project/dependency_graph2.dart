@@ -21,21 +21,20 @@ Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>
 
 /// Represents a graph of dependencies between [Project]s
 class DependencyGraph {
-
   Map<Project, _DependencyNode> _rootNodeMap = {};
 
   Map<Project, _DependencyNode> _nodeMap = {};
 
   // root nodes are those that nothing else depends on
-  Set<JefeProject> get rootNodes =>
-    _rootNodeMap.values.map((n) => n.toJefeProject()).toSet();
+  JefeProjectSet get rootNodes => new JefeProjectSet(
+      _rootNodeMap.values.map((n) => n.toJefeProject()).toSet());
 
   DependencyGraph._(Set<_ProjectDependencies> dependencySet) {
     dependencySet.forEach((ds) => _add(ds.project, ds.directDependencies));
   }
 
   Option<JefeProject> getProjectByName(String projectName) =>
-
+      rootNodes.getProjectByName(projectName);
 
 //  Option<JefeProject> getProjectByName(String projectName) =>
 
