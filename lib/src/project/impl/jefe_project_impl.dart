@@ -56,3 +56,34 @@ class JefeProjectImpl extends ProjectImpl
           ? new Some<JefeProject>(this)
           : directDependencies.getProjectByName(projectName);
 }
+
+class JefeProjectSetImpl extends DelegatingSet<JefeProject>
+    with JefeProjectGraphMixin
+    implements JefeProjectSet {
+  JefeProjectSetImpl(Set<JefeProject> base) : super(base);
+
+  JefeProjectSetImpl get directDependencies => this;
+
+  Option<JefeProject> getProjectByName(String projectName) =>
+      map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
+          .firstWhere((o) => o is Some, orElse: () => const None());
+
+  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) =>
+      expand/*<JefeProject>*/((n) => n.getDepthFirst(visited));
+}
+
+abstract class JefeProjectGraphMixin extends JefeProjectGraph {
+//  Option<JefeProject> getProjectByName(String projectName) =>
+//      map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
+//          .firstWhere((o) => o is Some, orElse: () => const None());
+
+  Iterable<JefeProject> get depthFirst {
+    return getDepthFirst(new Set<JefeProject>());
+  }
+
+  Future processDepthFirst(
+      process(JefeProject project, Iterable<JefeProject> dependencies)) async {
+    await Future.forEach(
+        depthFirst, (JefeProject p) => process(p, p.directDependencies));
+  }
+}

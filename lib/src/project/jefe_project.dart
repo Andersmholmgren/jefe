@@ -3,10 +3,10 @@
 
 library jefe.project.jefe;
 
-import 'package:jefe/src/project/project.dart';
 import 'dart:async';
+
+import 'package:jefe/src/project/project.dart';
 import 'package:option/option.dart';
-import 'package:collection/collection.dart';
 
 /// A [Project] managed by Jefe
 abstract class JefeProject extends Project implements JefeProjectGraph {
@@ -46,33 +46,3 @@ abstract class JefeProjectSet implements Set<JefeProject>, JefeProjectGraph {
       expand/*<JefeProject>*/((n) => n.getDepthFirst(visited));
 }
 
-class JefeProjectSetImpl extends DelegatingSet<JefeProject>
-    with JefeProjectGraphMixin
-    implements JefeProjectSet {
-  JefeProjectSetImpl(Set<JefeProject> base) : super(base);
-
-  JefeProjectSetImpl get directDependencies => this;
-
-  Option<JefeProject> getProjectByName(String projectName) =>
-      map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
-          .firstWhere((o) => o is Some, orElse: () => const None());
-
-  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) =>
-      expand/*<JefeProject>*/((n) => n.getDepthFirst(visited));
-}
-
-abstract class JefeProjectGraphMixin extends JefeProjectGraph {
-//  Option<JefeProject> getProjectByName(String projectName) =>
-//      map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
-//          .firstWhere((o) => o is Some, orElse: () => const None());
-
-  Iterable<JefeProject> get depthFirst {
-    return getDepthFirst(new Set<JefeProject>());
-  }
-
-  Future processDepthFirst(
-      process(JefeProject project, Iterable<JefeProject> dependencies)) async {
-    await Future.forEach(
-        depthFirst, (JefeProject p) => process(p, p.directDependencies));
-  }
-}
