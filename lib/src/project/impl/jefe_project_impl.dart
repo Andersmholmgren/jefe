@@ -38,16 +38,8 @@ class JefeProjectImpl extends ProjectImpl
             project.pubspec);
 
   @override
-  Iterable<JefeProject> get depthFirst => getDepthFirst(new Set<JefeProject>());
-
-//  @override
-//  Future processDepthFirst(
-//          process(JefeProject project, Iterable<JefeProject> dependencies)) =>
-//      directDependencies.processDepthFirst(process);
-
-  @override
   Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) {
-    final children = directDependencies.expand((n) => n.getDepthFirst(visited));
+    final children = directDependencies.getDepthFirst(visited);
 
     Iterable us() sync* {
       if (!visited.contains((this))) {

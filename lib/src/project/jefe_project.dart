@@ -47,16 +47,17 @@ class JefeProjectSet extends DelegatingSet<JefeProject>
   JefeProjectSet(Set<JefeProject> base) : super(base);
 
   JefeProjectSet get directDependencies => this;
+
+  Option<JefeProject> getProjectByName(String projectName) => directDependencies
+    .map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
+    .firstWhere((o) => o is Some, orElse: () => const None());
+
 }
 
 abstract class JefeProjectGraphMixin extends JefeProjectGraph {
 //  Option<JefeProject> getProjectByName(String projectName) =>
 //      map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
 //          .firstWhere((o) => o is Some, orElse: () => const None());
-
-  Option<JefeProject> getProjectByName(String projectName) => directDependencies
-      .map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
-      .firstWhere((o) => o is Some, orElse: () => const None());
 
   Iterable<JefeProject> get depthFirst {
     return getDepthFirst(new Set<JefeProject>());
