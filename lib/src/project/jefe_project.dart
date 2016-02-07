@@ -35,7 +35,7 @@ abstract class JefeProjectGraph {
 
   Iterable<JefeProject> get depthFirst;
 
-//  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited);
+  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited);
 
   Future processDepthFirst(
       process(JefeProject project, Iterable<JefeProject> dependencies));
@@ -46,13 +46,6 @@ class JefeProjectSet extends DelegatingSet<JefeProject>
     implements JefeProjectGraph {
   JefeProjectSet(Set<JefeProject> base) : super(base);
 
-  Option<JefeProject> getProjectByName(String projectName) =>
-      map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
-          .firstWhere((o) => o is Some, orElse: () => const None());
-
-  Iterable<JefeProject> get depthFirst =>
-      expand/*<JefeProject>*/((n) => n.getDepthFirst(new Set<JefeProject>()));
-
   JefeProjectSet get directDependencies => this;
 }
 
@@ -60,6 +53,18 @@ abstract class JefeProjectGraphMixin extends JefeProjectGraph {
 //  Option<JefeProject> getProjectByName(String projectName) =>
 //      map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
 //          .firstWhere((o) => o is Some, orElse: () => const None());
+
+  Option<JefeProject> getProjectByName(String projectName) => directDependencies
+      .map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
+      .firstWhere((o) => o is Some, orElse: () => const None());
+
+  Iterable<JefeProject> get depthFirst {
+    return getDepthFirst(new Set<JefeProject>());
+  }
+
+  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) =>
+      directDependencies
+          .expand/*<JefeProject>*/((n) => n.getDepthFirst(visited));
 
   Future processDepthFirst(
       process(JefeProject project, Iterable<JefeProject> dependencies)) async {
