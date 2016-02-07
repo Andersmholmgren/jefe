@@ -27,7 +27,8 @@ Logger _log = new Logger('jefe.project.commands.core');
 enum CommandConcurrencyMode { serial, concurrentProject, concurrentCommand }
 
 /// A command that operates on a single [Project]
-ProjectCommand projectCommand(String name, ProjectFunction function,
+ProjectCommand /*<T>*/ projectCommand /*<T>*/ (
+        String name, ProjectFunction function,
         {CommandConcurrencyMode concurrencyMode:
             CommandConcurrencyMode.concurrentCommand,
         Condition condition: _alwaysYes}) =>
@@ -64,13 +65,13 @@ ExecutorAwareProjectCommand executorAwareCommand(
     new _DefaultExecutorAwareProjectCommand(name, function);
 
 /// Some function applied to a [Project]
-typedef ProjectFunction(Project project);
+typedef Future<T> ProjectFunction<T>(Project project);
 
 /// Some function applied to a [Project] with the given dependencies
-typedef ProjectWithDependenciesFunction(
+typedef Future<T> ProjectWithDependenciesFunction<T>(
     Project project, Iterable<Project> dependencies);
 
-typedef ExecutorAwareProjectFunction(CommandExecutor executor);
+typedef Future<T> ExecutorAwareProjectFunction<T>(CommandExecutor executor);
 
 typedef bool Condition();
 
@@ -93,20 +94,21 @@ abstract class ProjectCommand<T> extends Command {
 
   Future<T> process(Project project, {Iterable<Project> dependencies});
 
-  ProjectCommand copy(
+  ProjectCommand<T> copy(
       {String name,
       CommandConcurrencyMode concurrencyMode,
       Condition condition});
 }
 
 /// a function that operates on the dependency graph as a whole
-typedef Future ProjectDependencyGraphFunction(
+typedef Future<T> ProjectDependencyGraphFunction<T>(
     DependencyGraph graph, Directory rootDirectory, ProjectFilter filter);
 
 /// a command that operates on the dependency graph as a whole
-abstract class ProjectDependencyGraphCommand extends Command {
+abstract class ProjectDependencyGraphCommand<T> extends Command {
   String get name;
-  Future process(
+
+  Future<T> process(
       DependencyGraph graph, Directory rootDirectory, ProjectFilter filter);
 }
 
@@ -122,12 +124,12 @@ abstract class CompositeProjectCommand extends Command {
 }
 
 /// a [Command] that controls the execution of other commands.
-abstract class ExecutorAwareProjectCommand extends Command {
+abstract class ExecutorAwareProjectCommand<T> extends Command {
   // Or maybe command.process can return more commands to execute.
   // A composite would be very useful here or at least a common base class
   String get name;
   CommandConcurrencyMode get concurrencyMode;
-  Future process(CommandExecutor executor, {ProjectFilter filter});
+  Future<T> process(CommandExecutor executor, {ProjectFilter filter});
 }
 
 class ProjectCommandError {

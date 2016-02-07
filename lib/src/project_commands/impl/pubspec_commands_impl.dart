@@ -105,7 +105,8 @@ class PubSpecCommandsImpl implements PubSpecCommands {
       Set<String> exportedPackageNames,
       DependencyType type,
       bool useGitIfNotHosted) async {
-    final newDependencies = new Map.from(dependencyRefs);
+    final newDependencies =
+        new Map<String, DependencyReference>.from(dependencyRefs);
 
     final pubspecProjectNames = dependencyRefs.keys.toSet();
 
