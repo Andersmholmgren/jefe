@@ -31,8 +31,11 @@ abstract class JefeProjectGraph {
   /// or one of it's dependencies (direct or indirect)
   Option<JefeProject> getProjectByName(String projectName);
 
-  /// Iterates over [depthFirst] invoking process for each
+  /// Iterates over [depthFirst] invoking [process] for each
   Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ process);
+
+  /// Invokes [process] on this project and all reachable dependencies
+  Future/*<T>*/ processAll/*<T>*/(ProjectFunction/*<T>*/ process);
 }
 
 /// A [Set] of [JefeProject] that supports [JefeProjectGraph] operations
