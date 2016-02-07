@@ -30,12 +30,12 @@ class JefeProjectImpl extends ProjectImpl
       allDependencies.difference(directDependencies);
 
   JefeProjectImpl(this.directDependencies, String gitUri,
-      Directory installDirectory, PubSpec pubspec)
-      : super(gitUri, installDirectory, pubspec);
+      Directory installDirectory, PubSpec pubspec, HostedMode hostedMode)
+      : super(gitUri, installDirectory, pubspec, hostedMode);
 
   JefeProjectImpl.from(Set<JefeProject> directDependencies, Project project)
       : this(directDependencies, project.gitUri, project.installDirectory,
-            project.pubspec);
+            project.pubspec, project.hostedMode);
 
   @override
   Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) {

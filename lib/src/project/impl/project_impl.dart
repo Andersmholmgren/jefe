@@ -57,9 +57,8 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   HostedMode get hostedMode => _hostedMode ?? _pubSpecHostedMode;
 
   ProjectImpl(String gitUri, Directory installDirectory, this._pubspec,
-      HostedMode hostedMode)
-      : this._hostedMode = hostedMode,
-        super(gitUri, installDirectory);
+      this._hostedMode)
+      : super(gitUri, installDirectory);
 
   static Future<ProjectImpl> install(
       Directory parentDir, String name, String gitUri,
