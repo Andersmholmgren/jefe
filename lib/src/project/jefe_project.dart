@@ -58,7 +58,7 @@ abstract class JefeProjectMixin {
 //      map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
 //          .firstWhere((o) => o is Some, orElse: () => const None());
 
-  Iterable<JefeProject> get depthFirst;;
+  Iterable<JefeProject> get depthFirst;
 
   Future processDepthFirst(
       process(JefeProject project, Iterable<JefeProject> dependencies)) async {
