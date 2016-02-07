@@ -43,8 +43,19 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
           process(JefeProject project, Iterable<JefeProject> dependencies)) =>
       directDependencies.processDepthFirst(process);
 
-  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) =>
-      directDependencies.getDepthFirst(visited);
+  @override
+  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) {
+    final children = expand((n) => n.getDepthFirst(visited));
+
+    Iterable us() sync* {
+      if (!visited.contains((this))) {
+        visited.add(this);
+        yield this;
+      }
+    }
+
+    return concat(<JefeProject>[children, us()]);
+  }
 
   @override
   Option<JefeProject> getProjectByName(String projectName) =>

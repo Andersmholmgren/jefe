@@ -46,16 +46,4 @@ class JefeProjectSet extends DelegatingSet<JefeProject> {
       depthFirst, (JefeProject pd) => process(pd, pd.directDependencies));
   }
 
-  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) {
-    final children = expand((n) => n.getDepthFirst(visited));
-
-    Iterable us() sync* {
-      if (!visited.contains((this))) {
-        visited.add(this);
-        yield this;
-      }
-    }
-
-    return concat(<JefeProject>[children, us()]);
-  }
 }
