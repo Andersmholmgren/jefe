@@ -40,7 +40,7 @@ class DependencyGraph {
   _DependencyNode _getOrCreateNode(Project project) {
     var node = _nodeMap[project]; // TODO: is this possible?
     if (node == null) {
-      node = new _DependencyNode(project);
+      node = new _DependencyNode(project, new Set<_DependencyNode>());
       _nodeMap[project] = node;
       _rootNodeMap[project] = node;
     }
@@ -51,35 +51,14 @@ class DependencyGraph {
 
 class _DependencyNode {
   final Project project;
-  final Set<_DependencyNode> _dependencies = new Set();
+  final Set<_DependencyNode> _dependencies;
   Iterable<Project> get directDependencies =>
       _dependencies.map((n) => n.project);
 
-  _DependencyNode(this.project);
+  _DependencyNode(this.project, this._dependencies);
 
   JefeProject toJefeProject() => new JefeProjectImpl.from(
       _dependencies.map((n) => n.toJefeProject()), project);
-
-//  Iterable<ProjectDependencies> getDepthFirst(Set<Project> visited) {
-//    final children = _dependencies.expand((n) => n.getDepthFirst(visited));
-//
-//    Iterable us() sync* {
-//      if (!visited.contains((project))) {
-//        visited.add(project);
-//        yield this;
-//      }
-//    }
-//
-//    return concat([children, us()]);
-//  }
-
-//  @override
-//  Set<Project> get allDependencies =>
-//      getDepthFirst(new Set()).map((pd) => pd.project).toSet();
-
-//  @override
-//  Set<Project> get indirectDependencies =>
-//      allDependencies.difference(directDependencies);
 }
 
 Future<Set<_DependencyNode>> _determineDependencies(
