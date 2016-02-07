@@ -48,6 +48,7 @@ class DependencyGraph {
     return node;
   }
 }
+
 class _ProjectDependencies {
   final Project project;
   final Set<Project> directDependencies;
@@ -58,8 +59,8 @@ class _ProjectDependencies {
 class _DependencyNode implements _ProjectDependencies {
   final Project project;
   final Set<_DependencyNode> _dependencies;
-  Iterable<Project> get directDependencies =>
-      _dependencies.map((n) => n.project);
+  Set<Project> get directDependencies =>
+      _dependencies.map((n) => n.project).toSet();
 
   _DependencyNode(this.project, this._dependencies);
 
