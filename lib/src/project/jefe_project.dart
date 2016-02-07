@@ -18,6 +18,10 @@ abstract class JefeProject extends Project implements JefeProjectGraph {
 /// Some function applied to a [JefeProject]
 typedef Future<T> ProjectFunction<T>(JefeProject project);
 
+typedef bool ProjectFilter(Project p);
+
+bool _noOpFilter(Project p) => true;
+
 /// A graph of [JefeProject] ordered by their dependencies
 abstract class JefeProjectGraph {
   /// Navigates the graph of [JefeProject] depthFirst such that those
@@ -35,7 +39,8 @@ abstract class JefeProjectGraph {
   Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ process);
 
   /// Invokes [process] on this project and all reachable dependencies
-  Future/*<T>*/ processAll/*<T>*/(ProjectFunction/*<T>*/ process);
+  Future/*<T>*/ processAllConcurrently/*<T>*/(ProjectFunction/*<T>*/ process,
+      {ProjectFilter filter: _noOpFilter});
 }
 
 /// A [Set] of [JefeProject] that supports [JefeProjectGraph] operations
