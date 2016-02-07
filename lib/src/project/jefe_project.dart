@@ -31,6 +31,8 @@ abstract class JefeProject extends Project {
 }
 
 abstract class JefeProjectGraph {
+  JefeProjectSet get directDependencies;
+
   Iterable<JefeProject> get depthFirst;
 
 //  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited);
@@ -50,6 +52,8 @@ class JefeProjectSet extends DelegatingSet<JefeProject>
 
   Iterable<JefeProject> get depthFirst =>
       expand/*<JefeProject>*/((n) => n.getDepthFirst(new Set<JefeProject>()));
+
+  JefeProjectSet get directDependencies => this;
 }
 
 abstract class JefeProjectGraphMixin extends JefeProjectGraph {
