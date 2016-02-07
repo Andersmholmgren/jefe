@@ -38,7 +38,6 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
 //  JefeProject forProject(String projectName) =>
 //    depthFirst.firstWhere((pd) => pd.name == projectName);
 
-  /// Iterates over [depthFirst] invoking process for each
   @override
   Future processDepthFirst(
       process(JefeProject project, Iterable<JefeProject> dependencies)) async {
