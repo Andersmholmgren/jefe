@@ -28,6 +28,7 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
       Directory installDirectory, PubSpec pubspec)
       : super(gitUri, installDirectory, pubspec);
 
+  @override
   Iterable<JefeProject> get depthFirst {
     Set<JefeProject> visited = new Set();
     return _rootNodes.expand((n) => n.getDepthFirst(visited));
@@ -38,6 +39,7 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
 //    depthFirst.firstWhere((pd) => pd.name == projectName);
 
   /// Iterates over [depthFirst] invoking process for each
+  @override
   Future processDepthFirst(
       process(JefeProject project, Iterable<JefeProject> dependencies)) async {
     await Future.forEach(

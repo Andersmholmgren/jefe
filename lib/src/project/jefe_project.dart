@@ -4,10 +4,20 @@
 library jefe.project.jefe;
 
 import 'package:jefe/src/project/project.dart';
+import 'dart:async';
 
 /// A [Project] managed by Jefe
 abstract class JefeProject extends Project {
   Set<JefeProject> get directDependencies;
   Set<JefeProject> get indirectDependencies;
   Set<JefeProject> get allDependencies;
+
+  /// Navigates the graph of [JefeProject] depthFirst such that those
+  /// with no dependencies are returned first and those projects that are
+  /// depended upon by other projects are returned before those projects
+  Iterable<JefeProject> get depthFirst;
+
+  /// Iterates over [depthFirst] invoking process for each
+  Future processDepthFirst(
+      process(JefeProject project, Iterable<JefeProject> dependencies));
 }
