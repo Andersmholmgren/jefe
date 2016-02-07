@@ -5,6 +5,7 @@ library jefe.project.jefe;
 
 import 'package:jefe/src/project/project.dart';
 import 'dart:async';
+import 'package:option/option.dart';
 
 /// A [Project] managed by Jefe
 abstract class JefeProject extends Project {
@@ -19,7 +20,12 @@ abstract class JefeProject extends Project {
 
   Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited);
 
-  /// Iterates over [depthFirst] invoking process for each
+  /// returns a [JefeProject] with matching name that is either this project
+  /// or one of it's dependencies (direct or indirect)
+  Option<JefeProject> getProjectByName(String projectName);
+
+
+    /// Iterates over [depthFirst] invoking process for each
   Future processDepthFirst(
       process(JefeProject project, Iterable<JefeProject> dependencies));
 }

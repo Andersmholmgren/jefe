@@ -11,6 +11,7 @@ import 'package:logging/logging.dart';
 import 'package:pubspec/pubspec.dart';
 import 'dart:async';
 import 'package:jefe/src/project/project.dart';
+import 'package:option/option.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
@@ -62,4 +63,12 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
 
     return concat(<JefeProject>[children, us()]);
   }
+
+  @override
+  Option<JefeProject> getProjectByName(String projectName) =>
+      name == projectName
+          ? new Some<JefeProject>(this)
+          : directDependencies
+              .map((c) => c.getProjectByName(projectName))
+              .firstWhere((o) => o is Some, orElse: () => const None());
 }
