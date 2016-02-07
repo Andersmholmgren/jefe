@@ -12,14 +12,13 @@ import 'package:pubspec/pubspec.dart';
 import 'dart:async';
 import 'package:jefe/src/project/project.dart';
 import 'package:option/option.dart';
-import 'dart:collection';
-import 'package:collection/wrappers.dart';
+import 'package:collection/collection.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
 class JefeProjectImpl extends ProjectImpl implements JefeProject {
   @override
-  final Set<JefeProject> directDependencies;
+  final JefeProjectSet directDependencies;
 
   @override
   Set<JefeProject> get allDependencies =>
@@ -38,9 +37,8 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
             project.pubspec);
 
   @override
-  Iterable<JefeProject> get depthFirst =>
-      directDependencies.expand /*<JefeProject>*/ (
-          (n) => n.getDepthFirst(new Set<JefeProject>()));
+  Iterable<JefeProject> get depthFirst => directDependencies
+      .expand/*<JefeProject>*/((n) => n.getDepthFirst(new Set<JefeProject>()));
 
 //  /// The [JefeProject] for the given [projectName]
 //  JefeProject forProject(String projectName) =>
@@ -70,9 +68,7 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
   Option<JefeProject> getProjectByName(String projectName) =>
       name == projectName
           ? new Some<JefeProject>(this)
-          : directDependencies
-              .map((c) => c.getProjectByName(projectName))
-              .firstWhere((o) => o is Some, orElse: () => const None());
+          : directDependencies.getProjectByName(projectName);
 }
 
 class JefeProjectSet extends DelegatingSet<JefeProject> {
@@ -80,6 +76,5 @@ class JefeProjectSet extends DelegatingSet<JefeProject> {
 
   Option<JefeProject> getProjectByName(String projectName) =>
       map((c) => c.getProjectByName(projectName))
-      .firstWhere((o) => o is Some, orElse: () => const None());
-
+          .firstWhere((o) => o is Some, orElse: () => const None());
 }
