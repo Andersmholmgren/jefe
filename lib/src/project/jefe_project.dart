@@ -50,15 +50,12 @@ class JefeProjectSet extends DelegatingSet<JefeProject>
 
   Iterable<JefeProject> get depthFirst =>
       expand/*<JefeProject>*/((n) => n.getDepthFirst(new Set<JefeProject>()));
-
 }
 
-abstract class JefeProjectGraphMixin {
+abstract class JefeProjectGraphMixin extends JefeProjectGraph {
 //  Option<JefeProject> getProjectByName(String projectName) =>
 //      map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
 //          .firstWhere((o) => o is Some, orElse: () => const None());
-
-  Iterable<JefeProject> get depthFirst;
 
   Future processDepthFirst(
       process(JefeProject project, Iterable<JefeProject> dependencies)) async {
