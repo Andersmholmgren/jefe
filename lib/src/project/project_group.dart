@@ -51,6 +51,8 @@ abstract class ProjectGroup extends ProjectEntity {
   @deprecated
   Future<DependencyGraph> get dependencyGraph;
 
+  Future<Set<JefeProject>> get rootJefeProjects;
+
   /// The directory that acts as the container for all the groups project
   /// and metadata directories. These are named with a '_root' suffix
   Directory get containerDirectory;
