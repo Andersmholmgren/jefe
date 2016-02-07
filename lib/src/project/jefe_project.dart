@@ -17,6 +17,8 @@ abstract class JefeProject extends Project {
   /// depended upon by other projects are returned before those projects
   Iterable<JefeProject> get depthFirst;
 
+  Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited);
+
   /// Iterates over [depthFirst] invoking process for each
   Future processDepthFirst(
       process(JefeProject project, Iterable<JefeProject> dependencies));

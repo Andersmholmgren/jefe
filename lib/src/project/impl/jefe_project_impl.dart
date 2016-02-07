@@ -30,10 +30,9 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
       : super(gitUri, installDirectory, pubspec);
 
   @override
-  Iterable<JefeProject> get depthFirst {
-    final visited = new Set<JefeProject>();
-    return _rootNodes.expand((n) => n._getDepthFirst(visited));
-  }
+  Iterable<JefeProject> get depthFirst =>
+      directDependencies.expand /*<JefeProject>*/ (
+          (n) => n.getDepthFirst(new Set<JefeProject>()));
 
 //  /// The [JefeProject] for the given [projectName]
 //  JefeProject forProject(String projectName) =>
@@ -47,15 +46,15 @@ class JefeProjectImpl extends ProjectImpl implements JefeProject {
   }
 
   Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) {
-    final children = _dependencies.expand((n) => n.getDepthFirst(visited));
+    final children = directDependencies.expand((n) => n.getDepthFirst(visited));
 
     Iterable us() sync* {
-      if (!visited.contains((project))) {
-        visited.add(project);
+      if (!visited.contains((this))) {
+        visited.add(this);
         yield this;
       }
     }
 
-    return concat([children, us()]);
+    return concat(<JefeProject>[children, us()]);
   }
 }

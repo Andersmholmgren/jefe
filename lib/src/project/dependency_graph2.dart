@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:pubspec/pubspec.dart';
 
 import 'project.dart';
+import 'package:jefe/src/project/jefe_project.dart';
 
 /// Returns a [DependencyGraph] for the set of [projects]
 Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>
@@ -16,12 +17,14 @@ Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>
 /// Represents a graph of dependencies between [Project]s
 class DependencyGraph {
   // root nodes are those that nothing else depends on
-//  Set<_DependencyNode> get _rootNodes => _rootNodeMap.values.toSet();
+  Set<JefeProject> get rootNodes {
+    return _rootNodeMap.values.toSet();
+  }
   Map<Project, _DependencyNode> _rootNodeMap = {};
 
   Map<Project, _DependencyNode> _nodeMap = {};
 
-  DependencyGraph._(Set<_ProjectDependencies> dependencySet) {
+  DependencyGraph._(Set<_DependencyNode> dependencySet) {
     dependencySet.forEach((ds) => _add(ds.project, ds.directDependencies));
   }
 
@@ -64,14 +67,6 @@ class DependencyGraph {
   }
 }
 
-/// Represents a [Project] and the immediate projects it depends on
-class _ProjectDependencies {
-  final Project project;
-  final Set<Project> directDependencies;
-
-  _ProjectDependencies(this.project, this.directDependencies);
-}
-
 
 class _DependencyNode {
   final Project project;
@@ -103,13 +98,13 @@ class _DependencyNode {
 //      allDependencies.difference(directDependencies);
 }
 
-Future<Set<_ProjectDependencies>> _determineDependencies(
+Future<Set<_DependencyNode>> _determineDependencies(
         Set<Project> projects) async =>
     (await Future.wait(projects.map((p) => _resolveDependencies(
             p, new Map.fromIterable(projects, key: (p) => p.name)))))
         .toSet();
 
-Future<_ProjectDependencies> _resolveDependencies(
+Future<_DependencyNode> _resolveDependencies(
     Project project, Map<String, Project> projects) async {
   final PubSpec pubspec = project.pubspec;
 
@@ -118,5 +113,5 @@ Future<_ProjectDependencies> _resolveDependencies(
       .where((v) => v != null)
       .toSet();
 
-  return new _ProjectDependencies(project, dependencies);
+  return new _DependencyNode(project, dependencies);
 }
