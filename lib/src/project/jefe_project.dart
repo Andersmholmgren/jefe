@@ -15,6 +15,13 @@ abstract class JefeProject extends Project implements JefeProjectGraph {
   Set<JefeProject> get allDependencies;
 }
 
+/// Some function applied to a [JefeProject]
+typedef Future<T> ProjectFunction<T>(JefeProject project);
+
+/// Some function applied to a [JefeProject] with the given dependencies
+typedef Future<T> ProjectWithDependenciesFunction<T>(
+    JefeProject project, Iterable<JefeProject> dependencies);
+
 /// A graph of [JefeProject] ordered by their dependencies
 abstract class JefeProjectGraph {
   /// Navigates the graph of [JefeProject] depthFirst such that those
@@ -29,8 +36,8 @@ abstract class JefeProjectGraph {
   Option<JefeProject> getProjectByName(String projectName);
 
   /// Iterates over [depthFirst] invoking process for each
-  Future processDepthFirst(
-      process(JefeProject project, Iterable<JefeProject> dependencies));
+  Future/*<T>*/ processDepthFirst/*<T>*/(
+      ProjectWithDependenciesFunction/*<T>*/ process);
 }
 
 /// A [Set] of [JefeProject] that supports [JefeProjectGraph] operations
