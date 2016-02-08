@@ -80,14 +80,18 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
 
   Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ command,
       {ProjectFilter filter, Combiner/*<T>*/ combine}) async {
-    return await Future.forEach(
-        _filteredDepthFirst(filter), (JefeProject p) => command(p));
+    return await new Stream<JefeProject>.fromIterable(
+            _filteredDepthFirst(filter))
+        .asyncMap((JefeProject p) => command(p))
+        .reduce(combine ?? _takeLast) as Future/*<T>*/;
+//    return await Future.forEach(
+//        _filteredDepthFirst(filter), (JefeProject p) => command(p));
   }
 
   Future/*<T>*/ processAllConcurrently/*<T>*/(ProjectFunction/*<T>*/ command,
       {ProjectFilter filter, Combiner/*<T>*/ combine}) async {
     return new Stream/*<T>*/ .fromFutures(
-            _filteredDepthFirst(filter).map/*<T>*/(command))
+            _filteredDepthFirst(filter).map/*<Future<T>>*/(command))
         .reduce(combine ?? _takeLast) as Future/*<T>*/;
 //    return (await Future.wait(_filteredDepthFirst(filter).map(command)))
 //        .reduce(combine ?? _takeLast);
