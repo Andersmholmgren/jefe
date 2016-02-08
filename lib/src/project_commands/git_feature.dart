@@ -3,10 +3,11 @@
 
 library jefe.project.commands.git.feature;
 
-import 'impl/git_feature_impl.dart';
-import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:git/git.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:pub_semver/pub_semver.dart';
+
+import 'impl/git_feature_impl.dart';
 
 typedef GitFeatureCommands GitFeatureCommandsFactory();
 

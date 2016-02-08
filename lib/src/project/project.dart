@@ -5,14 +5,16 @@ library jefe.project;
 
 import 'dart:async';
 import 'dart:io';
-import 'impl/project_impl.dart';
-import '../spec/jefe_spec.dart';
-import 'core.dart';
-import 'package:pubspec/pubspec.dart';
+
 import 'package:analyzer/analyzer.dart';
+import 'package:jefe/src/pub/pub_version.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
-import 'package:jefe/src/pub/pub_version.dart';
+import 'package:pubspec/pubspec.dart';
+
+import '../spec/jefe_spec.dart';
+import 'core.dart';
+import 'impl/project_impl.dart';
 
 abstract class ProjectReference implements ProjectEntityReference<Project> {}
 

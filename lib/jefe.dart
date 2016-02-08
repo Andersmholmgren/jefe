@@ -41,21 +41,19 @@
 ///
 library jefe;
 
+export 'src/project/dependency_graph.dart';
 export 'src/project/project.dart';
 export 'src/project/project_group.dart';
-export 'src/project/dependency_graph.dart';
 export 'src/project/release_type.dart';
-export 'src/project_commands/project_command_executor.dart';
-
 export 'src/project_commands/all_commands.dart';
-export 'src/project_commands/project_command.dart';
 export 'src/project_commands/docker_commands.dart';
 export 'src/project_commands/git_commands.dart';
 export 'src/project_commands/git_feature.dart';
 export 'src/project_commands/process_commands.dart';
+export 'src/project_commands/project_command.dart';
+export 'src/project_commands/project_command_executor.dart';
+export 'src/project_commands/project_lifecycle.dart';
 export 'src/project_commands/pub_commands.dart';
 export 'src/project_commands/pubspec_commands.dart';
-export 'src/project_commands/project_lifecycle.dart';
-
 export 'src/spec/jefe_spec.dart';
 //export 'src/spec/impl/jefe_yaml.dart';

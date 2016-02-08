@@ -3,16 +3,16 @@
 
 library jefe.project.jefe.impl;
 
+import 'dart:async';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:jefe/src/project/impl/project_impl.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/project.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pubspec/pubspec.dart';
-import 'package:collection/collection.dart';
-import 'dart:async';
 import 'package:quiver/iterables.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');

@@ -3,18 +3,18 @@
 
 library jefe.project.commands.docker.impl;
 
-import 'package:logging/logging.dart';
-import 'package:jefe/src/project/project.dart';
-import 'package:jefe/src/project_commands/project_command.dart';
-import 'package:jefe/src/project_commands/docker_commands.dart';
-import 'package:dockerfile/dockerfile.dart';
-import 'package:path/path.dart' as p;
-import 'package:jefe/src/project/dependency_graph.dart';
-import 'dart:io';
-import 'package:quiver/iterables.dart';
 import 'dart:async';
+import 'dart:io';
+
+import 'package:dockerfile/dockerfile.dart';
 import 'package:jefe/src/git/git.dart';
+import 'package:jefe/src/project/project.dart';
+import 'package:jefe/src/project_commands/docker_commands.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
+import 'package:logging/logging.dart';
+import 'package:path/path.dart' as p;
 import 'package:pubspec/pubspec.dart';
+import 'package:quiver/iterables.dart';
 
 Logger _log = new Logger('jefe.project.commands.docker.impl');
 

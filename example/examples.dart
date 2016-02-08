@@ -3,11 +3,12 @@
 
 library example;
 
+import 'dart:async';
 import 'dart:io';
+
+import 'package:jefe/jefe.dart';
 import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
-import 'package:jefe/jefe.dart';
-import 'dart:async';
 
 main() async {
   Logger.root.level = Level.ALL;

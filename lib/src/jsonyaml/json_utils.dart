@@ -3,8 +3,8 @@
 
 library util.json;
 
-import 'package:path/path.dart' as path;
 import 'package:option/option.dart';
+import 'package:path/path.dart' as path;
 
 final _p = path.url;
 

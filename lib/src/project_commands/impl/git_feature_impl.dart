@@ -3,16 +3,16 @@
 
 library jefe.project.commands.git.feature.impl;
 
-import 'package:jefe/src/project_commands/git_feature.dart';
-import 'package:jefe/src/git/git.dart';
-import 'package:logging/logging.dart';
-import 'package:jefe/src/project/project.dart';
-import 'package:jefe/src/project_commands/project_command.dart';
-import 'package:jefe/src/project/dependency_graph.dart';
-import 'dart:io';
-import 'package:option/option.dart';
 import 'dart:async';
+import 'dart:io';
+
 import 'package:git/git.dart';
+import 'package:jefe/src/git/git.dart';
+import 'package:jefe/src/project/project.dart';
+import 'package:jefe/src/project_commands/git_feature.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
+import 'package:logging/logging.dart';
+import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');

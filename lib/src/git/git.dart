@@ -3,15 +3,16 @@
 
 library jefe.git;
 
-import 'package:git/git.dart';
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
-import 'package:path/path.dart' as p;
+
+import 'package:git/git.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
+import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:quiver/iterables.dart';
-import 'dart:convert';
 
 Logger _log = new Logger('jefe.git');
 

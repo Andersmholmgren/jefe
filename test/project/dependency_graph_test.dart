@@ -3,10 +3,10 @@
 
 library jefe.project.dependency.test;
 
-import 'package:jefe/src/project/dependency_graph.dart';
-import 'package:test/test.dart';
 import 'package:jefe/src/project/project.dart';
 import 'package:logging/logging.dart';
+import 'package:test/test.dart';
+
 import 'test_helpers.dart';
 
 main() async {

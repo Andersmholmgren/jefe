@@ -4,8 +4,9 @@
 library jefe.project.commands.pub.spec;
 
 import 'package:jefe/src/project_commands/project_command.dart';
-import 'impl/pubspec_commands_impl.dart';
 import 'package:pubspec/pubspec.dart';
+
+import 'impl/pubspec_commands_impl.dart';
 
 /// Commands that operate on each [Project]s [PubSpec] files
 abstract class PubSpecCommands {

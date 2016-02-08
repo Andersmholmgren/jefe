@@ -4,10 +4,10 @@
 library jefe.project.commands.git.impl;
 
 import 'package:jefe/src/git/git.dart';
-import 'package:logging/logging.dart';
 import 'package:jefe/src/project/project.dart';
-import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:jefe/src/project_commands/git_commands.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
+import 'package:logging/logging.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.impl');
 

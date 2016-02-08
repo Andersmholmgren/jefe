@@ -4,17 +4,19 @@
 library jefe.project.commands.executor;
 
 import 'dart:async';
+import 'dart:io';
+
+import 'package:jefe/src/project/jefe_project.dart';
+import 'package:jefe/src/project/project.dart';
+import 'package:jefe/src/project/project_group.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 
 import 'impl/project_command_executor.dart';
-import 'dart:io';
-import 'package:jefe/src/project/project_group.dart';
-import 'package:jefe/src/project/project.dart';
 
 Future<CommandExecutor> executorForDirectory(String rootDirectory) async =>
     new CommandExecutor(await ProjectGroup.load(new Directory(rootDirectory)));
 
-typedef bool ProjectFilter(Project p);
+//typedef bool ProjectFilter(Project p);
 
 ProjectFilter projectNameFilter(String pattern) =>
     (Project p) => pattern == null || p.name.contains(pattern);

@@ -4,23 +4,25 @@
 library jefe.project.impl;
 
 import 'dart:async';
-import '../project.dart';
-import 'package:git/git.dart';
-import '../../git/git.dart' as git;
-import '../../pub/pub.dart' as pub;
-import 'package:logging/logging.dart';
-import '../../spec/jefe_spec.dart';
-import 'package:jefe/src/project/impl/project_group_impl.dart';
 import 'dart:io';
-import 'package:pubspec/pubspec.dart';
-import 'core_impl.dart';
+
 import 'package:analyzer/analyzer.dart';
-import 'package:path/path.dart' as p;
-import 'package:option/option.dart';
-import 'package:jefe/src/pub/pub_version.dart';
-import 'package:pub_semver/pub_semver.dart';
+import 'package:git/git.dart';
+import 'package:jefe/src/project/impl/project_group_impl.dart';
 import 'package:jefe/src/project_commands/project_command.dart'
     show executeTask;
+import 'package:jefe/src/pub/pub_version.dart';
+import 'package:logging/logging.dart';
+import 'package:option/option.dart';
+import 'package:path/path.dart' as p;
+import 'package:pub_semver/pub_semver.dart';
+import 'package:pubspec/pubspec.dart';
+
+import '../../git/git.dart' as git;
+import '../../pub/pub.dart' as pub;
+import '../../spec/jefe_spec.dart';
+import '../project.dart';
+import 'core_impl.dart';
 
 Logger _log = new Logger('jefe.project.impl');
 
@@ -62,7 +64,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   static Future<ProjectImpl> install(
       Directory parentDir, String name, String gitUri,
-      {bool updateIfExists}) async {
+      {bool updateIfExists, HostedMode hostedMode}) async {
     _log.info('installing project $name from $gitUri into $parentDir');
 
     final projectParentDir = await parentDir.create(recursive: true);
@@ -75,17 +77,22 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
     final installDirectory = new Directory(gitDir.path);
     return new ProjectImpl(
-        gitUri, installDirectory, await PubSpec.load(installDirectory));
+        gitUri,
+        installDirectory,
+        await PubSpec.load(installDirectory),
+        hostedMode ?? HostedMode.inferred);
   }
 
-  static Future<Project> load(Directory installDirectory) async {
+  static Future<Project> load(Directory installDirectory,
+      {HostedMode hostedMode}) async {
     _log.info('loading project from install directory $installDirectory');
     final GitDir gitDir = await GitDir.fromExisting(installDirectory.path);
 
     final PubSpec pubspec = await PubSpec.load(installDirectory);
 
     final String gitUri = await git.getOriginOrFirstRemote(gitDir);
-    return new ProjectImpl(gitUri, installDirectory, pubspec);
+    return new ProjectImpl(
+        gitUri, installDirectory, pubspec, hostedMode ?? HostedMode.inferred);
   }
 
   @override

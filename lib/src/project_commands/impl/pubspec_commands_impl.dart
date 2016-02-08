@@ -3,17 +3,18 @@
 
 library jefe.project.commands.pub.spec.impl;
 
-import 'package:logging/logging.dart';
+import 'dart:async';
+
 import 'package:jefe/src/project/project.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
-import 'package:jefe/src/project_commands/pubspec_commands.dart';
-import 'dart:async';
-import 'package:pubspec/pubspec.dart';
 import 'package:jefe/src/project_commands/pub_commands.dart';
+import 'package:jefe/src/project_commands/pubspec_commands.dart';
 import 'package:jefe/src/pub/pub.dart' as pub;
-import 'package:option/option.dart';
 import 'package:jefe/src/pub/pub_version.dart';
+import 'package:logging/logging.dart';
+import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:pubspec/pubspec.dart';
 
 Logger _log = new Logger('jefe.project.commands.pub.impl');
 

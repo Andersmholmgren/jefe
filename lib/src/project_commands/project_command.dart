@@ -6,7 +6,6 @@ library jefe.project.commands.core;
 import 'dart:async';
 import 'dart:io';
 
-import 'package:jefe/src/project/dependency_graph.dart';
 import 'package:jefe/src/project/project.dart';
 import 'package:jefe/src/project_commands/project_command_executor.dart';
 import 'package:logging/logging.dart';

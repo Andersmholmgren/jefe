@@ -3,11 +3,11 @@
 
 library jefe.project.commands.process.impl;
 
-import 'package:logging/logging.dart';
 import 'package:jefe/src/project/project.dart';
-import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:jefe/src/project_commands/process_commands.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:jefe/src/util/process_utils.dart';
+import 'package:logging/logging.dart';
 
 Logger _log = new Logger('jefe.project.commands.process.impl');
 

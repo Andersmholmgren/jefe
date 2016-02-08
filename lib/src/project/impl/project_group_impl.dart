@@ -4,21 +4,23 @@
 library jefe.project.group.impl;
 
 import 'dart:async';
-import '../project.dart';
-import '../project_group.dart';
 import 'dart:io';
+
 import 'package:git/git.dart';
-import '../../git/git.dart';
-import 'package:quiver/iterables.dart';
-import 'package:quiver/streams.dart' as streamz;
+import 'package:jefe/src/project/jefe_project.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
-import '../dependency_graph.dart';
+import 'package:quiver/iterables.dart';
+import 'package:quiver/streams.dart' as streamz;
+
+import '../../git/git.dart';
 import '../../spec/jefe_spec.dart' as spec;
-import 'project_impl.dart';
 import '../../spec/jefe_spec.dart';
+import '../dependency_graph.dart';
+import '../project.dart';
+import '../project_group.dart';
 import 'core_impl.dart';
-import 'package:jefe/src/project/jefe_project.dart';
+import 'project_impl.dart';
 
 Logger _log = new Logger('jefe.project.group.impl');
 
@@ -197,8 +199,8 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     return resultStream;
   }
 
-  Future<DependencyGraph> get dependencyGraph async =>
-      getDependencyGraph(await allProjects);
+  @deprecated
+  Future<JefeProjectSet> get dependencyGraph => rootJefeProjects;
 
   Future<JefeProjectSet> get rootJefeProjects async =>
       getRootProjects(await allProjects);

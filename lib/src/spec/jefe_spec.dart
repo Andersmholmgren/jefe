@@ -5,9 +5,11 @@ library jefe.project.spec;
 
 import 'dart:async';
 import 'dart:io';
+
 import 'package:jefe/jefe.dart';
 import 'package:jefe/src/spec/impl/jefe_yaml.dart';
 import 'package:path/path.dart' as p;
+
 import 'impl/jefe_spec_impl.dart';
 
 /// The meta data that defines a [ProjectGroup]. This is read from the group's

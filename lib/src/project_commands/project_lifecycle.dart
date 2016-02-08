@@ -3,10 +3,11 @@
 
 library jefe.project.commands.lifecycle;
 
+import 'package:jefe/src/project/release_type.dart';
 import 'package:jefe/src/project_commands/git_feature.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
+
 import 'impl/project_lifecycle_impl.dart';
-import 'package:jefe/src/project/release_type.dart';
 
 /// High level commands relating to the project lifecycle
 abstract class ProjectLifecycle {

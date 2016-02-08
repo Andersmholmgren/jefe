@@ -5,12 +5,13 @@ library jefe.project.group;
 
 import 'dart:async';
 import 'dart:io';
-import 'impl/project_group_impl.dart';
-import '../spec/jefe_spec.dart';
-import 'project.dart';
-import 'core.dart';
-import 'package:jefe/src/project/dependency_graph.dart';
+
 import 'package:jefe/src/project/jefe_project.dart';
+
+import '../spec/jefe_spec.dart';
+import 'core.dart';
+import 'impl/project_group_impl.dart';
+import 'project.dart';
 
 abstract class ProjectGroupReference
     implements ProjectEntityReference<ProjectGroup> {}
@@ -50,7 +51,7 @@ abstract class ProjectGroup extends ProjectEntity {
 
   /// Creates a graph of the dependency relationships for [allProjects]
   @deprecated
-  Future<DependencyGraph> get dependencyGraph;
+  Future<JefeProjectSet> get dependencyGraph;
 
   Future<JefeProjectSet> get rootJefeProjects;
 

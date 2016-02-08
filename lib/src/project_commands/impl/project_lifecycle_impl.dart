@@ -3,22 +3,22 @@
 
 library jefe.project.commands.lifecycle.impl;
 
-import 'package:jefe/src/project_commands/git_feature.dart';
-import 'package:logging/logging.dart';
+import 'dart:async';
+
+import 'package:git/git.dart';
 import 'package:jefe/src/git/git.dart';
 import 'package:jefe/src/project/project.dart';
-import 'package:jefe/src/project_commands/project_lifecycle.dart';
-import 'package:jefe/src/project_commands/project_command.dart';
+import 'package:jefe/src/project/release_type.dart';
 import 'package:jefe/src/project_commands/git_commands.dart';
+import 'package:jefe/src/project_commands/git_feature.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
+import 'package:jefe/src/project_commands/project_command_executor.dart';
+import 'package:jefe/src/project_commands/project_lifecycle.dart';
 import 'package:jefe/src/project_commands/pub_commands.dart';
 import 'package:jefe/src/project_commands/pubspec_commands.dart';
-import 'package:jefe/src/project/release_type.dart';
-import 'package:git/git.dart';
-import 'package:jefe/src/project_commands/project_command_executor.dart';
+import 'package:logging/logging.dart';
 import 'package:option/option.dart';
-import 'package:jefe/src/pub/pub_version.dart';
 import 'package:pub_semver/pub_semver.dart';
-import 'dart:async';
 
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 

@@ -3,15 +3,15 @@
 
 library jefe.project.commands.executor.impl;
 
-import 'package:jefe/src/project/project.dart';
-
-import 'package:logging/logging.dart';
 import 'dart:async';
+
+import 'package:jefe/src/project/dependency_graph.dart';
+import 'package:jefe/src/project/jefe_project.dart';
+import 'package:jefe/src/project/project.dart';
+import 'package:jefe/src/project/project_group.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:jefe/src/project_commands/project_command_executor.dart';
-import 'package:jefe/src/project/dependency_graph.dart';
-import 'package:jefe/src/project/project_group.dart';
-import 'package:jefe/src/project/jefe_project.dart';
+import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 
 Logger _log = new Logger('jefe.project.commands.impl');
@@ -58,7 +58,7 @@ class CommandExecutorImpl implements CommandExecutor {
     if (executionMode == CommandConcurrencyMode.concurrentProject ||
         executionMode == CommandConcurrencyMode.concurrentCommand) {
       return await _executeOnConcurrentProjects(
-          await _projectGroup.dependencyGraph, command, filter);
+          await _projectGroup.rootJefeProjects, command, filter);
     } else {
       return await _processDependenciesDepthFirst(
           (Project project, Iterable<Project> dependencies) async {
@@ -71,7 +71,7 @@ class CommandExecutorImpl implements CommandExecutor {
 
   Future _processDependenciesDepthFirst(
       process(Project project, Iterable<Project> dependencies)) async {
-    return (await _projectGroup.dependencyGraph).processDepthFirst(process);
+    return (await _projectGroup.rootJefeProjects).processDepthFirst(process);
   }
 
 //  ProjectWithDependenciesFunction _wrapDependencyProcessor(
@@ -122,7 +122,7 @@ class CommandExecutorImpl implements CommandExecutor {
       CompositeProjectCommand composite, ProjectFilter filter) async {
     _log.info('Executing composite command "${composite.name} '
         'concurrently on all projects"');
-    final projectGraph = await _projectGroup.dependencyGraph;
+    final projectGraph = await _projectGroup.rootJefeProjects;
 
     await Future.forEach(composite.commands, (command) async {
       await _executeOnConcurrentProjects(projectGraph, command, filter);

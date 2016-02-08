@@ -3,8 +3,10 @@
 
 library jefe.project.commands.docker;
 
-import 'package:jefe/src/project_commands/project_command.dart';
 import 'dart:io';
+
+import 'package:jefe/src/project_commands/project_command.dart';
+
 import 'impl/docker_commands_impl.dart';
 
 abstract class DockerCommands {

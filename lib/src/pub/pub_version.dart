@@ -3,9 +3,9 @@
 
 library jefe.pub.version;
 
-import 'package:pubspec/pubspec.dart';
-import 'package:pub_semver/pub_semver.dart';
 import 'package:jefe/src/jsonyaml/json_utils.dart';
+import 'package:pub_semver/pub_semver.dart';
+import 'package:pubspec/pubspec.dart';
 
 class PubVersion {
   final Uri archiveUrl;

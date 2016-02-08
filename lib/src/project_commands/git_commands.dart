@@ -4,6 +4,7 @@
 library jefe.project.commands.git;
 
 import 'package:jefe/src/project_commands/project_command.dart';
+
 import 'impl/git_commands_impl.dart';
 
 abstract class GitCommands {
