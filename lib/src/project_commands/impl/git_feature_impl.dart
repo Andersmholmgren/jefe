@@ -106,7 +106,7 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
   @override
   ProjectDependencyGraphCommand currentFeatureName() => dependencyGraphCommand(
           'Get current feature name',
-          (DependencyGraph graph, Directory rootDirectory, _) async {
+          (JefeProjectGraph graph, Directory rootDirectory, _) async {
         final featureNames = await new Stream.fromIterable(graph.depthFirst)
             .asyncMap((pd) async =>
                 await gitFlowCurrentFeatureName(await pd.project.gitDir))

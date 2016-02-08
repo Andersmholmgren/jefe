@@ -119,7 +119,8 @@ expectThat(
   scheduleForProjects(Iterable<Project> projects()) async {
     theProjects = projects();
     processor = new TestProcessor();
-    final DependencyGraph graph = await getDependencyGraph(theProjects.toSet());
+    final JefeProjectGraph graph =
+        await getDependencyGraph(theProjects.toSet());
     return graph.processDepthFirst(processor);
   }
 

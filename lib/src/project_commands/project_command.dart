@@ -53,7 +53,7 @@ CompositeProjectCommand projectCommandGroup(
   return new _DefaultCompositeProjectCommand(name, commands, concurrencyMode);
 }
 
-/// A command that operates on a [DependencyGraph]. Unlike the other commands,
+/// A command that operates on a [JefeProjectGraph]. Unlike the other commands,
 /// a ProjectDependencyGraphCommand is for tasks that require interacting with
 /// several projects at once
 ProjectDependencyGraphCommand /*<T>*/ dependencyGraphCommand /*<T>*/ (
@@ -102,14 +102,14 @@ abstract class ProjectCommand<T> extends Command {
 
 /// a function that operates on the dependency graph as a whole
 typedef Future<T> ProjectDependencyGraphFunction<T>(
-    DependencyGraph graph, Directory rootDirectory, ProjectFilter filter);
+    JefeProjectGraph graph, Directory rootDirectory, ProjectFilter filter);
 
 /// a command that operates on the dependency graph as a whole
 abstract class ProjectDependencyGraphCommand<T> extends Command {
   String get name;
 
   Future<T> process(
-      DependencyGraph graph, Directory rootDirectory, ProjectFilter filter);
+      JefeProjectGraph graph, Directory rootDirectory, ProjectFilter filter);
 }
 
 /// [concurrencyMode] can be used to limit the concurrencyMode of the
@@ -231,7 +231,7 @@ class _DefaultProjectDependencyGraphCommand<T>
   _DefaultProjectDependencyGraphCommand(this.name, this.function);
 
   @override
-  Future<T> process(DependencyGraph graph, Directory rootDirectory,
+  Future<T> process(JefeProjectGraph graph, Directory rootDirectory,
       ProjectFilter filter) async {
     _log.info('Executing command "$name"');
     final stopWatch = new Stopwatch();

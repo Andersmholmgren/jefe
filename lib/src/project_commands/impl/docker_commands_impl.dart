@@ -30,7 +30,7 @@ class DockerCommandsImpl implements DockerCommands {
           bool setupForPrivateGit: true,
           String targetRootPath: '/app'}) =>
       dependencyGraphCommand('generate Dockerfile',
-          (DependencyGraph graph, Directory rootDirectory, _) async {
+          (JefeProjectGraph graph, Directory rootDirectory, _) async {
         final serverProjectDeps = graph.forProject(serverProjectName);
         final clientProjectDeps = graph.forProject(clientProjectName);
 
@@ -94,7 +94,7 @@ class DockerCommandsImpl implements DockerCommands {
           Iterable<String> entryPointOptions: const [],
           String targetRootPath: '/app'}) =>
       dependencyGraphCommand('generate Dockerfile',
-          (DependencyGraph graph, Directory rootDirectory, _) async {
+          (JefeProjectGraph graph, Directory rootDirectory, _) async {
         final serverProjectDeps = graph.forProject(serverProjectName);
         final clientProjectDeps = graph.forProject(clientProjectName);
 
