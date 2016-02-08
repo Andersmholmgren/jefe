@@ -66,10 +66,12 @@ class JefeProjectSetImpl extends DelegatingSet<JefeProject>
 
   Option<JefeProject> getProjectByName(String projectName) =>
       map/*<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
-          .firstWhere((o) => o is Some, orElse: () => const None());
+          .firstWhere((o) => o is Some, orElse: () => const None())
+      as Option<JefeProject>;
 
   Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) =>
-      expand/*<JefeProject>*/((n) => n.getDepthFirst(visited));
+      expand/*<JefeProject>*/((n) => n.getDepthFirst(visited))
+      as Iterable<JefeProject>;
 }
 
 abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
