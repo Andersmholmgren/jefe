@@ -140,7 +140,8 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 //    final spec.ProjectGroupMetaData metaData = await spec.ProjectGroupMetaData
 //        .fromDefaultProjectGroupYamlFile(gitDir.path);
 
-    final projectGroup = await load(directoryLayout.containerDirectory);
+    final projectGroup =
+        await load(directoryLayout.containerDirectory) as ProjectGroupImpl;
 //        new ProjectGroupImpl(gitUri, metaData, directoryLayout);
 
     final projectGroupInstallFutures = projectGroup.childGroups.map((ref) =>
