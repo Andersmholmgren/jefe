@@ -12,24 +12,23 @@ import 'package:pubspec/pubspec.dart';
 import 'project.dart';
 
 Future<JefeProjectSet> getRootProjects(Set<Project> projects) async =>
-  (await getDependencyGraph(projects)).rootNodes;
+    (await _getDependencyGraph(projects)).rootNodes;
 
 /// Returns a [DependencyGraph] for the set of [projects]
-@deprecated
-Future<DependencyGraph> getDependencyGraph(Set<Project> projects) async =>
-  new DependencyGraph._(await _determineDependencies(projects));
+Future<_DependencyGraph> _getDependencyGraph(Set<Project> projects) async =>
+    new _DependencyGraph._(await _determineDependencies(projects));
 
 /// Represents a graph of dependencies between [Project]s
-class DependencyGraph {
+class _DependencyGraph {
   Map<Project, _DependencyNode> _rootNodeMap = {};
 
   Map<Project, _DependencyNode> _nodeMap = {};
 
   // root nodes are those that nothing else depends on
-  JefeProjectSet get rootNodes => new JefeProjectSet(
-    _rootNodeMap.values.map((n) => n.toJefeProject()).toSet());
+  JefeProjectSet get rootNodes => new JefeProjectSetImpl(
+      _rootNodeMap.values.map((n) => n.toJefeProject()).toSet());
 
-  DependencyGraph._(Set<_ProjectDependencies> dependencySet) {
+  _DependencyGraph._(Set<_ProjectDependencies> dependencySet) {
     dependencySet.forEach((ds) => _add(ds.project, ds.directDependencies));
   }
 
@@ -69,28 +68,28 @@ class _DependencyNode implements _ProjectDependencies {
   final Project project;
   final Set<_DependencyNode> _dependencies;
   Set<Project> get directDependencies =>
-    _dependencies.map((n) => n.project).toSet();
+      _dependencies.map((n) => n.project).toSet();
 
   _DependencyNode(this.project, this._dependencies);
 
   JefeProject toJefeProject() => new JefeProjectImpl.from(
-    _dependencies.map((n) => n.toJefeProject()), project);
+      _dependencies.map((n) => n.toJefeProject()), project);
 }
 
 Future<Set<_ProjectDependencies>> _determineDependencies(
-  Set<Project> projects) async =>
-  (await Future.wait(projects.map((p) => _resolveDependencies(
-    p, new Map.fromIterable(projects, key: (p) => p.name)))))
-    .toSet();
+        Set<Project> projects) async =>
+    (await Future.wait(projects.map((p) => _resolveDependencies(
+            p, new Map.fromIterable(projects, key: (p) => p.name)))))
+        .toSet();
 
 Future<_ProjectDependencies> _resolveDependencies(
-  Project project, Map<String, Project> projects) async {
+    Project project, Map<String, Project> projects) async {
   final PubSpec pubspec = project.pubspec;
 
   final dependencies = pubspec.allDependencies.keys
-    .map((name) => projects[name])
-    .where((v) => v != null)
-    .toSet();
+      .map((name) => projects[name])
+      .where((v) => v != null)
+      .toSet();
 
   return new _ProjectDependencies(project, dependencies);
 }
