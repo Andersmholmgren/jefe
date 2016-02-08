@@ -13,6 +13,7 @@ import 'package:option/option.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:collection/collection.dart';
 import 'dart:async';
+import 'package:quiver/iterables.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
@@ -42,14 +43,15 @@ class JefeProjectImpl extends ProjectImpl
   Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) {
     final children = directDependencies.getDepthFirst(visited);
 
-    Iterable us() sync* {
+    Iterable<JefeProject> us() sync* {
       if (!visited.contains((this))) {
         visited.add(this);
         yield this;
       }
     }
 
-    return concat(<JefeProject>[children, us()]) as Iterable<JefeProject>;
+    return concat(<Iterable<JefeProject>>[children, us()])
+        as Iterable<JefeProject>;
   }
 
   @override
