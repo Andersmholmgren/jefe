@@ -49,7 +49,7 @@ class JefeProjectImpl extends ProjectImpl
       }
     }
 
-    return concat(<JefeProject>[children, us()]);
+    return concat(<JefeProject>[children, us()]) as Iterable<JefeProject>;
   }
 
   @override
