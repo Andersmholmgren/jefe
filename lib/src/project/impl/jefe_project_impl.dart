@@ -82,9 +82,8 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
   Future/*<T>*/ processAllConcurrently/*<T>*/(ProjectFunction/*<T>*/ command,
       {ProjectFilter filter, /*=T*/ combine(
           /*=T*/ value, /*=T*/ element)}) async {
-    return depthFirst
-        .where(filter ?? _noOpFilter)
-        .map(command)
+    return (await Future
+            .wait(depthFirst.where(filter ?? _noOpFilter).map(command)))
         .reduce(combine ?? _takeLast);
   }
 
