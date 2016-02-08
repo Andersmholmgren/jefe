@@ -75,20 +75,24 @@ class JefeProjectSetImpl extends DelegatingSet<JefeProject>
 abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
   Iterable<JefeProject> get depthFirst => getDepthFirst(new Set<JefeProject>());
 
-  Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ command) async {
-    return await Future.forEach(depthFirst, (JefeProject p) => command(p));
+  Iterable<JefeProject> _filteredDepthFirst(ProjectFilter filter) =>
+      depthFirst.where(filter ?? _noOpFilter);
+
+  Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ command,
+      {ProjectFilter filter}) async {
+    return await Future.forEach(
+        _filteredDepthFirst(filter), (JefeProject p) => command(p));
   }
 
   Future/*<T>*/ processAllConcurrently/*<T>*/(ProjectFunction/*<T>*/ command,
-      {ProjectFilter filter, /*=T*/ combine(
-          /*=T*/ value, /*=T*/ element)}) async {
-    return (await Future
-            .wait(depthFirst.where(filter ?? _noOpFilter).map(command)))
+      {ProjectFilter filter, Combiner/*<T>*/ combine}) async {
+    return (await Future.wait(_filteredDepthFirst(filter).map(command)))
         .reduce(combine ?? _takeLast);
   }
 
   Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ command,
-      {ProjectFilter filter: _noOpFilter});
+          {ProjectFilter filter}) =>
+      processDepthFirst(command, filter: filter);
 }
 
 bool _noOpFilter(Project p) => true;

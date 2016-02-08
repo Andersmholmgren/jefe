@@ -20,6 +20,8 @@ typedef Future<T> ProjectFunction<T>(JefeProject project);
 
 typedef bool ProjectFilter(Project p);
 
+typedef T Combiner<T>(T value, T element);
+
 /// A graph of [JefeProject] ordered by their dependencies
 abstract class JefeProjectGraph {
   /// Navigates the graph of [JefeProject] depthFirst such that those
@@ -34,22 +36,22 @@ abstract class JefeProjectGraph {
   Option<JefeProject> getProjectByName(String projectName);
 
   /// Iterates over [depthFirst] invoking [command] for each
-  Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ command);
+  Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ command,
+      {ProjectFilter filter});
 
   /// Invokes [command] on this project and all reachable dependencies.
   /// [command] is executed concurrently on all projects.
   /// An optional [filter] can be provided to limit which projects the [command]
   /// is executed on.
   Future/*<T>*/ processAllConcurrently/*<T>*/(ProjectFunction/*<T>*/ command,
-      {ProjectFilter filter, /*=T*/ combine(
-          /*=T*/ value, /*=T*/ element)});
+      {ProjectFilter filter, Combiner/*<T>*/ combine});
 
   /// Invokes [command] on this project and all reachable dependencies
   /// [command] is executed one project at a time.
   /// An optional [filter] can be provided to limit which projects the [command]
   /// is executed on.
   Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ command,
-      {ProjectFilter filter: _noOpFilter});
+      {ProjectFilter filter});
 }
 
 /// A [Set] of [JefeProject] that supports [JefeProjectGraph] operations
