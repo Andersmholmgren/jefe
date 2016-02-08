@@ -20,8 +20,6 @@ typedef Future<T> ProjectFunction<T>(JefeProject project);
 
 typedef bool ProjectFilter(Project p);
 
-bool _noOpFilter(Project p) => true;
-
 /// A graph of [JefeProject] ordered by their dependencies
 abstract class JefeProjectGraph {
   /// Navigates the graph of [JefeProject] depthFirst such that those
@@ -43,7 +41,8 @@ abstract class JefeProjectGraph {
   /// An optional [filter] can be provided to limit which projects the [command]
   /// is executed on.
   Future/*<T>*/ processAllConcurrently/*<T>*/(ProjectFunction/*<T>*/ command,
-      {ProjectFilter filter: _noOpFilter});
+      {ProjectFilter filter, /*=T*/ combine(
+          /*=T*/ value, /*=T*/ element)});
 
   /// Invokes [command] on this project and all reachable dependencies
   /// [command] is executed one project at a time.

@@ -12,6 +12,7 @@ import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:collection/collection.dart';
+import 'dart:async';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
@@ -79,8 +80,18 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
   }
 
   Future/*<T>*/ processAllConcurrently/*<T>*/(ProjectFunction/*<T>*/ command,
-      {ProjectFilter filter: _noOpFilter});
+      {ProjectFilter filter, /*=T*/ combine(
+          /*=T*/ value, /*=T*/ element)}) async {
+    return depthFirst
+        .where(filter ?? _noOpFilter)
+        .map(command)
+        .reduce(combine ?? _takeLast);
+  }
 
   Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ command,
       {ProjectFilter filter: _noOpFilter});
 }
+
+bool _noOpFilter(Project p) => true;
+
+/*=T*/ _takeLast/*<T>*/(/*=T*/ value, /*=T*/ element) => element;
