@@ -79,20 +79,23 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
       depthFirst.where(filter ?? _noOpFilter);
 
   Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ command,
-      {ProjectFilter filter}) async {
+      {ProjectFilter filter, Combiner/*<T>*/ combine}) async {
     return await Future.forEach(
         _filteredDepthFirst(filter), (JefeProject p) => command(p));
   }
 
   Future/*<T>*/ processAllConcurrently/*<T>*/(ProjectFunction/*<T>*/ command,
       {ProjectFilter filter, Combiner/*<T>*/ combine}) async {
-    return (await Future.wait(_filteredDepthFirst(filter).map(command)))
-        .reduce(combine ?? _takeLast);
+    return new Stream/*<T>*/ .fromFutures(
+            _filteredDepthFirst(filter).map/*<T>*/(command))
+        .reduce(combine ?? _takeLast) as Future/*<T>*/;
+//    return (await Future.wait(_filteredDepthFirst(filter).map(command)))
+//        .reduce(combine ?? _takeLast);
   }
 
   Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ command,
-          {ProjectFilter filter}) =>
-      processDepthFirst(command, filter: filter);
+          {ProjectFilter filter, Combiner/*<T>*/ combine}) =>
+      processDepthFirst(command, filter: filter, combine: combine);
 }
 
 bool _noOpFilter(Project p) => true;
