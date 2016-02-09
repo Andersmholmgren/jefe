@@ -118,7 +118,7 @@ abstract class ProjectDependencyGraphCommand<T> extends Command {
 /// the CompositeProjectCommand's value and the ProjectCommand's value.
 /// TODO: this is not currently a composite. Either make it one or rename to
 /// ProjectCommandGroup or something
-abstract class CompositeProjectCommand<T> extends Command<T> {
+abstract class CompositeProjectCommand<T> extends Command {
   String get name;
   Iterable<ProjectCommand<T>> get commands;
   CommandConcurrencyMode get concurrencyMode;
