@@ -73,23 +73,6 @@ class CommandExecutorImpl implements CommandExecutor {
     return (await _projectGroup.rootJefeProjects).processDepthFirst(process);
   }
 
-//  ProjectWithDependenciesFunction _wrapDependencyProcessor(
-//          String description, ProjectWithDependenciesFunction processor) =>
-//      (Project project, Iterable<Project> dependencies) async {
-//    final taskDescription =
-//        '$description for project ${project.name} with ${dependencies.length} dependencies';
-//    _log.info('Executing command "$taskDescription"');
-//    await processor(project, dependencies);
-//    _log.finer('Completed command "$taskDescription"');
-//  };
-
-//  Future executeAll(Iterable<ProjectCommand> commands) =>
-//      Future.forEach(commands, execute);
-//  // TODO: this is the safest approach. It will execute each command from scratch
-//  // reevaluating allProjects and reloading all projects for each command
-//  // More efficient thought is if projects loaded once and then each command run
-//  // on them in turn
-
   Future executeAll(CompositeProjectCommand composite,
       {CommandConcurrencyMode concurrencyMode:
           CommandConcurrencyMode.concurrentCommand,
@@ -109,7 +92,6 @@ class CommandExecutorImpl implements CommandExecutor {
   Future _executeSerially(
       CompositeProjectCommand composite, ProjectFilter filter) async {
     _log.info('Executing composite command "${composite.name} serially"');
-
 
     final result = await Future.forEach(
         composite.commands, (c) => execute(c, filter: filter));
@@ -133,28 +115,20 @@ class CommandExecutorImpl implements CommandExecutor {
   }
 
   Future _executeOnConcurrentProjects(JefeProjectGraph projectGraph,
+          ProjectCommand command, ProjectFilter filter) =>
+      projectGraph.processAllConcurrently(command, filter: filter);
+
+  Future _executeOnAllConcurrentProjects(
       ProjectCommand command, ProjectFilter filter) async {
-    return await new Stream.fromIterable(
-            projectGraph.depthFirst.map((JefeProject pd) async {
-      if (filter(pd)) {
-        return await command.process(pd);
-      }
-    }).toList())
-        .asyncMap((result) => result)
-        .toList();
+    return _executeOnConcurrentProjects(
+        await getRootProjects(await _projectGroup.allProjects),
+        command,
+        filter);
   }
 
-  Future executeOn(ProjectCommand command, String projectName) async {
-    final JefeProjectGraph graph =
-        await getRootProjects(await _projectGroup.allProjects);
-    final jefeProjectOpt = graph.getProjectByName(projectName);
-    if (jefeProjectOpt is None) {
-      throw new ArgumentError.value(
-          projectName, 'projectName', 'No such project found');
-    }
-    final jefeProject = jefeProjectOpt.get();
-
-    return await command.process(jefeProject);
+  Future executeOn(ProjectCommand command, String projectName) {
+    return _executeOnAllConcurrentProjects(
+        command, projectNameFilter(projectName));
   }
 
   Future executeOnGraph(ProjectDependencyGraphCommand command,

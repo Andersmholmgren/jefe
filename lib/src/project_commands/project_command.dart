@@ -94,6 +94,7 @@ abstract class ProjectCommand<T> extends Command {
   Condition get condition;
 
   Future<T> process(JefeProject project);
+  Future<T> call(JefeProject project) => process(project);
 
   ProjectCommand<T> copy(
       {String name,
