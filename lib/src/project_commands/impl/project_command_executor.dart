@@ -12,7 +12,6 @@ import 'package:jefe/src/project/project_group.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:jefe/src/project_commands/project_command_executor.dart';
 import 'package:logging/logging.dart';
-import 'package:option/option.dart';
 
 Logger _log = new Logger('jefe.project.commands.impl');
 
@@ -49,28 +48,22 @@ class CommandExecutorImpl implements CommandExecutor {
       {CommandConcurrencyMode concurrencyMode:
           CommandConcurrencyMode.concurrentProject,
       ProjectFilter filter: _noOpFilter}) async {
-    final _filter = filter != null ? filter : _noOpFilter;
-
     final executionMode = concurrencyMode.index < command.concurrencyMode.index
         ? concurrencyMode
         : command.concurrencyMode;
 
     if (executionMode == CommandConcurrencyMode.concurrentProject ||
         executionMode == CommandConcurrencyMode.concurrentCommand) {
-      return await _executeOnConcurrentProjects(
-          await _projectGroup.rootJefeProjects, command, filter);
+      return await _executeOnAllConcurrentProjects(command, filter);
     } else {
-      return await _processDependenciesDepthFirst((JefeProject project) async {
-        if (_filter(project)) {
-          return await command.process(project);
-        }
-      });
+      return await _processDependenciesDepthFirst(command, filter);
     }
   }
 
   Future _processDependenciesDepthFirst(
-      Future process(JefeProject project)) async {
-    return (await _projectGroup.rootJefeProjects).processDepthFirst(process);
+      Future process(JefeProject project), ProjectFilter filter) async {
+    return (await _projectGroup.rootJefeProjects)
+        .processDepthFirst(process, filter: filter);
   }
 
   Future executeAll(CompositeProjectCommand composite,
@@ -119,17 +112,12 @@ class CommandExecutorImpl implements CommandExecutor {
       projectGraph.processAllConcurrently(command, filter: filter);
 
   Future _executeOnAllConcurrentProjects(
-      ProjectCommand command, ProjectFilter filter) async {
-    return _executeOnConcurrentProjects(
-        await getRootProjects(await _projectGroup.allProjects),
-        command,
-        filter);
-  }
+          ProjectCommand command, ProjectFilter filter) async =>
+      _executeOnConcurrentProjects(
+          await _projectGroup.rootJefeProjects, command, filter);
 
-  Future executeOn(ProjectCommand command, String projectName) {
-    return _executeOnAllConcurrentProjects(
-        command, projectNameFilter(projectName));
-  }
+  Future executeOn(ProjectCommand command, String projectName) =>
+      _executeOnAllConcurrentProjects(command, projectNameFilter(projectName));
 
   Future executeOnGraph(ProjectDependencyGraphCommand command,
       {ProjectFilter filter: _noOpFilter}) async {
