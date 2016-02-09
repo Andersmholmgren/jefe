@@ -184,11 +184,6 @@ class _DefaultCommand<T> implements ProjectCommand<T> {
       return null;
     }
 
-//    if (function is! ProjectWithDependenciesFunction &&
-//        function is! ProjectFunction) {
-//      throw new ArgumentError('Invalid function passed into process');
-//    }
-
     final Callable<T> callable = () => function(project);
 
     try {
@@ -230,15 +225,9 @@ class _DefaultProjectDependencyGraphCommand<T>
   @override
   Future<T> process(JefeProjectGraph graph, Directory rootDirectory,
       ProjectFilter filter) async {
-    _log.info('Executing command "$name"');
-    final stopWatch = new Stopwatch();
-    stopWatch.start();
+    final Callable<T> callable = () => function(graph, rootDirectory, filter);
 
-    final result = await function(graph, rootDirectory, filter);
-
-    _log.finer('Completed command "$name" in ${stopWatch.elapsed}');
-    stopWatch.stop();
-    return result;
+    return executeTask(callable, name);
   }
 }
 
