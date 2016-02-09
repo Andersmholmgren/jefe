@@ -46,11 +46,12 @@ ProjectCommand/*<T>*/ projectCommandWithDependencies/*<T>*/(
 /// order provided. Depending on the [concurrencyMode] of the composite command
 /// and that of the individual commands, commands may be executing on other
 /// [Project]s in the group simultaneously
-CompositeProjectCommand projectCommandGroup(
-    String name, Iterable<ProjectCommand> commands,
+CompositeProjectCommand/*<T>*/ projectCommandGroup/*<T>*/(
+    String name, Iterable<ProjectCommand/*<T>*/ > commands,
     {CommandConcurrencyMode concurrencyMode:
         CommandConcurrencyMode.concurrentCommand}) {
-  return new _DefaultCompositeProjectCommand(name, commands, concurrencyMode);
+  return new _DefaultCompositeProjectCommand/*<T>*/(
+      name, commands, concurrencyMode);
 }
 
 /// A command that operates on a [JefeProjectGraph]. Unlike the other commands,
@@ -117,9 +118,9 @@ abstract class ProjectDependencyGraphCommand<T> extends Command {
 /// the CompositeProjectCommand's value and the ProjectCommand's value.
 /// TODO: this is not currently a composite. Either make it one or rename to
 /// ProjectCommandGroup or something
-abstract class CompositeProjectCommand extends Command {
+abstract class CompositeProjectCommand<T> extends Command<T> {
   String get name;
-  Iterable<ProjectCommand> get commands;
+  Iterable<ProjectCommand<T>> get commands;
   CommandConcurrencyMode get concurrencyMode;
 }
 
@@ -211,9 +212,9 @@ class _DefaultCommand<T> implements ProjectCommand<T> {
   }
 }
 
-class _DefaultCompositeProjectCommand implements CompositeProjectCommand {
+class _DefaultCompositeProjectCommand<T> implements CompositeProjectCommand<T> {
   final String name;
-  final Iterable<ProjectCommand> commands;
+  final Iterable<ProjectCommand<T>> commands;
   final CommandConcurrencyMode concurrencyMode;
   _DefaultCompositeProjectCommand(
       this.name, this.commands, this.concurrencyMode);
