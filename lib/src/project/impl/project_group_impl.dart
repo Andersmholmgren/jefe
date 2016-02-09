@@ -149,8 +149,10 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     final projectInstallFutures = projectGroup.projects.map((ref) =>
         projectGroup._installChildProject(
             ref.name, ref.gitUri, updateIfExists));
-    await Future
-        .wait(concat([projectGroupInstallFutures, projectInstallFutures]));
+    await Future.wait(concat(<Iterable<Future>>[
+      projectGroupInstallFutures,
+      projectInstallFutures
+    ]) as Iterable<Future>);
 
     _log.info('Completed initialising group with gitUri: $gitUri and '
         'installDirectory: $dir');
@@ -185,19 +187,20 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 
   Stream<Project> get _allProjectsStream {
     final Stream<ProjectGroupImpl> childGroupStream =
-        new Stream.fromIterable(childGroups.map((ref) => ref.get()))
-            .asyncMap((pgf) => pgf);
+        new Stream<Future<ProjectGroup>>.fromIterable(
+                childGroups.map/*<Future<ProjectGroup>>*/((ref) => ref.get()))
+            .asyncMap((pgf) => pgf) as Stream<ProjectGroupImpl>;
 
-    final Stream<Project> childProjectStream =
-        childGroupStream.asyncExpand((pg) => pg._allProjectsStream);
+    final Stream<Project> childProjectStream = childGroupStream
+        .asyncExpand((pg) => pg._allProjectsStream) as Stream<Project>;
 
     final Stream<Project> projectStream =
-        new Stream.fromIterable(projects.map((p) => p.get()))
-            .asyncMap((p) => p);
+        new Stream<Future<Project>>.fromIterable(projects.map((p) => p.get()))
+            .asyncMap((p) => p) as Stream<Project>;
 
     final resultStream = streamz.concat([childProjectStream, projectStream]);
 
-    return resultStream;
+    return resultStream as Stream<Project>;
   }
 
   @deprecated
