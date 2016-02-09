@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:git/git.dart';
 import 'package:jefe/src/git/git.dart';
 import 'package:jefe/src/project/project.dart';
+import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/release_type.dart';
 import 'package:jefe/src/project_commands/git_commands.dart';
 import 'package:jefe/src/project_commands/git_feature.dart';
@@ -70,7 +71,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       {bool doPush: false, bool recursive: true}) {
     return projectCommandWithDependencies(
         'complete development of feature $featureName',
-        (Project project, Iterable<Project> dependencies) async {
+        (JefeProject project) async {
       await _git.assertWorkingTreeClean().process(project);
 
       final currentBranchName =
@@ -83,9 +84,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
             .process(project);
       }
 
-      await _pubSpec
-          .setToGitDependencies()
-          .process(project, dependencies: dependencies);
+      await _pubSpec.setToGitDependencies().process(project);
       await _pub.get().process(project);
       await _git
           .commit('completed development of feature $featureName')
@@ -115,7 +114,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
           {ReleaseType type: ReleaseType.minor,
           bool autoUpdateHostedVersions: false}) =>
       projectCommandWithDependencies('check release versions',
-          (Project project, Iterable<Project> dependencies) async {
+          (JefeProject project) async {
         final ProjectVersions versions = await getCurrentProjectVersions(
             project, dependencies, type, autoUpdateHostedVersions);
         if (versions.newReleaseVersion is Some) {
@@ -135,7 +134,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       {ReleaseType type: ReleaseType.minor,
       bool autoUpdateHostedVersions: false}) {
     return projectCommandWithDependencies('Release version: type $type',
-        (Project project, Iterable<Project> dependencies) async {
+        (JefeProject project) async {
       final ProjectVersions projectVersions = await getCurrentProjectVersions(
           project, dependencies, type, autoUpdateHostedVersions);
 
