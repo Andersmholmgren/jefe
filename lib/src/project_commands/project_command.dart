@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:jefe/src/project/project.dart';
 import 'package:jefe/src/project_commands/project_command_executor.dart';
 import 'package:logging/logging.dart';
+import 'package:jefe/src/project/jefe_project.dart';
 
 Logger _log = new Logger('jefe.project.commands.core');
 
@@ -26,19 +27,19 @@ Logger _log = new Logger('jefe.project.commands.core');
 enum CommandConcurrencyMode { serial, concurrentProject, concurrentCommand }
 
 /// A command that operates on a single [Project]
-ProjectCommand /*<T>*/ projectCommand /*<T>*/ (
+ProjectCommand/*<T>*/ projectCommand/*<T>*/(
         String name, ProjectFunction function,
         {CommandConcurrencyMode concurrencyMode:
             CommandConcurrencyMode.concurrentCommand,
         Condition condition: _alwaysYes}) =>
-    new _DefaultCommand /*<T>*/ (name, function, concurrencyMode, condition);
+    new _DefaultCommand/*<T>*/(name, function, concurrencyMode, condition);
 
 /// A command that operates on a single [Project] and the projects it depends on
-ProjectCommand /*<T>*/ projectCommandWithDependencies /*<T>*/ (
-        String name, ProjectWithDependenciesFunction /*<T>*/ function,
+ProjectCommand/*<T>*/ projectCommandWithDependencies/*<T>*/(
+        String name, ProjectFunction/*<T>*/ function,
         {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.serial,
         Condition condition: _alwaysYes}) =>
-    new _DefaultCommand /*<T>*/ (name, function, concurrencyMode, condition);
+    new _DefaultCommand/*<T>*/(name, function, concurrencyMode, condition);
 
 /// A command that is made up of an ordered list of other commands.
 /// For a given [Project] the commands will be executed one at a time in the
@@ -55,20 +56,20 @@ CompositeProjectCommand projectCommandGroup(
 /// A command that operates on a [JefeProjectGraph]. Unlike the other commands,
 /// a ProjectDependencyGraphCommand is for tasks that require interacting with
 /// several projects at once
-ProjectDependencyGraphCommand /*<T>*/ dependencyGraphCommand /*<T>*/ (
-        String name, ProjectDependencyGraphFunction /*<T>*/ function) =>
-    new _DefaultProjectDependencyGraphCommand /*<T>*/ (name, function);
+ProjectDependencyGraphCommand/*<T>*/ dependencyGraphCommand/*<T>*/(
+        String name, ProjectDependencyGraphFunction/*<T>*/ function) =>
+    new _DefaultProjectDependencyGraphCommand/*<T>*/(name, function);
 
-ExecutorAwareProjectCommand /*<T>*/ executorAwareCommand /*<T>*/ (
-        String name, ExecutorAwareProjectFunction /*<T>*/ function) =>
-    new _DefaultExecutorAwareProjectCommand /*<T>*/ (name, function);
+ExecutorAwareProjectCommand/*<T>*/ executorAwareCommand/*<T>*/(
+        String name, ExecutorAwareProjectFunction/*<T>*/ function) =>
+    new _DefaultExecutorAwareProjectCommand/*<T>*/(name, function);
 
-/// Some function applied to a [Project]
-typedef Future<T> ProjectFunction<T>(Project project);
-
-/// Some function applied to a [Project] with the given dependencies
-typedef Future<T> ProjectWithDependenciesFunction<T>(
-    Project project, Iterable<Project> dependencies);
+///// Some function applied to a [Project]
+//typedef Future<T> ProjectFunction<T>(Project project);
+//
+///// Some function applied to a [Project] with the given dependencies
+//typedef Future<T> ProjectWithDependenciesFunction<T>(
+//    Project project, Iterable<Project> dependencies);
 
 typedef Future<T> ExecutorAwareProjectFunction<T>(CommandExecutor executor);
 
@@ -91,7 +92,7 @@ abstract class ProjectCommand<T> extends Command {
   CommandConcurrencyMode get concurrencyMode;
   Condition get condition;
 
-  Future<T> process(Project project, {Iterable<Project> dependencies});
+  Future<T> process(JefeProject project);
 
   ProjectCommand<T> copy(
       {String name,
@@ -145,8 +146,8 @@ class ProjectCommandError {
 
 typedef Future<T> Callable<T>();
 
-Future /*<T>*/ executeTask /*<T>*/ (
-    Callable /*<T>*/ callable, String taskDescription) async {
+Future/*<T>*/ executeTask/*<T>*/(
+    Callable/*<T>*/ callable, String taskDescription) async {
   _log.info('Executing command "$taskDescription"');
   final stopWatch = new Stopwatch();
   stopWatch.start();
@@ -166,7 +167,7 @@ Future /*<T>*/ executeTask /*<T>*/ (
 
 class _DefaultCommand<T> implements ProjectCommand<T> {
   final String name;
-  final Function function;
+  final ProjectFunction<T> function;
   final CommandConcurrencyMode concurrencyMode;
   final Condition condition;
 
@@ -174,8 +175,7 @@ class _DefaultCommand<T> implements ProjectCommand<T> {
       this.name, this.function, this.concurrencyMode, this.condition);
 
   @override
-  Future<T> process(Project project,
-      {Iterable<Project> dependencies: const []}) async {
+  Future<T> process(JefeProject project) async {
     final taskDescription = '$name for project ${project.name}';
     if (!condition()) {
       _log.info(
@@ -183,15 +183,12 @@ class _DefaultCommand<T> implements ProjectCommand<T> {
       return null;
     }
 
-    if (function is! ProjectWithDependenciesFunction &&
-        function is! ProjectFunction) {
-      throw new ArgumentError('Invalid function passed into process');
-    }
+//    if (function is! ProjectWithDependenciesFunction &&
+//        function is! ProjectFunction) {
+//      throw new ArgumentError('Invalid function passed into process');
+//    }
 
-    final Callable<T> callable = () =>
-        (function is ProjectWithDependenciesFunction
-            ? function(project, dependencies)
-            : function(project));
+    final Callable<T> callable = () => function(project);
 
     try {
       return executeTask(callable, taskDescription);

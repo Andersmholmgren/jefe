@@ -61,16 +61,16 @@ class CommandExecutorImpl implements CommandExecutor {
           await _projectGroup.rootJefeProjects, command, filter);
     } else {
       return await _processDependenciesDepthFirst(
-          (Project project, Iterable<Project> dependencies) async {
+          (JefeProject project) async {
         if (_filter(project)) {
-          return await command.process(project, dependencies: dependencies);
+          return await command.process(project);
         }
       });
     }
   }
 
   Future _processDependenciesDepthFirst(
-      process(Project project, Iterable<Project> dependencies)) async {
+      Future process(JefeProject project)) async {
     return (await _projectGroup.rootJefeProjects).processDepthFirst(process);
   }
 
