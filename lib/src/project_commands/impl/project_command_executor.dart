@@ -109,6 +109,8 @@ class CommandExecutorImpl implements CommandExecutor {
   Future _executeSerially(
       CompositeProjectCommand composite, ProjectFilter filter) async {
     _log.info('Executing composite command "${composite.name} serially"');
+
+
     final result = await Future.forEach(
         composite.commands, (c) => execute(c, filter: filter));
     _log.finer('Completed composite command "${composite.name}"');
