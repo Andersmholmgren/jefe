@@ -28,7 +28,7 @@ enum CommandConcurrencyMode { serial, concurrentProject, concurrentCommand }
 
 /// A command that operates on a single [Project]
 ProjectCommand/*<T>*/ projectCommand/*<T>*/(
-        String name, ProjectFunction function,
+        String name, ProjectFunction/*<T>*/ function,
         {CommandConcurrencyMode concurrencyMode:
             CommandConcurrencyMode.concurrentCommand,
         Condition condition: _alwaysYes}) =>
@@ -204,7 +204,7 @@ class _DefaultCommand<T> implements ProjectCommand<T> {
   ProjectCommand<T> copy(
       {String name,
       CommandConcurrencyMode concurrencyMode,
-      Function function,
+      ProjectFunction<T> function,
       Condition condition}) {
     return new _DefaultCommand<T>(name ?? this.name, function ?? this.function,
         concurrencyMode ?? this.concurrencyMode, condition ?? this.condition);
