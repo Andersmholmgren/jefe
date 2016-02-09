@@ -60,8 +60,7 @@ class CommandExecutorImpl implements CommandExecutor {
       return await _executeOnConcurrentProjects(
           await _projectGroup.rootJefeProjects, command, filter);
     } else {
-      return await _processDependenciesDepthFirst(
-          (JefeProject project) async {
+      return await _processDependenciesDepthFirst((JefeProject project) async {
         if (_filter(project)) {
           return await command.process(project);
         }
@@ -136,7 +135,7 @@ class CommandExecutorImpl implements CommandExecutor {
     return await new Stream.fromIterable(
             projectGraph.depthFirst.map((JefeProject pd) async {
       if (filter(pd)) {
-        return await command.process(pd, dependencies: pd.directDependencies);
+        return await command.process(pd);
       }
     }).toList())
         .asyncMap((result) => result)
@@ -153,8 +152,7 @@ class CommandExecutorImpl implements CommandExecutor {
     }
     final jefeProject = jefeProjectOpt.get();
 
-    return await command.process(jefeProject.project,
-        dependencies: jefeProject.directDependencies);
+    return await command.process(jefeProject);
   }
 
   Future executeOnGraph(ProjectDependencyGraphCommand command,
