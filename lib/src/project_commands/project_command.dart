@@ -243,14 +243,8 @@ class _DefaultExecutorAwareProjectCommand<T>
 
   @override
   Future<T> process(CommandExecutor executor, {ProjectFilter filter}) async {
-    _log.info('Executing command "$name"');
-    final stopWatch = new Stopwatch();
-    stopWatch.start();
+    final Callable<T> callable = () => function(executor);
 
-    final result = await function(executor);
-
-    _log.finer('Completed command "$name" in ${stopWatch.elapsed}');
-    stopWatch.stop();
-    return result;
+    return executeTask(callable, name);
   }
 }
