@@ -86,8 +86,16 @@ class CommandExecutorImpl implements CommandExecutor {
       CompositeProjectCommand/*<T>*/ composite, ProjectFilter filter) async {
     _log.info('Executing composite command "${composite.name} serially"');
 
-    final result = await Future.forEach(
-        composite.commands, (c) => execute(c, filter: filter));
+//    final result = await Future.forEach(
+//        composite.commands, (c) => execute(c, filter: filter));
+    final projectGraph = await _projectGroup.rootJefeProjects;
+
+    final result =
+        new Stream<ProjectCommand/*<T>*/ >.fromIterable(composite.commands)
+            .asyncMap((ProjectCommand/*<T>*/ c) =>
+                projectGraph.processAllSerially/*<T>*/(c, filter: filter))
+            .reduce((/*=T*/ value, /*=T*/ element) => element) as Future/*<T>*/;
+
     _log.finer('Completed composite command "${composite.name}"');
     return result;
   }
