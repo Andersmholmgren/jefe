@@ -3,12 +3,10 @@
 
 library jefe.project.commands.git.feature;
 
-import 'package:git/git.dart';
-import 'package:jefe/src/project_commands/project_command.dart';
-import 'package:pub_semver/pub_semver.dart';
-
-import 'impl/git_feature_impl.dart';
 import 'dart:async';
+
+import 'package:git/git.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 /// Defines the commands that relate to the branching strategy for developing
 /// and releasing features
