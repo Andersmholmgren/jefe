@@ -72,7 +72,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     return projectCommandWithDependencies(
         'complete development of feature $featureName',
         (JefeProject project) async {
-      await _git.assertWorkingTreeClean().process(project);
+      await project.git.assertWorkingTreeClean().process(project);
 
       final currentBranchName =
           await gitCurrentBranchName(await project.gitDir);
@@ -89,7 +89,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       await _git
           .commit('completed development of feature $featureName')
           .process(project);
-      await _git.push().process(project);
+      await project.git.push().process(project);
     });
   }
 
@@ -162,7 +162,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
         await _pub.test().process(project);
 
-        await _git.commit('releasing version $releaseVersion').process(project);
+        await project.git.commit('releasing version $releaseVersion').process(project);
 
         if (projectVersions.hasBeenPublished) {
           await _pub.publish().process(project);
@@ -172,7 +172,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
             .releaseFinish(releaseVersion.toString())
             .process(project);
 
-        await _git.push().process(project);
+        await project.git.push();
       }
     });
   }
@@ -182,7 +182,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     return executorAwareCommand('Initialising for development',
         (CommandExecutor executor) async {
       await executor.execute(projectCommandGroup(
-          'Initialising for development', [_gitFeature.init(), _git.fetch()]));
+          'Initialising for development', [_gitFeature.init(), project.git.fetch()]));
 
       final currentFeatureNameOpt =
           await executor.execute(_gitFeature.currentFeatureName());
