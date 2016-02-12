@@ -3,12 +3,12 @@
 
 library jefe.project.commands.git.impl;
 
+import 'dart:async';
+
 import 'package:jefe/src/git/git.dart';
-import 'package:jefe/src/project/project.dart';
+import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:logging/logging.dart';
-import 'package:jefe/src/project/jefe_project.dart';
-import 'dart:async';
 
 Logger _log = new Logger('jefe.project.commands.git.impl');
 
@@ -18,27 +18,26 @@ abstract class GitCommandsImpl /*implements GitCommands */ {
   final JefeProject _project;
   GitCommandsImpl(this._project);
 
-  Future commit(String message) => executeTask('git commit',
-      () async => await gitCommit(await _project.gitDir, message));
+  Future commit(String message) => executeTask(
+      'git commit', () async => gitCommit(await _project.gitDir, message));
 
-  ProjectCommand push() => projectCommand('git push', (Project p) async {
-        await gitPush(await _project.gitDir);
-      });
+  Future push() =>
+      executeTask('git push', () async => gitPush(await _project.gitDir));
 
-  ProjectCommand fetch() => projectCommand('git fetch', (Project p) async {
+  Future fetch() => executeTask('git fetch', () async {
         await gitFetch(await _project.gitDir);
       });
 
-  ProjectCommand assertWorkingTreeClean() =>
-      projectCommand('git assertWorkingTreeClean', (Project p) async {
+  Future assertWorkingTreeClean() =>
+      executeTask('git assertWorkingTreeClean', () async {
         if (!await (await _project.gitDir).isWorkingTreeClean()) {
           throw new StateError(
               'working directory dirty for project ${_project.name}');
         }
       });
 
-  ProjectCommand assertOnBranch(String branchName) =>
-      projectCommand('git assertOnBranch $branchName', (Project p) async {
+  Future assertOnBranch(String branchName) =>
+      executeTask('git assertOnBranch $branchName', () async {
         var currentBranchName =
             (await (await _project.gitDir).getCurrentBranch()).branchName;
         if (currentBranchName != branchName) {
@@ -48,21 +47,19 @@ abstract class GitCommandsImpl /*implements GitCommands */ {
         }
       });
 
-  ProjectCommand checkout(String branchName) =>
-      projectCommand('git checkout $branchName', (Project p) async {
+  Future checkout(String branchName) =>
+      executeTask('git checkout $branchName', () async {
         await gitCheckout(await _project.gitDir, branchName);
       });
 
-  ProjectCommand updateFromRemote(String branchName,
-          [String remoteName = 'origin']) =>
-      projectCommand('git update from remote: $branchName', (Project p) async {
+  Future updateFromRemote(String branchName, [String remoteName = 'origin']) =>
+      executeTask('git update from remote: $branchName', () async {
         final gitDir = await _project.gitDir;
         await gitCheckout(gitDir, branchName);
         await gitMerge(gitDir, '$remoteName/$branchName');
       });
 
-  ProjectCommand merge(String commit) =>
-      projectCommand('git merge $commit', (Project p) async {
+  Future merge(String commit) => executeTask('git merge $commit', () async {
         await gitMerge(await _project.gitDir, commit);
       });
 }
