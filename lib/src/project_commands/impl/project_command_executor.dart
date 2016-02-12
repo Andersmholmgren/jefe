@@ -99,13 +99,22 @@ class CommandExecutorImpl implements CommandExecutor {
     _log.info('Executing composite command "${composite.name} '
         'concurrently on all projects"');
     final projectGraph = await _projectGroup.rootJefeProjects;
-    return projectGraph.processAllConcurrently/*<T>*/(composite);
+
+    final result =
+        new Stream<ProjectCommand/*<T>*/ >.fromIterable(composite.commands)
+            .asyncMap((ProjectCommand/*<T>*/ c) =>
+                projectGraph.processAllConcurrently/*<T>*/(c, filter: filter))
+            .reduce((/*=T*/ value, /*=T*/ element) => element) as Future/*<T>*/;
+
+//    return projectGraph.processAllConcurrently/*<T>*/(composite.commands);
 
 //    await Future.forEach(composite.commands, (command) async {
 //      await _executeOnConcurrentProjects/*<T>*/(projectGraph, command, filter);
 //    });
 
-    _log.finer('Completed composite command "${composite.name}"');
+    _log.finer(
+        'Completed composite command "${composite.name}" with result: $result');
+    return result;
   }
 
   Future/*<T>*/ _executeOnConcurrentProjects/*<T>*/(
