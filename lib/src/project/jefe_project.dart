@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:jefe/src/project/project.dart';
 import 'package:option/option.dart';
 import 'package:jefe/src/project/git_commands.dart';
+import 'package:jefe/src/project/git_feature.dart';
 
 /// A [Project] managed by Jefe
 abstract class JefeProject extends Project implements JefeProjectGraph {
@@ -16,6 +17,7 @@ abstract class JefeProject extends Project implements JefeProjectGraph {
   Set<JefeProject> get allDependencies;
 
   GitCommands get git;
+  GitFeatureCommands get gitFeature;
 }
 
 /// Some function applied to a [JefeProject]
