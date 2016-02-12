@@ -127,10 +127,10 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   @override
   Future<Set<String>> get exportedPackageNames async {
-    final Iterable<Directive> exports = (await compilationUnit)
+    final Iterable<ExportDirective> exports = (await compilationUnit)
         .map/*<Iterable<Directive>>*/(
             (cu) => cu.directives.where((d) => d is ExportDirective))
-        .getOrDefault(<Directive>[]);
+        .getOrDefault(<ExportDirective>[]) as Iterable<ExportDirective>;
 
     final exportedPackageNames = await exports
         .map((exp) => exp.uri.stringValue)
@@ -152,21 +152,22 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   @override
   Future<Iterable<Version>> get taggedGitVersions => executeTask(
-      () async => git.gitFetchVersionTags(await gitDir),
-      'fetch git release version tags');
+      'fetch git release version tags',
+      () async => git.gitFetchVersionTags(await gitDir));
 
   @override
   Future<Option<Version>> get latestPublishedVersion async {
     return (await publishedVersions).map(
-        (HostedPackageVersions versions) => versions.versions.last.version);
+            (HostedPackageVersions versions) => versions.versions.last.version)
+        as Option<Version>;
   }
 
   @override
   Future<Option<HostedPackageVersions>> get publishedVersions async =>
       executeTask(
+          'fetch package versions',
           () async =>
-              pub.fetchPackageVersions(name, publishToUrl: pubspec.publishTo),
-          'fetch package versions');
+              pub.fetchPackageVersions(name, publishToUrl: pubspec.publishTo));
 
   @override
   Future<ProjectVersions2> get projectVersions async {

@@ -149,7 +149,7 @@ class ProjectCommandError {
 typedef Future<T> Callable<T>();
 
 Future/*<T>*/ executeTask/*<T>*/(
-    Callable/*<T>*/ callable, String taskDescription) async {
+    String taskDescription, Callable/*<T>*/ callable) async {
   _log.info('Executing command "$taskDescription"');
   final stopWatch = new Stopwatch();
   stopWatch.start();
@@ -188,7 +188,7 @@ class _DefaultCommand<T> extends ProjectCommand<T> {
     final Callable<T> callable = () => function(project);
 
     try {
-      return executeTask(callable, taskDescription);
+      return executeTask(taskDescription, callable);
     } catch (e) {
 //      print(stackTrace);
       throw new ProjectCommandError(this, project, e);
@@ -228,7 +228,7 @@ class _DefaultProjectDependencyGraphCommand<T>
       ProjectFilter filter) async {
     final Callable<T> callable = () => function(graph, rootDirectory, filter);
 
-    return executeTask(callable, name);
+    return executeTask(name, callable);
   }
 }
 
@@ -246,6 +246,6 @@ class _DefaultExecutorAwareProjectCommand<T>
   Future<T> process(CommandExecutor executor, {ProjectFilter filter}) async {
     final Callable<T> callable = () => function(executor);
 
-    return executeTask(callable, name);
+    return executeTask(name, callable);
   }
 }
