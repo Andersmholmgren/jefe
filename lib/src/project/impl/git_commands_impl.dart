@@ -9,12 +9,11 @@ import 'package:jefe/src/git/git.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:logging/logging.dart';
+import 'package:jefe/src/project/git_commands.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.impl');
 
-abstract class GitCommandsImpl /*implements GitCommands */ {
-//  Future<GitDir> get gitDir;
-
+abstract class GitCommandsImpl implements GitCommands {
   final JefeProject _project;
   GitCommandsImpl(this._project);
 
