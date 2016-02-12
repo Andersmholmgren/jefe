@@ -62,8 +62,10 @@ class JefeProjectImpl extends ProjectImpl
           ? new Some<JefeProject>(this)
           : directDependencies.getProjectByName(projectName);
 
+  GitCommandsImpl _git;
+
   @override
-  GitCommands get git => new GitCommandsImpl(this);
+  GitCommands get git => _git ??= new GitCommandsImpl(this);
 }
 
 class JefeProjectSetImpl extends DelegatingSet<JefeProject>
