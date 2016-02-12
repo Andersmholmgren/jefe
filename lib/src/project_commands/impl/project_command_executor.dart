@@ -88,6 +88,10 @@ class CommandExecutorImpl implements CommandExecutor {
 
 //    final result = await Future.forEach(
 //        composite.commands, (c) => execute(c, filter: filter));
+
+    // TODO: this no longer goes through execute. What are the implications?
+    // 1/ it won't respect the concurrency modes any more :-(
+
     final projectGraph = await _projectGroup.rootJefeProjects;
 
     final result =
