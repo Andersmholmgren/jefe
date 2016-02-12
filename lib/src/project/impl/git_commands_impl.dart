@@ -5,7 +5,6 @@ library jefe.project.commands.git.impl;
 
 import 'package:jefe/src/git/git.dart';
 import 'package:jefe/src/project/project.dart';
-import 'package:jefe/src/project_commands/git_commands.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:logging/logging.dart';
 import 'package:jefe/src/project/jefe_project.dart';
@@ -19,12 +18,8 @@ abstract class GitCommandsImpl /*implements GitCommands */ {
   final JefeProject _project;
   GitCommandsImpl(this._project);
 
-  Future commit(String message) =>
-      executeTask(() async => await gitCommit(await _project.gitDir, message));
-
-//  projectCommand('git commit', (Project p) async {
-//        await gitCommit(await _project.gitDir, message);
-//      });
+  Future commit(String message) => executeTask('git commit',
+      () async => await gitCommit(await _project.gitDir, message));
 
   ProjectCommand push() => projectCommand('git push', (Project p) async {
         await gitPush(await _project.gitDir);
