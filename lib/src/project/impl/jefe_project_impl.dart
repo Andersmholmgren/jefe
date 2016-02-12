@@ -14,6 +14,8 @@ import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:quiver/iterables.dart';
+import 'package:jefe/src/project/git_commands.dart';
+import 'package:jefe/src/project/impl/git_commands_impl.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
@@ -59,6 +61,9 @@ class JefeProjectImpl extends ProjectImpl
       name == projectName
           ? new Some<JefeProject>(this)
           : directDependencies.getProjectByName(projectName);
+
+  @override
+  GitCommands get git => new GitCommandsImpl(this);
 }
 
 class JefeProjectSetImpl extends DelegatingSet<JefeProject>
