@@ -66,7 +66,7 @@ class CommandExecutorImpl implements CommandExecutor {
         .processDepthFirst/*<T>*/(process, filter: filter);
   }
 
-  Future executeAll(CompositeProjectCommand composite,
+  Future/*<T>*/ executeAll/*<T>*/(CompositeProjectCommand/*<T>*/ composite,
       {CommandConcurrencyMode concurrencyMode:
           CommandConcurrencyMode.concurrentCommand,
       ProjectFilter filter: _noOpFilter}) async {
@@ -74,16 +74,16 @@ class CommandExecutorImpl implements CommandExecutor {
     if (concurrencyMode != CommandConcurrencyMode.serial &&
         composite.commands
             .every((c) => c.concurrencyMode != CommandConcurrencyMode.serial)) {
-      return _executeAllOnConcurrentProjects(composite, _filter);
+      return _executeAllOnConcurrentProjects/*<T>*/(composite, _filter);
     } else {
-      return _executeSerially(composite, _filter);
+      return _executeSerially/*<T>*/(composite, _filter);
     }
 
     // TODO: add support for concurrentCommand
   }
 
-  Future _executeSerially(
-      CompositeProjectCommand composite, ProjectFilter filter) async {
+  Future/*<T>*/ _executeSerially/*<T>*/(
+      CompositeProjectCommand/*<T>*/ composite, ProjectFilter filter) async {
     _log.info('Executing composite command "${composite.name} serially"');
 
     final result = await Future.forEach(
@@ -94,15 +94,16 @@ class CommandExecutorImpl implements CommandExecutor {
 
   // executes concurrently on all projects but each command must complete on all
   // projects before moving on to next
-  Future _executeAllOnConcurrentProjects(
-      CompositeProjectCommand composite, ProjectFilter filter) async {
+  Future/*<T>*/ _executeAllOnConcurrentProjects/*<T>*/(
+      CompositeProjectCommand/*<T>*/ composite, ProjectFilter filter) async {
     _log.info('Executing composite command "${composite.name} '
         'concurrently on all projects"');
     final projectGraph = await _projectGroup.rootJefeProjects;
+    return projectGraph.processAllConcurrently/*<T>*/(composite);
 
-    await Future.forEach(composite.commands, (command) async {
-      await _executeOnConcurrentProjects(projectGraph, command, filter);
-    });
+//    await Future.forEach(composite.commands, (command) async {
+//      await _executeOnConcurrentProjects/*<T>*/(projectGraph, command, filter);
+//    });
 
     _log.finer('Completed composite command "${composite.name}"');
   }

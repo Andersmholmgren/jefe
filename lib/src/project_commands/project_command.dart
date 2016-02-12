@@ -6,10 +6,10 @@ library jefe.project.commands.core;
 import 'dart:async';
 import 'dart:io';
 
+import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/project.dart';
 import 'package:jefe/src/project_commands/project_command_executor.dart';
 import 'package:logging/logging.dart';
-import 'package:jefe/src/project/jefe_project.dart';
 
 Logger _log = new Logger('jefe.project.commands.core');
 
@@ -167,7 +167,7 @@ Future/*<T>*/ executeTask/*<T>*/(
   }
 }
 
-class _DefaultCommand<T> implements ProjectCommand<T> {
+class _DefaultCommand<T> extends ProjectCommand<T> {
   final String name;
   final ProjectFunction<T> function;
   final CommandConcurrencyMode concurrencyMode;
