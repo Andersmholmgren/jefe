@@ -14,17 +14,21 @@ import 'package:jefe/src/project_commands/project_command.dart'
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:jefe/src/project/jefe_project.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
 class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
+  final JefeProject _project;
+  GitFeatureCommandsFlowImpl(this._project);
+
   Future init() => executeTask('git flow init', () async {
-        await initGitFlow(await p.gitDir);
+        await initGitFlow(await _project.gitDir);
       });
 
   Future featureStart(String featureName, {bool throwIfExists: false}) =>
       executeTask('git flow feature start', () async {
-        final gitDir = await p.gitDir;
+        final gitDir = await _project.gitDir;
         if (!throwIfExists) {
           Future<bool> checkoutFeatureBranchIfExists() async {
             final Iterable<String> featureNames =
@@ -40,7 +44,8 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
           final currentFeatureOpt = await gitFlowCurrentFeatureName(gitDir);
           if (currentFeatureOpt is Some) {
             if (currentFeatureOpt.get() != featureName) {
-              _log.info('${p.name} currently on a different feature branch - '
+              _log.info(
+                  '${_project.name} currently on a different feature branch - '
                   '${currentFeatureOpt.get()}');
               // see if feature branch exists
               if (await checkoutFeatureBranchIfExists()) {
@@ -49,7 +54,7 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
             } else {
               // correct feature
               // TODO: could check the branch is correctly based off develop
-              _log.info('${p.name} already on correct feature branch');
+              _log.info('${_project.name} already on correct feature branch');
               return;
             }
           } else {
@@ -67,7 +72,7 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
   Future featureFinish(String featureName,
           {bool excludeOnlyCommitIf(Commit commit): _dontExclude}) =>
       executeTask('git flow feature finish', () async {
-        final GitDir gitDir = await p.gitDir;
+        final GitDir gitDir = await _project.gitDir;
         final Map<String, Commit> commits =
             await gitDir.getCommits('$developBranchName..HEAD');
         _log.info('found ${commits.length} commits on feature branch');
@@ -85,12 +90,12 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
 
   Future releaseStart(String releaseName) =>
       executeTask('git flow release start', () async {
-        await gitFlowReleaseStart(await p.gitDir, releaseName);
+        await gitFlowReleaseStart(await _project.gitDir, releaseName);
       });
 
   Future releaseFinish(String releaseName) =>
       executeTask('git flow release finish', () async {
-        var gitDir = await p.gitDir;
+        var gitDir = await _project.gitDir;
         await gitFlowReleaseFinish(gitDir, releaseName);
         await gitTag(gitDir, releaseName);
         await gitPush(gitDir);
@@ -103,7 +108,7 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
   String get developBranchName => 'develop';
 
   @override
-  ProjectDependencyGraphCommand currentFeatureName() =>
+  Future<String> currentFeatureName() =>
       dependencyGraphCommand('Get current feature name',
           (JefeProjectGraph graph, Directory rootDirectory, _) async {
         final featureNames = await new Stream.fromIterable(graph.depthFirst)
@@ -125,17 +130,17 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
   @override
   Future<Iterable<Version>> getReleaseVersionTags() =>
       executeTask('fetch git release version tags', () async {
-        final gitDir = await p.gitDir;
+        final gitDir = await _project.gitDir;
         return await gitFetchVersionTags(gitDir);
       });
 
   @override
   Future assertNoActiveReleases() =>
       executeTask('check no active releases', () async {
-        final releaseNames = await gitFlowReleaseNames(await p.gitDir);
+        final releaseNames = await gitFlowReleaseNames(await _project.gitDir);
         if (releaseNames.isNotEmpty) {
           throw new StateError(
-              '${p.name} has an existing release branch. Must finish all active releases first');
+              '${_project.name} has an existing release branch. Must finish all active releases first');
         }
       });
 }
