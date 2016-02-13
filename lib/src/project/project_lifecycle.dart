@@ -9,7 +9,7 @@ import 'package:jefe/src/project/release_type.dart';
 
 /// High level commands relating to the project lifecycle
 abstract class ProjectLifecycle {
-  Future init({bool doCheckout: true});
+  Future init({bool doCheckout: true, bool recursive: true});
 
   /// A command to start a new feature, performing all the tasks necessary to
   /// put the projects within the group in the correct state, including the
