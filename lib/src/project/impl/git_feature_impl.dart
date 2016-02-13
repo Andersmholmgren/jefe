@@ -27,85 +27,22 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
 
   Future featureStart(String featureName, {bool throwIfExists: false}) =>
       executeTask('git flow feature start', () async {
-        final gitDir = await _project.gitDir;
-
-        Future<bool> checkoutFeatureBranchIfExists() async {
-          final Iterable<String> featureNames =
-              await gitFlowFeatureNames(gitDir);
-          if (featureNames.contains(featureName)) {
-            if (throwIfExists)
-              throw new StateError("Feature '$featureName' already exists");
-
-            await gitCheckout(gitDir, '$featureBranchPrefix$featureName');
-            return true;
-          } else {
-            return false;
-          }
-        }
-
-        final currentFeatureOpt = await gitFlowCurrentFeatureName(gitDir);
-        if (currentFeatureOpt is Some) {
-          if (currentFeatureOpt.get() != featureName) {
-            _log.info(
-                '${_project.name} currently on a different feature branch - '
-                '${currentFeatureOpt.get()}');
-            // see if feature branch exists
-            if (await checkoutFeatureBranchIfExists()) {
-              return;
-            }
-          } else {
+        final featureNames = await fetchCurrentProjectsFeatureNames();
+        if (featureNames.featureExists(featureName)) {
+          if (throwIfExists)
+            throw new StateError("Feature '$featureName' already exists");
+          else if (featureNames.currentFeatureIs(featureName)) {
             // correct feature
             // TODO: could check the branch is correctly based off develop
             _log.info('${_project.name} already on correct feature branch');
-            return;
+          } else {
+            return gitCheckout(
+                await _project.gitDir, '$featureBranchPrefix$featureName');
           }
         } else {
-          // no current feature
-          // see if feature branch exists
-          if (await checkoutFeatureBranchIfExists()) {
-            return;
-          }
+          return gitFlowFeatureStart(await _project.gitDir, featureName);
         }
-
-        await gitFlowFeatureStart(gitDir, featureName);
       });
-
-  Future<bool> checkoutFeature(String featureName,
-      {bool throwIfNotExists: false}) async {
-    final gitDir = await _project.gitDir;
-
-    Future<bool> checkoutFeatureBranchIfExists() async {
-      final Iterable<String> featureNames = await gitFlowFeatureNames(gitDir);
-      if (featureNames.contains(featureName)) {
-        await gitCheckout(gitDir, '$featureBranchPrefix$featureName');
-        return true;
-      } else {
-        if (throwIfNotExists)
-          throw new StateError("Feature '$featureName' doesn't exist");
-
-        return false;
-      }
-    }
-
-    final currentFeatureOpt = await gitFlowCurrentFeatureName(gitDir);
-    if (currentFeatureOpt is Some) {
-      if (currentFeatureOpt.get() != featureName) {
-        _log.info('${_project.name} currently on a different feature branch - '
-            '${currentFeatureOpt.get()}');
-        // see if feature branch exists
-        return checkoutFeatureBranchIfExists();
-      } else {
-        // correct feature
-        // TODO: could check the branch is correctly based off develop
-        _log.info('${_project.name} already on correct feature branch');
-        return true;
-      }
-    } else {
-      // no current feature
-      // see if feature branch exists
-      return checkoutFeatureBranchIfExists();
-    }
-  }
 
   Future featureFinish(String featureName,
           {bool excludeOnlyCommitIf(Commit commit): _dontExclude}) =>
@@ -187,6 +124,27 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
               '${_project.name} has an existing release branch. Must finish all active releases first');
         }
       });
+
+  Future<FeatureNames> fetchCurrentProjectsFeatureNames() async {
+    final gitDir = await _project.gitDir;
+    final results = await Future
+        .wait([gitFlowFeatureNames(gitDir), gitFlowCurrentFeatureName(gitDir)]);
+
+    return new FeatureNames(
+        (results[0] as Iterable<String>).toSet(), results[1] as Option<String>);
+  }
 }
 
 bool _dontExclude(Commit c) => false;
+
+class FeatureNames {
+  final Set<String> featureNames;
+  final Option<String> currentFeatureName;
+
+  FeatureNames(this.featureNames, this.currentFeatureName);
+
+  bool currentFeatureIs(String featureName) =>
+      currentFeatureName is Some && currentFeatureName.get() == featureName;
+
+  bool featureExists(String featureName) => featureNames.contains(featureName);
+}
