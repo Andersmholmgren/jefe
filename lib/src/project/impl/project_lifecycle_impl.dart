@@ -261,26 +261,24 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       if (latestTaggedVersion > currentPubspecVersion) {
         throw new StateError('the latest tagged version $latestTaggedVersion'
             ' is greater than the current pubspec version $currentPubspecVersion');
+      } else if (latestTaggedVersion < currentPubspecVersion) {
+        // manually bumped version
+        return new Some<Version>(currentPubspecVersion);
       } else {
-        if (latestTaggedVersion < currentPubspecVersion) {
-          // manually bumped version
-          return new Some<Version>(currentPubspecVersion);
-        } else {
-          // latest released version is same as pubspec version
-          if (await hasChanges) {
-            if (isHosted && !autoUpdateHostedVersions) {
-              // Hosted packages must observe semantic versioning so not sensible
-              // to try to automatically bump version, unless the user explicitly
-              // requests it
-              throw new ArgumentError(
-                  '${project.name} is hosted and has changes. '
-                  'The version must be manually changed for hosted packages');
-            } else {
-              return new Some(type.bump(currentPubspecVersion));
-            }
+        // latest released version is same as pubspec version
+        if (await hasChanges) {
+          if (isHosted && !autoUpdateHostedVersions) {
+            // Hosted packages must observe semantic versioning so not sensible
+            // to try to automatically bump version, unless the user explicitly
+            // requests it
+            throw new ArgumentError(
+                '${project.name} is hosted and has changes. '
+                'The version must be manually changed for hosted packages');
           } else {
-            return const None();
+            return new Some(type.bump(currentPubspecVersion));
           }
+        } else {
+          return const None();
         }
       }
     } else {
