@@ -20,8 +20,6 @@ import 'package:jefe/src/project_commands/project_command.dart'
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
-//import 'package:jefe/src/project_commands/project_command_executor.dart';
-//import 'package:jefe/src/project_commands/project_lifecycle.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
@@ -49,20 +47,6 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       if (doPush) await _git.push();
     });
   }
-
-  // TODO: return to this approach once the concurrency support is implemented
-  // to handle it
-//  @override
-//  CompositeProjectCommand completeFeature(String featureName,
-//                                          {bool doPush: false, bool recursive: true}) {
-//    return projectCommandGroup('close off feature $featureName', [
-//      _gitFeature.featureFinish(featureName),
-//      _pubSpec.setToGitDependencies(),
-//      _git.commit('set git dependencies for end of feature $featureName'),
-//      new OptionalPush(doPush, _git.push()),
-//      _pub.get()
-//    ]);
-//  }
 
   @override
   Future completeFeature(String featureName,
@@ -308,11 +292,6 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       }
     }
   }
-
-//  Future<bool> _hasCommitsSince(GitDir gitDir, Version sinceVersion) async {
-//    return (await commitCountSince(gitDir, sinceVersion.toString())) > 0;
-//  }
-
 }
 
 class ProjectVersions {
@@ -327,9 +306,4 @@ class ProjectVersions {
   bool get newReleaseRequired => newReleaseVersion is Some;
 
   ProjectVersions(this.currentVersions, this.newReleaseVersion);
-}
-
-main() {
-  print(new Version(0, 0, 1) > new Version(0, 0, 1, build: '2'));
-  print(new Version(0, 0, 1, build: '2') > new Version(0, 0, 1));
 }
