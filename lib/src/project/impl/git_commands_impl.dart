@@ -12,11 +12,13 @@ import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:git/git.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.impl');
 
 class GitCommandsImpl implements GitCommands {
   final JefeProject _project;
+
   GitCommandsImpl(this._project);
 
   Future<GitDir> get _gitDir => _project.gitDir;
