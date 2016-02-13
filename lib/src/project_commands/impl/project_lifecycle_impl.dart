@@ -161,7 +161,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         await project.git.commit('releasing version $releaseVersion');
 
         if (projectVersions.hasBeenPublished) {
-          await _pub.publish().process(project);
+          await project.pub.publish();
         }
 
         await project.gitFeature.releaseFinish(releaseVersion.toString());
