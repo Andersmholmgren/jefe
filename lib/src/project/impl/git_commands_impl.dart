@@ -13,7 +13,7 @@ import 'package:jefe/src/project/git_commands.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.impl');
 
-abstract class GitCommandsImpl implements GitCommands {
+class GitCommandsImpl implements GitCommands {
   final JefeProject _project;
   GitCommandsImpl(this._project);
 
