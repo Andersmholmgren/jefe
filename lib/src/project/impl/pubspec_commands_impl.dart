@@ -8,7 +8,8 @@ import 'dart:async';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/project.dart';
 import 'package:jefe/src/project/pubspec_commands.dart';
-import 'package:jefe/src/project_commands/project_command.dart';
+import 'package:jefe/src/project_commands/project_command.dart'
+    show executeTask;
 import 'package:jefe/src/pub/pub.dart' as pub;
 import 'package:jefe/src/pub/pub_version.dart';
 import 'package:logging/logging.dart';
@@ -49,29 +50,30 @@ class PubSpecCommandsImpl implements PubSpecCommands {
 
   @override
   Future<bool> haveDependenciesChanged(DependencyType type,
-          {bool useGitIfNotHosted: true}) =>
-      projectCommandWithDependencies/*<bool>*/(
-          'checking if $type dependencies have changed',
-          (Project project, Iterable<Project> dependencies) async {
-            final exportedPackageNames = await project.exportedPackageNames;
+      {bool useGitIfNotHosted: true}) {
+    return executeTask/*<bool>*/(
+        'checking if $type dependencies have changed',
+      () async =>  _project.processDepthFirst((JefeProject project) async {
+          final exportedPackageNames = await project.exportedPackageNames;
 
-            final actualDependencies = project.pubspec.allDependencies;
+          final actualDependencies = project.pubspec.allDependencies;
 
-            final expectedDependencies = await _createDependencyReferences(
-                project,
-                dependencies,
-                actualDependencies,
-                exportedPackageNames,
-                type,
-                useGitIfNotHosted);
+          final expectedDependencies = await _createDependencyReferences(
+              project,
+              project.directDependencies,
+              actualDependencies,
+              exportedPackageNames,
+              type,
+              useGitIfNotHosted);
 
-            final dependenciesChanged = expectedDependencies.keys
-                .any((k) => expectedDependencies[k] != actualDependencies[k]);
+          final dependenciesChanged = expectedDependencies.keys
+              .any((k) => expectedDependencies[k] != actualDependencies[k]);
 
-            _log.info('dependencies for ${project.name} have '
-                '${dependenciesChanged ? "" : "NOT "}changed');
-            return dependenciesChanged;
-          } as ProjectWithDependenciesFunction<bool>);
+          _log.info('dependencies for ${project.name} have '
+              '${dependenciesChanged ? "" : "NOT "}changed');
+          return dependenciesChanged;
+        } as ProjectFunction<bool>);
+  }
 
   Future _setToDependencies(Project project, Iterable<Project> dependencies,
       DependencyType type, bool useGitIfNotHosted) async {
