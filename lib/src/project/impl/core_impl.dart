@@ -18,9 +18,10 @@ abstract class ProjectEntityImpl implements ProjectEntity {
 
   ProjectEntityImpl(this.gitUri, this.installDirectory);
 
+  GitDir _gitDir;
+
   @override
   Future<GitDir> get gitDir {
-//    print('--- loading git dir from ${installDirectory.path}');
-    return GitDir.fromExisting(installDirectory.path);
+    return _gitDir ??= GitDir.fromExisting(installDirectory.path);
   }
 }
