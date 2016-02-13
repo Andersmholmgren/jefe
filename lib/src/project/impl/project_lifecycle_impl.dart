@@ -144,15 +144,30 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   @override
   Future release(
       {ReleaseType type: ReleaseType.minor,
-      bool autoUpdateHostedVersions: false}) {
-    return projectCommandWithDependencies('Release version: type $type',
-        (JefeProject project) async {
+      bool autoUpdateHostedVersions: false,
+      bool recursive: true}) {
+    if (!recursive)
+      return releaseCurrentProject(type, autoUpdateHostedVersions);
+
+    Future doRelease(JefeProject project) => project.lifecycle.release(
+        type: type,
+        autoUpdateHostedVersions: autoUpdateHostedVersions,
+        recursive: false);
+
+    return executeTask('Release version: type $type',
+        () => _project.processDepthFirst(doRelease));
+  }
+
+  Future releaseCurrentProject(
+      ReleaseType type, bool autoUpdateHostedVersions) {
+    return executeTask(
+        'Release version: type $type for project ${_project.name}', () async {
       final ProjectVersions projectVersions = await getCurrentProjectVersions(
-          project, type, autoUpdateHostedVersions);
+          _project, type, autoUpdateHostedVersions);
 
       if (!projectVersions.newReleaseRequired) {
         // no release needed
-        _log.fine('no changes needing release for ${project.name}');
+        _log.fine('no changes needing release for ${_project.name}');
         return;
       } else {
         final releaseVersion = projectVersions.newReleaseVersion.get();
@@ -163,24 +178,24 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
         if (releaseVersion != projectVersions.pubspecVersion) {
           await project
-              .updatePubspec(project.pubspec.copy(version: releaseVersion));
+              .updatePubspec(_project.pubspec.copy(version: releaseVersion));
         }
 
-        await project.pubspecCommands.setToHostedDependencies();
+        await _project.pubspecCommands.setToHostedDependencies();
 
-        await project.pub.get();
+        await _project.pub.get();
 
-        await project.pub.test();
+        await _project.pub.test();
 
-        await project.git.commit('releasing version $releaseVersion');
+        await _project.git.commit('releasing version $releaseVersion');
 
         if (projectVersions.hasBeenPublished) {
-          await project.pub.publish();
+          await _project.pub.publish();
         }
 
-        await project.gitFeature.releaseFinish(releaseVersion.toString());
+        await _project.gitFeature.releaseFinish(releaseVersion.toString());
 
-        await project.git.push();
+        await _project.git.push();
       }
     });
   }

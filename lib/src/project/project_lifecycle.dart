@@ -32,5 +32,6 @@ abstract class ProjectLifecycle {
   /// Create a release of the project group, including tagging, merging etc
   Future release(
       {ReleaseType type: ReleaseType.minor,
-      bool autoUpdateHostedVersions: false});
+      bool autoUpdateHostedVersions: false,
+      bool recursive: true});
 }
