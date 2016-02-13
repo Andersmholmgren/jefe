@@ -109,9 +109,9 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
 
   @override
   Future<Option<String>> currentFeatureName() {
-    Future<Option<String>> featureNameFor(JefeProject graph) async {
+    Future<Option<String>> featureNameFor() async {
       final featureNames =
-          await new Stream<JefeProject>.fromIterable(graph.depthFirst)
+          await new Stream<JefeProject>.fromIterable(_project.depthFirst)
               .asyncMap(
                   (p) async => await gitFlowCurrentFeatureName(await p.gitDir))
               .where((o) => o is Some)
@@ -127,8 +127,8 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
       }
     }
 
-    return executeTask/*<Option<String>>*/('Get current feature name',
-        () => _project.processDepthFirst/*<Option<String>>*/(featureNameFor));
+    return executeTask/*<Option<String>>*/(
+        'Get current feature name', featureNameFor);
   }
 
   @override
