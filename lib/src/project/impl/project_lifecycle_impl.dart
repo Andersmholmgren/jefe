@@ -40,11 +40,11 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     if (!recursive)
       return startNewFeatureForCurrentProject(featureName, doPush: doPush);
 
-    Future doStart(JefeProject project) => project.lifecycle
-        .startNewFeature(featureName, doPush: doPush, recursive: false);
-
-    return executeTask('set up project for new feature $featureName',
-        () => _project.processDepthFirst(doStart));
+    return executeTask(
+        'set up project for new feature $featureName',
+        () => _project.processDepthFirst((JefeProject project) => project
+            .lifecycle
+            .startNewFeature(featureName, doPush: doPush, recursive: false)));
   }
 
   Future startNewFeatureForCurrentProject(String featureName,
