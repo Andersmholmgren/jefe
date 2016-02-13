@@ -37,7 +37,20 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   @override
   Future startNewFeature(String featureName,
       {bool doPush: false, bool recursive: true}) {
-    return executeTask('set up project for new feature "$featureName"',
+    if (!recursive)
+      return startNewFeatureForCurrentProject(featureName, doPush: doPush);
+
+    Future doStart(JefeProject project) => project.lifecycle
+        .startNewFeature(featureName, doPush: doPush, recursive: false);
+
+    return executeTask('set up project for new feature $featureName',
+        () => _project.processDepthFirst(doStart));
+  }
+
+  Future startNewFeatureForCurrentProject(String featureName,
+      {bool doPush: false}) {
+    return executeTask(
+        'set up project for new feature "$featureName" for project ${_project.name}',
         () async {
       await _git.assertWorkingTreeClean();
       await _gitFeature.featureStart(featureName);
