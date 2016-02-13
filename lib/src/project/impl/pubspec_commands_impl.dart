@@ -51,31 +51,36 @@ class PubSpecCommandsImpl implements PubSpecCommands {
   @override
   Future<bool> haveDependenciesChanged(DependencyType type,
       {bool useGitIfNotHosted: true}) {
-    Future<bool> x(JefeProject project) async {
-      final exportedPackageNames = await project.exportedPackageNames;
-
-      final actualDependencies = project.pubspec.allDependencies;
-
-      final expectedDependencies = await _createDependencyReferences(
-          project,
-          project.directDependencies,
-          actualDependencies,
-          exportedPackageNames,
-          type,
-          useGitIfNotHosted);
-
-      final dependenciesChanged = expectedDependencies.keys
-          .any((k) => expectedDependencies[k] != actualDependencies[k]);
-
-      _log.info('dependencies for ${project.name} have '
-          '${dependenciesChanged ? "" : "NOT "}changed');
-      return dependenciesChanged;
-    }
+    Future<bool> x(JefeProject p) => p.pubspecCommands._haveDependenciesChangedInThisProject(
+      type, useGitIfNotHosted);
 
     return executeTask/*<bool>*/(
         'checking if $type dependencies have changed',
-        () => _project.processDepthFirst(x,
+        () => _project.processDepthFirst/*<bool>*/(
+            x,
             combine: (bool b1, bool b2) => b1 || b2));
+  }
+
+  Future<bool> _haveDependenciesChangedInThisProject(
+      DependencyType type, bool useGitIfNotHosted) async {
+    final exportedPackageNames = await _project.exportedPackageNames;
+
+    final actualDependencies = _project.pubspec.allDependencies;
+
+    final expectedDependencies = await _createDependencyReferences(
+        _project,
+        _project.directDependencies,
+        actualDependencies,
+        exportedPackageNames,
+        type,
+        useGitIfNotHosted);
+
+    final dependenciesChanged = expectedDependencies.keys
+        .any((k) => expectedDependencies[k] != actualDependencies[k]);
+
+    _log.info('dependencies for ${_project.name} have '
+        '${dependenciesChanged ? "" : "NOT "}changed');
+    return dependenciesChanged;
   }
 
   Future _setToDependencies(Project project, Iterable<Project> dependencies,
