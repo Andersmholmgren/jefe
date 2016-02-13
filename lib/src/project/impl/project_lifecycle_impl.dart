@@ -195,7 +195,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
         await _git.commit('releasing version $releaseVersion');
 
-        if (projectVersions.hasBeenPublished) {
+        if (projectVersions.currentVersions.isHosted) {
           await _pub.publish();
         }
 
