@@ -20,9 +20,9 @@ import 'package:pubspec/pubspec.dart';
 Logger _log = new Logger('jefe.project.commands.pub.impl');
 
 class PubSpecCommandsImpl implements PubSpecCommands {
-  final JefeProject _project;
+  final JefeProjectGraph _graph;
 
-  PubSpecCommandsImpl(this._project);
+  PubSpecCommandsImpl(this._graph);
 
   @override
   Future setToPathDependencies() =>
@@ -43,7 +43,7 @@ class PubSpecCommandsImpl implements PubSpecCommands {
     return executeTask(
         'change to $type dependencies',
         () => _setToDependencies(
-            _project, _project.directDependencies, type, useGitIfNotHosted));
+            _graph, _graph.directDependencies, type, useGitIfNotHosted));
   }
 
   // TODO: not sure if it makes sense to do this over whole sub graph
@@ -55,19 +55,19 @@ class PubSpecCommandsImpl implements PubSpecCommands {
 
     return executeTask/*<bool>*/(
         'checking if $type dependencies have changed',
-        () => _project.processDepthFirst/*<bool>*/(x,
+        () => _graph.processDepthFirst/*<bool>*/(x,
             combine: (bool b1, bool b2) => b1 || b2));
   }
 
   Future<bool> _haveDependenciesChangedInThisProject(
       DependencyType type, bool useGitIfNotHosted) async {
-    final exportedPackageNames = await _project.exportedPackageNames;
+    final exportedPackageNames = await _graph.exportedPackageNames;
 
-    final actualDependencies = _project.pubspec.allDependencies;
+    final actualDependencies = _graph.pubspec.allDependencies;
 
     final expectedDependencies = await _createDependencyReferences(
-        _project,
-        _project.directDependencies,
+        _graph,
+        _graph.directDependencies,
         actualDependencies,
         exportedPackageNames,
         type,
@@ -76,7 +76,7 @@ class PubSpecCommandsImpl implements PubSpecCommands {
     final dependenciesChanged = expectedDependencies.keys
         .any((k) => expectedDependencies[k] != actualDependencies[k]);
 
-    _log.info('dependencies for ${_project.name} have '
+    _log.info('dependencies for ${_graph.name} have '
         '${dependenciesChanged ? "" : "NOT "}changed');
     return dependenciesChanged;
   }

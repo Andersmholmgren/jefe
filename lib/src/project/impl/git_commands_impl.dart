@@ -17,11 +17,11 @@ import 'package:git/git.dart';
 Logger _log = new Logger('jefe.project.commands.git.impl');
 
 class GitCommandsImpl implements GitCommands {
-  final JefeProject _project;
+  final JefeProjectGraph _graph;
 
-  GitCommandsImpl(this._project);
+  GitCommandsImpl(this._graph);
 
-  Future<GitDir> get _gitDir => _project.gitDir;
+//  Future<GitDir> get _gitDir => _graph.gitDir;
 
   @override
   Future commit(String message) =>
@@ -40,7 +40,7 @@ class GitCommandsImpl implements GitCommands {
       executeTask('git assertWorkingTreeClean', () async {
         if (!await (await _gitDir).isWorkingTreeClean()) {
           throw new StateError(
-              'working directory dirty for project ${_project.name}');
+              'working directory dirty for project ${_graph.name}');
         }
       });
 
@@ -51,7 +51,7 @@ class GitCommandsImpl implements GitCommands {
             (await (await _gitDir).getCurrentBranch()).branchName;
         if (currentBranchName != branchName) {
           throw new StateError(
-              '${_project.name} is on different branch ($currentBranchName) than '
+              '${_graph.name} is on different branch ($currentBranchName) than '
               'expected ($branchName). Make sure you run jefe finish first');
         }
       });

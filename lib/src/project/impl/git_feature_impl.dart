@@ -18,11 +18,11 @@ import 'package:pub_semver/pub_semver.dart';
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
 class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
-  final JefeProject _project;
-  GitFeatureCommandsFlowImpl(this._project);
+  final JefeProjectGraph _graph;
+  GitFeatureCommandsFlowImpl(this._graph);
 
   Future init() => executeTask('git flow init', () async {
-        await initGitFlow(await _project.gitDir);
+        await initGitFlow(await _graph.gitDir);
       });
 
   Future featureStart(String featureName, {bool throwIfExists: false}) =>
@@ -34,20 +34,20 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
           else if (featureNames.currentFeatureIs(featureName)) {
             // correct feature
             // TODO: could check the branch is correctly based off develop
-            _log.info('${_project.name} already on correct feature branch');
+            _log.info('${_graph.name} already on correct feature branch');
           } else {
             return gitCheckout(
-                await _project.gitDir, '$featureBranchPrefix$featureName');
+                await _graph.gitDir, '$featureBranchPrefix$featureName');
           }
         } else {
-          return gitFlowFeatureStart(await _project.gitDir, featureName);
+          return gitFlowFeatureStart(await _graph.gitDir, featureName);
         }
       });
 
   Future featureFinish(String featureName,
           {bool excludeOnlyCommitIf(Commit commit): _dontExclude}) =>
       executeTask('git flow feature finish', () async {
-        final GitDir gitDir = await _project.gitDir;
+        final GitDir gitDir = await _graph.gitDir;
         final Map<String, Commit> commits =
             await gitDir.getCommits('$developBranchName..HEAD');
         _log.info('found ${commits.length} commits on feature branch');
@@ -65,12 +65,12 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
 
   Future releaseStart(String releaseName) =>
       executeTask('git flow release start', () async {
-        await gitFlowReleaseStart(await _project.gitDir, releaseName);
+        await gitFlowReleaseStart(await _graph.gitDir, releaseName);
       });
 
   Future releaseFinish(String releaseName) =>
       executeTask('git flow release finish', () async {
-        var gitDir = await _project.gitDir;
+        var gitDir = await _graph.gitDir;
         await gitFlowReleaseFinish(gitDir, releaseName);
         await gitTag(gitDir, releaseName);
         await gitPush(gitDir);
@@ -86,7 +86,7 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
   Future<Option<String>> currentFeatureName() {
     Future<Option<String>> featureNameFor() async {
       final featureNames =
-          await new Stream<JefeProject>.fromIterable(_project.depthFirst)
+          await new Stream<JefeProject>.fromIterable(_graph.depthFirst)
               .asyncMap(
                   (p) async => await gitFlowCurrentFeatureName(await p.gitDir))
               .where((o) => o is Some)
@@ -109,7 +109,7 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
   @override
   Future<Iterable<Version>> getReleaseVersionTags() {
     Future<Iterable<Version>> fetchTags() async {
-      final gitDir = await _project.gitDir;
+      final gitDir = await _graph.gitDir;
       return await gitFetchVersionTags(gitDir);
     }
     return executeTask('fetch git release version tags', fetchTags);
@@ -118,15 +118,15 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
   @override
   Future assertNoActiveReleases() =>
       executeTask('check no active releases', () async {
-        final releaseNames = await gitFlowReleaseNames(await _project.gitDir);
+        final releaseNames = await gitFlowReleaseNames(await _graph.gitDir);
         if (releaseNames.isNotEmpty) {
           throw new StateError(
-              '${_project.name} has an existing release branch. Must finish all active releases first');
+              '${_graph.name} has an existing release branch. Must finish all active releases first');
         }
       });
 
   Future<FeatureNames> fetchCurrentProjectsFeatureNames() async {
-    final gitDir = await _project.gitDir;
+    final gitDir = await _graph.gitDir;
     final results = await Future
         .wait([gitFlowFeatureNames(gitDir), gitFlowCurrentFeatureName(gitDir)]);
 
@@ -136,8 +136,8 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
 
   @override
   Future<bool> get hasChangesSinceLatestTaggedVersion async =>
-      (await _project.latestTaggedGitVersion)
-          .map((v) => _project.git.hasChangesSince(v))
+      (await _graph.latestTaggedGitVersion)
+          .map((v) => _graph.git.hasChangesSince(v))
           .getOrElse(() => false);
 }
 

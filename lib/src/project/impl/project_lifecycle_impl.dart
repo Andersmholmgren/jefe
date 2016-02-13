@@ -26,13 +26,13 @@ Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 const String featureStartCommitPrefix = 'set up project for new feature';
 
 class ProjectLifecycleImpl implements ProjectLifecycle {
-  final JefeProject _project;
-  ProjectLifecycleImpl(this._project);
+  final JefeProjectGraph _graph;
+  ProjectLifecycleImpl(this._graph);
 
-  GitCommands get _git => _project.git;
-  GitFeatureCommands get _gitFeature => _project.gitFeature;
-  PubCommands get _pub => _project.pub;
-  PubSpecCommands get _pubspec => _project.pubspecCommands;
+  GitCommands get _git => _graph.git;
+  GitFeatureCommands get _gitFeature => _graph.gitFeature;
+  PubCommands get _pub => _graph.pub;
+  PubSpecCommands get _pubspec => _graph.pubspecCommands;
 
   @override
   Future startNewFeature(String featureName,
@@ -42,7 +42,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
     return executeTask(
         'set up project for new feature $featureName',
-        () => _project.processDepthFirst((JefeProject project) => project
+        () => _graph.processDepthFirst((JefeProject project) => project
             .lifecycle
             .startNewFeature(featureName, doPush: doPush, recursive: false)));
   }
@@ -50,7 +50,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   Future startNewFeatureForCurrentProject(String featureName,
       {bool doPush: false}) {
     return executeTask(
-        'set up project for new feature "$featureName" for project ${_project.name}',
+        'set up project for new feature "$featureName" for project ${_graph.name}',
         () async {
       await _git.assertWorkingTreeClean();
       await _gitFeature.featureStart(featureName);
@@ -71,18 +71,18 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         .completeFeature(featureName, doPush: doPush, recursive: false);
 
     return executeTask('complete development of feature $featureName',
-        () => _project.processDepthFirst(doComplete));
+        () => _graph.processDepthFirst(doComplete));
   }
 
   Future completeFeatureForCurrentProject(String featureName,
       {bool doPush: false}) {
     return executeTask(
-        'complete development of feature $featureName for project ${_project.name}',
+        'complete development of feature $featureName for project ${_graph.name}',
         () async {
       await _git.assertWorkingTreeClean();
 
       final currentBranchName =
-          await gitCurrentBranchName(await _project.gitDir);
+          await gitCurrentBranchName(await _graph.gitDir);
       if (!(currentBranchName == _gitFeature.developBranchName)) {
         await _gitFeature.featureFinish(featureName,
             excludeOnlyCommitIf: (Commit c) =>
@@ -111,12 +111,12 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         recursive: false);
 
     return executeTask('Pre release checks: type $type',
-        () => _project.processDepthFirst(doPreRelease));
+        () => _graph.processDepthFirst(doPreRelease));
   }
 
   Future preReleaseCurrentProject(
           ReleaseType type, bool autoUpdateHostedVersions) =>
-      executeTask('Pre release checks for project ${_project.name}', () async {
+      executeTask('Pre release checks for project ${_graph.name}', () async {
         await _git.assertWorkingTreeClean();
         await _gitFeature.assertNoActiveReleases();
         await _git.assertOnBranch(_gitFeature.developBranchName);
@@ -134,15 +134,15 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
           bool autoUpdateHostedVersions: false}) =>
       executeTask('check release versions', () async {
         final ProjectVersions versions = await getCurrentProjectVersions(
-            _project, type, autoUpdateHostedVersions);
+            _graph, type, autoUpdateHostedVersions);
         if (versions.newReleaseVersion is Some) {
           _log.info(
-              '==> project ${_project.name} will be upgraded from version: '
+              '==> project ${_graph.name} will be upgraded from version: '
               '${versions.taggedGitVersion} '
               'to: ${versions.newReleaseVersion.get()}. '
               'It will ${versions.hasBeenPublished ? "" : "NOT "}be published to pub');
         } else {
-          _log.info('project ${_project.name} will NOT be upgraded. '
+          _log.info('project ${_graph.name} will NOT be upgraded. '
               'It will remain at version: ${versions.pubspecVersion}');
         }
       });
@@ -161,19 +161,19 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         recursive: false);
 
     return executeTask('Release version: type $type',
-        () => _project.processDepthFirst(doRelease));
+        () => _graph.processDepthFirst(doRelease));
   }
 
   Future releaseCurrentProject(
       ReleaseType type, bool autoUpdateHostedVersions) {
     return executeTask(
-        'Release version: type $type for project ${_project.name}', () async {
+        'Release version: type $type for project ${_graph.name}', () async {
       final ProjectVersions projectVersions = await getCurrentProjectVersions(
-          _project, type, autoUpdateHostedVersions);
+          _graph, type, autoUpdateHostedVersions);
 
       if (!projectVersions.newReleaseRequired) {
         // no release needed
-        _log.fine('no changes needing release for ${_project.name}');
+        _log.fine('no changes needing release for ${_graph.name}');
         return;
       } else {
         final releaseVersion = projectVersions.newReleaseVersion.get();
@@ -183,8 +183,8 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         await _gitFeature.releaseStart(releaseVersion.toString());
 
         if (releaseVersion != projectVersions.pubspecVersion) {
-          await _project
-              .updatePubspec(_project.pubspec.copy(version: releaseVersion));
+          await _graph
+              .updatePubspec(_graph.pubspec.copy(version: releaseVersion));
         }
 
         await _pubspec.setToHostedDependencies();
@@ -214,12 +214,12 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         project.lifecycle.init(doCheckout: doCheckout, recursive: false);
 
     return executeTask('Initialising for development',
-        () => _project.processDepthFirst(doInit));
+        () => _graph.processDepthFirst(doInit));
   }
 
   Future initCurrentProject(bool doCheckout) {
     return executeTask(
-        'Initialising for development for project ${_project.name}', () async {
+        'Initialising for development for project ${_graph.name}', () async {
       await _git.fetch();
       await _gitFeature.init();
 

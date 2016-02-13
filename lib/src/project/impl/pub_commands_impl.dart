@@ -15,30 +15,30 @@ import 'package:logging/logging.dart';
 Logger _log = new Logger('jefe.project.commands.pub.impl');
 
 class PubCommandsImpl implements PubCommands {
-  final JefeProject _project;
-  PubCommandsImpl(this._project);
+  final JefeProjectGraph _graph;
+  PubCommandsImpl(this._graph);
 
   @override
   Future get() =>
-      executeTask('pub get', () async => pub.get(_project.installDirectory));
+      executeTask('pub get', () async => pub.get(_graph.installDirectory));
 
   @override
   Future fetchPackageVersions() =>
-      executeTask('fetch package versions', () => _project.publishedVersions);
+      executeTask('fetch package versions', () => _graph.publishedVersions);
 
   @override
   Future publish() => executeTask(
-      'pub publish', () async => pub.publish(_project.installDirectory));
+      'pub publish', () async => pub.publish(_graph.installDirectory));
 
   @override
   Future test() => executeTask('pub run test', () async {
         final hasTestPackage =
-            _project.pubspec.allDependencies.containsKey('test');
+            _graph.pubspec.allDependencies.containsKey('test');
         if (hasTestPackage) {
-          return await pub.test(_project.installDirectory);
+          return await pub.test(_graph.installDirectory);
         } else {
           _log.warning(() =>
-              "Ignoring tests for project ${_project.name} as doesn't use test package");
+              "Ignoring tests for project ${_graph.name} as doesn't use test package");
         }
       });
 }

@@ -20,9 +20,9 @@ import 'package:jefe/src/project/jefe_project.dart';
 Logger _log = new Logger('jefe.project.commands.docker.impl');
 
 class DockerCommandsImpl implements DockerCommands {
-  final JefeProject _project;
+  final JefeProjectGraph _graph;
 
-  DockerCommandsImpl(this._project);
+  DockerCommandsImpl(this._graph);
 
   @override
   Future generateDockerfile(
