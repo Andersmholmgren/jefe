@@ -108,24 +108,28 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
   String get developBranchName => 'develop';
 
   @override
-  Future<String> currentFeatureName() =>
-      dependencyGraphCommand('Get current feature name',
-          (JefeProjectGraph graph, Directory rootDirectory, _) async {
-        final featureNames = await new Stream.fromIterable(graph.depthFirst)
-            .asyncMap((pd) async =>
-                await gitFlowCurrentFeatureName(await pd.project.gitDir))
-            .where((o) => o is Some)
-            .map((o) => o.get())
-            .toSet();
+  Future<Option<String>> currentFeatureName() {
+    Future<Option<String>> featureNameFor(JefeProject graph) async {
+      final featureNames =
+          await new Stream<JefeProject>.fromIterable(graph.depthFirst)
+              .asyncMap(
+                  (p) async => await gitFlowCurrentFeatureName(await p.gitDir))
+              .where((o) => o is Some)
+              .map((o) => o.get())
+              .toSet();
 
-        if (featureNames.length == 0) {
-          return const None();
-        } else if (featureNames.length == 1) {
-          return new Some(featureNames.first);
-        } else {
-          throw new StateError('more than one current feature $featureNames');
-        }
-      });
+      if (featureNames.length == 0) {
+        return const None();
+      } else if (featureNames.length == 1) {
+        return new Some<String>(featureNames.first);
+      } else {
+        throw new StateError('more than one current feature $featureNames');
+      }
+    }
+
+    return executeTask/*<Option<String>>*/('Get current feature name',
+        () => _project.processDepthFirst/*<Option<String>>*/(featureNameFor));
+  }
 
   @override
   Future<Iterable<Version>> getReleaseVersionTags() =>
