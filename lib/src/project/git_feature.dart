@@ -7,6 +7,7 @@ import 'dart:async';
 
 import 'package:git/git.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:option/option.dart';
 
 /// Defines the commands that relate to the branching strategy for developing
 /// and releasing features
@@ -34,7 +35,7 @@ abstract class GitFeatureCommands {
 
   /// Looks up the name of the current feature branch if any. Note it is an
   /// error if different projects are on different feature branches
-  Future currentFeatureName();
+  Future<Option<String>> currentFeatureName();
 
   /// Initiates a release which may involve creating a release branch
   Future releaseStart(String version);
