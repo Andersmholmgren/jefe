@@ -3,15 +3,12 @@
 
 library jefe.project.commands.pub.spec;
 
-import 'package:jefe/src/project_commands/project_command.dart';
-import 'package:pubspec/pubspec.dart';
+import 'dart:async';
 
-import 'impl/pubspec_commands_impl.dart';
+import 'package:pubspec/pubspec.dart';
 
 /// Commands that operate on each [Project]s [PubSpec] files
 abstract class PubSpecCommands {
-  factory PubSpecCommands() = PubSpecCommandsImpl;
-
   /// Sets the dependencies between [Project]s within the group to use path
   /// dependencies
   Future setToPathDependencies();
