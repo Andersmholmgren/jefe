@@ -3,12 +3,8 @@
 
 library jefe.project.commands.docker;
 
-import 'dart:io';
-
-import 'package:jefe/src/project_commands/project_command.dart';
-
-import 'impl/docker_commands_impl.dart';
 import 'dart:async';
+import 'dart:io';
 
 abstract class DockerCommands {
   /// Generates a Dockerfile based on the provided [serverProjectName]
