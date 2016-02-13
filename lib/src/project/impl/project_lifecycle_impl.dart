@@ -210,11 +210,21 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   }
 
   @override
-  Future init({bool doCheckout: true}) {
-    return executorAwareCommand('Initialising for development',
-        (CommandExecutor executor) async {
-      await executor.execute(projectCommandGroup(
-          'Initialising for development', [_gitFeature.init(), _git.fetch()]));
+  Future init({bool doCheckout: true, bool recursive: true}) {
+    if (!recursive) return initCurrentProject(doCheckout);
+
+    Future doInit(JefeProject project) =>
+        project.lifecycle.init(doCheckout: doCheckout, recursive: false);
+
+    return executeTask('Initialising for development',
+        () => _project.processDepthFirst(doInit));
+  }
+
+  Future initCurrentProject(bool doCheckout) {
+    return executeTask(
+        'Initialising for development for project ${_project.name}', () async {
+      await _git.fetch();
+      await _gitFeature.init();
 
       final currentFeatureNameOpt = await _gitFeature.currentFeatureName();
 
