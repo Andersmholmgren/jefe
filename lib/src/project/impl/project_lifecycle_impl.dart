@@ -267,11 +267,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
           return new Some<Version>(currentPubspecVersion);
         } else {
           // latest released version is same as pubspec version
-          final hasChanges = await _gitFeature
-                  .hasChangesSinceLatestTaggedVersion ||
-              (await _pubspec.haveDependenciesChanged(DependencyType.hosted));
-
-          if (hasChanges) {
+          if (await hasChanges) {
             if (isHosted && !autoUpdateHostedVersions) {
               // Hosted packages must observe semantic versioning so not sensible
               // to try to automatically bump version, unless the user explicitly
@@ -305,6 +301,12 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       }
     }
   }
+
+  Future<bool> get hasChanges async =>
+      new Stream<bool>.fromFutures(<Future<bool>>[
+        _gitFeature.hasChangesSinceLatestTaggedVersion,
+        _pubspec.haveDependenciesChanged(DependencyType.hosted)
+      ]).any((b) => b);
 }
 
 class ProjectVersions {
