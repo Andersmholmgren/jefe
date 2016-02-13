@@ -145,9 +145,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
         _log.fine('new release version $releaseVersion');
 
-        await _gitFeature
-            .releaseStart(releaseVersion.toString())
-            .process(project);
+        await project.gitFeature.releaseStart(releaseVersion.toString());
 
         if (releaseVersion != projectVersions.pubspecVersion) {
           await project
@@ -166,9 +164,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
           await _pub.publish().process(project);
         }
 
-        await _gitFeature
-            .releaseFinish(releaseVersion.toString())
-            .process(project);
+        await project.gitFeature.releaseFinish(releaseVersion.toString());
 
         await project.git.push();
       }
