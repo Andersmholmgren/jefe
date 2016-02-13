@@ -107,24 +107,23 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
   @override
   Future preRelease(
-          {ReleaseType type: ReleaseType.minor,
-          bool autoUpdateHostedVersions: false}) =>
-      projectCommandGroup('Pre release checks', [
-        _git.assertWorkingTreeClean(),
-        _gitFeature.assertNoActiveReleases(),
-        _git.assertOnBranch(_gitFeature.developBranchName),
-        _git.fetch(),
-        _git.updateFromRemote('master'),
-        _git.updateFromRemote(_gitFeature.developBranchName),
-        _git.merge('master'),
-        checkReleaseVersions(
-            type: type, autoUpdateHostedVersions: autoUpdateHostedVersions),
-        _pub.test()
-      ]);
+      {ReleaseType type: ReleaseType.minor,
+      bool autoUpdateHostedVersions: false,
+      bool recursive: true}) {
+    if (!recursive)
+      return preReleaseCurrentProject(type, autoUpdateHostedVersions);
+
+    Future doPreRelease(JefeProject project) => project.lifecycle.preRelease(
+        type: type,
+        autoUpdateHostedVersions: autoUpdateHostedVersions,
+        recursive: false);
+
+    return executeTask('Pre release checks: type $type',
+        () => _project.processDepthFirst(doPreRelease));
+  }
 
   Future preReleaseCurrentProject(
-          {ReleaseType type: ReleaseType.minor,
-          bool autoUpdateHostedVersions: false}) =>
+          ReleaseType type, bool autoUpdateHostedVersions) =>
       executeTask('Pre release checks for project ${_project.name}', () async {
         return Future.wait([
           _project.git.assertWorkingTreeClean(),
