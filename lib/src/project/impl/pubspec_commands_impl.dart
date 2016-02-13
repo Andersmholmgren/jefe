@@ -42,10 +42,8 @@ class PubSpecCommandsImpl implements PubSpecCommands {
       DependencyType type, bool useGitIfNotHosted) {
     return executeTask(
         'change to $type dependencies',
-        () async => _project.processDepthFirst((JefeProject p) async {
-              await _setToDependencies(
-                  p, p.directDependencies, type, useGitIfNotHosted);
-            }));
+        () => _setToDependencies(
+            _project, _project.directDependencies, type, useGitIfNotHosted));
   }
 
   @override
