@@ -18,6 +18,8 @@ import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:quiver/iterables.dart';
+import 'package:jefe/src/project/pubspec_commands.dart';
+import 'package:jefe/src/project/impl/pubspec_commands_impl.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
@@ -81,6 +83,12 @@ class JefeProjectImpl extends ProjectImpl
   @override
   GitFeatureCommands get gitFeature =>
       _gitFeature ??= _gitFeatureCommandsFactory(this);
+
+  PubSpecCommands _pubspecCommands;
+
+  @override
+  PubSpecCommands get pubspecCommands =>
+      _pubspecCommands ??= new PubSpecCommandsImpl(this);
 }
 
 class JefeProjectSetImpl extends DelegatingSet<JefeProject>

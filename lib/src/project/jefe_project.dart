@@ -9,6 +9,7 @@ import 'package:jefe/src/project/project.dart';
 import 'package:option/option.dart';
 import 'package:jefe/src/project/git_commands.dart';
 import 'package:jefe/src/project/git_feature.dart';
+import 'package:jefe/src/project/pubspec_commands.dart';
 
 /// A [Project] managed by Jefe
 abstract class JefeProject extends Project implements JefeProjectGraph {
@@ -18,6 +19,7 @@ abstract class JefeProject extends Project implements JefeProjectGraph {
 
   GitCommands get git;
   GitFeatureCommands get gitFeature;
+  PubSpecCommands get pubspecCommands;
 }
 
 /// Some function applied to a [JefeProject]
