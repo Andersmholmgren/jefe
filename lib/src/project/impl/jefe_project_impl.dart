@@ -22,6 +22,7 @@ import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:quiver/iterables.dart';
+import 'package:jefe/src/project/project_lifecycle.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
@@ -96,6 +97,12 @@ class JefeProjectImpl extends ProjectImpl
 
   @override
   PubCommands get pub => _pub ??= new PubCommandsImpl(this);
+
+  ProjectLifecycle _lifecycle;
+
+  @override
+  ProjectLifecycle get lifecycle =>
+      _lifecycle ??= new ProjectLifecycleImpl(this);
 }
 
 class JefeProjectSetImpl extends DelegatingSet<JefeProject>
