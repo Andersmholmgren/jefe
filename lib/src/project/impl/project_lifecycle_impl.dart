@@ -210,23 +210,20 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   }
 
   @override
-  ExecutorAwareProjectCommand init({bool doCheckout: true}) {
+  Future init({bool doCheckout: true}) {
     return executorAwareCommand('Initialising for development',
         (CommandExecutor executor) async {
       await executor.execute(projectCommandGroup(
           'Initialising for development', [_gitFeature.init(), _git.fetch()]));
 
-      final currentFeatureNameOpt =
-          await executor.execute(_gitFeature.currentFeatureName());
+      final currentFeatureNameOpt = await _gitFeature.currentFeatureName();
 
       if (currentFeatureNameOpt is Some) {
-        var currentFeatureName = currentFeatureNameOpt.get();
+        final currentFeatureName = currentFeatureNameOpt.get();
         _log.info('Detected existing feature - $currentFeatureName');
-        await executor.execute(startNewFeature(currentFeatureName));
+        await startNewFeature(currentFeatureName);
       } else {
-        await executor.execute(_git
-            .checkout(_gitFeature.developBranchName)
-            .copy(condition: () => doCheckout));
+        if (doCheckout) await _git.checkout(_gitFeature.developBranchName);
       }
     });
   }
