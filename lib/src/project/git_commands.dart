@@ -5,6 +5,8 @@ library jefe.project.commands.git;
 
 import 'dart:async';
 
+import 'package:pub_semver/pub_semver.dart';
+
 abstract class GitCommands {
   Future commit(String message);
 
@@ -21,4 +23,6 @@ abstract class GitCommands {
   Future assertOnBranch(String branchName);
 
   Future checkout(String branchName);
+
+  Future<bool> hasChangesSince(Version sinceVersion);
 }

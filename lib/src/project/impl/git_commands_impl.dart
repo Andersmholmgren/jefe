@@ -21,15 +21,19 @@ class GitCommandsImpl implements GitCommands {
 
   Future<GitDir> get _gitDir => _project.gitDir;
 
+  @override
   Future commit(String message) =>
       executeTask('git commit', () async => gitCommit(await _gitDir, message));
 
+  @override
   Future push() => executeTask('git push', () async => gitPush(await _gitDir));
 
+  @override
   Future fetch() => executeTask('git fetch', () async {
         await gitFetch(await _gitDir);
       });
 
+  @override
   Future assertWorkingTreeClean() =>
       executeTask('git assertWorkingTreeClean', () async {
         if (!await (await _gitDir).isWorkingTreeClean()) {
@@ -38,6 +42,7 @@ class GitCommandsImpl implements GitCommands {
         }
       });
 
+  @override
   Future assertOnBranch(String branchName) =>
       executeTask('git assertOnBranch $branchName', () async {
         var currentBranchName =
@@ -49,11 +54,13 @@ class GitCommandsImpl implements GitCommands {
         }
       });
 
+  @override
   Future checkout(String branchName) =>
       executeTask('git checkout $branchName', () async {
         await gitCheckout(await _gitDir, branchName);
       });
 
+  @override
   Future updateFromRemote(String branchName, [String remoteName = 'origin']) =>
       executeTask('git update from remote: $branchName', () async {
         final gitDir = await _gitDir;
@@ -61,10 +68,12 @@ class GitCommandsImpl implements GitCommands {
         await gitMerge(gitDir, '$remoteName/$branchName');
       });
 
+  @override
   Future merge(String commit) => executeTask('git merge $commit', () async {
         await gitMerge(await _gitDir, commit);
       });
 
+  @override
   Future<bool> hasChangesSince(Version sinceVersion) async {
     return (await diffSummarySince(await _gitDir, sinceVersion.toString()))
         is Some;
