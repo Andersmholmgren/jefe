@@ -132,11 +132,13 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
   }
 
   @override
-  Future<Iterable<Version>> getReleaseVersionTags() =>
-      executeTask('fetch git release version tags', () async {
-        final gitDir = await _project.gitDir;
-        return await gitFetchVersionTags(gitDir);
-      });
+  Future<Iterable<Version>> getReleaseVersionTags() {
+    Future<Iterable<Version>> fetchTags() async {
+      final gitDir = await _project.gitDir;
+      return await gitFetchVersionTags(gitDir);
+    }
+    return executeTask('fetch git release version tags', fetchTags);
+  }
 
   @override
   Future assertNoActiveReleases() =>
