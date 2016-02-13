@@ -46,6 +46,7 @@ class PubSpecCommandsImpl implements PubSpecCommands {
             _project, _project.directDependencies, type, useGitIfNotHosted));
   }
 
+  // TODO: not sure if it makes sense to do this over whole sub graph
   @override
   Future<bool> haveDependenciesChanged(DependencyType type,
       {bool useGitIfNotHosted: true}) {
