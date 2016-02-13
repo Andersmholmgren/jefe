@@ -51,4 +51,6 @@ abstract class GitFeatureCommands {
   Future<Iterable<Version>> getReleaseVersionTags();
 
   Future assertNoActiveReleases();
+
+  Future<bool> get hasChangesSinceLatestTaggedVersion;
 }

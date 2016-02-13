@@ -133,6 +133,12 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
     return new FeatureNames(
         (results[0] as Iterable<String>).toSet(), results[1] as Option<String>);
   }
+
+  @override
+  Future<bool> get hasChangesSinceLatestTaggedVersion async =>
+      (await _project.latestTaggedGitVersion)
+          .map((v) => _project.git.hasChangesSince(v))
+          .getOrElse(() => false);
 }
 
 bool _dontExclude(Commit c) => false;
