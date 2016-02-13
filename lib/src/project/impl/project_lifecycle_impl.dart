@@ -274,9 +274,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
               await hasChangesSince(await project.gitDir, latestTaggedVersion);
 
           final hasChanges = hasChangesSinceLatestTaggedVersion ||
-              (await _pubSpec
-                  .haveDependenciesChanged(DependencyType.hosted)
-                  .process(project));
+              (await _pubspec.haveDependenciesChanged(DependencyType.hosted));
 
           if (hasChanges) {
             if (isHosted && !autoUpdateHostedVersions) {
