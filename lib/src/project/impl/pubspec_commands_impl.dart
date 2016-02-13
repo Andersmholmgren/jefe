@@ -51,7 +51,7 @@ class PubSpecCommandsImpl implements PubSpecCommands {
   @override
   Future<bool> haveDependenciesChanged(DependencyType type,
       {bool useGitIfNotHosted: true}) {
-    Future<bool> x(JefeProject p) => p.pubspecCommands
+    Future<bool> x(JefeProject p) => (p.pubspecCommands as PubSpecCommandsImpl)
         ._haveDependenciesChangedInThisProject(type, useGitIfNotHosted);
 
     return executeTask/*<bool>*/(
