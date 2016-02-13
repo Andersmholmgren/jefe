@@ -142,18 +142,17 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   Future checkReleaseVersions(
           {ReleaseType type: ReleaseType.minor,
           bool autoUpdateHostedVersions: false}) =>
-      projectCommandWithDependencies('check release versions',
-          (JefeProject project) async {
+      executeTask('check release versions', () async {
         final ProjectVersions versions = await getCurrentProjectVersions(
-            project, type, autoUpdateHostedVersions);
+            _project, type, autoUpdateHostedVersions);
         if (versions.newReleaseVersion is Some) {
           _log.info(
-              '==> project ${project.name} will be upgraded from version: '
+              '==> project ${_project.name} will be upgraded from version: '
               '${versions.taggedGitVersion} '
               'to: ${versions.newReleaseVersion.get()}. '
               'It will ${versions.hasBeenPublished ? "" : "NOT "}be published to pub');
         } else {
-          _log.info('project ${project.name} will NOT be upgraded. '
+          _log.info('project ${_project.name} will NOT be upgraded. '
               'It will remain at version: ${versions.pubspecVersion}');
         }
       });
