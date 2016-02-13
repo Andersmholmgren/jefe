@@ -174,10 +174,10 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
         _log.fine('new release version $releaseVersion');
 
-        await project.gitFeature.releaseStart(releaseVersion.toString());
+        await _project.gitFeature.releaseStart(releaseVersion.toString());
 
         if (releaseVersion != projectVersions.pubspecVersion) {
-          await project
+          await _project
               .updatePubspec(_project.pubspec.copy(version: releaseVersion));
         }
 
