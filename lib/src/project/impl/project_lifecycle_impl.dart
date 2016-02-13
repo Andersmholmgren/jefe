@@ -23,7 +23,6 @@ import 'package:pub_semver/pub_semver.dart';
 //import 'package:jefe/src/project_commands/project_command_executor.dart';
 //import 'package:jefe/src/project_commands/project_lifecycle.dart';
 
-
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
 const String featureStartCommitPrefix = 'set up project for new feature';
@@ -35,6 +34,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   GitCommands get _git => _project.git;
   GitFeatureCommands get _gitFeature => _project.gitFeature;
   PubCommands get _pub => _project.pub;
+  PubSpecCommands get _pubspec => _project.pubspecCommands;
 
   @override
   Future startNewFeature(String featureName,
@@ -43,7 +43,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         () async {
       await _git.assertWorkingTreeClean();
       await _gitFeature.featureStart(featureName);
-      await _project.pubspecCommands.setToPathDependencies();
+      await _pubspec.setToPathDependencies();
       await _pub.get();
       await _git.commit('$featureStartCommitPrefix $featureName');
       if (doPush) await _git.push();
@@ -92,7 +92,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
                 c.message.startsWith(featureStartCommitPrefix));
       }
 
-      await _project.pubspecCommands.setToGitDependencies();
+      await _pubspec.setToGitDependencies();
       await _pub.get();
       await _git.commit('completed development of feature $featureName');
 
@@ -190,7 +190,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
               .updatePubspec(_project.pubspec.copy(version: releaseVersion));
         }
 
-        await _project.pubspecCommands.setToHostedDependencies();
+        await _pubspec.setToHostedDependencies();
 
         await _pub.get();
 
