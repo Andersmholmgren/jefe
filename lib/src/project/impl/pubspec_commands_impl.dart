@@ -51,28 +51,31 @@ class PubSpecCommandsImpl implements PubSpecCommands {
   @override
   Future<bool> haveDependenciesChanged(DependencyType type,
       {bool useGitIfNotHosted: true}) {
+    Future<bool> x(JefeProject project) async {
+      final exportedPackageNames = await project.exportedPackageNames;
+
+      final actualDependencies = project.pubspec.allDependencies;
+
+      final expectedDependencies = await _createDependencyReferences(
+          project,
+          project.directDependencies,
+          actualDependencies,
+          exportedPackageNames,
+          type,
+          useGitIfNotHosted);
+
+      final dependenciesChanged = expectedDependencies.keys
+          .any((k) => expectedDependencies[k] != actualDependencies[k]);
+
+      _log.info('dependencies for ${project.name} have '
+          '${dependenciesChanged ? "" : "NOT "}changed');
+      return dependenciesChanged;
+    }
+
     return executeTask/*<bool>*/(
         'checking if $type dependencies have changed',
-      () async =>  _project.processDepthFirst((JefeProject project) async {
-          final exportedPackageNames = await project.exportedPackageNames;
-
-          final actualDependencies = project.pubspec.allDependencies;
-
-          final expectedDependencies = await _createDependencyReferences(
-              project,
-              project.directDependencies,
-              actualDependencies,
-              exportedPackageNames,
-              type,
-              useGitIfNotHosted);
-
-          final dependenciesChanged = expectedDependencies.keys
-              .any((k) => expectedDependencies[k] != actualDependencies[k]);
-
-          _log.info('dependencies for ${project.name} have '
-              '${dependenciesChanged ? "" : "NOT "}changed');
-          return dependenciesChanged;
-        } as ProjectFunction<bool>);
+        () => _project.processDepthFirst(x,
+            combine: (bool b1, bool b2) => b1 || b2));
   }
 
   Future _setToDependencies(Project project, Iterable<Project> dependencies,
