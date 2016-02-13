@@ -43,15 +43,16 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   @override
   Future startNewFeature(String featureName,
       {bool doPush: false, bool recursive: true}) {
-    return projectCommandGroup(
-        'set up project for new feature "$featureName"', [
-      _git.assertWorkingTreeClean(),
-      _gitFeature.featureStart(featureName),
-      _pubSpec.setToPathDependencies(),
-      _pub.get(),
-      _git.commit('$featureStartCommitPrefix $featureName'),
-      _git.push().copy(condition: () => doPush)
-    ]);
+    return executeTask(
+        'set up project for new feature "$featureName"',
+        () => Future.wait([
+              _project.git.assertWorkingTreeClean(),
+              _project.gitFeature.featureStart(featureName),
+              _project.pubspecCommands.setToPathDependencies(),
+              _project.pub.get(),
+              _project.git.commit('$featureStartCommitPrefix $featureName'),
+              _project.git.push().copy(condition: () => doPush)
+            ]));
   }
 
   // TODO: return to this approach once the concurrency support is implemented
@@ -125,18 +126,18 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   Future preReleaseCurrentProject(
           ReleaseType type, bool autoUpdateHostedVersions) =>
       executeTask('Pre release checks for project ${_project.name}', () async {
-        return Future.wait([
-          _project.git.assertWorkingTreeClean(),
-          _project.gitFeature.assertNoActiveReleases(),
-          _project.git.assertOnBranch(_gitFeature.developBranchName),
-          _project.git.fetch(),
-          _project.git.updateFromRemote('master'),
-          _project.git.updateFromRemote(_gitFeature.developBranchName),
-          _project.git.merge('master'),
-          checkReleaseVersions(
-              type: type, autoUpdateHostedVersions: autoUpdateHostedVersions),
-          _project.pub.test()
-        ]);
+        await _project.git.assertWorkingTreeClean();
+        await _project.gitFeature.assertNoActiveReleases();
+        await _project.git
+            .assertOnBranch(_project.gitFeature.developBranchName);
+        await _project.git.fetch();
+        await _project.git.updateFromRemote('master');
+        await _project.git
+            .updateFromRemote(_project.gitFeature.developBranchName);
+        await _project.git.merge('master');
+        await checkReleaseVersions(
+            type: type, autoUpdateHostedVersions: autoUpdateHostedVersions);
+        await _project.pub.test();
       });
 
   Future checkReleaseVersions(
