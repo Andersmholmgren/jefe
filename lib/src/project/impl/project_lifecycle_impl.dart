@@ -270,10 +270,8 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
           return new Some<Version>(currentPubspecVersion);
         } else {
           // latest released version is same as pubspec version
-          final hasChangesSinceLatestTaggedVersion =
-              await hasChangesSince(await project.gitDir, latestTaggedVersion);
-
-          final hasChanges = hasChangesSinceLatestTaggedVersion ||
+          final hasChanges = await _gitFeature
+                  .hasChangesSinceLatestTaggedVersion ||
               (await _pubspec.haveDependenciesChanged(DependencyType.hosted));
 
           if (hasChanges) {
