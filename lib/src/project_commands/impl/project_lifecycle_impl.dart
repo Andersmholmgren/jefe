@@ -222,7 +222,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
       } else {
         if (latestTaggedVersion < currentPubspecVersion) {
           // manually bumped version
-          return new Some(currentPubspecVersion);
+          return new Some<Version>(currentPubspecVersion);
         } else {
           // latest released version is same as pubspec version
           final hasChangesSinceLatestTaggedVersion =
