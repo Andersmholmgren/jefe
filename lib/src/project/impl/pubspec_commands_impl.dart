@@ -51,13 +51,12 @@ class PubSpecCommandsImpl implements PubSpecCommands {
   @override
   Future<bool> haveDependenciesChanged(DependencyType type,
       {bool useGitIfNotHosted: true}) {
-    Future<bool> x(JefeProject p) => p.pubspecCommands._haveDependenciesChangedInThisProject(
-      type, useGitIfNotHosted);
+    Future<bool> x(JefeProject p) => p.pubspecCommands
+        ._haveDependenciesChangedInThisProject(type, useGitIfNotHosted);
 
     return executeTask/*<bool>*/(
         'checking if $type dependencies have changed',
-        () => _project.processDepthFirst/*<bool>*/(
-            x,
+        () => _project.processDepthFirst/*<bool>*/(x,
             combine: (bool b1, bool b2) => b1 || b2));
   }
 
