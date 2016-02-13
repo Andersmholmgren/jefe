@@ -135,7 +135,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
           _project.git.merge('master'),
           checkReleaseVersions(
               type: type, autoUpdateHostedVersions: autoUpdateHostedVersions),
-          _pub.test()
+          _project.pub.test()
         ]);
       });
 
