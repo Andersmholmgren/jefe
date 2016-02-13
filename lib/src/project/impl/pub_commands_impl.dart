@@ -3,13 +3,13 @@
 
 library jefe.project.commands.pub.impl;
 
-import 'package:jefe/src/project/project.dart';
+import 'dart:async';
+
+import 'package:jefe/src/project/jefe_project.dart';
+import 'package:jefe/src/project/pub_commands.dart';
 import 'package:jefe/src/project_commands/project_command.dart' show executeTask;
 import 'package:jefe/src/pub/pub.dart' as pub;
 import 'package:logging/logging.dart';
-import 'dart:async';
-import 'package:jefe/src/project/pub_commands.dart';
-import 'package:jefe/src/project/jefe_project.dart';
 
 Logger _log = new Logger('jefe.project.commands.pub.impl');
 
@@ -19,24 +19,24 @@ class PubCommandsImpl implements PubCommands {
 
   @override
   Future get() => executeTask(
-      'pub get', (Project p) async => await pub.get(p.installDirectory));
+      'pub get', () async => await pub.get(_project.installDirectory));
 
   @override
   Future fetchPackageVersions() => executeTask(
-      'fetch package versions', (Project p) => p.publishedVersions);
+      'fetch package versions', () => _project.publishedVersions);
 
   @override
   Future publish() => executeTask('pub publish',
-      (Project p) async => await pub.publish(p.installDirectory));
+      () async => await pub.publish(_project.installDirectory));
 
   @override
-  Future test() => executeTask('pub run test', (Project p) async {
-        final hasTestPackage = p.pubspec.allDependencies.containsKey('test');
+  Future test() => executeTask('pub run test', () async {
+        final hasTestPackage = _project.pubspec.allDependencies.containsKey('test');
         if (hasTestPackage) {
-          return await pub.test(p.installDirectory);
+          return await pub.test(_project.installDirectory);
         } else {
           _log.warning(() =>
-              "Ignoring tests for project ${p.name} as doesn't use test package");
+              "Ignoring tests for project ${_project.name} as doesn't use test package");
         }
       });
 }
