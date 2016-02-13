@@ -12,14 +12,16 @@ import 'package:jefe/src/project/git_feature.dart';
 import 'package:jefe/src/project/impl/git_commands_impl.dart';
 import 'package:jefe/src/project/impl/git_feature_impl.dart';
 import 'package:jefe/src/project/impl/project_impl.dart';
+import 'package:jefe/src/project/impl/pub_commands_impl.dart';
+import 'package:jefe/src/project/impl/pubspec_commands_impl.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/project.dart';
+import 'package:jefe/src/project/pub_commands.dart';
+import 'package:jefe/src/project/pubspec_commands.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:quiver/iterables.dart';
-import 'package:jefe/src/project/pubspec_commands.dart';
-import 'package:jefe/src/project/impl/pubspec_commands_impl.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
@@ -89,6 +91,11 @@ class JefeProjectImpl extends ProjectImpl
   @override
   PubSpecCommands get pubspecCommands =>
       _pubspecCommands ??= new PubSpecCommandsImpl(this);
+
+  PubCommands _pub;
+
+  @override
+  PubCommands get pub => _pub ??= new PubCommandsImpl(this);
 }
 
 class JefeProjectSetImpl extends DelegatingSet<JefeProject>
