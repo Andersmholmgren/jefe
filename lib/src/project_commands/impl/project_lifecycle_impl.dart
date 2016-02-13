@@ -152,11 +152,11 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
               .updatePubspec(project.pubspec.copy(version: releaseVersion));
         }
 
-        await _pubSpec.setToHostedDependencies().process(project);
+        await project.pubspecCommands.setToHostedDependencies();
 
-        await _pub.get().process(project);
+        await project.pub.get();
 
-        await _pub.test().process(project);
+        await project.pub.test();
 
         await project.git.commit('releasing version $releaseVersion');
 
