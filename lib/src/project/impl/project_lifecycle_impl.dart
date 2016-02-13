@@ -7,52 +7,47 @@ import 'dart:async';
 
 import 'package:git/git.dart';
 import 'package:jefe/src/git/git.dart';
+import 'package:jefe/src/project/git_commands.dart';
+import 'package:jefe/src/project/git_feature.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/project.dart';
+import 'package:jefe/src/project/project_lifecycle.dart';
+import 'package:jefe/src/project/pub_commands.dart';
 import 'package:jefe/src/project/pubspec_commands.dart';
 import 'package:jefe/src/project/release_type.dart';
 import 'package:jefe/src/project_commands/project_command.dart'
     show executeTask;
-//import 'package:jefe/src/project_commands/project_command_executor.dart';
-//import 'package:jefe/src/project_commands/project_lifecycle.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
-import 'package:jefe/src/project/project_lifecycle.dart';
+//import 'package:jefe/src/project_commands/project_command_executor.dart';
+//import 'package:jefe/src/project_commands/project_lifecycle.dart';
+
 
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
 const String featureStartCommitPrefix = 'set up project for new feature';
 
 class ProjectLifecycleImpl implements ProjectLifecycle {
-//  final GitFeatureCommands _gitFeature;
-//  final GitCommands _git;
-//  final PubCommands _pub;
-//  final PubSpecCommands _pubSpec;
-
   final JefeProject _project;
   ProjectLifecycleImpl(this._project);
 
-//  ProjectLifecycleImpl(
-//      {GitFeatureCommandsFactory gitFeatureFactory: defaultFlowFeatureFactory})
-//      : this._gitFeature = gitFeatureFactory(),
-//        this._git = new GitCommands(),
-//        this._pub = new PubCommands(),
-//        this._pubSpec = new PubSpecCommands();
+  GitCommands get _git => _project.git;
+  GitFeatureCommands get _gitFeature => _project.gitFeature;
+  PubCommands get _pub => _project.pub;
 
   @override
   Future startNewFeature(String featureName,
       {bool doPush: false, bool recursive: true}) {
-    return executeTask(
-        'set up project for new feature "$featureName"',
-        () => Future.wait([
-              _project.git.assertWorkingTreeClean(),
-              _project.gitFeature.featureStart(featureName),
-              _project.pubspecCommands.setToPathDependencies(),
-              _project.pub.get(),
-              _project.git.commit('$featureStartCommitPrefix $featureName'),
-              _project.git.push().copy(condition: () => doPush)
-            ]));
+    return executeTask('set up project for new feature "$featureName"',
+        () async {
+      await _git.assertWorkingTreeClean();
+      await _gitFeature.featureStart(featureName);
+      await _project.pubspecCommands.setToPathDependencies();
+      await _pub.get();
+      await _git.commit('$featureStartCommitPrefix $featureName');
+      if (doPush) await _git.push();
+    });
   }
 
   // TODO: return to this approach once the concurrency support is implemented
@@ -87,22 +82,21 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     return executeTask(
         'complete development of feature $featureName for project ${_project.name}',
         () async {
-      await _project.git.assertWorkingTreeClean();
+      await _git.assertWorkingTreeClean();
 
       final currentBranchName =
           await gitCurrentBranchName(await _project.gitDir);
-      if (!(currentBranchName == _project.gitFeature.developBranchName)) {
-        await _project.gitFeature.featureFinish(featureName,
+      if (!(currentBranchName == _gitFeature.developBranchName)) {
+        await _gitFeature.featureFinish(featureName,
             excludeOnlyCommitIf: (Commit c) =>
                 c.message.startsWith(featureStartCommitPrefix));
       }
 
       await _project.pubspecCommands.setToGitDependencies();
-      await _project.pub.get();
-      await _project.git
-          .commit('completed development of feature $featureName');
+      await _pub.get();
+      await _git.commit('completed development of feature $featureName');
 
-      if (doPush) await _project.git.push();
+      if (doPush) await _git.push();
     });
   }
 
@@ -126,18 +120,16 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
   Future preReleaseCurrentProject(
           ReleaseType type, bool autoUpdateHostedVersions) =>
       executeTask('Pre release checks for project ${_project.name}', () async {
-        await _project.git.assertWorkingTreeClean();
-        await _project.gitFeature.assertNoActiveReleases();
-        await _project.git
-            .assertOnBranch(_project.gitFeature.developBranchName);
-        await _project.git.fetch();
-        await _project.git.updateFromRemote('master');
-        await _project.git
-            .updateFromRemote(_project.gitFeature.developBranchName);
-        await _project.git.merge('master');
+        await _git.assertWorkingTreeClean();
+        await _gitFeature.assertNoActiveReleases();
+        await _git.assertOnBranch(_gitFeature.developBranchName);
+        await _git.fetch();
+        await _git.updateFromRemote('master');
+        await _git.updateFromRemote(_gitFeature.developBranchName);
+        await _git.merge('master');
         await checkReleaseVersions(
             type: type, autoUpdateHostedVersions: autoUpdateHostedVersions);
-        await _project.pub.test();
+        await _pub.test();
       });
 
   Future checkReleaseVersions(
@@ -191,7 +183,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
         _log.fine('new release version $releaseVersion');
 
-        await _project.gitFeature.releaseStart(releaseVersion.toString());
+        await _gitFeature.releaseStart(releaseVersion.toString());
 
         if (releaseVersion != projectVersions.pubspecVersion) {
           await _project
@@ -200,19 +192,19 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
         await _project.pubspecCommands.setToHostedDependencies();
 
-        await _project.pub.get();
+        await _pub.get();
 
-        await _project.pub.test();
+        await _pub.test();
 
-        await _project.git.commit('releasing version $releaseVersion');
+        await _git.commit('releasing version $releaseVersion');
 
         if (projectVersions.hasBeenPublished) {
-          await _project.pub.publish();
+          await _pub.publish();
         }
 
-        await _project.gitFeature.releaseFinish(releaseVersion.toString());
+        await _gitFeature.releaseFinish(releaseVersion.toString());
 
-        await _project.git.push();
+        await _git.push();
       }
     });
   }
