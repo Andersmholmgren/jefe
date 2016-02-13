@@ -122,6 +122,24 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
         _pub.test()
       ]);
 
+  Future preReleaseCurrentProject(
+          {ReleaseType type: ReleaseType.minor,
+          bool autoUpdateHostedVersions: false}) =>
+      executeTask('Pre release checks for project ${_project.name}', () async {
+        return Future.wait([
+          _project.git.assertWorkingTreeClean(),
+          _project.gitFeature.assertNoActiveReleases(),
+          _project.git.assertOnBranch(_gitFeature.developBranchName),
+          _project.git.fetch(),
+          _project.git.updateFromRemote('master'),
+          _project.git.updateFromRemote(_gitFeature.developBranchName),
+          _project.git.merge('master'),
+          checkReleaseVersions(
+              type: type, autoUpdateHostedVersions: autoUpdateHostedVersions),
+          _pub.test()
+        ]);
+      });
+
   Future checkReleaseVersions(
           {ReleaseType type: ReleaseType.minor,
           bool autoUpdateHostedVersions: false}) =>

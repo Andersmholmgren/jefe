@@ -23,6 +23,7 @@ import 'package:option/option.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:quiver/iterables.dart';
 import 'package:jefe/src/project/project_lifecycle.dart';
+import 'package:jefe/src/project/impl/project_lifecycle_impl.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
