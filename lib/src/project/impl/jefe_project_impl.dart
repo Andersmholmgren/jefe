@@ -24,6 +24,8 @@ Logger _log = new Logger('jefe.project.jefe.impl');
 class JefeProjectImpl extends ProjectImpl
     with _JefeProjectGraphMixin
     implements JefeProject, JefeProjectGraph {
+  final GitFeatureCommandsFactory _gitFeatureCommandsFactory;
+
   @override
   final JefeProjectSet directDependencies;
 
@@ -36,12 +38,17 @@ class JefeProjectImpl extends ProjectImpl
       allDependencies.difference(directDependencies);
 
   JefeProjectImpl(this.directDependencies, String gitUri,
-      Directory installDirectory, PubSpec pubspec, HostedMode hostedMode)
-      : super(gitUri, installDirectory, pubspec, hostedMode);
+      Directory installDirectory, PubSpec pubspec, HostedMode hostedMode,
+      {GitFeatureCommandsFactory gitFeatureCommandsFactory})
+      : this._gitFeatureCommandsFactory = (gitFeatureCommandsFactory ??
+            (JefeProject p) => new GitFeatureCommandsFlowImpl(p)),
+        super(gitUri, installDirectory, pubspec, hostedMode);
 
-  JefeProjectImpl.from(Set<JefeProject> directDependencies, Project project)
+  JefeProjectImpl.from(Set<JefeProject> directDependencies, Project project,
+      {GitFeatureCommandsFactory gitFeatureCommandsFactory})
       : this(directDependencies, project.gitUri, project.installDirectory,
-            project.pubspec, project.hostedMode);
+            project.pubspec, project.hostedMode,
+            gitFeatureCommandsFactory: gitFeatureCommandsFactory);
 
   @override
   Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) {

@@ -8,6 +8,9 @@ import 'dart:async';
 import 'package:git/git.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:option/option.dart';
+import 'package:jefe/src/project/jefe_project.dart';
+
+typedef GitFeatureCommands GitFeatureCommandsFactory(JefeProject project);
 
 /// Defines the commands that relate to the branching strategy for developing
 /// and releasing features
