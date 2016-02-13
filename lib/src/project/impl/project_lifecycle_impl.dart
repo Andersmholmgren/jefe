@@ -92,7 +92,8 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
 
   Future completeFeature2(String featureName,
       {bool doPush: false, bool recursive: true}) {
-    return executeTask('complete development of feature $featureName',
+    return executeTask(
+        'complete development of feature $featureName for project ${_project.name}',
         () async {
       await _project.git.assertWorkingTreeClean();
 
