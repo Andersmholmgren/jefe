@@ -33,11 +33,8 @@ abstract class BaseCommandsImpl<S> {
   Callable/*<T>*/ _concurrentProcessor/*<T>*/(
       String taskDescription, ProjectFunction/*<T>*/ command,
       {ProjectFilter filter, Combiner/*<T>*/ combine}) {
-    return () => graph.processAllConcurrently(command,
-//        (JefeProject project) =>
-//            _processOnSingeProject(project, taskDescription, command),
-        filter: filter,
-        combine: combine);
+    return () =>
+        graph.processAllConcurrently(command, filter: filter, combine: combine);
   }
 
   _Processor/*<T>*/ _processor(CommandConcurrencyMode mode) {
@@ -52,10 +49,12 @@ abstract class BaseCommandsImpl<S> {
       {ProjectFilter filter,
       Combiner/*<T>*/ combine,
       CommandConcurrencyMode mode: CommandConcurrencyMode.concurrentCommand}) {
-    final processor = _processor(mode);
-    executeTask(
+    final processor =
+        _processor(mode ?? CommandConcurrencyMode.concurrentCommand);
+
+    return executeTask/*<T>*/(
         taskDescription,
-        () => processor(
+        processor(
             (JefeProject project) =>
                 _processOnSingeProject2(project, taskDescription, command),
             filter: filter,
