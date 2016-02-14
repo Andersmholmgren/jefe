@@ -22,10 +22,8 @@ class GitCommandsImpl extends BaseCommandsImpl implements GitCommands {
 //  Future<GitDir> get _gitDir => _graph.gitDir;
 
   @override
-  Future commit(String message) => executeTask(
-      'git commit',
-      () => processAllConcurrently(
-          (JefeProject p) async => gitCommit(await p.gitDir, message)));
+  Future commit(String message) => processAllConcurrently('git commit',
+      (JefeProject p) async => gitCommit(await p.gitDir, message));
 
   @override
   Future push() => executeTask('git push', () async => gitPush(await _gitDir));
