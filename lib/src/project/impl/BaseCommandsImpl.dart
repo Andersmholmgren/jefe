@@ -44,7 +44,7 @@ abstract class BaseCommandsImpl<S> {
   _Processor/*<T>*/ _processor/*<T>*/(CommandConcurrencyMode mode) {
     switch (mode) {
       case CommandConcurrencyMode.serial:
-        return _concurrentProcessor; // TODO:!!!
+        return _serialProcessor;
       case CommandConcurrencyMode.concurrentCommand:
       case CommandConcurrencyMode.concurrentProject:
       default:
