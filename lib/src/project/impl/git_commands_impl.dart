@@ -22,7 +22,7 @@ class GitCommandsImpl extends BaseCommandsImpl<GitCommands>
       : super(
             graph,
             (JefeProject p) async =>
-                new _GitCommandsSingleProjectImpl(p, await p.gitDir));
+                new GitCommandsSingleProjectImpl(p, await p.gitDir));
 
   @override
   Future commit(String message) =>
@@ -62,11 +62,11 @@ class GitCommandsImpl extends BaseCommandsImpl<GitCommands>
       (GitCommands s) => s.hasChangesSince(sinceVersion));
 }
 
-class _GitCommandsSingleProjectImpl implements GitCommands {
+class GitCommandsSingleProjectImpl implements GitCommands {
   final JefeProject _project;
   final GitDir _gitDir;
 
-  _GitCommandsSingleProjectImpl(this._project, this._gitDir);
+  GitCommandsSingleProjectImpl(this._project, this._gitDir);
 
   @override
   Future commit(String message) => gitCommit(_gitDir, message);

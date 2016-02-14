@@ -82,6 +82,12 @@ class JefeProjectImpl extends ProjectImpl
   @override
   GitCommands get git => _git ??= new GitCommandsImpl(this);
 
+  GitCommands _gitCurrentProject;
+
+  @override
+  Future<GitCommands> get gitCurrentProject async => _gitCurrentProject ??=
+      new GitCommandsSingleProjectImpl(this, await gitDir);
+
   GitFeatureCommands _gitFeature;
 
   @override
