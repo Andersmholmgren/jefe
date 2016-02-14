@@ -19,10 +19,9 @@ abstract class JefeProject extends Project implements JefeProjectGraph {
   Set<JefeProject> get indirectDependencies;
   Set<JefeProject> get allDependencies;
 
-  Future<GitCommands> get gitCurrentProject; // ????????
+//  Future<GitCommands> get gitCurrentProject; // ????????
 
-  Future<SingleProjectCommands> get singleProjectCommands;
-
+  Future<ProjectCommands> get singleProjectCommands;
 }
 
 /// Some function applied to a [JefeProject]
@@ -36,11 +35,13 @@ abstract class JefeGroupCommand<S> {
   Future<S> singleProjectCommandFor(JefeProject project);
 }
 
-abstract class SingleProjectCommands {
-  GitCommands get git;
-  GitFeatureCommands get gitFeature;
-  PubSpecCommands get pubspecCommands;
-  PubCommands get pub;
+class ProjectCommands {
+  final GitCommands git;
+  final GitFeatureCommands gitFeature;
+  final PubSpecCommands pubspecCommands;
+  final PubCommands pub;
+
+  ProjectCommands(this.git, this.gitFeature, this.pubspecCommands, this.pub);
 }
 
 /// A graph of [JefeProject] ordered by their dependencies

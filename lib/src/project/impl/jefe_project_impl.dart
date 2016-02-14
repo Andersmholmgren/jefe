@@ -82,11 +82,11 @@ class JefeProjectImpl extends ProjectImpl
   @override
   GitCommands get git => _git ??= new GitCommandsImpl(this);
 
-  GitCommands _gitCurrentProject;
+//  GitCommands _gitCurrentProject;
 
-  @override
-  Future<GitCommands> get gitCurrentProject async => _gitCurrentProject ??=
-      new GitCommandsSingleProjectImpl(this, await gitDir);
+//  @override
+//  Future<GitCommands> get gitCurrentProject async => _gitCurrentProject ??=
+//      new GitCommandsSingleProjectImpl(this, await gitDir);
 
   GitFeatureCommands _gitFeature;
 
@@ -110,6 +110,19 @@ class JefeProjectImpl extends ProjectImpl
   @override
   ProjectLifecycle get lifecycle =>
       _lifecycle ??= new ProjectLifecycleImpl(this);
+
+  ProjectCommands _singleProjectCommands;
+
+  @override
+  Future<ProjectCommands> get singleProjectCommands async {
+    Future<ProjectCommands> create() async {
+      final _gitDir = await gitDir;
+      return new ProjectCommands(
+          new GitCommandsSingleProjectImpl(this, _gitDir));
+    }
+
+    return _singleProjectCommands ??= await create();
+  }
 }
 
 class JefeProjectSetImpl extends DelegatingSet<JefeProject>
