@@ -69,8 +69,6 @@ class _GitCommandsSingleProjectImpl implements GitCommands {
 
   _GitCommandsSingleProjectImpl(this._project, this._gitDir);
 
-//  Future<GitDir> get _gitDir => _graph.gitDir;
-
   @override
   Future commit(String message) => gitCommit(_gitDir, message);
 
@@ -78,30 +76,20 @@ class _GitCommandsSingleProjectImpl implements GitCommands {
   Future push() => gitPush(_gitDir);
 
   @override
-  Future fetch() => executeTask('git fetch', (JefeProject p) async {
-        await gitFetch(await p.gitDir);
-      });
+  Future fetch() => gitFetch(_gitDir);
 
   @override
-  Future assertWorkingTreeClean() =>
-      executeTask('git assertWorkingTreeClean', (JefeProject p) async {
-        if (!await (await p.gitDir).isWorkingTreeClean()) {
-          throw new StateError(
-              'working directory dirty for project ${graph.name}');
-        }
-      });
+  Future assertWorkingTreeClean() => _gitDir.isWorkingTreeClean();
 
   @override
-  Future assertOnBranch(String branchName) =>
-      executeTask('git assertOnBranch $branchName', (JefeProject p) async {
-        var currentBranchName =
-            (await (await p.gitDir).getCurrentBranch()).branchName;
-        if (currentBranchName != branchName) {
-          throw new StateError(
-              '${graph.name} is on different branch ($currentBranchName) than '
-              'expected ($branchName). Make sure you run jefe finish first');
-        }
-      });
+  Future assertOnBranch(String branchName) async {
+    var currentBranchName = (await (_gitDir).getCurrentBranch()).branchName;
+    if (currentBranchName != branchName) {
+      throw new StateError(
+          '${_project.name} is on different branch ($currentBranchName) than '
+          'expected ($branchName). Make sure you run jefe finish first');
+    }
+  }
 
   @override
   Future checkout(String branchName) =>
