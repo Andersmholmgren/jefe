@@ -24,4 +24,9 @@ abstract class BaseCommandsImpl {
           taskDescription,
           () => graph.processAllConcurrently(command,
               filter: filter, combine: combine));
+
+  Future/*<T>*/ _processOnSingeProject/*<T>*/(JefeProject project,
+          String taskDescription, ProjectFunction/*<T>*/ command) =>
+      executeTask('$taskDescription for project ${project.name}',
+          () => command(project));
 }
