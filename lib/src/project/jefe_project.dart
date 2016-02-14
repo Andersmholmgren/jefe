@@ -18,12 +18,6 @@ abstract class JefeProject extends Project implements JefeProjectGraph {
   JefeProjectSet get directDependencies;
   Set<JefeProject> get indirectDependencies;
   Set<JefeProject> get allDependencies;
-
-  GitCommands get git;
-  GitFeatureCommands get gitFeature;
-  PubSpecCommands get pubspecCommands;
-  PubCommands get pub;
-  ProjectLifecycle get lifecycle;
 }
 
 /// Some function applied to a [JefeProject]
@@ -63,6 +57,12 @@ abstract class JefeProjectGraph {
   /// is executed on.
   Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ command,
       {ProjectFilter filter, Combiner/*<T>*/ combine});
+
+  GitCommands get git;
+  GitFeatureCommands get gitFeature;
+  PubSpecCommands get pubspecCommands;
+  PubCommands get pub;
+  ProjectLifecycle get lifecycle;
 }
 
 /// A [Set] of [JefeProject] that supports [JefeProjectGraph] operations

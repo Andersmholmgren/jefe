@@ -7,25 +7,25 @@ import 'dart:async';
 
 import 'package:jefe/src/git/git.dart';
 import 'package:jefe/src/project/git_commands.dart';
+import 'package:jefe/src/project/impl/BaseCommandsImpl.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
-import 'package:git/git.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.impl');
 
-class GitCommandsImpl implements GitCommands {
-  final JefeProjectGraph _graph;
-
-  GitCommandsImpl(this._graph);
+class GitCommandsImpl extends BaseCommandsImpl implements GitCommands {
+  GitCommandsImpl(JefeProjectGraph graph) : super(graph);
 
 //  Future<GitDir> get _gitDir => _graph.gitDir;
 
   @override
-  Future commit(String message) =>
-      executeTask('git commit', () async => gitCommit(await _gitDir, message));
+  Future commit(String message) => executeTask(
+      'git commit',
+      () => processAllConcurrently(
+          (JefeProject p) async => gitCommit(await p.gitDir, message)));
 
   @override
   Future push() => executeTask('git push', () async => gitPush(await _gitDir));
@@ -40,7 +40,7 @@ class GitCommandsImpl implements GitCommands {
       executeTask('git assertWorkingTreeClean', () async {
         if (!await (await _gitDir).isWorkingTreeClean()) {
           throw new StateError(
-              'working directory dirty for project ${_graph.name}');
+              'working directory dirty for project ${graph.name}');
         }
       });
 
@@ -51,7 +51,7 @@ class GitCommandsImpl implements GitCommands {
             (await (await _gitDir).getCurrentBranch()).branchName;
         if (currentBranchName != branchName) {
           throw new StateError(
-              '${_graph.name} is on different branch ($currentBranchName) than '
+              '${graph.name} is on different branch ($currentBranchName) than '
               'expected ($branchName). Make sure you run jefe finish first');
         }
       });
