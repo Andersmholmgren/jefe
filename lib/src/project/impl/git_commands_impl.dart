@@ -20,8 +20,10 @@ Logger _log = new Logger('jefe.project.commands.git.impl');
 class GitCommandsImpl extends BaseCommandsImpl<GitCommands>
     implements GitCommands {
   GitCommandsImpl(JefeProjectGraph graph)
-      : super(graph,
-            (JefeProject p) async => new _GitCommandsImpl(p, await p.gitDir));
+      : super(
+            graph,
+            (JefeProject p) async =>
+                new _GitCommandsSingleProjectImpl(p, await p.gitDir));
 
   @override
   Future commit(String message) =>
@@ -43,37 +45,29 @@ class GitCommandsImpl extends BaseCommandsImpl<GitCommands>
       (GitCommands s) => s.assertOnBranch(branchName));
 
   @override
-  Future checkout(String branchName) =>
-      executeTask('git checkout $branchName', (JefeProject p) async {
-        await gitCheckout(await p.gitDir, branchName);
-      });
+  Future checkout(String branchName) => process(
+      'git checkout $branchName', (GitCommands s) => s.checkout(branchName));
 
   @override
   Future updateFromRemote(String branchName, [String remoteName = 'origin']) =>
-      executeTask('git update from remote: $branchName', (JefeProject p) async {
-        final gitDir = await p.gitDir;
-        await gitCheckout(gitDir, branchName);
-        await gitMerge(gitDir, '$remoteName/$branchName');
-      });
+      process('git update from remote: $branchName',
+          (GitCommands s) => s.updateFromRemote(branchName, remoteName));
 
   @override
-  Future merge(String commit) =>
-      executeTask('git merge $commit', (JefeProject p) async {
-        await gitMerge(await p.gitDir, commit);
-      });
+  Future merge(String commitMessage) =>
+      process('git merge', (GitCommands s) => s.merge(commitMessage));
 
   @override
-  Future<bool> hasChangesSince(Version sinceVersion) async {
-    return (await diffSummarySince(await p.gitDir, sinceVersion.toString()))
-        is Some;
-  }
+  Future<bool> hasChangesSince(Version sinceVersion) => process(
+      'git has changes since $sinceVersion',
+      (GitCommands s) => s.hasChangesSince(sinceVersion));
 }
 
-class _GitCommandsImpl implements GitCommands {
+class _GitCommandsSingleProjectImpl implements GitCommands {
   final JefeProject _project;
   final GitDir _gitDir;
 
-  _GitCommandsImpl(this._project, this._gitDir);
+  _GitCommandsSingleProjectImpl(this._project, this._gitDir);
 
 //  Future<GitDir> get _gitDir => _graph.gitDir;
 
