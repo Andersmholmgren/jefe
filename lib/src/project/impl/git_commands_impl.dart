@@ -102,15 +102,11 @@ class _GitCommandsSingleProjectImpl implements GitCommands {
   }
 
   @override
-  Future merge(String commit) =>
-      executeTask('git merge $commit', (JefeProject p) async {
-        await gitMerge(await p.gitDir, commit);
-      });
+  Future merge(String commit) => gitMerge(_gitDir, commit);
 
   @override
   Future<bool> hasChangesSince(Version sinceVersion) async {
-    return (await diffSummarySince(await p.gitDir, sinceVersion.toString()))
-        is Some;
+    return (await diffSummarySince(_gitDir, sinceVersion.toString())) is Some;
   }
 
   @override
