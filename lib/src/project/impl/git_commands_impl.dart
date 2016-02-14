@@ -92,18 +92,14 @@ class _GitCommandsSingleProjectImpl implements GitCommands {
   }
 
   @override
-  Future checkout(String branchName) =>
-      executeTask('git checkout $branchName', (JefeProject p) async {
-        await gitCheckout(await p.gitDir, branchName);
-      });
+  Future checkout(String branchName) => gitCheckout(_gitDir, branchName);
 
   @override
-  Future updateFromRemote(String branchName, [String remoteName = 'origin']) =>
-      executeTask('git update from remote: $branchName', (JefeProject p) async {
-        final gitDir = await p.gitDir;
-        await gitCheckout(gitDir, branchName);
-        await gitMerge(gitDir, '$remoteName/$branchName');
-      });
+  Future updateFromRemote(String branchName,
+      [String remoteName = 'origin']) async {
+    await gitCheckout(_gitDir, branchName);
+    await gitMerge(_gitDir, '$remoteName/$branchName');
+  }
 
   @override
   Future merge(String commit) =>
