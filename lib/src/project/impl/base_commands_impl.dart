@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:jefe/src/project_commands/project_command.dart'
     show Callable, CommandConcurrencyMode, executeTask;
 
+import 'package:quiver/check.dart';
+
 typedef Future<S> SingleProjectCommandFactory<S>(JefeProject project);
 typedef Future<T> SingleProjectCommand<S, T>(S single);
 typedef Callable<T> _Processor<T>(ProjectFunction/*<T>*/ command,
@@ -12,7 +14,13 @@ abstract class BaseCommandsImpl<S> implements JefeGroupCommand<S> {
   final JefeProjectGraph graph;
   final SingleProjectCommandFactory<S> _singleProjectCommandFactory;
 
-  BaseCommandsImpl(this.graph, this._singleProjectCommandFactory);
+  final bool isSingleProjectMode;
+
+  BaseCommandsImpl(this.graph, this._singleProjectCommandFactory,
+      {this.isSingleProjectMode: false}) {
+    checkArgument(!isSingleProjectMode || graph is JefeProject,
+        message: "can only set single project mode on single projects ;-)");
+  }
 
   Future<S> singleProjectCommandFor(JefeProject project) =>
       _singleProjectCommandFactory(project);
@@ -44,7 +52,22 @@ abstract class BaseCommandsImpl<S> implements JefeGroupCommand<S> {
         graph.processDepthFirst(command, filter: filter, combine: combine);
   }
 
+  Callable/*<T>*/ _singleProjectProcessor/*<T>*/(ProjectFunction/*<T>*/ command,
+      {ProjectFilter filter, Combiner/*<T>*/ combine}) {
+    return () {
+      final project = graph as JefeProject;
+      if (!filter(project)) {
+        return new Future.value();
+      }
+      return command(project);
+    };
+  }
+
   _Processor/*<T>*/ _processor/*<T>*/(CommandConcurrencyMode mode) {
+    if (isSingleProjectMode) {
+      return _singleProjectProcessor;
+    }
+
     switch (mode) {
       case CommandConcurrencyMode.serial:
         return _serialProcessor;
