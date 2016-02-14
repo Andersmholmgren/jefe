@@ -8,7 +8,7 @@ import 'dart:async';
 import 'package:git/git.dart';
 import 'package:jefe/src/git/git.dart';
 import 'package:jefe/src/project/git_commands.dart';
-import 'package:jefe/src/project/impl/BaseCommandsImpl.dart';
+import 'package:jefe/src/project/impl/base_commands_impl.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
