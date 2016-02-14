@@ -5,8 +5,7 @@ import 'package:jefe/src/project_commands/project_command.dart'
 
 typedef Future<S> SingleProjectCommandFactory<S>(JefeProject project);
 typedef Future<T> SingleProjectCommand<S, T>(S single);
-typedef Callable<T> _Processor<T>(
-    String taskDescription, ProjectFunction/*<T>*/ command,
+typedef Callable<T> _Processor<T>(ProjectFunction/*<T>*/ command,
     {ProjectFilter filter, Combiner/*<T>*/ combine});
 
 abstract class BaseCommandsImpl<S> {
@@ -30,17 +29,20 @@ abstract class BaseCommandsImpl<S> {
           {ProjectFilter filter, Combiner/*<T>*/ combine}) =>
       graph.processDepthFirst(command, filter: filter, combine: combine);
 
-  Callable/*<T>*/ _concurrentProcessor/*<T>*/(
-      String taskDescription, ProjectFunction/*<T>*/ command,
+  Callable/*<T>*/ _concurrentProcessor/*<T>*/(ProjectFunction/*<T>*/ command,
       {ProjectFilter filter, Combiner/*<T>*/ combine}) {
     return () =>
         graph.processAllConcurrently(command, filter: filter, combine: combine);
   }
 
-  _Processor/*<T>*/ _processor(CommandConcurrencyMode mode) {
+  _Processor/*<T>*/ _processor/*<T>*/(CommandConcurrencyMode mode) {
     switch (mode) {
       case CommandConcurrencyMode.concurrentCommand:
+      case CommandConcurrencyMode.concurrentProject:
+      default:
         return _concurrentProcessor;
+//  case CommandConcurrencyMode.serial:
+//  return _concurrentProcessor;
     }
   }
 
@@ -50,7 +52,7 @@ abstract class BaseCommandsImpl<S> {
       Combiner/*<T>*/ combine,
       CommandConcurrencyMode mode: CommandConcurrencyMode.concurrentCommand}) {
     final processor =
-        _processor(mode ?? CommandConcurrencyMode.concurrentCommand);
+        _processor/*<T>*/(mode ?? CommandConcurrencyMode.concurrentCommand);
 
     return executeTask/*<T>*/(
         taskDescription,
