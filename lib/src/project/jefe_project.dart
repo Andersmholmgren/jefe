@@ -19,8 +19,6 @@ abstract class JefeProject extends Project implements JefeProjectGraph {
   Set<JefeProject> get indirectDependencies;
   Set<JefeProject> get allDependencies;
 
-//  Future<GitCommands> get gitCurrentProject; // ????????
-
   Future<ProjectCommands> get singleProjectCommands;
 }
 
@@ -74,6 +72,9 @@ abstract class JefeProjectGraph {
   /// is executed on.
   Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ command,
       {ProjectFilter filter, Combiner/*<T>*/ combine});
+
+  // ??????
+  //  Future<ProjectCommands> get multiProjectCommands;
 
   GitCommands get git;
   GitFeatureCommands get gitFeature;
