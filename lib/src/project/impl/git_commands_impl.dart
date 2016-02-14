@@ -5,15 +5,14 @@ library jefe.project.commands.git.impl;
 
 import 'dart:async';
 
+import 'package:git/git.dart';
 import 'package:jefe/src/git/git.dart';
 import 'package:jefe/src/project/git_commands.dart';
 import 'package:jefe/src/project/impl/BaseCommandsImpl.dart';
 import 'package:jefe/src/project/jefe_project.dart';
-import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
-import 'package:git/git.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.impl');
 
