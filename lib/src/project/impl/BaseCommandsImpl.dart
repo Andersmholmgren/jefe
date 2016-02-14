@@ -35,6 +35,12 @@ abstract class BaseCommandsImpl<S> {
         graph.processAllConcurrently(command, filter: filter, combine: combine);
   }
 
+  Callable/*<T>*/ _serialProcessor/*<T>*/(ProjectFunction/*<T>*/ command,
+      {ProjectFilter filter, Combiner/*<T>*/ combine}) {
+    return () =>
+        graph.processDepthFirst(command, filter: filter, combine: combine);
+  }
+
   _Processor/*<T>*/ _processor/*<T>*/(CommandConcurrencyMode mode) {
     switch (mode) {
       case CommandConcurrencyMode.serial:
