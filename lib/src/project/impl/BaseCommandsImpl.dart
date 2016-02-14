@@ -22,8 +22,11 @@ abstract class BaseCommandsImpl {
           {ProjectFilter filter, Combiner/*<T>*/ combine}) =>
       executeTask(
           taskDescription,
-          () => graph.processAllConcurrently(command,
-              filter: filter, combine: combine));
+          () => graph.processAllConcurrently(
+              (JefeProject project) =>
+                  _processOnSingeProject(project, taskDescription, command),
+              filter: filter,
+              combine: combine));
 
   Future/*<T>*/ _processOnSingeProject/*<T>*/(JefeProject project,
           String taskDescription, ProjectFunction/*<T>*/ command) =>
