@@ -8,17 +8,24 @@ typedef Future<T> SingleProjectCommand<S, T>(S single);
 typedef Callable<T> _Processor<T>(ProjectFunction/*<T>*/ command,
     {ProjectFilter filter, Combiner/*<T>*/ combine});
 
-abstract class BaseCommandsImpl<S> {
+abstract class JefeGroupCommand<S> {
+  Future<S> singleProjectCommandFor(JefeProject project);
+}
+
+abstract class BaseCommandsImpl<S> implements JefeGroupCommand<S> {
   final JefeProjectGraph graph;
   final SingleProjectCommandFactory<S> _singleProjectCommandFactory;
 
   BaseCommandsImpl(this.graph, this._singleProjectCommandFactory);
 
+  Future<S> singleProjectCommandFor(JefeProject project) =>
+      _singleProjectCommandFactory(project);
+
   Future/*<T>*/ processAllConcurrently2/*<T>*/(
       String taskDescription, SingleProjectCommand<S, dynamic/*=T*/ > command,
       {ProjectFilter filter, Combiner/*<T>*/ combine}) {
     Future/*<T>*/ _executeOnSingleProject(JefeProject p) async {
-      return command(await _singleProjectCommandFactory(p));
+      return command(await singleProjectCommandFor(p));
     }
 
     return graph.processAllConcurrently(_executeOnSingleProject,

@@ -23,13 +23,6 @@ class GitCommandsImpl extends BaseCommandsImpl<GitCommands>
       : super(graph,
             (JefeProject p) async => new _GitCommandsImpl(p, await p.gitDir));
 
-//  Future<_GitCommandsImpl> _single(JefeProject p) async =>
-//    new _GitCommandsImpl(p, await p.gitDir);
-//
-//  typedef Future/*<T>*/ X/*<T>*/(_GitCommandsImpl single);
-
-//  Future com(String message) => single((GitCommands s) => s.commit(message));
-
   @override
   Future commit(String message) =>
       process('git commit', (GitCommands s) => s.commit(message));
