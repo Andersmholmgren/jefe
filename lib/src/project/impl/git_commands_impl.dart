@@ -134,4 +134,11 @@ class _GitCommandsImpl implements GitCommands {
     return (await diffSummarySince(await p.gitDir, sinceVersion.toString()))
         is Some;
   }
+
+  @override
+  Future<GitCommands> singleProjectCommandFor(JefeProject project) async {
+    if (project != _project) throw new ArgumentError.value('damn');
+
+    return this;
+  }
 }

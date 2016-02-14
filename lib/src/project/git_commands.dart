@@ -7,7 +7,9 @@ import 'dart:async';
 
 import 'package:pub_semver/pub_semver.dart';
 
-abstract class GitCommands {
+import 'package:jefe/src/project/jefe_project.dart';
+
+abstract class GitCommands extends JefeGroupCommand<GitCommands> {
   Future commit(String message);
 
   Future push();

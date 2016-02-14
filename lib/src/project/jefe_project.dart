@@ -27,6 +27,11 @@ typedef bool ProjectFilter(Project p);
 
 typedef T Combiner<T>(T value, T element);
 
+abstract class JefeGroupCommand<S> {
+  Future<S> singleProjectCommandFor(JefeProject project);
+}
+
+
 /// A graph of [JefeProject] ordered by their dependencies
 abstract class JefeProjectGraph {
   /// Navigates the graph of [JefeProject] depthFirst such that those

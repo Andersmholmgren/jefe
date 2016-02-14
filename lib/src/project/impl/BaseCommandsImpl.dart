@@ -8,10 +8,6 @@ typedef Future<T> SingleProjectCommand<S, T>(S single);
 typedef Callable<T> _Processor<T>(ProjectFunction/*<T>*/ command,
     {ProjectFilter filter, Combiner/*<T>*/ combine});
 
-abstract class JefeGroupCommand<S> {
-  Future<S> singleProjectCommandFor(JefeProject project);
-}
-
 abstract class BaseCommandsImpl<S> implements JefeGroupCommand<S> {
   final JefeProjectGraph graph;
   final SingleProjectCommandFactory<S> _singleProjectCommandFactory;
