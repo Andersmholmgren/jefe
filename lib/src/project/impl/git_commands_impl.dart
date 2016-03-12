@@ -20,13 +20,16 @@ class GitCommandsImpl extends SingleProjectCommandSupport<GitCommands>
     implements GitCommands {
   GitCommandsImpl(JefeProject project, GitDir gitDir)
       : super(new _GitCommandsImpl(project, gitDir), project);
+
+  static Future<GitCommands> create(JefeProject project) async {
+    return new GitCommandsImpl(project, await project.gitDir);
+  }
 }
 
 class GitCommandsMultiProjectImpl
     extends MultiProjectCommandSupport<GitCommands> implements GitCommands {
   GitCommandsMultiProjectImpl(JefeProject project)
-      : super(project,
-            (JefeProject p) async => new GitCommandsImpl(p, await p.gitDir));
+      : super(project, (JefeProject p) async => GitCommandsImpl.create(p));
 }
 
 class _GitCommandsImpl implements GitCommands {
