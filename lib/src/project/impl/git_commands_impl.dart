@@ -16,57 +16,12 @@ import 'package:pub_semver/pub_semver.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.impl');
 
-class GitCommandsImpl extends BaseCommandsImpl<GitCommands>
-    implements GitCommands {
-  GitCommandsImpl(JefeProjectGraph graph)
-      : super(
-            graph,
-            (JefeProject p) async =>
-                new GitCommandsSingleProjectImpl(p, await p.gitDir));
 
-  @override
-  Future commit(String message) =>
-      process('git commit', (GitCommands s) => s.commit(message));
-
-  @override
-  Future push() => process('git push', (GitCommands s) => s.push());
-
-  @override
-  Future fetch() => process('git fetch', (GitCommands s) => s.fetch());
-
-  @override
-  Future assertWorkingTreeClean() => process('git assertWorkingTreeClean',
-      (GitCommands s) => s.assertWorkingTreeClean());
-
-  @override
-  Future assertOnBranch(String branchName) => process(
-      'git assertOnBranch $branchName',
-      (GitCommands s) => s.assertOnBranch(branchName));
-
-  @override
-  Future checkout(String branchName) => process(
-      'git checkout $branchName', (GitCommands s) => s.checkout(branchName));
-
-  @override
-  Future updateFromRemote(String branchName, [String remoteName = 'origin']) =>
-      process('git update from remote: $branchName',
-          (GitCommands s) => s.updateFromRemote(branchName, remoteName));
-
-  @override
-  Future merge(String commitMessage) =>
-      process('git merge', (GitCommands s) => s.merge(commitMessage));
-
-  @override
-  Future<bool> hasChangesSince(Version sinceVersion) => process(
-      'git has changes since $sinceVersion',
-      (GitCommands s) => s.hasChangesSince(sinceVersion));
-}
-
-class GitCommandsSingleProjectImpl implements GitCommands {
+class GitCommandsImpl implements GitCommands {
   final JefeProject _project;
   final GitDir _gitDir;
 
-  GitCommandsSingleProjectImpl(this._project, this._gitDir);
+  GitCommandsImpl(this._project, this._gitDir);
 
   @override
   Future commit(String message) => gitCommit(_gitDir, message);
@@ -108,6 +63,7 @@ class GitCommandsSingleProjectImpl implements GitCommands {
     return (await diffSummarySince(_gitDir, sinceVersion.toString())) is Some;
   }
 
+  // TODO: remove this??
   @override
   Future<GitCommands> singleProjectCommandFor(JefeProject project) async {
     if (project != _project) throw new ArgumentError.value('damn');
