@@ -17,7 +17,7 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 
-Logger _log = new Logger('jefe.project.commands.pub.impl');
+Logger _log = new Logger('jefe.project.commands.pubspec.impl');
 
 abstract class PubSpecCommandsImpl implements PubSpecCommands {
   factory PubSpecCommandsImpl(JefeProjectGraph graph,
