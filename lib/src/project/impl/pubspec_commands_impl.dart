@@ -19,10 +19,34 @@ import 'package:pubspec/pubspec.dart';
 
 Logger _log = new Logger('jefe.project.commands.pub.impl');
 
-class PubSpecCommandsImpl implements PubSpecCommands {
-  final JefeProjectGraph _graph;
 
-  PubSpecCommandsImpl(this._graph);
+abstract class PubSpecCommandsImpl implements PubSpecCommands {
+  factory PubSpecCommandsImpl(JefeProjectGraph graph, {bool multiProject: true}) {
+    return multiProject
+      ? new PubSpecCommandsMultiProjectImpl(graph)
+      : new PubSpecCommandsSingleProjectImpl(graph as JefeProject);
+  }
+}
+
+class PubSpecCommandsSingleProjectImpl
+  extends SingleProjectCommandSupport<PubSpecCommands> implements PubSpecCommands {
+  PubSpecCommandsSingleProjectImpl(JefeProject project)
+    : super(
+    (JefeProject p) async => new _PubSpecCommandsSingleProjectImpl(project),
+    project);
+}
+
+class PubSpecCommandsMultiProjectImpl
+  extends MultiProjectCommandSupport<PubSpecCommands> implements PubSpecCommands {
+  PubSpecCommandsMultiProjectImpl(JefeProjectGraph graph)
+    : super(graph,
+    (JefeProject p) async => new PubSpecCommandsSingleProjectImpl(p));
+}
+
+class _PubSpecCommandsSingleProjectImpl implements PubSpecCommands {
+  final JefeProject _project;
+
+  PubSpecCommandsImpl(this._project);
 
   @override
   Future setToPathDependencies() =>
@@ -43,7 +67,7 @@ class PubSpecCommandsImpl implements PubSpecCommands {
     return executeTask(
         'change to $type dependencies',
         () => _setToDependencies(
-            _graph, _graph.directDependencies, type, useGitIfNotHosted));
+            _project, _project.directDependencies, type, useGitIfNotHosted));
   }
 
   // TODO: not sure if it makes sense to do this over whole sub graph
@@ -55,19 +79,19 @@ class PubSpecCommandsImpl implements PubSpecCommands {
 
     return executeTask/*<bool>*/(
         'checking if $type dependencies have changed',
-        () => _graph.processDepthFirst/*<bool>*/(x,
+        () => _project.processDepthFirst/*<bool>*/(x,
             combine: (bool b1, bool b2) => b1 || b2));
   }
 
   Future<bool> _haveDependenciesChangedInThisProject(
       DependencyType type, bool useGitIfNotHosted) async {
-    final exportedPackageNames = await _graph.exportedPackageNames;
+    final exportedPackageNames = await _project.exportedPackageNames;
 
-    final actualDependencies = _graph.pubspec.allDependencies;
+    final actualDependencies = _project.pubspec.allDependencies;
 
     final expectedDependencies = await _createDependencyReferences(
-        _graph,
-        _graph.directDependencies,
+        _project,
+        _project.directDependencies,
         actualDependencies,
         exportedPackageNames,
         type,
@@ -76,7 +100,7 @@ class PubSpecCommandsImpl implements PubSpecCommands {
     final dependenciesChanged = expectedDependencies.keys
         .any((k) => expectedDependencies[k] != actualDependencies[k]);
 
-    _log.info('dependencies for ${_graph.name} have '
+    _log.info('dependencies for ${_project.name} have '
         '${dependenciesChanged ? "" : "NOT "}changed');
     return dependenciesChanged;
   }
