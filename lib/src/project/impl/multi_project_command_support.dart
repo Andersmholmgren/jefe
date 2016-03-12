@@ -7,6 +7,9 @@ import 'package:jefe/src/project_commands/project_command.dart';
 Logger _log = new Logger('jefe.project.command.multiproject');
 
 typedef Future<T> SingleProjectCommandFactory<T>(JefeProject project);
+typedef Future<T> SingleProjectCommand<S, T>(S single);
+typedef Callable<T> _Processor<T>(ProjectFunction/*<T>*/ command,
+    {ProjectFilter filter, Combiner/*<T>*/ combine});
 
 /**
  * TODO: we could build a default mode into JefeProject / JefeProjectGraph etc
@@ -15,7 +18,7 @@ typedef Future<T> SingleProjectCommandFactory<T>(JefeProject project);
  */
 
 class MultiProjectCommandSupport<C> {
-  final JefeProjectGraph _projectGraph;
+  final JefeProjectGraph graph;
 
   final SingleProjectCommandFactory<C> _factory;
 
@@ -42,19 +45,19 @@ class MultiProjectCommandSupport<C> {
     }
 
     /**
-     * TODO: don't assume depth first. Support all variants somehow. Pinch code
-     * from base_commands_impl
-     *
-     * Maybe use annotations to mark commands that can't be run in parallel,
+     * TODO: Maybe use annotations to mark commands that can't be run in parallel,
      * or that must run depthFirst. Mind you distinguishing between serial
      * and depthFirst is fairly meaningless
      */
-    return _projectGraph.processAllConcurrently(projectFunction);
-//      _projectGraph.processDepthFirst(projectFunction);
+
+    return process(MirrorSystem.getName(i.memberName), projectFunction,
+        mode: defaultConcurrencyMode);
   }
 
   Future/*<T>*/ process/*<T>*/(
-      String taskDescription, SingleProjectCommand<S, dynamic/*=T*/ > command,
+      String taskDescription,
+//    SingleProjectCommand<S, dynamic/*=T*/ > command,
+      ProjectFunction/*<T>*/ command,
       {ProjectFilter filter,
       Combiner/*<T>*/ combine,
       CommandConcurrencyMode mode: CommandConcurrencyMode.concurrentCommand}) {
@@ -62,12 +65,49 @@ class MultiProjectCommandSupport<C> {
         _processor/*<T>*/(mode ?? CommandConcurrencyMode.concurrentCommand);
 
     return executeTask/*<T>*/(
-        taskDescription,
-        processor(
-            (JefeProject project) =>
-                _processOnSingeProject2(project, taskDescription, command),
-            filter: filter,
-            combine: combine));
+        taskDescription, processor(command, filter: filter, combine: combine));
+  }
+
+//  Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ command,
+//          {ProjectFilter filter, Combiner/*<T>*/ combine}) =>
+//      graph.processDepthFirst(command, filter: filter, combine: combine);
+
+  Callable/*<T>*/ _concurrentProcessor/*<T>*/(ProjectFunction/*<T>*/ command,
+      {ProjectFilter filter, Combiner/*<T>*/ combine}) {
+    return () =>
+        graph.processAllConcurrently(command, filter: filter, combine: combine);
+  }
+
+  Callable/*<T>*/ _serialProcessor/*<T>*/(ProjectFunction/*<T>*/ command,
+      {ProjectFilter filter, Combiner/*<T>*/ combine}) {
+    return () =>
+        graph.processDepthFirst(command, filter: filter, combine: combine);
+  }
+
+//  Callable/*<T>*/ _singleProjectProcessor/*<T>*/(ProjectFunction/*<T>*/ command,
+//      {ProjectFilter filter, Combiner/*<T>*/ combine}) {
+//    return () {
+//      final project = graph as JefeProject;
+//      if (!filter(project)) {
+//        return new Future.value();
+//      }
+//      return command(project);
+//    };
+//  }
+
+  _Processor/*<T>*/ _processor/*<T>*/(CommandConcurrencyMode mode) {
+//    if (isSingleProjectMode) {
+//      return _singleProjectProcessor;
+//    }
+
+    switch (mode) {
+      case CommandConcurrencyMode.serial:
+        return _serialProcessor;
+      case CommandConcurrencyMode.concurrentCommand:
+      case CommandConcurrencyMode.concurrentProject:
+      default:
+        return _concurrentProcessor;
+    }
   }
 }
 
