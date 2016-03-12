@@ -17,10 +17,10 @@ import 'package:pub_semver/pub_semver.dart';
 Logger _log = new Logger('jefe.project.commands.git.impl');
 
 abstract class GitCommandsImpl implements GitCommands {
-  factory GitCommandsImpl(JefeProject project, {bool multiProject: true}) {
+  factory GitCommandsImpl(JefeProjectGraph graph, {bool multiProject: true}) {
     return multiProject
-        ? new GitCommandsMultiProjectImpl(project)
-        : new GitCommandsSingleProjectImpl(project);
+        ? new GitCommandsMultiProjectImpl(graph)
+        : new GitCommandsSingleProjectImpl(graph as JefeProject);
   }
 }
 
@@ -35,8 +35,8 @@ class GitCommandsSingleProjectImpl
 
 class GitCommandsMultiProjectImpl
     extends MultiProjectCommandSupport<GitCommands> implements GitCommands {
-  GitCommandsMultiProjectImpl(JefeProject project)
-      : super(project,
+  GitCommandsMultiProjectImpl(JefeProjectGraph graph)
+      : super(graph,
             (JefeProject p) async => new GitCommandsSingleProjectImpl(p));
 }
 
