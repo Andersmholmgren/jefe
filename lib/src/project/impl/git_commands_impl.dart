@@ -8,7 +8,7 @@ import 'dart:async';
 import 'package:git/git.dart';
 import 'package:jefe/src/git/git.dart';
 import 'package:jefe/src/project/git_commands.dart';
-import 'package:jefe/src/project/impl/base_commands_impl.dart';
+import 'package:jefe/src/project/impl/multi_project_command_support.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
@@ -16,12 +16,24 @@ import 'package:pub_semver/pub_semver.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.impl');
 
+class GitCommandsImpl extends SingleProjectCommandSupport<GitCommands>
+    implements GitCommands {
+  GitCommandsImpl(JefeProject project, GitDir gitDir)
+      : super(new _GitCommandsImpl(project, gitDir), project);
+}
 
-class GitCommandsImpl implements GitCommands {
+class GitCommandsMultiProjectImpl
+    extends MultiProjectCommandSupport<GitCommands> implements GitCommands {
+  GitCommandsMultiProjectImpl(JefeProject project)
+      : super(project,
+            (JefeProject p) async => new GitCommandsImpl(p, await p.gitDir));
+}
+
+class _GitCommandsImpl implements GitCommands {
   final JefeProject _project;
   final GitDir _gitDir;
 
-  GitCommandsImpl(this._project, this._gitDir);
+  _GitCommandsImpl(this._project, this._gitDir);
 
   @override
   Future commit(String message) => gitCommit(_gitDir, message);

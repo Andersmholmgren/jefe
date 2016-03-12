@@ -14,15 +14,14 @@ typedef Future<T> SingleProjectCommandFactory<T>(JefeProject project);
  * project manner.
  */
 
-abstract class MultiProjectCommandSupport<C> {
-  final C _singleT;
+class MultiProjectCommandSupport<C> {
   final JefeProjectGraph _projectGraph;
 
 //  final InstanceMirror _tMirror;
   final SingleProjectCommandFactory<C> _factory;
 
-  MultiProjectCommandSupport(C singleT, this._projectGraph, this._factory)
-      : this._singleT = singleT
+  MultiProjectCommandSupport(this._projectGraph, this._factory)
+//      : this._singleT = singleT
 //  ,        _tMirror = reflect(singleT)
   ;
 
