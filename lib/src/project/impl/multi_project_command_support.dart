@@ -1,22 +1,32 @@
 import 'package:jefe/src/project/jefe_project.dart';
 import 'dart:async';
 import 'dart:mirrors';
+import 'package:logging/logging.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
 
-typedef Future<T> TFactory<T>(JefeProject project);
+Logger _log = new Logger('jefe.project.command.multiproject');
+
+typedef Future<T> SingleProjectCommandFactory<T>(JefeProject project);
+
+/**
+ * TODO: we could build a default mode into JefeProject / JefeProjectGraph etc
+ * that determines whether the methods will respond in a multi or single
+ * project manner.
+ */
 
 abstract class MultiProjectCommandSupport<C> {
   final C _singleT;
   final JefeProjectGraph _projectGraph;
 
 //  final InstanceMirror _tMirror;
-  final TFactory<C> _factory;
+  final SingleProjectCommandFactory<C> _factory;
 
-  MultiProjectCommandSupport(C singleT, this._projectGraph, this._factory) : this._singleT = singleT
+  MultiProjectCommandSupport(C singleT, this._projectGraph, this._factory)
+      : this._singleT = singleT
 //  ,        _tMirror = reflect(singleT)
-    ;
+  ;
 
   noSuchMethod(Invocation i) {
-
     /**
      * TODO: this is also useful for wrapping single project commands.
      * i.e. we wrap so we can log, time, catch errors etc!!!!!
@@ -32,7 +42,30 @@ abstract class MultiProjectCommandSupport<C> {
       return tMirror.delegate(i) as Future/*<A>*/;
     }
 
+    /**
+     * TODO: don't assume depth first. Support all variants somehow.
+     *
+     * Maybe use annotations to mark commands that can't be run in parallel,
+     * or that must run depthFirst. Mind you distinguishing between serial
+     * and depthFirst is fairly meaningless
+     */
     return _projectGraph.processDepthFirst(projectFunction);
   }
 }
 
+class SingleProjectCommandSupport<C> {
+  final JefeProject _project;
+
+  final InstanceMirror _tMirror;
+
+  SingleProjectCommandSupport(C singleT, this._project)
+      : _tMirror = reflect(singleT);
+
+  noSuchMethod(Invocation i) {
+    return executeTask(
+        '${MirrorSystem.getName(i.memberName)} on project ${_project.name}',
+        () async {
+      return _tMirror.delegate(i);
+    });
+  }
+}
