@@ -24,7 +24,7 @@ class MultiProjectCommandSupport<C> {
 
   final CommandConcurrencyMode defaultConcurrencyMode;
 
-  MultiProjectCommandSupport(this._projectGraph, this._factory,
+  MultiProjectCommandSupport(this.graph, this._factory,
       {this.defaultConcurrencyMode: CommandConcurrencyMode.concurrentCommand});
 
   noSuchMethod(Invocation i) {
