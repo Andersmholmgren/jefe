@@ -8,20 +8,19 @@ import 'dart:io';
 
 import 'package:dockerfile/dockerfile.dart';
 import 'package:jefe/src/git/git.dart';
-import 'package:jefe/src/project/project.dart';
 import 'package:jefe/src/project/docker_commands.dart';
-import 'package:jefe/src/project_commands/project_command.dart' show executeTask;
+import 'package:jefe/src/project/jefe_project.dart';
+import 'package:jefe/src/project/project.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'package:pubspec/pubspec.dart';
 import 'package:quiver/iterables.dart';
-import 'package:jefe/src/project/jefe_project.dart';
 
 Logger _log = new Logger('jefe.project.commands.docker.impl');
 
-
 abstract class DockerCommandsImpl implements DockerCommands {
-  factory DockerCommandsImpl(JefeProjectGraph graph, {bool multiProject: true}) {
+  factory DockerCommandsImpl(JefeProjectGraph graph,
+      {bool multiProject: true}) {
     // no distinction between multi and single project docker. Always operates
     // at one level
     return new _DockerCommandsMultiProjectImpl(graph);
@@ -52,19 +51,22 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
   DockerCommandsMultiProjectImpl(this._graph);
 
   @override
-  Future generateDockerfile(
-          String serverProjectName, String clientProjectName,
-          {Directory outputDirectory,
-          String dartVersion: 'latest',
-          Map<String, dynamic> environment: const {},
-          Iterable<int> exposePorts: const [],
-          Iterable<String> entryPointOptions: const [],
-          bool omitClientWhenPathDependencies: true,
-          bool setupForPrivateGit: true,
-          String targetRootPath: '/app'}) {
-      Future foo(JefeProjectGraph graph, Directory rootDirectory) async {
-      final serverProjectDeps = graph.forProject(serverProjectName);
-      final clientProjectDeps = graph.forProject(clientProjectName);
+  Future generateDockerfile(String serverProjectName, String clientProjectName,
+      {Directory outputDirectory,
+      String dartVersion: 'latest',
+      Map<String, dynamic> environment: const {},
+      Iterable<int> exposePorts: const [],
+      Iterable<String> entryPointOptions: const [],
+      bool omitClientWhenPathDependencies: true,
+      bool setupForPrivateGit: true,
+      String targetRootPath: '/app'}) {
+    Future foo(JefeProjectGraph graph, Directory rootDirectory) async {
+      JefeProject getProjectByName(String type, String name) =>
+          graph.getProjectByName(name).getOrElse(() =>
+              throw new ArgumentError('$type project $name does not exist'));
+
+      final serverProject = getProjectByName('server', serverProjectName);
+      final clientProject = getProjectByName('client', clientProjectName);
 
       final dockerfile = new Dockerfile();
 
@@ -73,13 +75,13 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
       _setupForPrivateGit(setupForPrivateGit, dockerfile);
 
       final serverFiles = new _TopLevelProjectFiles(
-        dockerfile, serverProjectDeps, rootDirectory.path, targetRootPath);
+          dockerfile, serverProjectDeps, rootDirectory.path, targetRootPath);
 
       final clientFiles = new _TopLevelProjectFiles(
-        dockerfile, clientProjectDeps, rootDirectory.path, targetRootPath);
+          dockerfile, clientProjectDeps, rootDirectory.path, targetRootPath);
 
       final omitClient =
-        omitClientWhenPathDependencies && clientFiles.hasPathDependencies;
+          omitClientWhenPathDependencies && clientFiles.hasPathDependencies;
 
       final excludedDependencies = serverFiles.addAll();
       if (!omitClient) {
@@ -88,10 +90,10 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
       }
 
       final pathHandler = new _PathHandler(
-        rootDirectory.path,
-        targetRootPath,
-        serverFiles.hasPathDependencies &&
-          (omitClient || clientFiles.hasPathDependencies));
+          rootDirectory.path,
+          targetRootPath,
+          serverFiles.hasPathDependencies &&
+              (omitClient || clientFiles.hasPathDependencies));
 
       dockerfile.envs(environment);
 
@@ -100,18 +102,18 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
       dockerfile.cmd([]);
 
       final serverMain = p.join(
-        serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
+          serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
 
       dockerfile.workDir(serverFiles.workDir);
 
       dockerfile.entryPoint('/usr/bin/dart',
-        args: concat([
-          entryPointOptions,
-          [pathHandler.targetPath(serverMain)]
-        ]));
+          args: concat([
+            entryPointOptions,
+            [pathHandler.targetPath(serverMain)]
+          ]));
 
       final saveDirectory =
-      outputDirectory != null ? outputDirectory : rootDirectory;
+          outputDirectory != null ? outputDirectory : rootDirectory;
       await dockerfile.save(saveDirectory);
     }
 //      return executeTask('generate Dockerfile', () => foo()
@@ -271,42 +273,36 @@ class _TopLevelProjectFiles {
   final String rootDirectoryPath;
   final String targetRootPath;
   final String dirPath;
-  final ProjectDependencies projectDependencies;
+  final JefeProject jefeProject;
 
   _PathHandler get pathHandler =>
       new _PathHandler(rootDirectoryPath, targetRootPath, hasPathDependencies);
 
   _AddHelper get addHelper => new _AddHelper(pathHandler, dockerfile);
 
-  _TopLevelProjectFiles(
-      Dockerfile dockerfile,
-      ProjectDependencies projectDependencies,
-      this.rootDirectoryPath,
-      this.targetRootPath)
+  _TopLevelProjectFiles(Dockerfile dockerfile, JefeProject jefeProject,
+      this.rootDirectoryPath, this.targetRootPath)
       : this.dockerfile = dockerfile,
-        this.projectDependencies = projectDependencies,
-        dirPath = projectDependencies.project.installDirectory.path;
+        this.jefeProject = jefeProject,
+        dirPath = jefeProject.installDirectory.path;
 
   bool get hasPathDependencies => pathDependentProjects.isNotEmpty;
 
   Set<Project> get pathDependentProjects {
-    final dependencyMap = new Map.fromIterable(
-        projectDependencies.allDependencies,
+    final dependencyMap = new Map.fromIterable(jefeProject.allDependencies,
         key: (project) => project.name);
 
-    final allProjects = concat([
-      [projectDependencies.project],
-      projectDependencies.allDependencies
-    ]);
+    final allProjects = jefeProject.allDependencies;
 
-    final pathKeys = allProjects.expand((Project project) {
+    final Iterable<String> pathKeys =
+        allProjects.expand/*<String>*/((Project project) {
       final dependencies = project.pubspec.allDependencies;
       return dependencies.keys.where((key) =>
           dependencies[key] is PathReference &&
-              dependencyMap.keys.contains(key));
+          dependencyMap.keys.contains(key));
     });
 
-    return pathKeys.map((key) => dependencyMap[key]).toSet();
+    return pathKeys.map/*<Project>*/((key) => dependencyMap[key]).toSet();
   }
 
   void addPathDependentProjects(
