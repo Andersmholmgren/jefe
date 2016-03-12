@@ -13,44 +13,11 @@ import 'package:jefe/src/project/jefe_project.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:jefe/src/project/impl/multi_project_command_support.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.impl');
 
-typedef Future<T> TFactory<T>(JefeProject project);
-
-abstract class X<T> {
-  final T _singleT;
-  final JefeProject _project;
-
-  final InstanceMirror _tMirror;
-  final TFactory<T> _factory;
-
-  X(T singleT, this._project, this._factory)
-      : this._singleT = singleT,
-        _tMirror = reflect(singleT);
-
-  noSuchMethod(Invocation i) {
-    _log.fine('Executing ${i.memberName}');
-
-    /**
-     * TODO: this is also useful for wrapping single project commands.
-     * i.e. we wrap so we can log, time, catch errors etc!!!!!
-     *
-     * That way commands are written in the simplest possible manner, but we
-     * can still have all that goodness with it in a standard way. Yay
-     */
-
-    Future/*<A>*/ projectFunction/*<A>*/(JefeProject project) async {
-      final T t = await _factory(project);
-      final InstanceMirror tMirror = reflect(t);
-      return tMirror.delegate(i) as Future/*<A>*/;
-    }
-
-    return _project.processDepthFirst(projectFunction);
-  }
-}
-
-class GitCommandsMultiProjectImpl extends X<GitCommands>
+class GitCommandsMultiProjectImpl extends MultiProjectCommandSupport<GitCommands>
     implements GitCommands {
   GitCommandsMultiProjectImpl(GitCommands single, JefeProject project)
       : super(
