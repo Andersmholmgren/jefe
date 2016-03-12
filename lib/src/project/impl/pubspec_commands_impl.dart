@@ -5,11 +5,10 @@ library jefe.project.commands.pub.spec.impl;
 
 import 'dart:async';
 
+import 'package:jefe/src/project/impl/multi_project_command_support.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/project.dart';
 import 'package:jefe/src/project/pubspec_commands.dart';
-import 'package:jefe/src/project_commands/project_command.dart'
-    show executeTask;
 import 'package:jefe/src/pub/pub.dart' as pub;
 import 'package:jefe/src/pub/pub_version.dart';
 import 'package:logging/logging.dart';
@@ -44,6 +43,18 @@ class PubSpecCommandsMultiProjectImpl
   PubSpecCommandsMultiProjectImpl(JefeProjectGraph graph)
       : super(graph,
             (JefeProject p) async => new PubSpecCommandsSingleProjectImpl(p));
+/*
+  // TODO: not sure if it makes sense to do this over whole sub graph
+  @override
+  Future<bool> haveDependenciesChanged(DependencyType type,
+    {bool useGitIfNotHosted: true}) {
+    Future<bool> x(JefeProject p) => (p.pubspecCommands as PubSpecCommandsImpl)
+      ._haveDependenciesChangedInThisProject(type, useGitIfNotHosted);
+
+    return _project.processDepthFirst/*<bool>*/(x,
+      combine: (bool b1, bool b2) => b1 || b2);
+  }
+*/
 }
 
 class _PubSpecCommandsSingleProjectImpl implements PubSpecCommands {
@@ -66,28 +77,13 @@ class _PubSpecCommandsSingleProjectImpl implements PubSpecCommands {
       _setToDependenciesCommand(DependencyType.hosted, useGitIfNotHosted);
 
   Future _setToDependenciesCommand(
-      DependencyType type, bool useGitIfNotHosted) {
-    return executeTask(
-        'change to $type dependencies',
-        () => _setToDependencies(
-            _project, _project.directDependencies, type, useGitIfNotHosted));
-  }
+          DependencyType type, bool useGitIfNotHosted) =>
+      _setToDependencies(
+          _project, _project.directDependencies, type, useGitIfNotHosted);
 
-  // TODO: not sure if it makes sense to do this over whole sub graph
   @override
   Future<bool> haveDependenciesChanged(DependencyType type,
-      {bool useGitIfNotHosted: true}) {
-    Future<bool> x(JefeProject p) => (p.pubspecCommands as PubSpecCommandsImpl)
-        ._haveDependenciesChangedInThisProject(type, useGitIfNotHosted);
-
-    return executeTask/*<bool>*/(
-        'checking if $type dependencies have changed',
-        () => _project.processDepthFirst/*<bool>*/(x,
-            combine: (bool b1, bool b2) => b1 || b2));
-  }
-
-  Future<bool> _haveDependenciesChangedInThisProject(
-      DependencyType type, bool useGitIfNotHosted) async {
+      {bool useGitIfNotHosted: true}) async {
     final exportedPackageNames = await _project.exportedPackageNames;
 
     final actualDependencies = _project.pubspec.allDependencies;
