@@ -80,7 +80,7 @@ class JefeProjectImpl extends ProjectImpl
   GitCommands _git;
 
   @override
-  GitCommands get git => _git ??= new GitCommandsImpl(this);
+  GitCommands get git => _git ??= new GitCommandsSingleProjectImpl(this);
 
 //  GitCommands _gitCurrentProject;
 
