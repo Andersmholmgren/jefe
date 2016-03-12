@@ -19,10 +19,37 @@ import 'package:jefe/src/project/jefe_project.dart';
 
 Logger _log = new Logger('jefe.project.commands.docker.impl');
 
-class DockerCommandsImpl implements DockerCommands {
+
+abstract class DockerCommandsImpl implements DockerCommands {
+  factory DockerCommandsImpl(JefeProjectGraph graph, {bool multiProject: true}) {
+    // no distinction between multi and single project docker. Always operates
+    // at one level
+    return new _DockerCommandsMultiProjectImpl(graph);
+//    return multiProject
+//      ? new _DockerCommandsMultiProjectImpl(graph)
+//      : throw new ArgumentError('no single project version of')
+  }
+}
+
+//class DockerCommandsSingleProjectImpl
+//  extends SingleProjectCommandSupport<DockerCommands> implements DockerCommands {
+//  DockerCommandsSingleProjectImpl(JefeProject project)
+//    : super(
+//    (JefeProject p) async => new _DockerCommandsSingleProjectImpl(project),
+//    project);
+//}
+
+//class DockerCommandsMultiProjectImpl
+//  extends MultiProjectCommandSupport<DockerCommands> implements DockerCommands {
+//  DockerCommandsMultiProjectImpl(JefeProjectGraph graph)
+//    : super(graph,
+//    (JefeProject p) async => new DockerCommandsSingleProjectImpl(p));
+//}
+
+class DockerCommandsMultiProjectImpl implements DockerCommands {
   final JefeProjectGraph _graph;
 
-  DockerCommandsImpl(this._graph);
+  DockerCommandsMultiProjectImpl(this._graph);
 
   @override
   Future generateDockerfile(
