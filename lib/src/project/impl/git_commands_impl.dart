@@ -29,7 +29,7 @@ class GitCommandsSingleProjectImpl
   GitCommandsSingleProjectImpl(JefeProject project)
       : super(
             (JefeProject p) async =>
-                new _GitCommandsImpl(project, await p.gitDir),
+                new _GitCommandsSingleProjectImpl(project, await p.gitDir),
             project);
 }
 
@@ -40,11 +40,11 @@ class GitCommandsMultiProjectImpl
             (JefeProject p) async => new GitCommandsSingleProjectImpl(p));
 }
 
-class _GitCommandsImpl implements GitCommands {
+class _GitCommandsSingleProjectImpl implements GitCommands {
   final JefeProject _project;
   final GitDir _gitDir;
 
-  _GitCommandsImpl(this._project, this._gitDir);
+  _GitCommandsSingleProjectImpl(this._project, this._gitDir);
 
   @override
   Future commit(String message) => gitCommit(_gitDir, message);
