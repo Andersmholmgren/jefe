@@ -14,31 +14,55 @@ import 'package:logging/logging.dart';
 
 Logger _log = new Logger('jefe.project.commands.pub.impl');
 
-class PubCommandsImpl implements PubCommands {
-  final JefeProjectGraph _graph;
-  PubCommandsImpl(this._graph);
+abstract class PubCommandsImpl implements PubCommands {
+  factory PubCommandsImpl(JefeProjectGraph graph, {bool multiProject: true}) {
+    return multiProject
+        ? new PubCommandsMultiProjectImpl(graph)
+        : new PubCommandsSingleProjectImpl(graph as JefeProject);
+  }
+}
+
+class PubCommandsSingleProjectImpl
+    extends SingleProjectCommandSupport<PubCommands> implements PubCommands {
+  PubCommandsSingleProjectImpl(JefeProject project)
+      : super(
+            (JefeProject p) async =>
+                new _PubCommandsSingleProjectImpl(project, await p.pubDir),
+            project);
+}
+
+class PubCommandsMultiProjectImpl
+    extends MultiProjectCommandSupport<PubCommands> implements PubCommands {
+  PubCommandsMultiProjectImpl(JefeProjectGraph graph)
+      : super(graph,
+            (JefeProject p) async => new PubCommandsSingleProjectImpl(p));
+}
+
+class _PubCommandsSingleProjectImpl implements PubCommands {
+  final JefeProject _project;
+  _PubCommandsSingleProjectImpl(this._project);
 
   @override
   Future get() =>
-      executeTask('pub get', () async => pub.get(_graph.installDirectory));
+      executeTask('pub get', () async => pub.get(_project.installDirectory));
 
   @override
   Future fetchPackageVersions() =>
-      executeTask('fetch package versions', () => _graph.publishedVersions);
+      executeTask('fetch package versions', () => _project.publishedVersions);
 
   @override
   Future publish() => executeTask(
-      'pub publish', () async => pub.publish(_graph.installDirectory));
+      'pub publish', () async => pub.publish(_project.installDirectory));
 
   @override
   Future test() => executeTask('pub run test', () async {
         final hasTestPackage =
-            _graph.pubspec.allDependencies.containsKey('test');
+            _project.pubspec.allDependencies.containsKey('test');
         if (hasTestPackage) {
-          return await pub.test(_graph.installDirectory);
+          return await pub.test(_project.installDirectory);
         } else {
           _log.warning(() =>
-              "Ignoring tests for project ${_graph.name} as doesn't use test package");
+              "Ignoring tests for project ${_project.name} as doesn't use test package");
         }
       });
 }
