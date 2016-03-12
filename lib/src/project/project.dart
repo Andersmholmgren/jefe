@@ -20,7 +20,7 @@ abstract class ProjectReference implements ProjectEntityReference<Project> {}
 
 /// Represents a Dart Project versioned with Git. Provides access to the
 /// [PubSpec] and the git repository
-abstract class Project extends ProjectEntity {
+abstract class Project implements ProjectEntity {
   PubSpec get pubspec;
   ProjectIdentifier get id;
   Future<Option<CompilationUnit>> get compilationUnit;
