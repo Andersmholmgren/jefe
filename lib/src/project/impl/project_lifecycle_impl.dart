@@ -52,6 +52,12 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     return executeTask(
         'set up project for new feature "$featureName" for project ${_graph.name}',
         () async {
+          /*
+          TODO: it may not make much sense to try to hide the multi vs single
+          project here as we likely wanna explicitly decide concurrency at
+          each step.
+           */
+
       await _git.assertWorkingTreeClean();
       await _gitFeature.featureStart(featureName);
       await _pubspec.setToPathDependencies();
