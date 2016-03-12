@@ -5,6 +5,7 @@ library jefe.project.commands.pub.impl;
 
 import 'dart:async';
 
+import 'package:jefe/src/project/impl/multi_project_command_support.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/pub_commands.dart';
 import 'package:jefe/src/project_commands/project_command.dart'
@@ -26,8 +27,7 @@ class PubCommandsSingleProjectImpl
     extends SingleProjectCommandSupport<PubCommands> implements PubCommands {
   PubCommandsSingleProjectImpl(JefeProject project)
       : super(
-            (JefeProject p) async =>
-                new _PubCommandsSingleProjectImpl(project, await p.pubDir),
+            (JefeProject p) async => new _PubCommandsSingleProjectImpl(project),
             project);
 }
 
