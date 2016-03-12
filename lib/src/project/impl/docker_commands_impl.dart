@@ -18,17 +18,24 @@ import 'package:quiver/iterables.dart';
 
 Logger _log = new Logger('jefe.project.commands.docker.impl');
 
-abstract class DockerCommandsImpl implements DockerCommands {
-  factory DockerCommandsImpl(JefeProjectGraph graph,
-      {bool multiProject: true}) {
-    // no distinction between multi and single project docker. Always operates
-    // at one level
-    return new _DockerCommandsMultiProjectImpl(graph);
-//    return multiProject
-//      ? new _DockerCommandsMultiProjectImpl(graph)
-//      : throw new ArgumentError('no single project version of')
-  }
+DockerCommands createDockerCommands(JefeProjectGraph graph,
+    {bool multiProject: true}) {
+  // no distinction between multi and single project docker. Always operates
+  // at one level
+  return new DockerCommandsMultiProjectImpl(graph);
 }
+
+//abstract class DockerCommandsImpl implements DockerCommands {
+//  factory DockerCommandsImpl(JefeProjectGraph graph,
+//      {bool multiProject: true}) {
+//    // no distinction between multi and single project docker. Always operates
+//    // at one level
+//    return new DockerCommandsMultiProjectImpl(graph);
+////    return multiProject
+////      ? new _DockerCommandsMultiProjectImpl(graph)
+////      : throw new ArgumentError('no single project version of')
+//  }
+//}
 
 //class DockerCommandsSingleProjectImpl
 //  extends SingleProjectCommandSupport<DockerCommands> implements DockerCommands {
