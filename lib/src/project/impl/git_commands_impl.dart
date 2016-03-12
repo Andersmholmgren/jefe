@@ -18,19 +18,18 @@ Logger _log = new Logger('jefe.project.commands.git.impl');
 
 class GitCommandsSingleProjectImpl
     extends SingleProjectCommandSupport<GitCommands> implements GitCommands {
-  GitCommandsSingleProjectImpl(JefeProject project, GitDir gitDir)
-      : super(new _GitCommandsImpl(project, gitDir), project);
-
-  static Future<GitCommands> create(JefeProject project) async {
-    return new GitCommandsSingleProjectImpl(project, await project.gitDir);
-  }
+  GitCommandsSingleProjectImpl(JefeProject project)
+      : super(
+            (JefeProject p) async =>
+                new _GitCommandsImpl(project, await p.gitDir),
+            project);
 }
 
 class GitCommandsMultiProjectImpl
     extends MultiProjectCommandSupport<GitCommands> implements GitCommands {
   GitCommandsMultiProjectImpl(JefeProject project)
       : super(project,
-            (JefeProject p) async => GitCommandsSingleProjectImpl.create(p));
+            (JefeProject p) async => new GitCommandsSingleProjectImpl(p));
 }
 
 class _GitCommandsImpl implements GitCommands {
