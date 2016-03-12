@@ -141,6 +141,10 @@ class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
     }
   }
 
+  // TODO: this is a single project command that doesn't make a lot of sense
+  // to run on more than one project. Currently it is not in the interface for
+  // that reason. We could implemented it by merging all the results if that is
+  // useful??
   Future<FeatureNames> fetchCurrentProjectsFeatureNames() async {
     final results = await Future.wait(
         [gitFlowFeatureNames(_gitDir), gitFlowCurrentFeatureName(_gitDir)]);
