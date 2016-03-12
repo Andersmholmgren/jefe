@@ -54,16 +54,20 @@ class MultiProjectCommandSupport<C> {
 
 class SingleProjectCommandSupport<C> {
   final JefeProject _project;
-  final InstanceMirror _singleProjectCommandMirror;
+  final SingleProjectCommandFactory<C> _singleProjectCommandFactory;
+  InstanceMirror __singleProjectCommandMirror;
 
-  SingleProjectCommandSupport(C singleT, this._project)
-      : _singleProjectCommandMirror = reflect(singleT);
+  Future<InstanceMirror> get _singleProjectCommandMirror async =>
+      __singleProjectCommandMirror ??=
+          reflect(await _singleProjectCommandFactory(_project));
+
+  SingleProjectCommandSupport(this._singleProjectCommandFactory, this._project);
 
   noSuchMethod(Invocation i) {
     return executeTask(
         '${MirrorSystem.getName(i.memberName)} on project ${_project.name}',
         () async {
-      return _singleProjectCommandMirror.delegate(i);
+      return (await _singleProjectCommandMirror).delegate(i);
     });
   }
 }
