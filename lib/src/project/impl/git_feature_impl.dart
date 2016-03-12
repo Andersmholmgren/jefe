@@ -75,9 +75,7 @@ class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
 
   _GitFeatureCommandsSingleProjectFlowImpl(this._project, this._gitDir);
 
-  Future init() => executeTask('git flow init', () async {
-        await initGitFlow(_gitDir);
-      });
+  Future init() => initGitFlow(_gitDir);
 
   Future featureStart(String featureName, {bool throwIfExists: false}) async {
     final featureNames = await fetchCurrentProjectsFeatureNames();
@@ -117,35 +115,20 @@ class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
       gitFlowReleaseStart(_gitDir, releaseName);
 
   Future releaseFinish(String releaseName) async {
-    var gitDir = _gitDir;
-    await gitFlowReleaseFinish(gitDir, releaseName);
-    await gitTag(gitDir, releaseName);
-    await gitPush(gitDir);
-    await gitCheckout(gitDir, developBranchName);
-    await gitMerge(gitDir, 'master', ffOnly: false);
-    await gitDir.runCommand(['push', 'origin', 'master']);
+    await gitFlowReleaseFinish(_gitDir, releaseName);
+    await gitTag(_gitDir, releaseName);
+    await gitPush(_gitDir);
+    await gitCheckout(_gitDir, developBranchName);
+    await gitMerge(_gitDir, 'master', ffOnly: false);
+    await _gitDir.runCommand(['push', 'origin', 'master']);
   }
 
   @override
   String get developBranchName => 'develop';
 
   @override
-  Future<Option<String>> currentFeatureName() async {
-    final featureNames = await new Stream<JefeProject>.fromIterable(
-            _project.depthFirst)
-        .asyncMap((p) async => await gitFlowCurrentFeatureName(await p.gitDir))
-        .where((o) => o is Some)
-        .map((o) => o.get())
-        .toSet();
-
-    if (featureNames.length == 0) {
-      return const None();
-    } else if (featureNames.length == 1) {
-      return new Some<String>(featureNames.first);
-    } else {
-      throw new StateError('more than one current feature $featureNames');
-    }
-  }
+  Future<Option<String>> currentFeatureName() =>
+      gitFlowCurrentFeatureName(_gitDir);
 
   @override
   Future<Iterable<Version>> getReleaseVersionTags() async =>
