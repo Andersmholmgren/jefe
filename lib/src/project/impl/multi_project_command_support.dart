@@ -55,17 +55,16 @@ abstract class MultiProjectCommandSupport<C> {
 
 class SingleProjectCommandSupport<C> {
   final JefeProject _project;
-
-  final InstanceMirror _tMirror;
+  final InstanceMirror _singleProjectCommandMirror;
 
   SingleProjectCommandSupport(C singleT, this._project)
-      : _tMirror = reflect(singleT);
+      : _singleProjectCommandMirror = reflect(singleT);
 
   noSuchMethod(Invocation i) {
     return executeTask(
         '${MirrorSystem.getName(i.memberName)} on project ${_project.name}',
         () async {
-      return _tMirror.delegate(i);
+      return _singleProjectCommandMirror.delegate(i);
     });
   }
 }
