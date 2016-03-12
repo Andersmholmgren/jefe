@@ -20,11 +20,11 @@ typedef Callable<T> _Processor<T>(ProjectFunction/*<T>*/ command,
 class MultiProjectCommandSupport<C> {
   final JefeProjectGraph graph;
 
-  final SingleProjectCommandFactory<C> _factory;
+  final SingleProjectCommandFactory<C> singleProjectCommandfactory;
 
   final CommandConcurrencyMode defaultConcurrencyMode;
 
-  MultiProjectCommandSupport(this.graph, this._factory,
+  MultiProjectCommandSupport(this.graph, this.singleProjectCommandfactory,
       {this.defaultConcurrencyMode: CommandConcurrencyMode.concurrentCommand});
 
   noSuchMethod(Invocation i) {
@@ -38,7 +38,7 @@ class MultiProjectCommandSupport<C> {
 
     Future/*<T>*/ projectFunction/*<T>*/(JefeProject project) async {
 //      _log.fine('Executing ${i.memberName}');
-      final C singleProjectCommand = await _factory(project);
+      final C singleProjectCommand = await singleProjectCommandfactory(project);
       final InstanceMirror singleProjectCommandMirror =
           reflect(singleProjectCommand);
       return singleProjectCommandMirror.delegate(i) as Future/*<T>*/;

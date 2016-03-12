@@ -19,94 +19,54 @@ import 'package:jefe/src/project/impl/multi_project_command_support.dart';
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
 abstract class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
-  factory GitFeatureCommandsFlowImpl(JefeProject project, {bool multiProject: true}) {
+  factory GitFeatureCommandsFlowImpl(JefeProject project,
+      {bool multiProject: true}) {
     return multiProject
-      ? new GitFeatureCommandsMultiProjectFlowImpl(project)
-      : new GitFeatureCommandsSingleProjectFlowImpl(project);
+        ? new GitFeatureCommandsMultiProjectFlowImpl(project)
+        : new GitFeatureCommandsSingleProjectFlowImpl(project);
   }
 }
 
 class GitFeatureCommandsSingleProjectFlowImpl
-  extends SingleProjectCommandSupport<GitFeatureCommands> implements GitFeatureCommands {
+    extends SingleProjectCommandSupport<GitFeatureCommands>
+    implements GitFeatureCommands {
   GitFeatureCommandsSingleProjectFlowImpl(JefeProject project)
-    : super(
-    (JefeProject p) async =>
-  new _GitFeatureCommandsSingleProjectFlowImpl(project, await p.gitDir),
-    project);
+      : super(
+            (JefeProject p) async =>
+                new _GitFeatureCommandsSingleProjectFlowImpl(
+                    project, await p.gitDir),
+            project);
 }
 
-
 class GitFeatureCommandsMultiProjectFlowImpl
-  extends MultiProjectCommandSupport<GitFeatureCommands> implements GitFeatureCommands {
-
-  GitFeatureCommandsMultiProjectFlowImpl(JefeProjectGraph graph);
-    : super(graph, (JefeProject p) async => new GitFeatureCommandsSingleProjectFlowImpl(p));
+    extends MultiProjectCommandSupport<GitFeatureCommands>
+    implements GitFeatureCommands {
+  GitFeatureCommandsMultiProjectFlowImpl(JefeProjectGraph graph)
+      : super(
+            graph,
+            (JefeProject p) async =>
+                new GitFeatureCommandsSingleProjectFlowImpl(p));
 
   @override
   String get developBranchName => 'develop';
 
   @override
-  Future<Option<String>> currentFeatureName() {
-    /*
-    Damn this is a case where the multi project needs to reduce the results from
-    the singles
-     */
-
-    Future<Option<String>> featureNameFor() async {
-      final featureNames =
-          await new Stream<JefeProject>.fromIterable(_graph.depthFirst)
-              .asyncMap(
-                  (p) async => await gitFlowCurrentFeatureName(await p.gitDir))
-              .where((o) => o is Some)
-              .map((o) => o.get())
-              .toSet();
-
-      if (featureNames.length == 0) {
-        return const None();
-      } else if (featureNames.length == 1) {
-        return new Some<String>(featureNames.first);
-      } else {
-        throw new StateError('more than one current feature $featureNames');
+  Future<Option<String>> currentFeatureName() async {
+    Option<String> extractName(
+        Option<String> previous, Option<String> current) {
+      if (previous.runtimeType != current.runtimeType ||
+          (previous.getOrElse(() => null) != current.getOrElse(() => null))) {
+        throw new StateError(
+            'found more than one feature name $previous and $current');
       }
+      return current;
     }
-
-    return executeTask/*<Option<String>>*/(
-        'Get current feature name', featureNameFor);
+    return process/*<Option<String>>*/(
+        'current feature name',
+        (JefeProject p) async =>
+            (await singleProjectCommandfactory(p)).currentFeatureName(),
+        combine: extractName);
   }
-
-  @override
-  Future<Iterable<Version>> getReleaseVersionTags() {
-    Future<Iterable<Version>> fetchTags() async {
-      final gitDir = await _graph.gitDir;
-      return await gitFetchVersionTags(gitDir);
-    }
-    return executeTask('fetch git release version tags', fetchTags);
-  }
-
-  @override
-  Future assertNoActiveReleases() =>
-      executeTask('check no active releases', () async {
-        final releaseNames = await gitFlowReleaseNames(await _graph.gitDir);
-        if (releaseNames.isNotEmpty) {
-          throw new StateError(
-              '${_graph.name} has an existing release branch. Must finish all active releases first');
-        }
-      });
-
-  Future<FeatureNames> fetchCurrentProjectsFeatureNames() async {
-    final gitDir = await _graph.gitDir;
-    final results = await Future
-        .wait([gitFlowFeatureNames(gitDir), gitFlowCurrentFeatureName(gitDir)]);
-
-    return new FeatureNames(
-        (results[0] as Iterable<String>).toSet(), results[1] as Option<String>);
-  }
-
-  @override
-  Future<bool> get hasChangesSinceLatestTaggedVersion async =>
-      (await _graph.latestTaggedGitVersion)
-          .map((v) => _graph.git.hasChangesSince(v))
-          .getOrElse(() => false);
 }
 
 class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
