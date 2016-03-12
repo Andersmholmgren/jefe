@@ -49,11 +49,10 @@ class PubSpecCommandsMultiProjectImpl
   Future<bool> haveDependenciesChanged(DependencyType type,
       {bool useGitIfNotHosted: true}) {
     return process/*<bool>*/(
-        'ddd',
+        'have dependencies changed',
         (JefeProject p) async => p.pubspecCommands.haveDependenciesChanged(type,
             useGitIfNotHosted: useGitIfNotHosted),
         combine: (bool b1, bool b2) => b1 || b2,
-        // TODO: this should be depthFirst to make it explicit!!!
         mode: CommandConcurrencyMode.serialDepthFirst);
   }
 }
