@@ -117,10 +117,10 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
     dockerfile.workDir(serverFiles.workDir);
 
     dockerfile.entryPoint('/usr/bin/dart',
-        args: concat([
+        args: concat(<Iterable<String>>[
           entryPointOptions,
           [pathHandler.targetPath(serverMain)]
-        ]));
+        ]) as Iterable<String>);
 
     final saveDirectory =
         outputDirectory != null ? outputDirectory : rootDirectory;
