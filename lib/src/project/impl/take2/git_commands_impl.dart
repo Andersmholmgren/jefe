@@ -32,8 +32,14 @@ abstract class X<T> {
   noSuchMethod(Invocation i) {
     _log.fine('Executing ${i.memberName}');
 
-//    _project.processDepthFirst()
-//    _project.depthFirst
+    /**
+     * TODO: this is also useful for wrapping single project commands.
+     * i.e. we wrap so we can log, time, catch errors etc!!!!!
+     *
+     * That way commands are written in the simplest possible manner, but we
+     * can still have all that goodness with it in a standard way. Yay
+     */
+
     Future/*<A>*/ projectFunction/*<A>*/(JefeProject project) async {
       final T t = await _factory(project);
       final InstanceMirror tMirror = reflect(t);
