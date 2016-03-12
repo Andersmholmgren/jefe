@@ -19,34 +19,37 @@ import 'package:pubspec/pubspec.dart';
 
 Logger _log = new Logger('jefe.project.commands.pub.impl');
 
-
 abstract class PubSpecCommandsImpl implements PubSpecCommands {
-  factory PubSpecCommandsImpl(JefeProjectGraph graph, {bool multiProject: true}) {
+  factory PubSpecCommandsImpl(JefeProjectGraph graph,
+      {bool multiProject: true}) {
     return multiProject
-      ? new PubSpecCommandsMultiProjectImpl(graph)
-      : new PubSpecCommandsSingleProjectImpl(graph as JefeProject);
+        ? new PubSpecCommandsMultiProjectImpl(graph)
+        : new PubSpecCommandsSingleProjectImpl(graph as JefeProject);
   }
 }
 
 class PubSpecCommandsSingleProjectImpl
-  extends SingleProjectCommandSupport<PubSpecCommands> implements PubSpecCommands {
+    extends SingleProjectCommandSupport<PubSpecCommands>
+    implements PubSpecCommands {
   PubSpecCommandsSingleProjectImpl(JefeProject project)
-    : super(
-    (JefeProject p) async => new _PubSpecCommandsSingleProjectImpl(project),
-    project);
+      : super(
+            (JefeProject p) async =>
+                new _PubSpecCommandsSingleProjectImpl(project),
+            project);
 }
 
 class PubSpecCommandsMultiProjectImpl
-  extends MultiProjectCommandSupport<PubSpecCommands> implements PubSpecCommands {
+    extends MultiProjectCommandSupport<PubSpecCommands>
+    implements PubSpecCommands {
   PubSpecCommandsMultiProjectImpl(JefeProjectGraph graph)
-    : super(graph,
-    (JefeProject p) async => new PubSpecCommandsSingleProjectImpl(p));
+      : super(graph,
+            (JefeProject p) async => new PubSpecCommandsSingleProjectImpl(p));
 }
 
 class _PubSpecCommandsSingleProjectImpl implements PubSpecCommands {
   final JefeProject _project;
 
-  PubSpecCommandsImpl(this._project);
+  _PubSpecCommandsSingleProjectImpl(this._project);
 
   @override
   Future setToPathDependencies() =>
