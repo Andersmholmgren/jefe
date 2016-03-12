@@ -17,13 +17,12 @@ typedef Future<T> SingleProjectCommandFactory<T>(JefeProject project);
 class MultiProjectCommandSupport<C> {
   final JefeProjectGraph _projectGraph;
 
-//  final InstanceMirror _tMirror;
   final SingleProjectCommandFactory<C> _factory;
 
-  MultiProjectCommandSupport(this._projectGraph, this._factory)
-//      : this._singleT = singleT
-//  ,        _tMirror = reflect(singleT)
-  ;
+  final CommandConcurrencyMode defaultConcurrencyMode;
+
+  MultiProjectCommandSupport(this._projectGraph, this._factory,
+      {this.defaultConcurrencyMode: CommandConcurrencyMode.concurrentCommand});
 
   noSuchMethod(Invocation i) {
     /**
@@ -34,21 +33,41 @@ class MultiProjectCommandSupport<C> {
      * can still have all that goodness with it in a standard way. Yay
      */
 
-    Future/*<A>*/ projectFunction/*<A>*/(JefeProject project) async {
+    Future/*<T>*/ projectFunction/*<T>*/(JefeProject project) async {
 //      _log.fine('Executing ${i.memberName}');
-      final C t = await _factory(project);
-      final InstanceMirror tMirror = reflect(t);
-      return tMirror.delegate(i) as Future/*<A>*/;
+      final C singleProjectCommand = await _factory(project);
+      final InstanceMirror singleProjectCommandMirror =
+          reflect(singleProjectCommand);
+      return singleProjectCommandMirror.delegate(i) as Future/*<T>*/;
     }
 
     /**
-     * TODO: don't assume depth first. Support all variants somehow.
+     * TODO: don't assume depth first. Support all variants somehow. Pinch code
+     * from base_commands_impl
      *
      * Maybe use annotations to mark commands that can't be run in parallel,
      * or that must run depthFirst. Mind you distinguishing between serial
      * and depthFirst is fairly meaningless
      */
-    return _projectGraph.processDepthFirst(projectFunction);
+    return _projectGraph.processAllConcurrently(projectFunction);
+//      _projectGraph.processDepthFirst(projectFunction);
+  }
+
+  Future/*<T>*/ process/*<T>*/(
+      String taskDescription, SingleProjectCommand<S, dynamic/*=T*/ > command,
+      {ProjectFilter filter,
+      Combiner/*<T>*/ combine,
+      CommandConcurrencyMode mode: CommandConcurrencyMode.concurrentCommand}) {
+    final processor =
+        _processor/*<T>*/(mode ?? CommandConcurrencyMode.concurrentCommand);
+
+    return executeTask/*<T>*/(
+        taskDescription,
+        processor(
+            (JefeProject project) =>
+                _processOnSingeProject2(project, taskDescription, command),
+            filter: filter,
+            combine: combine));
   }
 }
 
