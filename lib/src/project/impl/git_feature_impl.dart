@@ -224,10 +224,8 @@ class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
   }
 
   @override
-  Future<Iterable<Version>> getReleaseVersionTags() async {
-    final gitDir = _gitDir;
-    return await gitFetchVersionTags(gitDir);
-  }
+  Future<Iterable<Version>> getReleaseVersionTags() async =>
+      gitFetchVersionTags(_gitDir);
 
   @override
   Future assertNoActiveReleases() async {
@@ -239,9 +237,8 @@ class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
   }
 
   Future<FeatureNames> fetchCurrentProjectsFeatureNames() async {
-    final gitDir = _gitDir;
-    final results = await Future
-        .wait([gitFlowFeatureNames(gitDir), gitFlowCurrentFeatureName(gitDir)]);
+    final results = await Future.wait(
+        [gitFlowFeatureNames(_gitDir), gitFlowCurrentFeatureName(_gitDir)]);
 
     return new FeatureNames(
         (results[0] as Iterable<String>).toSet(), results[1] as Option<String>);
