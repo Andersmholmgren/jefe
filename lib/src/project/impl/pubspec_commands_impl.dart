@@ -15,6 +15,7 @@ import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
 
 Logger _log = new Logger('jefe.project.commands.pub.impl');
 
@@ -43,18 +44,18 @@ class PubSpecCommandsMultiProjectImpl
   PubSpecCommandsMultiProjectImpl(JefeProjectGraph graph)
       : super(graph,
             (JefeProject p) async => new PubSpecCommandsSingleProjectImpl(p));
-/*
-  // TODO: not sure if it makes sense to do this over whole sub graph
+
   @override
   Future<bool> haveDependenciesChanged(DependencyType type,
-    {bool useGitIfNotHosted: true}) {
-    Future<bool> x(JefeProject p) => (p.pubspecCommands as PubSpecCommandsImpl)
-      ._haveDependenciesChangedInThisProject(type, useGitIfNotHosted);
-
-    return _project.processDepthFirst/*<bool>*/(x,
-      combine: (bool b1, bool b2) => b1 || b2);
+      {bool useGitIfNotHosted: true}) {
+    return process/*<bool>*/(
+        'ddd',
+        (JefeProject p) async => p.pubspecCommands.haveDependenciesChanged(type,
+            useGitIfNotHosted: useGitIfNotHosted),
+        combine: (bool b1, bool b2) => b1 || b2,
+        // TODO: this should be depthFirst to make it explicit!!!
+        mode: CommandConcurrencyMode.serialDepthFirst);
   }
-*/
 }
 
 class _PubSpecCommandsSingleProjectImpl implements PubSpecCommands {

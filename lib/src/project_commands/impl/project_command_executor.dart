@@ -71,9 +71,9 @@ class CommandExecutorImpl implements CommandExecutor {
           CommandConcurrencyMode.concurrentCommand,
       ProjectFilter filter: _noOpFilter}) async {
     final _filter = filter != null ? filter : _noOpFilter;
-    if (concurrencyMode != CommandConcurrencyMode.serial &&
+    if (concurrencyMode != CommandConcurrencyMode.serialDepthFirst &&
         composite.commands
-            .every((c) => c.concurrencyMode != CommandConcurrencyMode.serial)) {
+            .every((c) => c.concurrencyMode != CommandConcurrencyMode.serialDepthFirst)) {
       return _executeAllOnConcurrentProjects/*<T>*/(composite, _filter);
     } else {
       return _executeSerially/*<T>*/(composite, _filter);

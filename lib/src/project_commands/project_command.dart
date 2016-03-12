@@ -13,9 +13,9 @@ import 'package:logging/logging.dart';
 
 Logger _log = new Logger('jefe.project.commands.core');
 
-/// [serial] means the command must execute on a single project at a time and
+/// [serialDepthFirst] means the command must execute on a single project at a time and
 /// must complete execution on all the projects before the next command may be
-/// executed.
+/// executed. They will execute in depth first order of the dependencies
 ///
 /// [concurrentProject] means that the command may execute on several projects
 /// concurrently but must complete execution on all the projects before the
@@ -24,7 +24,11 @@ Logger _log = new Logger('jefe.project.commands.core');
 /// [concurrentCommand]  means that the command may execute on several projects
 /// concurrently and the next command may commence on projects where this
 /// command has completed before it has completed on all projects
-enum CommandConcurrencyMode { serial, concurrentProject, concurrentCommand }
+enum CommandConcurrencyMode {
+  serialDepthFirst,
+  concurrentProject,
+  concurrentCommand
+}
 
 /// A command that operates on a single [Project]
 ProjectCommand/*<T>*/ projectCommand/*<T>*/(
@@ -37,7 +41,8 @@ ProjectCommand/*<T>*/ projectCommand/*<T>*/(
 /// A command that operates on a single [Project] and the projects it depends on
 ProjectCommand/*<T>*/ projectCommandWithDependencies/*<T>*/(
         String name, ProjectFunction/*<T>*/ function,
-        {CommandConcurrencyMode concurrencyMode: CommandConcurrencyMode.serial,
+        {CommandConcurrencyMode concurrencyMode:
+            CommandConcurrencyMode.serialDepthFirst,
         Condition condition: _alwaysYes}) =>
     new _DefaultCommand/*<T>*/(name, function, concurrencyMode, condition);
 

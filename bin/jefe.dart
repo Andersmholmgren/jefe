@@ -148,7 +148,7 @@ class Jefe {
     await executor.execute(process.process(command, args),
         filter: projectNameFilter(projects),
         concurrencyMode: executeSerially
-            ? CommandConcurrencyMode.serial
+            ? CommandConcurrencyMode.serialDepthFirst
             : CommandConcurrencyMode.concurrentProject);
   }
 
@@ -166,7 +166,7 @@ class Jefe {
     final command = _setToDependencyCommand(type);
     await executor.execute(command,
         filter: projectNameFilter(projects),
-        concurrencyMode: CommandConcurrencyMode.serial);
+        concurrencyMode: CommandConcurrencyMode.serialDepthFirst);
   }
 
   @u.SubCommand(help: 'Runs tests projects that have tests')

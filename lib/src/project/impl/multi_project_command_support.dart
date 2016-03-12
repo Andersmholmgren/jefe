@@ -101,7 +101,7 @@ class MultiProjectCommandSupport<C> {
 //    }
 
     switch (mode) {
-      case CommandConcurrencyMode.serial:
+      case CommandConcurrencyMode.serialDepthFirst:
         return _serialProcessor;
       case CommandConcurrencyMode.concurrentCommand:
       case CommandConcurrencyMode.concurrentProject:

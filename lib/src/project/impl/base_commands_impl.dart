@@ -69,7 +69,7 @@ abstract class BaseCommandsImpl<S> implements JefeGroupCommand<S> {
     }
 
     switch (mode) {
-      case CommandConcurrencyMode.serial:
+      case CommandConcurrencyMode.serialDepthFirst:
         return _serialProcessor;
       case CommandConcurrencyMode.concurrentCommand:
       case CommandConcurrencyMode.concurrentProject:
