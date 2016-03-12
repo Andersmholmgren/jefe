@@ -145,14 +145,14 @@ class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
           .getOrElse(() => false);
 }
 
-class GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
+class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
   final JefeProject _project;
   final GitDir _gitDir;
 
-  GitFeatureCommandsSingleProjectFlowImpl(this._project, this._gitDir);
+  _GitFeatureCommandsSingleProjectFlowImpl(this._project, this._gitDir);
 
   Future init() => executeTask('git flow init', () async {
-        await initGitFlow(await _project.gitDir);
+        await initGitFlow(_gitDir);
       });
 
   Future featureStart(String featureName, {bool throwIfExists: false}) async {
@@ -165,17 +165,16 @@ class GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
         // TODO: could check the branch is correctly based off develop
         _log.info('${_project.name} already on correct feature branch');
       } else {
-        return gitCheckout(
-            await _project.gitDir, '$featureBranchPrefix$featureName');
+        return gitCheckout(_gitDir, '$featureBranchPrefix$featureName');
       }
     } else {
-      return gitFlowFeatureStart(await _project.gitDir, featureName);
+      return gitFlowFeatureStart(_gitDir, featureName);
     }
   }
 
   Future featureFinish(String featureName,
       {bool excludeOnlyCommitIf(Commit commit): _dontExclude}) async {
-    final GitDir gitDir = await _project.gitDir;
+    final GitDir gitDir = _gitDir;
     final Map<String, Commit> commits =
         await gitDir.getCommits('$developBranchName..HEAD');
     _log.info('found ${commits.length} commits on feature branch');
@@ -191,10 +190,10 @@ class GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
   }
 
   Future releaseStart(String releaseName) async =>
-      gitFlowReleaseStart(await _project.gitDir, releaseName);
+      gitFlowReleaseStart(_gitDir, releaseName);
 
   Future releaseFinish(String releaseName) async {
-    var gitDir = await _project.gitDir;
+    var gitDir = _gitDir;
     await gitFlowReleaseFinish(gitDir, releaseName);
     await gitTag(gitDir, releaseName);
     await gitPush(gitDir);
@@ -226,13 +225,13 @@ class GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
 
   @override
   Future<Iterable<Version>> getReleaseVersionTags() async {
-    final gitDir = await _project.gitDir;
+    final gitDir = _gitDir;
     return await gitFetchVersionTags(gitDir);
   }
 
   @override
   Future assertNoActiveReleases() async {
-    final releaseNames = await gitFlowReleaseNames(await _project.gitDir);
+    final releaseNames = await gitFlowReleaseNames(_gitDir);
     if (releaseNames.isNotEmpty) {
       throw new StateError(
           '${_project.name} has an existing release branch. Must finish all active releases first');
@@ -240,7 +239,7 @@ class GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
   }
 
   Future<FeatureNames> fetchCurrentProjectsFeatureNames() async {
-    final gitDir = await _project.gitDir;
+    final gitDir = _gitDir;
     final results = await Future
         .wait([gitFlowFeatureNames(gitDir), gitFlowCurrentFeatureName(gitDir)]);
 
