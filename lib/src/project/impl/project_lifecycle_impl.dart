@@ -52,7 +52,7 @@ class ProjectLifecycleImpl implements ProjectLifecycle {
     return executeTask(
         'set up project for new feature "$featureName" for project ${_graph.name}',
         () async {
-          /*
+      /*
           TODO: it may not make much sense to try to hide the multi vs single
           project here as we likely wanna explicitly decide concurrency at
           each step.
@@ -338,39 +338,23 @@ class ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
   }
 
   @override
-  Future completeFeature(String featureName,
-      {bool doPush: false, bool recursive: true}) {
-    if (!recursive)
-      return completeFeatureForCurrentProject(featureName, doPush: doPush);
+  Future completeFeature(String featureName, {bool doPush: false}) async {
+    await _git.assertWorkingTreeClean();
 
-    Future doComplete(JefeProject project) => project.lifecycle
-        .completeFeature(featureName, doPush: doPush, recursive: false);
+    final currentBranchName = await gitCurrentBranchName(await _project.gitDir);
+    if (!(currentBranchName == _gitFeature.developBranchName)) {
+      await _gitFeature.featureFinish(featureName,
+          excludeOnlyCommitIf: (Commit c) =>
+              c.message.startsWith(featureStartCommitPrefix));
+    }
 
-    return executeTask('complete development of feature $featureName',
-        () => _project.processDepthFirst(doComplete));
-  }
+    /// TODO: this step must be done depthFirst
+    /// One solution is just to do the whole completeFeature depthFirst
+    await _pubspec.setToGitDependencies();
+    await _pub.get();
+    await _git.commit('completed development of feature $featureName');
 
-  Future completeFeatureForCurrentProject(String featureName,
-      {bool doPush: false}) {
-    return executeTask(
-        'complete development of feature $featureName for project ${_project.name}',
-        () async {
-      await _git.assertWorkingTreeClean();
-
-      final currentBranchName =
-          await gitCurrentBranchName(await _project.gitDir);
-      if (!(currentBranchName == _gitFeature.developBranchName)) {
-        await _gitFeature.featureFinish(featureName,
-            excludeOnlyCommitIf: (Commit c) =>
-                c.message.startsWith(featureStartCommitPrefix));
-      }
-
-      await _pubspec.setToGitDependencies();
-      await _pub.get();
-      await _git.commit('completed development of feature $featureName');
-
-      if (doPush) await _git.push();
-    });
+    if (doPush) await _git.push();
   }
 
   @override
