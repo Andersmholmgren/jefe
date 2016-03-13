@@ -15,12 +15,11 @@ import 'package:logging/logging.dart';
 
 Logger _log = new Logger('jefe.project.commands.pub.impl');
 
-abstract class PubCommandsImpl implements PubCommands {
-  factory PubCommandsImpl(JefeProjectGraph graph, {bool multiProject: true}) {
-    return multiProject
-        ? new PubCommandsMultiProjectImpl(graph)
-        : new PubCommandsSingleProjectImpl(graph as JefeProject);
-  }
+PubCommands createPubCommands(JefeProjectGraph graph,
+    {bool multiProject: true}) {
+  return multiProject
+      ? new PubCommandsMultiProjectImpl(graph)
+      : new PubCommandsSingleProjectImpl(graph as JefeProject);
 }
 
 class PubCommandsSingleProjectImpl

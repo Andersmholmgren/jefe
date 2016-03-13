@@ -120,7 +120,7 @@ class JefeProjectImpl extends ProjectImpl
           createGitCommands(this, multiProject: false),
           createGitFeatureCommands(this, multiProject: false),
           null,
-          null,
+          createPubCommands(this, multiProject: false),
           createProjectLifecycle(this, multiProject: false));
     }
 
