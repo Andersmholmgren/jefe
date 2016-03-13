@@ -136,6 +136,7 @@ class Jefe {
       @u.Flag(help: 'Instead of running the commands concurrently on the projects, run only one command on one project at a time', abbr: 's')
           bool executeSerially: false}) async {
     final graph = await _loadGraph(rootDirectory);
+    graph.pr
 //    if (executeSerially) {
 //      graph.processDepthFirst()
 //

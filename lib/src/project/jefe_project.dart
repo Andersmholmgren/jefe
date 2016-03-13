@@ -41,10 +41,10 @@ class ProjectCommands {
   final PubSpecCommands pubspecCommands;
   final PubCommands pub;
   final ProjectLifecycle lifecycle;
-  final ProcessCommands process;
+  final ProcessCommands processCommands;
 
   ProjectCommands(this.git, this.gitFeature, this.pubspecCommands, this.pub,
-      this.lifecycle, this.process);
+      this.lifecycle, this.processCommands);
 }
 
 class MultiProjectCommands extends ProjectCommands {
@@ -56,13 +56,14 @@ class MultiProjectCommands extends ProjectCommands {
       PubSpecCommands pubspecCommands,
       PubCommands pub,
       ProjectLifecycle lifecycle,
-      ProcessCommands process,
+      ProcessCommands processCommands,
       this.docker)
-      : super(git, gitFeature, pubspecCommands, pub, lifecycle, process);
+      : super(
+            git, gitFeature, pubspecCommands, pub, lifecycle, processCommands);
 }
 
 /// A graph of [JefeProject] ordered by their dependencies
-abstract class JefeProjectGraph {
+abstract class JefeProjectGraph implements ProjectCommands {
   /// Navigates the graph of [JefeProject] depthFirst such that those
   /// with no dependencies are returned first and those projects that are
   /// depended upon by other projects are returned before those projects
@@ -95,11 +96,6 @@ abstract class JefeProjectGraph {
   // ??????
   //  Future<ProjectCommands> get multiProjectCommands;
 
-  GitCommands get git;
-  GitFeatureCommands get gitFeature;
-  PubSpecCommands get pubspecCommands;
-  PubCommands get pub;
-  ProjectLifecycle get lifecycle;
 }
 
 /// A [Set] of [JefeProject] that supports [JefeProjectGraph] operations

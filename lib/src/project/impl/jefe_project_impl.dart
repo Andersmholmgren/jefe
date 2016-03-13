@@ -26,6 +26,7 @@ import 'package:jefe/src/project/project_lifecycle.dart';
 import 'package:jefe/src/project/impl/project_lifecycle_impl.dart';
 import 'package:jefe/src/project/impl/process_commands_impl.dart';
 import 'package:jefe/src/project/impl/docker_commands_impl.dart';
+import 'package:jefe/src/project/process_commands.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
@@ -93,6 +94,9 @@ class JefeProjectImpl extends ProjectImpl
 
   @override
   ProjectLifecycle get lifecycle => multiProjectCommands.lifecycle;
+
+  @override
+  ProcessCommands get processCommands => multiProjectCommands.process;
 
 //  ProjectCommands _createProcessCommands(bool multiProject) {
 //
