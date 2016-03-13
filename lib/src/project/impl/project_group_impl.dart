@@ -62,7 +62,6 @@ class DefaultProjectEntityReferenceFactory
 }
 
 class ProjectGroupImpl extends ProjectEntityImpl
-//  with _JefeProjectGraphMixin ??????
   implements ProjectGroup {
   // TODO: we need to hide the project group refs here etc as
   // it complicates encapsulating loading from the right directory

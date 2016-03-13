@@ -12,6 +12,7 @@ import 'package:jefe/src/project/project_lifecycle.dart';
 import 'package:jefe/src/project/pub_commands.dart';
 import 'package:jefe/src/project/pubspec_commands.dart';
 import 'package:option/option.dart';
+import 'package:jefe/src/project/docker_commands.dart';
 
 /// A [Project] managed by Jefe
 abstract class JefeProject extends Project implements JefeProjectGraph {
@@ -42,6 +43,19 @@ class ProjectCommands {
 
   ProjectCommands(this.git, this.gitFeature, this.pubspecCommands, this.pub,
       this.lifecycle);
+}
+
+class MultiProjectCommands extends ProjectCommands {
+  final DockerCommands docker;
+
+  MultiProjectCommands(
+      GitCommands git,
+      GitFeatureCommands gitFeature,
+      PubSpecCommands pubspecCommands,
+      PubCommands pub,
+      ProjectLifecycle lifecycle,
+      this.docker)
+      : super(git, gitFeature, pubspecCommands, pub, lifecycle);
 }
 
 /// A graph of [JefeProject] ordered by their dependencies

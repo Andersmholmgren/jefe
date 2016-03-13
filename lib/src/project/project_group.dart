@@ -18,7 +18,7 @@ abstract class ProjectGroupReference
 
 /// Represents a group of related [Project]s. These projects are managed as
 /// a unit and typically have dependencies between them.
-abstract class ProjectGroup implements ProjectEntity, JefeProjectGraph {
+abstract class ProjectGroup implements ProjectEntity {
   ProjectGroupIdentifier get id;
 
   /// Install a [ProjectGroup] plus all its [Project]s and child [ProjectGroup]s
