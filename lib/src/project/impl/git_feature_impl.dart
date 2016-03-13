@@ -71,6 +71,8 @@ class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
   final JefeProject _project;
   final GitDir _gitDir;
 
+  ProjectCommands get spc => _project.singleProjectCommands;
+
   _GitFeatureCommandsSingleProjectFlowImpl(this._project, this._gitDir);
 
   Future init() => initGitFlow(_gitDir);
@@ -158,6 +160,10 @@ class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
       (await _project.latestTaggedGitVersion)
           .map((v) => _project.git.hasChangesSince(v))
           .getOrElse(() => false);
+
+  @override
+  Future<bool> get isOnDevelopBranch async =>
+      (await _gitDir.getCurrentBranch()).branchName == developBranchName;
 }
 
 bool _dontExclude(Commit c) => false;
