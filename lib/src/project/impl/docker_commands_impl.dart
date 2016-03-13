@@ -11,11 +11,11 @@ import 'package:jefe/src/git/git.dart';
 import 'package:jefe/src/project/docker_commands.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/project.dart';
+import 'package:jefe/src/project/project_group.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'package:pubspec/pubspec.dart';
 import 'package:quiver/iterables.dart';
-import 'package:jefe/src/project/project_group.dart';
 
 Logger _log = new Logger('jefe.project.commands.docker.impl');
 
@@ -164,8 +164,8 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
 
     dockerfile.cmd([]);
 
-    dockerfile.workDir(
-        pathHandler.targetPath(serverProject.project.installDirectory.path));
+    dockerfile
+        .workDir(pathHandler.targetPath(serverProject.installDirectory.path));
 
     final serverMain =
         p.join(serverProject.installDirectory.path, 'bin/server.dart');
@@ -190,18 +190,12 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
         ? gitRef
         : (await gitCurrentTagName(await topLevelProject.gitDir)).get();
 
-    final dir = topLevelProject.project.installDirectory;
+    final dir = topLevelProject.installDirectory;
     final dirPath = dir.path;
 
     final targetPath = pathHandler.targetPath(dirPath);
-    dockerfile.run('git', args: [
-      'clone',
-      '-q',
-      '-b',
-      ref,
-      topLevelProject.project.gitUri,
-      targetPath
-    ]);
+    dockerfile.run('git',
+        args: ['clone', '-q', '-b', ref, topLevelProject.gitUri, targetPath]);
     dockerfile.workDir(targetPath);
 //    dockerfile.run('git', args: ['checkout', '-q', ref]);
 
@@ -362,6 +356,8 @@ class _TopLevelProjectFiles {
     pubGet();
     addWholeDirectory();
     pubGetOffline();
-    return concat([excludeDependencies, pathDependentProjects]).toSet();
+    return concat(
+            <Iterable<Project>>[excludeDependencies, pathDependentProjects])
+        .toSet() as Set<Project>;
   }
 }
