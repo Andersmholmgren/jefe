@@ -106,21 +106,19 @@ class Jefe {
           bool skipPreRelease: false,
       @u.Flag(help: 'if true then version numbers of hosted packages will also be updated', defaultsTo: false)
           bool autoUpdateHostedVersions: false}) async {
-    final executor = await _load(rootDirectory);
+    final graph = await _loadGraph(rootDirectory);
+
+//    final executor = await _load(rootDirectory);
     // TODO: would be nice to leverage grinder here (command dependencies)
     // somehow
     if (!skipPreRelease) {
-      await executor.execute(
-          lifecycle.preRelease(
-              type: type, autoUpdateHostedVersions: autoUpdateHostedVersions),
-          filter: projectNameFilter(projects));
+      await graph.lifecycle.preRelease(
+          type: type, autoUpdateHostedVersions: autoUpdateHostedVersions);
     }
 
     if (!preReleaseOnly) {
-      await executor.execute(
-          lifecycle.release(
-              type: type, autoUpdateHostedVersions: autoUpdateHostedVersions),
-          filter: projectNameFilter(projects));
+      await graph.lifecycle.release(
+          type: type, autoUpdateHostedVersions: autoUpdateHostedVersions);
     } else {
       print('-------');
     }
