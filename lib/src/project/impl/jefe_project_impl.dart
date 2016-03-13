@@ -96,7 +96,7 @@ class JefeProjectImpl extends ProjectImpl
   ProjectLifecycle get lifecycle => multiProjectCommands.lifecycle;
 
   @override
-  ProcessCommands get processCommands => multiProjectCommands.process;
+  ProcessCommands get processCommands => multiProjectCommands.processCommands;
 
 //  ProjectCommands _createProcessCommands(bool multiProject) {
 //
