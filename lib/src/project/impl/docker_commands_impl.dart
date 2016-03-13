@@ -71,18 +71,13 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
       bool omitClientWhenPathDependencies: true,
       bool setupForPrivateGit: true,
       String targetRootPath: '/app'}) async {
-
     /*
       TODO: this is not getting wrapped!!!! should we call executeTask or
       should we add a different kinda base class for this case??
      */
 
-    JefeProject getProjectByName(String type, String name) =>
-        _graph.getProjectByName(name).getOrElse(() =>
-            throw new ArgumentError('$type project $name does not exist'));
-
-    final serverProject = getProjectByName('server', serverProjectName);
-    final clientProject = getProjectByName('client', clientProjectName);
+    final serverProject = _getProjectByName('server', serverProjectName);
+    final clientProject = _getProjectByName('client', clientProjectName);
 
     final dockerfile = new Dockerfile();
 
@@ -117,8 +112,8 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
 
     dockerfile.cmd([]);
 
-    final serverMain = p.join(
-        serverProject.installDirectory.path, 'bin/server.dart');
+    final serverMain =
+        p.join(serverProject.installDirectory.path, 'bin/server.dart');
 
     dockerfile.workDir(serverFiles.workDir);
 
@@ -136,69 +131,66 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
 //);
 
   Future generateProductionDockerfile(
-          String serverProjectName, String clientProjectName,
-          {String serverGitRef,
-          String clientGitRef,
-          Directory outputDirectory,
-          String dartVersion: 'latest',
-          Map<String, dynamic> environment: const {},
-          Iterable<int> exposePorts: const [],
-          Iterable<String> entryPointOptions: const [],
-          String targetRootPath: '/app'}) =>
-      dependencyGraphCommand('generate Dockerfile',
-          (JefeProjectGraph graph, Directory rootDirectory, _) async {
-        final serverProjectDeps = graph.forProject(serverProjectName);
-        final clientProjectDeps = graph.forProject(clientProjectName);
+      String serverProjectName, String clientProjectName,
+      {String serverGitRef,
+      String clientGitRef,
+      Directory outputDirectory,
+      String dartVersion: 'latest',
+      Map<String, dynamic> environment: const {},
+      Iterable<int> exposePorts: const [],
+      Iterable<String> entryPointOptions: const [],
+      String targetRootPath: '/app'}) async {
+    final serverProject = _getProjectByName('server', serverProjectName);
+    final clientProject = _getProjectByName('client', clientProjectName);
 
-        final pathHandler =
-            new _PathHandler(rootDirectory.path, targetRootPath, false);
+    final pathHandler =
+        new _PathHandler(rootDirectory.path, targetRootPath, false);
 
-        final dockerfile = new Dockerfile();
+    final dockerfile = new Dockerfile();
 
-        dockerfile.from('google/dart', tag: dartVersion);
+    dockerfile.from('google/dart', tag: dartVersion);
 
-        _setupForPrivateGit(true, dockerfile);
+    _setupForPrivateGit(true, dockerfile);
 
-        await _cloneTopLevelProject(
-            dockerfile, serverProjectDeps, serverGitRef, pathHandler);
-        await _cloneTopLevelProject(
-            dockerfile, clientProjectDeps, clientGitRef, pathHandler);
-        dockerfile.run('pub', args: ['build']);
+    await _cloneTopLevelProject(
+        dockerfile, serverProject, serverGitRef, pathHandler);
+    await _cloneTopLevelProject(
+        dockerfile, clientProject, clientGitRef, pathHandler);
+    dockerfile.run('pub', args: ['build']);
 
-        dockerfile.envs(environment);
+    dockerfile.envs(environment);
 
-        dockerfile.expose(exposePorts);
+    dockerfile.expose(exposePorts);
 
-        dockerfile.cmd([]);
+    dockerfile.cmd([]);
 
-        dockerfile.workDir(pathHandler
-            .targetPath(serverProjectDeps.project.installDirectory.path));
+    dockerfile.workDir(
+        pathHandler.targetPath(serverProject.project.installDirectory.path));
 
-        final serverMain = p.join(
-            serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
+    final serverMain =
+        p.join(serverProject.installDirectory.path, 'bin/server.dart');
 
-        dockerfile.entryPoint('/usr/bin/dart',
-            args: concat([
-              entryPointOptions,
-              [pathHandler.targetPath(serverMain)]
-            ]));
+    dockerfile.entryPoint('/usr/bin/dart',
+        args: concat(<Iterable<String>>[
+          entryPointOptions,
+          [pathHandler.targetPath(serverMain)]
+        ]) as Iterable<String>);
 
-        final saveDirectory =
-            outputDirectory != null ? outputDirectory : rootDirectory;
-        await dockerfile.save(saveDirectory);
-      });
+    final saveDirectory =
+        outputDirectory != null ? outputDirectory : rootDirectory;
+    await dockerfile.save(saveDirectory);
+  }
 
   Future _cloneTopLevelProject(
       Dockerfile dockerfile,
-      ProjectDependencies topLevelProjectDeps,
+      JefeProject topLevelProject,
       String gitRef,
       _PathHandler pathHandler) async {
     final ref = gitRef != null
         ? gitRef
-        : (await gitCurrentTagName(await topLevelProjectDeps.project.gitDir))
-            .get();
+        : (await gitCurrentTagName(await topLevelProject.gitDir)).get();
 
-    final dir = topLevelProjectDeps.project.installDirectory;
+    final dir = topLevelProject.project.installDirectory;
     final dirPath = dir.path;
 
     final targetPath = pathHandler.targetPath(dirPath);
@@ -207,7 +199,7 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
       '-q',
       '-b',
       ref,
-      topLevelProjectDeps.project.gitUri,
+      topLevelProject.project.gitUri,
       targetPath
     ]);
     dockerfile.workDir(targetPath);
@@ -245,6 +237,10 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
           args: ['github.com', '>>', '/root/.ssh/known_hosts']);
     }
   }
+
+  JefeProject _getProjectByName(String type, String name) =>
+      _graph.getProjectByName(name).getOrElse(
+          () => throw new ArgumentError('$type project $name does not exist'));
 }
 
 class _PathHandler {
