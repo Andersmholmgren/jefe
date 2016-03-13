@@ -62,7 +62,7 @@ class GitFeatureCommandsMultiProjectFlowImpl
     return process/*<Option<String>>*/(
         'current feature name',
         (JefeProject p) async =>
-            (await singleProjectCommandfactory(p)).currentFeatureName(),
+            (await singleProjectCommandFactory(p)).currentFeatureName(),
         combine: extractName);
   }
 }
