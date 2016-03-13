@@ -74,4 +74,6 @@ class ProjectVersions2 {
 class ProjectStatus {
   final ProjectVersions2 versions;
   final bool hasChangesSinceLastGitVersion;
+
+  ProjectStatus(this.versions, this.hasChangesSinceLastGitVersion);
 }
