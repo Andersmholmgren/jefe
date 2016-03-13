@@ -80,7 +80,7 @@ class JefeProjectImpl extends ProjectImpl
   GitCommands _git;
 
   @override
-  GitCommands get git => _git ??= new GitCommandsImpl(this);
+  GitCommands get git => _git ??= createGitCommands(this);
 
 //  GitCommands _gitCurrentProject;
 
@@ -117,7 +117,9 @@ class JefeProjectImpl extends ProjectImpl
   ProjectCommands get singleProjectCommands {
     ProjectCommands create() {
 //      final _gitDir = await gitDir;
-      return new ProjectCommands(createGitCommands(this), null, null, null);
+      return new ProjectCommands(
+          createGitCommands(this, multiProject: false),
+        createGitFeatureCommands(), null, null, null);
     }
 
     return _singleProjectCommands ??= create();

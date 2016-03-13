@@ -16,13 +16,11 @@ import 'package:pub_semver/pub_semver.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
-abstract class GitFeatureCommandsFlowImpl implements GitFeatureCommands {
-  factory GitFeatureCommandsFlowImpl(JefeProject project,
-      {bool multiProject: true}) {
-    return multiProject
-        ? new GitFeatureCommandsMultiProjectFlowImpl(project)
-        : new GitFeatureCommandsSingleProjectFlowImpl(project);
-  }
+GitFeatureCommands createGitFeatureCommands(JefeProjectGraph graph,
+    {bool multiProject: true}) {
+  return multiProject
+      ? new GitFeatureCommandsMultiProjectImpl(graph)
+      : new GitFeatureCommandsSingleProjectImpl(graph as JefeProject);
 }
 
 class GitFeatureCommandsSingleProjectFlowImpl

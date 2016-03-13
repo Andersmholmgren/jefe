@@ -23,14 +23,6 @@ GitCommands createGitCommands(JefeProjectGraph graph,
       : new GitCommandsSingleProjectImpl(graph as JefeProject);
 }
 
-//abstract class GitCommandsImpl implements GitCommands {
-//  factory GitCommandsImpl(JefeProjectGraph graph, {bool multiProject: true}) {
-//    return multiProject
-//        ? new GitCommandsMultiProjectImpl(graph)
-//        : new GitCommandsSingleProjectImpl(graph as JefeProject);
-//  }
-//}
-
 class GitCommandsSingleProjectImpl
     extends SingleProjectCommandSupport<GitCommands> implements GitCommands {
   GitCommandsSingleProjectImpl(JefeProject project)
