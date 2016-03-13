@@ -24,6 +24,8 @@ import 'package:pubspec/pubspec.dart';
 import 'package:quiver/iterables.dart';
 import 'package:jefe/src/project/project_lifecycle.dart';
 import 'package:jefe/src/project/impl/project_lifecycle_impl.dart';
+import 'package:jefe/src/project/impl/process_commands_impl.dart';
+import 'package:jefe/src/project/impl/docker_commands_impl.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
@@ -92,6 +94,10 @@ class JefeProjectImpl extends ProjectImpl
   @override
   ProjectLifecycle get lifecycle => multiProjectCommands.lifecycle;
 
+//  ProjectCommands _createProcessCommands(bool multiProject) {
+//
+//  }
+
   ProjectCommands _singleProjectCommands;
   @override
   ProjectCommands get singleProjectCommands {
@@ -101,22 +107,27 @@ class JefeProjectImpl extends ProjectImpl
           createGitFeatureCommands(this, multiProject: false),
           createPubSpecCommands(this, multiProject: false),
           createPubCommands(this, multiProject: false),
-          createProjectLifecycle(this, multiProject: false));
+          createProjectLifecycle(this, multiProject: false),
+          createProcessCommands(this, multiProject: false));
     }
 
     return _singleProjectCommands ??= create();
   }
 
-  ProjectCommands _multiProjectCommands;
+  MultiProjectCommands _multiProjectCommands;
 //  @override
-  ProjectCommands get multiProjectCommands {
-    ProjectCommands create() {
-      return new ProjectCommands(
+  MultiProjectCommands get multiProjectCommands {
+    MultiProjectCommands create() {
+      return new MultiProjectCommands(
           createGitCommands(this, multiProject: true),
           createGitFeatureCommands(this, multiProject: true),
           createPubSpecCommands(this, multiProject: true),
           createPubCommands(this, multiProject: true),
-          createProjectLifecycle(this, multiProject: true));
+          createProjectLifecycle(this, multiProject: true),
+          createProcessCommands(this, multiProject: false),
+          createDockerCommands(this,
+              installDirectory, // TODO: not sure if it is this or the container dir
+              multiProject: false));
     }
 
     return _multiProjectCommands ??= create();
