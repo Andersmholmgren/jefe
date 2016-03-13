@@ -18,6 +18,8 @@ abstract class GitFeatureCommands {
   /// The branch that features merge onto when they complete
   String get developBranchName;
 
+  Future<bool> get isOnDevelopBranch;
+
   /// Performs any initialisation such as defining the names of directories etc
   /// to be used
   Future init();

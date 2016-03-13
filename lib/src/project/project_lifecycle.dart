@@ -14,14 +14,12 @@ abstract class ProjectLifecycle {
   /// A command to start a new feature, performing all the tasks necessary to
   /// put the projects within the group in the correct state, including the
   /// git branches, creating path dependencies etc
-  Future startNewFeature(String featureName,
-      {bool doPush: false});
+  Future startNewFeature(String featureName, {bool doPush: false});
 
   // Complete the feature by performing all the tasks necessary to return
   // the projects to the stable development state. Includes mergine git branches,
   // creating to git dependencies etc
-  Future completeFeature(String featureName,
-      {bool doPush: false});
+  Future completeFeature({String featureName, bool doPush: false});
 
   /// Performs checks that things are in a healthy state for a release. e.g.
   /// make sure all tests pass

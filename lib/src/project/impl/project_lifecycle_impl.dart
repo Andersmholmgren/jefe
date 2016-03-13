@@ -16,7 +16,7 @@ import 'package:jefe/src/project/pub_commands.dart';
 import 'package:jefe/src/project/pubspec_commands.dart';
 import 'package:jefe/src/project/release_type.dart';
 import 'package:jefe/src/project_commands/project_command.dart'
-    show executeTask;
+    show CommandConcurrencyMode, executeTask;
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
@@ -51,36 +51,49 @@ class ProjectLifecycleImpl extends Object
   }
 
   @override
-  Future completeFeature(String featureName, {bool doPush: false}) {
-    if (!recursive)
-      return completeFeatureForCurrentProject(featureName, doPush: doPush);
-
-    Future doComplete(JefeProject project) => project.lifecycle
-        .completeFeature(featureName, doPush: doPush, recursive: false);
-
+  Future completeFeature({String featureName, bool doPush: false}) {
     return executeTask('complete development of feature $featureName',
-        () => graph.processDepthFirst(doComplete));
-  }
-
-  Future completeFeatureForCurrentProject(String featureName,
-      {bool doPush: false}) {
-    return executeTask(
-        'complete development of feature $featureName for project ${graph.name}',
         () async {
-      await _git.assertWorkingTreeClean();
+      await graph.git.assertWorkingTreeClean();
+      final currentFeatureNameOpt = await graph.gitFeature.currentFeatureName();
+      if (currentFeatureNameOpt is Some &&
+          featureName != null &&
+          currentFeatureNameOpt.get() != featureName) {
+        throw new StateError('some projects are on a different feature branch '
+            '(${currentFeatureNameOpt.get()}) to that specified ($featureName');
+      } else if (currentFeatureNameOpt is None && featureName == null) {
+        // nothing to do. We are not on any feature branch and no feature name
+        // requested
+        return null;
+      } else {
+        final finishingFeatureName = featureName ?? currentFeatureNameOpt.get();
 
-      final currentBranchName = await gitCurrentBranchName(await graph.gitDir);
-      if (!(currentBranchName == _gitFeature.developBranchName)) {
-        await _gitFeature.featureFinish(featureName,
-            excludeOnlyCommitIf: (Commit c) =>
-                c.message.startsWith(featureStartCommitPrefix));
+        Future completeOnProject(JefeProject p) async {
+          if (await p.gitFeature.isOnDevelopBranch) {
+            _log.finer(
+                'project ${p.name} is already on develop branch. Nothing to do');
+            return;
+          }
+          if ((await p.gitFeature.currentFeatureName()).getOrElse(() => null) !=
+              finishingFeatureName) {
+            throw new StateError(
+                "project ${p.name} is neither on feature branch or develop");
+          }
+
+          await p.gitFeature.featureFinish(featureName,
+              excludeOnlyCommitIf: (Commit c) =>
+                  c.message.startsWith(featureStartCommitPrefix));
+
+          await p.pubspecCommands.setToGitDependencies();
+          await p.pub.get();
+          await p.git.commit('completed development of feature $featureName');
+
+          if (doPush) await p.git.push();
+        }
+
+        return process('TODO', completeOnProject,
+            mode: CommandConcurrencyMode.serialDepthFirst);
       }
-
-      await _pubspec.setToGitDependencies();
-      await _pub.get();
-      await _git.commit('completed development of feature $featureName');
-
-      if (doPush) await _git.push();
     });
   }
 
