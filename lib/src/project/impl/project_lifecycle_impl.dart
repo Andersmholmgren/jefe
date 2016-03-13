@@ -315,7 +315,7 @@ class ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
   final JefeProject _project;
   ProjectLifecycleSingleProjectImpl(this._project);
 
-  GitCommands get _git => _project.git.singleProjectCommandFor(_project);
+  GitCommands get _git => _project.s;//git.singleProjectCommandFor(_project);
   GitFeatureCommands get _gitFeature =>
       _project.gitFeature.singleProjectCommandFor(_project);
   PubCommands get _pub => _project.pub.singleProjectCommandFor(_project);

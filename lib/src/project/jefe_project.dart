@@ -19,7 +19,7 @@ abstract class JefeProject extends Project implements JefeProjectGraph {
   Set<JefeProject> get indirectDependencies;
   Set<JefeProject> get allDependencies;
 
-  Future<ProjectCommands> get singleProjectCommands;
+  ProjectCommands get singleProjectCommands;
 }
 
 /// Some function applied to a [JefeProject]

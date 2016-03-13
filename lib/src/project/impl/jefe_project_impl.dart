@@ -114,14 +114,13 @@ class JefeProjectImpl extends ProjectImpl
   ProjectCommands _singleProjectCommands;
 
   @override
-  Future<ProjectCommands> get singleProjectCommands async {
-    Future<ProjectCommands> create() async {
-      final _gitDir = await gitDir;
-      return new ProjectCommands(
-          new GitCommandsSingleProjectImpl(this, _gitDir));
+  ProjectCommands get singleProjectCommands {
+    ProjectCommands create() {
+//      final _gitDir = await gitDir;
+      return new ProjectCommands(createGitCommands(this), null, null, null);
     }
 
-    return _singleProjectCommands ??= await create();
+    return _singleProjectCommands ??= create();
   }
 }
 
@@ -131,12 +130,12 @@ class JefeProjectSetImpl extends DelegatingSet<JefeProject>
   JefeProjectSetImpl(Set<JefeProject> base) : super(base);
 
   Option<JefeProject> getProjectByName(String projectName) =>
-      map/**<Option<JefeProject>>*/((c) => c.getProjectByName(projectName))
+      map /**<Option<JefeProject>>*/ ((c) => c.getProjectByName(projectName))
           .firstWhere((o) => o is Some, orElse: () => const None())
       as Option<JefeProject>;
 
   Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) =>
-      expand/**<JefeProject>*/((n) => n.getDepthFirst(visited))
+      expand /**<JefeProject>*/ ((n) => n.getDepthFirst(visited))
       as Iterable<JefeProject>;
 }
 
