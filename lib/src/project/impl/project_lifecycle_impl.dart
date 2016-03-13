@@ -91,7 +91,8 @@ class ProjectLifecycleImpl extends Object
           if (doPush) await p.git.push();
         }
 
-        return process('TODO', completeOnProject,
+        return process(
+            'complete feature $finishingFeatureName', completeOnProject,
             mode: CommandConcurrencyMode.serialDepthFirst);
       }
     });
