@@ -17,7 +17,7 @@ typedef Callable<T> _Processor<T>(ProjectFunction/*<T>*/ command,
  * project manner.
  */
 
-class MultiProjectCommandSupport<C> {
+class MultiProjectCommandSupport<C> extends Object with CommandSupport {
   final JefeProjectGraph graph;
 
   final SingleProjectCommandFactory<C> singleProjectCommandFactory;
@@ -53,6 +53,10 @@ class MultiProjectCommandSupport<C> {
     return process(MirrorSystem.getName(i.memberName), projectFunction,
         mode: defaultConcurrencyMode);
   }
+}
+
+abstract class CommandSupport {
+  JefeProjectGraph get graph;
 
   Future/*<T>*/ process/*<T>*/(
       String taskDescription,
