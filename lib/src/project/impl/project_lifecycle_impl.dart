@@ -199,6 +199,7 @@ class _ProjectLifecycleSingleProjectImpl
           'project ${_project.name} is already on develop branch. Nothing to do');
       return;
     }
+
     final currentFeatureNameOpt = await spc.gitFeature.currentFeatureName();
     if (currentFeatureNameOpt is Some &&
         featureName != null &&
@@ -212,7 +213,7 @@ class _ProjectLifecycleSingleProjectImpl
       if ((await spc.gitFeature.currentFeatureName()).getOrElse(() => null) !=
           finishingFeatureName) {
         throw new StateError(
-            "project ${p.name} is neither on feature branch or develop");
+            "project ${_project.name} is neither on feature branch or develop");
       }
 
       await spc.gitFeature.featureFinish(featureName,
@@ -247,8 +248,8 @@ class _ProjectLifecycleSingleProjectImpl
           {ReleaseType type: ReleaseType.minor,
           bool autoUpdateHostedVersions: false}) =>
       executeTask('check release versions', () async {
-        final ProjectVersions versions = await getCurrentProjectVersions(
-            _project, type, autoUpdateHostedVersions);
+        final ProjectVersions versions =
+            await getCurrentProjectVersions(type, autoUpdateHostedVersions);
         if (versions.newReleaseVersion is Some) {
           _log.info(
               '==> project ${_project.name} will be upgraded from version: '
@@ -271,7 +272,7 @@ class _ProjectLifecycleSingleProjectImpl
 
     if (!projectVersions.newReleaseRequired) {
       // no release needed
-      _log.fine('no changes needing release for ${graph.name}');
+      _log.fine('no changes needing release for ${_project.name}');
       return;
     } else {
       final releaseVersion = projectVersions.newReleaseVersion.get();
@@ -281,7 +282,8 @@ class _ProjectLifecycleSingleProjectImpl
       await spc.gitFeature.releaseStart(releaseVersion.toString());
 
       if (releaseVersion != projectVersions.pubspecVersion) {
-        await p.updatePubspec(p.pubspec.copy(version: releaseVersion));
+        await _project
+            .updatePubspec(_project.pubspec.copy(version: releaseVersion));
       }
 
       await spc.pubspecCommands.setToHostedDependencies();
@@ -320,7 +322,7 @@ class _ProjectLifecycleSingleProjectImpl
 
   Future<ProjectVersions> getCurrentProjectVersions(
       ReleaseType type, bool autoUpdateHostedVersions) async {
-    final currentProjectVersions = await project.projectVersions;
+    final currentProjectVersions = await _project.projectVersions;
 
     _log.fine('${_project.name}: $currentProjectVersions');
 
