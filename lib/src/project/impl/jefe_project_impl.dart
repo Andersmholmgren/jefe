@@ -47,7 +47,7 @@ class JefeProjectImpl extends ProjectImpl
       Directory installDirectory, PubSpec pubspec, HostedMode hostedMode,
       {GitFeatureCommandsFactory gitFeatureCommandsFactory})
       : this._gitFeatureCommandsFactory = (gitFeatureCommandsFactory ??
-            (JefeProject p) => new GitFeatureCommandsFlowImpl(p)),
+            (JefeProject p) => createGitFeatureCommands(p)),
         super(gitUri, installDirectory, pubspec, hostedMode);
 
   JefeProjectImpl.from(Set<JefeProject> directDependencies, Project project,
