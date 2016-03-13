@@ -128,7 +128,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   @override
   Future<Set<String>> get exportedPackageNames async {
     final Iterable<ExportDirective> exports = (await compilationUnit)
-        .map/*<Iterable<Directive>>*/(
+        .map/**<Iterable<Directive>>*/(
             (cu) => cu.directives.where((d) => d is ExportDirective))
         .getOrDefault(<ExportDirective>[]) as Iterable<ExportDirective>;
 
