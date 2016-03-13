@@ -102,49 +102,36 @@ class ProjectLifecycleImpl extends Object
 
   @override
   Future preRelease(
-      {ReleaseType type: ReleaseType.minor,
-      bool autoUpdateHostedVersions: false,
-      bool recursive: true}) {
-    if (!recursive)
-      return preReleaseCurrentProject(type, autoUpdateHostedVersions);
-
-    Future doPreRelease(JefeProject project) => project.lifecycle.preRelease(
-        type: type,
-        autoUpdateHostedVersions: autoUpdateHostedVersions,
-        recursive: false);
-
-    return executeTask('Pre release checks: type $type',
-        () => graph.processDepthFirst(doPreRelease));
-  }
-
-  Future preReleaseCurrentProject(
-          ReleaseType type, bool autoUpdateHostedVersions) =>
-      executeTask('Pre release checks for project ${graph.name}', () async {
-        await _git.assertWorkingTreeClean();
-        await _gitFeature.assertNoActiveReleases();
-        await _git.assertOnBranch(_gitFeature.developBranchName);
-        await _git.fetch();
-        await _git.updateFromRemote('master');
-        await _git.updateFromRemote(_gitFeature.developBranchName);
-        await _git.merge('master');
+          {ReleaseType type: ReleaseType.minor,
+          bool autoUpdateHostedVersions: false}) =>
+      process('Pre release checks for project', (JefeProject p) async {
+        final s = p.singleProjectCommands;
+        await s.git.assertWorkingTreeClean();
+        await s.gitFeature.assertNoActiveReleases();
+        await s.git.assertOnBranch(s.gitFeature.developBranchName);
+        await s.git.fetch();
+        await s.git.updateFromRemote('master');
+        await s.git.updateFromRemote(s.gitFeature.developBranchName);
+        await s.git.merge('master');
         await checkReleaseVersions(
             type: type, autoUpdateHostedVersions: autoUpdateHostedVersions);
-        await _pub.test();
+        await s.pub.test();
       });
 
-  Future checkReleaseVersions(
+  // TODO: rework
+  Future checkReleaseVersions(JefeProject p,
           {ReleaseType type: ReleaseType.minor,
           bool autoUpdateHostedVersions: false}) =>
       executeTask('check release versions', () async {
-        final ProjectVersions versions = await getCurrentProjectVersions(
-            graph, type, autoUpdateHostedVersions);
+        final ProjectVersions versions =
+            await getCurrentProjectVersions(p, type, autoUpdateHostedVersions);
         if (versions.newReleaseVersion is Some) {
-          _log.info('==> project ${graph.name} will be upgraded from version: '
+          _log.info('==> project ${p.name} will be upgraded from version: '
               '${versions.taggedGitVersion} '
               'to: ${versions.newReleaseVersion.get()}. '
               'It will ${versions.hasBeenPublished ? "" : "NOT "}be published to pub');
         } else {
-          _log.info('project ${graph.name} will NOT be upgraded. '
+          _log.info('project ${p.name} will NOT be upgraded. '
               'It will remain at version: ${versions.pubspecVersion}');
         }
       });
