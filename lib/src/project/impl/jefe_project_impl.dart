@@ -116,10 +116,12 @@ class JefeProjectImpl extends ProjectImpl
   @override
   ProjectCommands get singleProjectCommands {
     ProjectCommands create() {
-//      final _gitDir = await gitDir;
       return new ProjectCommands(
           createGitCommands(this, multiProject: false),
-        createGitFeatureCommands(), null, null, null);
+          createGitFeatureCommands(this, multiProject: false),
+          null,
+          null,
+          createProjectLifecycle(this, multiProject: false));
     }
 
     return _singleProjectCommands ??= create();
