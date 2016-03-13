@@ -6,13 +6,10 @@ library jefe.project.commands.lifecycle.impl;
 import 'dart:async';
 
 import 'package:git/git.dart';
-import 'package:jefe/src/git/git.dart';
-import 'package:jefe/src/project/git_commands.dart';
-import 'package:jefe/src/project/git_feature.dart';
+import 'package:jefe/src/project/impl/multi_project_command_support.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/project.dart';
 import 'package:jefe/src/project/project_lifecycle.dart';
-import 'package:jefe/src/project/pub_commands.dart';
 import 'package:jefe/src/project/pubspec_commands.dart';
 import 'package:jefe/src/project/release_type.dart';
 import 'package:jefe/src/project_commands/project_command.dart'
@@ -20,7 +17,6 @@ import 'package:jefe/src/project_commands/project_command.dart'
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
-import 'package:jefe/src/project/impl/multi_project_command_support.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
@@ -46,7 +42,9 @@ class ProjectLifecycleSingleProjectImpl
 class ProjectLifecycleMultiProjectImpl
     extends MultiProjectCommandSupport<ProjectLifecycle>
     implements ProjectLifecycle {
-  ProjectLifecycleMultiProjectImpl(JefeProjectGraph graph) : super(graph);
+  ProjectLifecycleMultiProjectImpl(JefeProjectGraph graph)
+      : super(graph,
+            (JefeProject p) async => new ProjectLifecycleSingleProjectImpl(p));
 
   @override
   Future completeFeature({String featureName, bool doPush: false}) {
