@@ -71,6 +71,12 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
       bool omitClientWhenPathDependencies: true,
       bool setupForPrivateGit: true,
       String targetRootPath: '/app'}) async {
+
+    /*
+      TODO: this is not getting wrapped!!!! should we call executeTask or
+      should we add a different kinda base class for this case??
+     */
+
     JefeProject getProjectByName(String type, String name) =>
         _graph.getProjectByName(name).getOrElse(() =>
             throw new ArgumentError('$type project $name does not exist'));
