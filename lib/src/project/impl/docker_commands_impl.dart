@@ -81,8 +81,8 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
         _graph.getProjectByName(name).getOrElse(() =>
             throw new ArgumentError('$type project $name does not exist'));
 
-    final serverProjectDeps = getProjectByName('server', serverProjectName);
-    final clientProjectDeps = getProjectByName('client', clientProjectName);
+    final serverProject = getProjectByName('server', serverProjectName);
+    final clientProject = getProjectByName('client', clientProjectName);
 
     final dockerfile = new Dockerfile();
 
@@ -91,10 +91,10 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
     _setupForPrivateGit(setupForPrivateGit, dockerfile);
 
     final serverFiles = new _TopLevelProjectFiles(
-        dockerfile, serverProjectDeps, rootDirectory.path, targetRootPath);
+        dockerfile, serverProject, rootDirectory.path, targetRootPath);
 
     final clientFiles = new _TopLevelProjectFiles(
-        dockerfile, clientProjectDeps, rootDirectory.path, targetRootPath);
+        dockerfile, clientProject, rootDirectory.path, targetRootPath);
 
     final omitClient =
         omitClientWhenPathDependencies && clientFiles.hasPathDependencies;
@@ -118,7 +118,7 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
     dockerfile.cmd([]);
 
     final serverMain = p.join(
-        serverProjectDeps.project.installDirectory.path, 'bin/server.dart');
+        serverProject.installDirectory.path, 'bin/server.dart');
 
     dockerfile.workDir(serverFiles.workDir);
 
