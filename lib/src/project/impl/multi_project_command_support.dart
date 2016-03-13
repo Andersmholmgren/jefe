@@ -120,6 +120,8 @@ class SingleProjectCommandSupport<C> {
   final SingleProjectCommandFactory<C> _singleProjectCommandFactory;
   InstanceMirror __singleProjectCommandMirror;
 
+  ProjectCommands get spc => _project.singleProjectCommands;
+
   Future<InstanceMirror> get _singleProjectCommandMirror async =>
       __singleProjectCommandMirror ??=
           reflect(await _singleProjectCommandFactory(_project));

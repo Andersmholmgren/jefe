@@ -38,6 +38,7 @@ class ProjectLifecycleImpl extends Object
 //  PubCommands get _pub => graph.pub;
 //  PubSpecCommands get _pubspec => graph.pubspecCommands;
 
+  // TODO: this could be a single process command
   @override
   Future startNewFeature(String featureName, {bool doPush: false}) {
     return process('start new feature "$featureName"', (JefeProject p) async {
@@ -100,6 +101,7 @@ class ProjectLifecycleImpl extends Object
     });
   }
 
+  // TODO: this could be a single process command
   @override
   Future preRelease(
           {ReleaseType type: ReleaseType.minor,
@@ -113,7 +115,7 @@ class ProjectLifecycleImpl extends Object
         await s.git.updateFromRemote('master');
         await s.git.updateFromRemote(s.gitFeature.developBranchName);
         await s.git.merge('master');
-        await checkReleaseVersions(
+        await checkReleaseVersions(p,
             type: type, autoUpdateHostedVersions: autoUpdateHostedVersions);
         await s.pub.test();
       });
@@ -136,6 +138,7 @@ class ProjectLifecycleImpl extends Object
         }
       });
 
+  // TODO: this could be a single process command
   @override
   Future release(
           {ReleaseType type: ReleaseType.minor,
@@ -281,29 +284,24 @@ class ProjectLifecycleImpl extends Object
       ]).any((b) => b);
 }
 
-class ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
-  final JefeProject _project;
-  ProjectLifecycleSingleProjectImpl(this._project);
+class _ProjectLifecycleSingleProjectImpl
+    extends SingleProjectCommandSupport<ProjectLifecycle>
+    implements ProjectLifecycle {
+  _ProjectLifecycleSingleProjectImpl(JefeProject project) : super(project);
 
-  GitCommands get _git => _project.singleProjectCommands.git;
-  GitFeatureCommands get _gitFeature =>
-      _project.gitFeature.singleProjectCommandFor(_project);
-  PubCommands get _pub => _project.pub.singleProjectCommandFor(_project);
-  PubSpecCommands get _pubspec =>
-      _project.pubspecCommands.singleProjectCommandFor(_project);
+//  GitCommands get _git => spc.git;
+//  GitFeatureCommands get _gitFeature => spc.gitFeature;
+//  PubCommands get _pub => spc.pub;
+//  PubSpecCommands get _pubspec => spc.pubspecCommands;
 
   @override
-  Future startNewFeature(String featureName, {bool doPush: false}) {
-    return executeTask(
-        'set up project for new feature "$featureName" for project ${_project.name}',
-        () async {
-      await _git.assertWorkingTreeClean();
-      await _gitFeature.featureStart(featureName);
-      await _pubspec.setToPathDependencies();
-      await _pub.get();
-      await _git.commit('$featureStartCommitPrefix $featureName');
-      if (doPush) await _git.push();
-    });
+  Future startNewFeature(String featureName, {bool doPush: false}) async {
+      await spc.git.assertWorkingTreeClean();
+      await spc.gitFeature.featureStart(featureName);
+      await spc.pubspecCommands.setToPathDependencies();
+      await spc.pub.get();
+      await spc.git.commit('$featureStartCommitPrefix $featureName');
+      if (doPush) await spc.git.push();
   }
 
   @override
