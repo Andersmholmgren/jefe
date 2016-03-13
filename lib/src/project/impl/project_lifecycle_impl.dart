@@ -120,23 +120,23 @@ class ProjectLifecycleImpl extends Object
 //        await s.pub.test();
 //      });
 
-  // TODO: rework
-  Future checkReleaseVersions(JefeProject p,
-          {ReleaseType type: ReleaseType.minor,
-          bool autoUpdateHostedVersions: false}) =>
-      executeTask('check release versions', () async {
-        final ProjectVersions versions =
-            await getCurrentProjectVersions(p, type, autoUpdateHostedVersions);
-        if (versions.newReleaseVersion is Some) {
-          _log.info('==> project ${p.name} will be upgraded from version: '
-              '${versions.taggedGitVersion} '
-              'to: ${versions.newReleaseVersion.get()}. '
-              'It will ${versions.hasBeenPublished ? "" : "NOT "}be published to pub');
-        } else {
-          _log.info('project ${p.name} will NOT be upgraded. '
-              'It will remain at version: ${versions.pubspecVersion}');
-        }
-      });
+//  // TODO: rework
+//  Future checkReleaseVersions(JefeProject p,
+//          {ReleaseType type: ReleaseType.minor,
+//          bool autoUpdateHostedVersions: false}) =>
+//      executeTask('check release versions', () async {
+//        final ProjectVersions versions =
+//            await getCurrentProjectVersions(p, type, autoUpdateHostedVersions);
+//        if (versions.newReleaseVersion is Some) {
+//          _log.info('==> project ${p.name} will be upgraded from version: '
+//              '${versions.taggedGitVersion} '
+//              'to: ${versions.newReleaseVersion.get()}. '
+//              'It will ${versions.hasBeenPublished ? "" : "NOT "}be published to pub');
+//        } else {
+//          _log.info('project ${p.name} will NOT be upgraded. '
+//              'It will remain at version: ${versions.pubspecVersion}');
+//        }
+//      });
 
   // TODO: this could be a single process command
   @override
@@ -144,44 +144,47 @@ class ProjectLifecycleImpl extends Object
           {ReleaseType type: ReleaseType.minor,
           bool autoUpdateHostedVersions: false,
           bool recursive: true}) =>
-      process('release', (JefeProject p) async {
-        final s = p.singleProjectCommands;
-
-        final ProjectVersions projectVersions =
-            await getCurrentProjectVersions(p, type, autoUpdateHostedVersions);
-
-        if (!projectVersions.newReleaseRequired) {
-          // no release needed
-          _log.fine('no changes needing release for ${graph.name}');
-          return;
-        } else {
-          final releaseVersion = projectVersions.newReleaseVersion.get();
-
-          _log.fine('new release version $releaseVersion');
-
-          await s.gitFeature.releaseStart(releaseVersion.toString());
-
-          if (releaseVersion != projectVersions.pubspecVersion) {
-            await p.updatePubspec(p.pubspec.copy(version: releaseVersion));
-          }
-
-          await s.pubspec.setToHostedDependencies();
-
-          await s.pub.get();
-
-          await s.pub.test();
-
-          await s.git.commit('releasing version $releaseVersion');
-
-          if (projectVersions.currentVersions.isHosted) {
-            await s.pub.publish();
-          }
-
-          await s.gitFeature.releaseFinish(releaseVersion.toString());
-
-          await s.git.push();
-        }
-      });
+      process('release', (JefeProject p) async =>
+        p.singleProjectCommands.lifecycle.release(type: type,
+          ),
+        mode: CommandConcurrencyMode.serialDepthFirst);
+//        final s = p.singleProjectCommands;
+//
+//        final ProjectVersions projectVersions =
+//            await getCurrentProjectVersions(p, type, autoUpdateHostedVersions);
+//
+//        if (!projectVersions.newReleaseRequired) {
+//          // no release needed
+//          _log.fine('no changes needing release for ${graph.name}');
+//          return;
+//        } else {
+//          final releaseVersion = projectVersions.newReleaseVersion.get();
+//
+//          _log.fine('new release version $releaseVersion');
+//
+//          await s.gitFeature.releaseStart(releaseVersion.toString());
+//
+//          if (releaseVersion != projectVersions.pubspecVersion) {
+//            await p.updatePubspec(p.pubspec.copy(version: releaseVersion));
+//          }
+//
+//          await s.pubspec.setToHostedDependencies();
+//
+//          await s.pub.get();
+//
+//          await s.pub.test();
+//
+//          await s.git.commit('releasing version $releaseVersion');
+//
+//          if (projectVersions.currentVersions.isHosted) {
+//            await s.pub.publish();
+//          }
+//
+//          await s.gitFeature.releaseFinish(releaseVersion.toString());
+//
+//          await s.git.push();
+//        }
+//      });
 
   @override
   Future init({bool doCheckout: true}) {

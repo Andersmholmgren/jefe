@@ -38,8 +38,10 @@ class ProjectCommands {
   final GitFeatureCommands gitFeature;
   final PubSpecCommands pubspecCommands;
   final PubCommands pub;
+  final ProjectLifecycle lifecycle;
 
-  ProjectCommands(this.git, this.gitFeature, this.pubspecCommands, this.pub);
+  ProjectCommands(this.git, this.gitFeature, this.pubspecCommands, this.pub,
+      this.lifecycle);
 }
 
 /// A graph of [JefeProject] ordered by their dependencies
