@@ -159,8 +159,7 @@ class ProjectLifecycleImpl extends Object
           await s.gitFeature.releaseStart(releaseVersion.toString());
 
           if (releaseVersion != projectVersions.pubspecVersion) {
-            await graph
-                .updatePubspec(graph.pubspec.copy(version: releaseVersion));
+            await p.updatePubspec(p.pubspec.copy(version: releaseVersion));
           }
 
           await s.pubspec.setToHostedDependencies();
