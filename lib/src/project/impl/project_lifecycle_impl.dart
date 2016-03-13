@@ -41,12 +41,13 @@ class ProjectLifecycleImpl extends Object
   @override
   Future startNewFeature(String featureName, {bool doPush: false}) {
     return process('start new feature "$featureName"', (JefeProject p) async {
-      await p.git.assertWorkingTreeClean();
-      await p.gitFeature.featureStart(featureName);
-      await p.pubspecCommands.setToPathDependencies();
-      await p.pub.get();
-      await p.git.commit('$featureStartCommitPrefix $featureName');
-      if (doPush) await p.git.push();
+      final s = p.singleProjectCommands;
+      await s.git.assertWorkingTreeClean();
+      await s.gitFeature.featureStart(featureName);
+      await s.pubspecCommands.setToPathDependencies();
+      await s.pub.get();
+      await s.git.commit('$featureStartCommitPrefix $featureName');
+      if (doPush) await s.git.push();
     });
   }
 
@@ -69,26 +70,27 @@ class ProjectLifecycleImpl extends Object
         final finishingFeatureName = featureName ?? currentFeatureNameOpt.get();
 
         Future completeOnProject(JefeProject p) async {
-          if (await p.gitFeature.isOnDevelopBranch) {
+          final s = p.singleProjectCommands;
+          if (await s.gitFeature.isOnDevelopBranch) {
             _log.finer(
                 'project ${p.name} is already on develop branch. Nothing to do');
             return;
           }
-          if ((await p.gitFeature.currentFeatureName()).getOrElse(() => null) !=
+          if ((await s.gitFeature.currentFeatureName()).getOrElse(() => null) !=
               finishingFeatureName) {
             throw new StateError(
                 "project ${p.name} is neither on feature branch or develop");
           }
 
-          await p.gitFeature.featureFinish(featureName,
+          await s.gitFeature.featureFinish(featureName,
               excludeOnlyCommitIf: (Commit c) =>
                   c.message.startsWith(featureStartCommitPrefix));
 
-          await p.pubspecCommands.setToGitDependencies();
-          await p.pub.get();
-          await p.git.commit('completed development of feature $featureName');
+          await s.pubspecCommands.setToGitDependencies();
+          await s.pub.get();
+          await s.git.commit('completed development of feature $featureName');
 
-          if (doPush) await p.git.push();
+          if (doPush) await s.git.push();
         }
 
         return process(
