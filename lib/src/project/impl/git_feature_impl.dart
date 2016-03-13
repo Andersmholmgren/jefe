@@ -19,8 +19,8 @@ Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 GitFeatureCommands createGitFeatureCommands(JefeProjectGraph graph,
     {bool multiProject: true}) {
   return multiProject
-      ? new GitFeatureCommandsMultiProjectImpl(graph)
-      : new GitFeatureCommandsSingleProjectImpl(graph as JefeProject);
+      ? new GitFeatureCommandsMultiProjectFlowImpl(graph)
+      : new GitFeatureCommandsSingleProjectFlowImpl(graph as JefeProject);
 }
 
 class GitFeatureCommandsSingleProjectFlowImpl
