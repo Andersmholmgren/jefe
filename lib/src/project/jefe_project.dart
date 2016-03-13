@@ -31,7 +31,7 @@ typedef bool ProjectFilter(Project p);
 typedef T Combiner<T>(T value, T element);
 
 abstract class JefeGroupCommand<S> {
-  Future<S> singleProjectCommandFor(JefeProject project);
+//  Future<S> singleProjectCommandFor(JefeProject project);
 }
 
 class ProjectCommands {

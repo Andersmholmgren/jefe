@@ -135,8 +135,17 @@ class Jefe {
           String projects,
       @u.Flag(help: 'Instead of running the commands concurrently on the projects, run only one command on one project at a time', abbr: 's')
           bool executeSerially: false}) async {
+    final graph = await _loadGraph(rootDirectory);
+//    if (executeSerially) {
+//      graph.processDepthFirst()
+//
+//    }
+//    executeSerially
+//      ? CommandConcurrencyMode.serialDepthFirst
+//      : CommandConcurrencyMode.concurrentProject
+
     final CommandExecutor executor = await _load(rootDirectory);
-    await executor.execute(process.process(command, args),
+    await executor.execute(process.execute(command, args),
         filter: projectNameFilter(projects),
         concurrencyMode: executeSerially
             ? CommandConcurrencyMode.serialDepthFirst

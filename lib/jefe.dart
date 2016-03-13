@@ -48,7 +48,7 @@ export 'src/project/release_type.dart';
 export 'src/project/docker_commands.dart';
 export 'src/project/git_commands.dart';
 export 'src/project/git_feature.dart';
-export 'src/project_commands/process_commands.dart';
+export 'package:jefe/src/project/process_commands.dart';
 export 'src/project_commands/project_command.dart';
 export 'src/project_commands/project_command_executor.dart';
 export 'src/project/project_lifecycle.dart';
