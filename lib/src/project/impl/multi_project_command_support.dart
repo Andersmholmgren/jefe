@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:mirrors';
 import 'package:logging/logging.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
+import 'package:jefe/src/project/project.dart';
 
 Logger _log = new Logger('jefe.project.command.multiproject');
 
@@ -23,9 +24,12 @@ class MultiProjectCommandSupport<C> extends Object with CommandSupport {
   final SingleProjectCommandFactory<C> singleProjectCommandFactory;
 
   final CommandConcurrencyMode defaultConcurrencyMode;
+  final ProjectFilter projectFilter;
 
   MultiProjectCommandSupport(this.graph, this.singleProjectCommandFactory,
-      {this.defaultConcurrencyMode: CommandConcurrencyMode.concurrentCommand});
+      {this.defaultConcurrencyMode: CommandConcurrencyMode.concurrentCommand,
+      ProjectFilter projectFilter})
+      : this.projectFilter = projectFilter ?? ((Project p) => true);
 
   noSuchMethod(Invocation i) {
     /**
@@ -51,7 +55,7 @@ class MultiProjectCommandSupport<C> extends Object with CommandSupport {
      */
 
     return process(MirrorSystem.getName(i.memberName), projectFunction,
-        mode: defaultConcurrencyMode);
+        mode: defaultConcurrencyMode, filter: projectFilter);
   }
 }
 
