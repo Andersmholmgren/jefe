@@ -48,20 +48,6 @@ class ProjectLifecycleMultiProjectImpl
     implements ProjectLifecycle {
   ProjectLifecycleMultiProjectImpl(JefeProjectGraph graph) : super(graph);
 
-//  // TODO: this could be a single process command
-//  @override
-//  Future startNewFeature(String featureName, {bool doPush: false}) {
-//    return process('start new feature "$featureName"', (JefeProject p) async {
-//      final s = p.singleProjectCommands;
-//      await s.git.assertWorkingTreeClean();
-//      await s.gitFeature.featureStart(featureName);
-//      await s.pubspecCommands.setToPathDependencies();
-//      await s.pub.get();
-//      await s.git.commit('$featureStartCommitPrefix $featureName');
-//      if (doPush) await s.git.push();
-//    });
-//  }
-
   @override
   Future completeFeature({String featureName, bool doPush: false}) {
     return executeTask('complete development of feature $featureName',
@@ -75,43 +61,6 @@ class ProjectLifecycleMultiProjectImpl
     });
   }
 
-//  // TODO: this could be a single process command
-//  @override
-//  Future preRelease(
-//          {ReleaseType type: ReleaseType.minor,
-//          bool autoUpdateHostedVersions: false}) =>
-//      process('Pre release checks', (JefeProject p) async {
-//        final s = p.singleProjectCommands;
-//        await s.git.assertWorkingTreeClean();
-//        await s.gitFeature.assertNoActiveReleases();
-//        await s.git.assertOnBranch(s.gitFeature.developBranchName);
-//        await s.git.fetch();
-//        await s.git.updateFromRemote('master');
-//        await s.git.updateFromRemote(s.gitFeature.developBranchName);
-//        await s.git.merge('master');
-//        await checkReleaseVersions(p,
-//            type: type, autoUpdateHostedVersions: autoUpdateHostedVersions);
-//        await s.pub.test();
-//      });
-
-//  // TODO: rework
-//  Future checkReleaseVersions(JefeProject p,
-//          {ReleaseType type: ReleaseType.minor,
-//          bool autoUpdateHostedVersions: false}) =>
-//      executeTask('check release versions', () async {
-//        final ProjectVersions versions =
-//            await getCurrentProjectVersions(p, type, autoUpdateHostedVersions);
-//        if (versions.newReleaseVersion is Some) {
-//          _log.info('==> project ${p.name} will be upgraded from version: '
-//              '${versions.taggedGitVersion} '
-//              'to: ${versions.newReleaseVersion.get()}. '
-//              'It will ${versions.hasBeenPublished ? "" : "NOT "}be published to pub');
-//        } else {
-//          _log.info('project ${p.name} will NOT be upgraded. '
-//              'It will remain at version: ${versions.pubspecVersion}');
-//        }
-//      });
-
   @override
   Future release(
           {ReleaseType type: ReleaseType.minor,
@@ -122,105 +71,105 @@ class ProjectLifecycleMultiProjectImpl
               type: type, autoUpdateHostedVersions: autoUpdateHostedVersions),
           mode: CommandConcurrencyMode.serialDepthFirst);
 
-  @override
-  Future init({bool doCheckout: true}) {
-    if (!recursive) return initCurrentProject(doCheckout);
+//  @override
+//  Future init({bool doCheckout: true}) {
+//    if (!recursive) return initCurrentProject(doCheckout);
+//
+//    Future doInit(JefeProject project) =>
+//        project.lifecycle.init(doCheckout: doCheckout, recursive: false);
+//
+//    return executeTask(
+//        'Initialising for development', () => graph.processDepthFirst(doInit));
+//  }
+//
+//  Future initCurrentProject(bool doCheckout) {
+//    return executeTask('Initialising for development for project ${graph.name}',
+//        () async {
+//      await _git.fetch();
+//      await _gitFeature.init();
+//
+//      final currentFeatureNameOpt = await _gitFeature.currentFeatureName();
+//
+//      if (currentFeatureNameOpt is Some) {
+//        final currentFeatureName = currentFeatureNameOpt.get();
+//        _log.info('Detected existing feature - $currentFeatureName');
+//        await startNewFeature(currentFeatureName);
+//      } else {
+//        if (doCheckout) await _git.checkout(_gitFeature.developBranchName);
+//      }
+//    });
+//  }
 
-    Future doInit(JefeProject project) =>
-        project.lifecycle.init(doCheckout: doCheckout, recursive: false);
-
-    return executeTask(
-        'Initialising for development', () => graph.processDepthFirst(doInit));
-  }
-
-  Future initCurrentProject(bool doCheckout) {
-    return executeTask('Initialising for development for project ${graph.name}',
-        () async {
-      await _git.fetch();
-      await _gitFeature.init();
-
-      final currentFeatureNameOpt = await _gitFeature.currentFeatureName();
-
-      if (currentFeatureNameOpt is Some) {
-        final currentFeatureName = currentFeatureNameOpt.get();
-        _log.info('Detected existing feature - $currentFeatureName');
-        await startNewFeature(currentFeatureName);
-      } else {
-        if (doCheckout) await _git.checkout(_gitFeature.developBranchName);
-      }
-    });
-  }
-
-  Future<ProjectVersions> getCurrentProjectVersions(JefeProject project,
-      ReleaseType type, bool autoUpdateHostedVersions) async {
-    final currentProjectVersions = await project.projectVersions;
-
-    _log.fine('${project.name}: $currentProjectVersions');
-
-    final Option<Version> releaseVersionOpt = await _getReleaseVersion(
-        currentProjectVersions, autoUpdateHostedVersions, type, project);
-
-    return new ProjectVersions(currentProjectVersions, releaseVersionOpt);
-  }
-
-  Future<Option<Version>> _getReleaseVersion(
-      ProjectVersions2 currentVersions,
-      bool autoUpdateHostedVersions,
-      ReleaseType type,
-      JefeProject project) async {
-    final hasBeenPublished = currentVersions.hasBeenPublished;
-    final isHosted = currentVersions.isHosted;
-    final currentPubspecVersion = currentVersions.pubspecVersion;
-
-    if (currentVersions.hasBeenGitTagged) {
-      final latestTaggedVersion = currentVersions.taggedGitVersion.get();
-      if (latestTaggedVersion > currentPubspecVersion) {
-        throw new StateError('the latest tagged version $latestTaggedVersion'
-            ' is greater than the current pubspec version $currentPubspecVersion');
-      } else if (latestTaggedVersion < currentPubspecVersion) {
-        // manually bumped version
-        return new Some<Version>(currentPubspecVersion);
-      } else {
-        // latest released version is same as pubspec version
-        if (await hasChanges) {
-          if (isHosted && !autoUpdateHostedVersions) {
-            // Hosted packages must observe semantic versioning so not sensible
-            // to try to automatically bump version, unless the user explicitly
-            // requests it
-            throw new ArgumentError(
-                '${project.name} is hosted and has changes. '
-                'The version must be manually changed for hosted packages');
-          } else {
-            return new Some(type.bump(currentPubspecVersion));
-          }
-        } else {
-          return const None();
-        }
-      }
-    } else {
-      // never been tagged
-      if (hasBeenPublished) {
-        if (currentPubspecVersion > currentVersions.publishedVersion.get()) {
-          return new Some(currentPubspecVersion);
-        } else {
-          _log.warning(() =>
-              "Project ${project.name} is hosted but has never been tagged in git. "
-              "Can't tell if there are unpublished changes. "
-              "Will not release as pubspec version is not greater than hosted version");
-          return const None();
-        }
-      } else {
-        // never tagged and never published. Assume it needs releasing
-        return new Some(currentPubspecVersion);
-      }
-    }
-  }
-
-  Future<bool> get hasChanges async =>
-      new Stream<bool>.fromFutures(<Future<bool>>[
-        _gitFeature.hasChangesSinceLatestTaggedVersion,
-        _pubspec.haveDependenciesChanged(DependencyType.hosted)
-      ]).any((b) => b);
+//  Future<ProjectVersions> getCurrentProjectVersions(JefeProject project,
+//      ReleaseType type, bool autoUpdateHostedVersions) async {
+//    final currentProjectVersions = await project.projectVersions;
+//
+//    _log.fine('${project.name}: $currentProjectVersions');
+//
+//    final Option<Version> releaseVersionOpt = await _getReleaseVersion(
+//        currentProjectVersions, autoUpdateHostedVersions, type, project);
+//
+//    return new ProjectVersions(currentProjectVersions, releaseVersionOpt);
+//  }
+//
+//  Future<Option<Version>> _getReleaseVersion(
+//      ProjectVersions2 currentVersions,
+//      bool autoUpdateHostedVersions,
+//      ReleaseType type,
+//      JefeProject project) async {
+//    final hasBeenPublished = currentVersions.hasBeenPublished;
+//    final isHosted = currentVersions.isHosted;
+//    final currentPubspecVersion = currentVersions.pubspecVersion;
+//
+//    if (currentVersions.hasBeenGitTagged) {
+//      final latestTaggedVersion = currentVersions.taggedGitVersion.get();
+//      if (latestTaggedVersion > currentPubspecVersion) {
+//        throw new StateError('the latest tagged version $latestTaggedVersion'
+//            ' is greater than the current pubspec version $currentPubspecVersion');
+//      } else if (latestTaggedVersion < currentPubspecVersion) {
+//        // manually bumped version
+//        return new Some<Version>(currentPubspecVersion);
+//      } else {
+//        // latest released version is same as pubspec version
+//        if (await hasChanges) {
+//          if (isHosted && !autoUpdateHostedVersions) {
+//            // Hosted packages must observe semantic versioning so not sensible
+//            // to try to automatically bump version, unless the user explicitly
+//            // requests it
+//            throw new ArgumentError(
+//                '${project.name} is hosted and has changes. '
+//                'The version must be manually changed for hosted packages');
+//          } else {
+//            return new Some(type.bump(currentPubspecVersion));
+//          }
+//        } else {
+//          return const None();
+//        }
+//      }
+//    } else {
+//      // never been tagged
+//      if (hasBeenPublished) {
+//        if (currentPubspecVersion > currentVersions.publishedVersion.get()) {
+//          return new Some(currentPubspecVersion);
+//        } else {
+//          _log.warning(() =>
+//              "Project ${project.name} is hosted but has never been tagged in git. "
+//              "Can't tell if there are unpublished changes. "
+//              "Will not release as pubspec version is not greater than hosted version");
+//          return const None();
+//        }
+//      } else {
+//        // never tagged and never published. Assume it needs releasing
+//        return new Some(currentPubspecVersion);
+//      }
+//    }
+//  }
+//
+//  Future<bool> get hasChanges async =>
+//      new Stream<bool>.fromFutures(<Future<bool>>[
+//        _gitFeature.hasChangesSinceLatestTaggedVersion,
+//        _pubspec.haveDependenciesChanged(DependencyType.hosted)
+//      ]).any((b) => b);
 }
 
 class _ProjectLifecycleSingleProjectImpl
@@ -354,51 +303,35 @@ class _ProjectLifecycleSingleProjectImpl
   }
 
   @override
-  Future init({bool doCheckout: true}) {
-    if (!recursive) return initCurrentProject(doCheckout);
+  Future init({bool doCheckout: true}) async {
+    await spc.git.fetch();
+    await spc.gitFeature.init();
 
-    Future doInit(JefeProject project) =>
-        project.lifecycle.init(doCheckout: doCheckout, recursive: false);
+    final currentFeatureNameOpt = await spc.gitFeature.currentFeatureName();
 
-    return executeTask('Initialising for development',
-        () => _project.processDepthFirst(doInit));
-  }
-
-  Future initCurrentProject(bool doCheckout) {
-    return executeTask(
-        'Initialising for development for project ${_project.name}', () async {
-      await _git.fetch();
-      await _gitFeature.init();
-
-      final currentFeatureNameOpt = await _gitFeature.currentFeatureName();
-
-      if (currentFeatureNameOpt is Some) {
-        final currentFeatureName = currentFeatureNameOpt.get();
-        _log.info('Detected existing feature - $currentFeatureName');
-        await startNewFeature(currentFeatureName);
-      } else {
-        if (doCheckout) await _git.checkout(_gitFeature.developBranchName);
-      }
-    });
+    if (currentFeatureNameOpt is Some) {
+      final currentFeatureName = currentFeatureNameOpt.get();
+      _log.info('Detected existing feature - $currentFeatureName');
+      await startNewFeature(currentFeatureName);
+    } else {
+      if (doCheckout) await spc.git.checkout(spc.gitFeature.developBranchName);
+    }
   }
 
   Future<ProjectVersions> getCurrentProjectVersions(
       ReleaseType type, bool autoUpdateHostedVersions) async {
     final currentProjectVersions = await project.projectVersions;
 
-    _log.fine('${project.name}: $currentProjectVersions');
+    _log.fine('${_project.name}: $currentProjectVersions');
 
     final Option<Version> releaseVersionOpt = await _getReleaseVersion(
-        currentProjectVersions, autoUpdateHostedVersions, type, project);
+        currentProjectVersions, autoUpdateHostedVersions, type);
 
     return new ProjectVersions(currentProjectVersions, releaseVersionOpt);
   }
 
-  Future<Option<Version>> _getReleaseVersion(
-      ProjectVersions2 currentVersions,
-      bool autoUpdateHostedVersions,
-      ReleaseType type,
-      JefeProject project) async {
+  Future<Option<Version>> _getReleaseVersion(ProjectVersions2 currentVersions,
+      bool autoUpdateHostedVersions, ReleaseType type) async {
     final hasBeenPublished = currentVersions.hasBeenPublished;
     final isHosted = currentVersions.isHosted;
     final currentPubspecVersion = currentVersions.pubspecVersion;
@@ -419,7 +352,7 @@ class _ProjectLifecycleSingleProjectImpl
             // to try to automatically bump version, unless the user explicitly
             // requests it
             throw new ArgumentError(
-                '${project.name} is hosted and has changes. '
+                '${_project.name} is hosted and has changes. '
                 'The version must be manually changed for hosted packages');
           } else {
             return new Some(type.bump(currentPubspecVersion));
@@ -435,7 +368,7 @@ class _ProjectLifecycleSingleProjectImpl
           return new Some(currentPubspecVersion);
         } else {
           _log.warning(() =>
-              "Project ${project.name} is hosted but has never been tagged in git. "
+              "Project ${_project.name} is hosted but has never been tagged in git. "
               "Can't tell if there are unpublished changes. "
               "Will not release as pubspec version is not greater than hosted version");
           return const None();
