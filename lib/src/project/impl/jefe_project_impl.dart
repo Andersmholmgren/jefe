@@ -109,7 +109,7 @@ class JefeProjectImpl extends ProjectImpl
 
   @override
   ProjectLifecycle get lifecycle =>
-      _lifecycle ??= new ProjectLifecycleImpl(this);
+      _lifecycle ??= new ProjectLifecycleMultiProjectImpl(this);
 
   ProjectCommands _singleProjectCommands;
 
