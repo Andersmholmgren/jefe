@@ -54,12 +54,11 @@ DockerCommands createDockerCommands(JefeProjectGraph graph,
 //}
 
 class DockerCommandsMultiProjectImpl implements DockerCommands {
-  final ProjectGroup _graph;
+  final JefeProjectGraph _graph;
 
-  Directory get rootDirectory =>
-      _graph.containerDirectory; // or installDirectory??
+  final Directory _rootDirectory;
 
-  DockerCommandsMultiProjectImpl(this._graph);
+  DockerCommandsMultiProjectImpl(this._graph, this._rootDirectory);
 
   @override
   Future generateDockerfile(String serverProjectName, String clientProjectName,
@@ -86,10 +85,10 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
     _setupForPrivateGit(setupForPrivateGit, dockerfile);
 
     final serverFiles = new _TopLevelProjectFiles(
-        dockerfile, serverProject, rootDirectory.path, targetRootPath);
+        dockerfile, serverProject, _rootDirectory.path, targetRootPath);
 
     final clientFiles = new _TopLevelProjectFiles(
-        dockerfile, clientProject, rootDirectory.path, targetRootPath);
+        dockerfile, clientProject, _rootDirectory.path, targetRootPath);
 
     final omitClient =
         omitClientWhenPathDependencies && clientFiles.hasPathDependencies;
@@ -101,7 +100,7 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
     }
 
     final pathHandler = new _PathHandler(
-        rootDirectory.path,
+        _rootDirectory.path,
         targetRootPath,
         serverFiles.hasPathDependencies &&
             (omitClient || clientFiles.hasPathDependencies));
@@ -124,7 +123,7 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
         ]) as Iterable<String>);
 
     final saveDirectory =
-        outputDirectory != null ? outputDirectory : rootDirectory;
+        outputDirectory != null ? outputDirectory : _rootDirectory;
     await dockerfile.save(saveDirectory);
   }
 //      return executeTask('generate Dockerfile', () => foo()
@@ -144,7 +143,7 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
     final clientProject = _getProjectByName('client', clientProjectName);
 
     final pathHandler =
-        new _PathHandler(rootDirectory.path, targetRootPath, false);
+        new _PathHandler(_rootDirectory.path, targetRootPath, false);
 
     final dockerfile = new Dockerfile();
 
@@ -177,7 +176,7 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
         ]) as Iterable<String>);
 
     final saveDirectory =
-        outputDirectory != null ? outputDirectory : rootDirectory;
+        outputDirectory != null ? outputDirectory : _rootDirectory;
     await dockerfile.save(saveDirectory);
   }
 
