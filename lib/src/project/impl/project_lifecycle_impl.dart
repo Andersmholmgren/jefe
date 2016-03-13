@@ -382,8 +382,8 @@ class _ProjectLifecycleSingleProjectImpl
 
   Future<bool> get hasChanges async =>
       new Stream<bool>.fromFutures(<Future<bool>>[
-        _gitFeature.hasChangesSinceLatestTaggedVersion,
-        _pubspec.haveDependenciesChanged(DependencyType.hosted)
+        spc.gitFeature.hasChangesSinceLatestTaggedVersion,
+        spc.pubspecCommands.haveDependenciesChanged(DependencyType.hosted)
       ]).any((b) => b);
 }
 
