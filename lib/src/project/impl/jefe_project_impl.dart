@@ -119,7 +119,7 @@ class JefeProjectImpl extends ProjectImpl
       return new ProjectCommands(
           createGitCommands(this, multiProject: false),
           createGitFeatureCommands(this, multiProject: false),
-          null,
+          createPubSpecCommands(this, multiProject: false),
           createPubCommands(this, multiProject: false),
           createProjectLifecycle(this, multiProject: false));
     }

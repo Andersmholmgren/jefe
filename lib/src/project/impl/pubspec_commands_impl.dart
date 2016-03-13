@@ -19,13 +19,11 @@ import 'package:jefe/src/project_commands/project_command.dart';
 
 Logger _log = new Logger('jefe.project.commands.pubspec.impl');
 
-abstract class PubSpecCommandsImpl implements PubSpecCommands {
-  factory PubSpecCommandsImpl(JefeProjectGraph graph,
-      {bool multiProject: true}) {
-    return multiProject
-        ? new PubSpecCommandsMultiProjectImpl(graph)
-        : new PubSpecCommandsSingleProjectImpl(graph as JefeProject);
-  }
+PubSpecCommands createPubSpecCommands(JefeProjectGraph graph,
+    {bool multiProject: true}) {
+  return multiProject
+      ? new PubSpecCommandsMultiProjectImpl(graph)
+      : new PubSpecCommandsSingleProjectImpl(graph as JefeProject);
 }
 
 class PubSpecCommandsSingleProjectImpl
