@@ -38,7 +38,8 @@ class HostedPackageVersions {
     final p = parseJson(json);
     final packageName = p.single('name');
     final latest = p.single('latest', (v) => new PubVersion.fromJson(v));
-    final versions = p.list('versions', (v) => new PubVersion.fromJson(v));
+    final versions = p.list('versions', (v) => new PubVersion.fromJson(v))
+        as Iterable<PubVersion>;
 
     return new HostedPackageVersions(packageName, latest, versions);
   }
