@@ -328,17 +328,16 @@ class _ProjectLifecycleSingleProjectImpl
   Future preRelease(
       {ReleaseType type: ReleaseType.minor,
       bool autoUpdateHostedVersions: false}) async {
-    final s = p.singleProjectCommands;
-    await s.git.assertWorkingTreeClean();
-    await s.gitFeature.assertNoActiveReleases();
-    await s.git.assertOnBranch(s.gitFeature.developBranchName);
-    await s.git.fetch();
-    await s.git.updateFromRemote('master');
-    await s.git.updateFromRemote(s.gitFeature.developBranchName);
-    await s.git.merge('master');
+    await spc.git.assertWorkingTreeClean();
+    await spc.gitFeature.assertNoActiveReleases();
+    await spc.git.assertOnBranch(spc.gitFeature.developBranchName);
+    await spc.git.fetch();
+    await spc.git.updateFromRemote('master');
+    await spc.git.updateFromRemote(spc.gitFeature.developBranchName);
+    await spc.git.merge('master');
     await checkReleaseVersions(
         type: type, autoUpdateHostedVersions: autoUpdateHostedVersions);
-    await s.pub.test();
+    await spc.pub.test();
   }
 
   Future checkReleaseVersions(
