@@ -93,7 +93,7 @@ Future<Iterable<String>> _getTagNames(GitDir gitDir) async {
 }
 
 Iterable<Version> _extractVersions(Iterable<String> tagNames) => tagNames
-    .map((String tagName) {
+    .map/*<Option<Version>>*/((String tagName) {
       try {
         return new Some(new Version.parse(tagName));
       } on FormatException catch (_) {
@@ -101,7 +101,7 @@ Iterable<Version> _extractVersions(Iterable<String> tagNames) => tagNames
       }
     })
     .where((o) => o is Some)
-    .map((o) => o.get())
+    .map/*<Version>*/((o) => o.get())
     .toList()..sort();
 
 Future gitPush(GitDir gitDir) async {
