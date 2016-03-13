@@ -13,13 +13,18 @@ import 'package:jefe/src/project/jefe_project.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.impl');
 
 GitCommands createGitCommands(JefeProjectGraph graph,
-    {bool multiProject: true}) {
+    {bool multiProject: true,
+    CommandConcurrencyMode defaultConcurrencyMode,
+    ProjectFilter projectFilter}) {
   return multiProject
-      ? new GitCommandsMultiProjectImpl(graph)
+      ? new GitCommandsMultiProjectImpl(graph,
+          defaultConcurrencyMode: defaultConcurrencyMode,
+          projectFilter: projectFilter)
       : new GitCommandsSingleProjectImpl(graph as JefeProject);
 }
 
@@ -34,9 +39,13 @@ class GitCommandsSingleProjectImpl
 
 class GitCommandsMultiProjectImpl
     extends MultiProjectCommandSupport<GitCommands> implements GitCommands {
-  GitCommandsMultiProjectImpl(JefeProjectGraph graph)
-      : super(graph,
-            (JefeProject p) async => new GitCommandsSingleProjectImpl(p));
+  GitCommandsMultiProjectImpl(JefeProjectGraph graph,
+      {CommandConcurrencyMode defaultConcurrencyMode,
+      ProjectFilter projectFilter})
+      : super(
+            graph, (JefeProject p) async => new GitCommandsSingleProjectImpl(p),
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter);
 }
 
 class _GitCommandsSingleProjectImpl implements GitCommands {
