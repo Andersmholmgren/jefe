@@ -11,7 +11,6 @@ import 'package:jefe/src/git/git.dart';
 import 'package:jefe/src/project/docker_commands.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/project.dart';
-import 'package:jefe/src/project/project_group.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'package:pubspec/pubspec.dart';
@@ -19,11 +18,12 @@ import 'package:quiver/iterables.dart';
 
 Logger _log = new Logger('jefe.project.commands.docker.impl');
 
-DockerCommands createDockerCommands(JefeProjectGraph graph,
+DockerCommands createDockerCommands(
+    JefeProjectGraph graph, Directory rootDirectory,
     {bool multiProject: true}) {
   // no distinction between multi and single project docker. Always operates
   // at one level
-  return new DockerCommandsMultiProjectImpl(graph);
+  return new DockerCommandsMultiProjectImpl(graph, rootDirectory);
 }
 
 //abstract class DockerCommandsImpl implements DockerCommands {
