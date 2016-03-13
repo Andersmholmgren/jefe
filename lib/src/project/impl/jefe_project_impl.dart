@@ -112,7 +112,6 @@ class JefeProjectImpl extends ProjectImpl
       _lifecycle ??= new ProjectLifecycleMultiProjectImpl(this);
 
   ProjectCommands _singleProjectCommands;
-
   @override
   ProjectCommands get singleProjectCommands {
     ProjectCommands create() {
@@ -125,6 +124,21 @@ class JefeProjectImpl extends ProjectImpl
     }
 
     return _singleProjectCommands ??= create();
+  }
+
+  ProjectCommands _multiProjectCommands;
+//  @override
+  ProjectCommands get multiProjectCommands {
+    ProjectCommands create() {
+      return new ProjectCommands(
+          createGitCommands(this, multiProject: true),
+          createGitFeatureCommands(this, multiProject: true),
+          createPubSpecCommands(this, multiProject: true),
+          createPubCommands(this, multiProject: true),
+          createProjectLifecycle(this, multiProject: true));
+    }
+
+    return _multiProjectCommands ??= create();
   }
 }
 
