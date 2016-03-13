@@ -104,7 +104,7 @@ class ProjectLifecycleImpl extends Object
   Future preRelease(
           {ReleaseType type: ReleaseType.minor,
           bool autoUpdateHostedVersions: false}) =>
-      process('Pre release checks for project', (JefeProject p) async {
+      process('Pre release checks', (JefeProject p) async {
         final s = p.singleProjectCommands;
         await s.git.assertWorkingTreeClean();
         await s.gitFeature.assertNoActiveReleases();
@@ -138,62 +138,48 @@ class ProjectLifecycleImpl extends Object
 
   @override
   Future release(
-      {ReleaseType type: ReleaseType.minor,
-      bool autoUpdateHostedVersions: false,
-      bool recursive: true}) {
-    if (!recursive)
-      return releaseCurrentProject(type, autoUpdateHostedVersions);
+          {ReleaseType type: ReleaseType.minor,
+          bool autoUpdateHostedVersions: false,
+          bool recursive: true}) =>
+      process('release', (JefeProject p) async {
+        final s = p.singleProjectCommands;
 
-    Future doRelease(JefeProject project) => project.lifecycle.release(
-        type: type,
-        autoUpdateHostedVersions: autoUpdateHostedVersions,
-        recursive: false);
+        final ProjectVersions projectVersions =
+            await getCurrentProjectVersions(p, type, autoUpdateHostedVersions);
 
-    return executeTask('Release version: type $type',
-        () => graph.processDepthFirst(doRelease));
-  }
+        if (!projectVersions.newReleaseRequired) {
+          // no release needed
+          _log.fine('no changes needing release for ${graph.name}');
+          return;
+        } else {
+          final releaseVersion = projectVersions.newReleaseVersion.get();
 
-  Future releaseCurrentProject(
-      ReleaseType type, bool autoUpdateHostedVersions) {
-    return executeTask('Release version: type $type for project ${graph.name}',
-        () async {
-      final ProjectVersions projectVersions = await getCurrentProjectVersions(
-          graph, type, autoUpdateHostedVersions);
+          _log.fine('new release version $releaseVersion');
 
-      if (!projectVersions.newReleaseRequired) {
-        // no release needed
-        _log.fine('no changes needing release for ${graph.name}');
-        return;
-      } else {
-        final releaseVersion = projectVersions.newReleaseVersion.get();
+          await s.gitFeature.releaseStart(releaseVersion.toString());
 
-        _log.fine('new release version $releaseVersion');
+          if (releaseVersion != projectVersions.pubspecVersion) {
+            await graph
+                .updatePubspec(graph.pubspec.copy(version: releaseVersion));
+          }
 
-        await _gitFeature.releaseStart(releaseVersion.toString());
+          await s.pubspec.setToHostedDependencies();
 
-        if (releaseVersion != projectVersions.pubspecVersion) {
-          await graph
-              .updatePubspec(graph.pubspec.copy(version: releaseVersion));
+          await s.pub.get();
+
+          await s.pub.test();
+
+          await s.git.commit('releasing version $releaseVersion');
+
+          if (projectVersions.currentVersions.isHosted) {
+            await s.pub.publish();
+          }
+
+          await s.gitFeature.releaseFinish(releaseVersion.toString());
+
+          await s.git.push();
         }
-
-        await _pubspec.setToHostedDependencies();
-
-        await _pub.get();
-
-        await _pub.test();
-
-        await _git.commit('releasing version $releaseVersion');
-
-        if (projectVersions.currentVersions.isHosted) {
-          await _pub.publish();
-        }
-
-        await _gitFeature.releaseFinish(releaseVersion.toString());
-
-        await _git.push();
-      }
-    });
-  }
+      });
 
   @override
   Future init({bool doCheckout: true}) {
