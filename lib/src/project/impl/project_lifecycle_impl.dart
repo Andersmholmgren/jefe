@@ -39,22 +39,8 @@ class ProjectLifecycleImpl extends Object
 //  PubSpecCommands get _pubspec => graph.pubspecCommands;
 
   @override
-  Future startNewFeature(String featureName,
-      {bool doPush: false, bool recursive: true}) {
-    if (!recursive)
-      return startNewFeatureForCurrentProject(featureName, doPush: doPush);
-
-    return executeTask(
-        'set up project for new feature $featureName',
-        () => graph.processDepthFirst((JefeProject project) => project.lifecycle
-            .startNewFeature(featureName, doPush: doPush, recursive: false)));
-  }
-
-  Future startNewFeatureForCurrentProject(String featureName,
-      {bool doPush: false}) {
-    return process(
-        'set up project for new feature "$featureName" for project ${graph.name}',
-        (JefeProject p) async {
+  Future startNewFeature(String featureName, {bool doPush: false}) {
+    return process('start new feature "$featureName"', (JefeProject p) async {
       await p.git.assertWorkingTreeClean();
       await p.gitFeature.featureStart(featureName);
       await p.pubspecCommands.setToPathDependencies();
@@ -65,8 +51,7 @@ class ProjectLifecycleImpl extends Object
   }
 
   @override
-  Future completeFeature(String featureName,
-      {bool doPush: false, bool recursive: true}) {
+  Future completeFeature(String featureName, {bool doPush: false}) {
     if (!recursive)
       return completeFeatureForCurrentProject(featureName, doPush: doPush);
 
@@ -208,7 +193,7 @@ class ProjectLifecycleImpl extends Object
   }
 
   @override
-  Future init({bool doCheckout: true, bool recursive: true}) {
+  Future init({bool doCheckout: true}) {
     if (!recursive) return initCurrentProject(doCheckout);
 
     Future doInit(JefeProject project) =>
@@ -320,8 +305,7 @@ class ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
       _project.pubspecCommands.singleProjectCommandFor(_project);
 
   @override
-  Future startNewFeature(String featureName,
-      {bool doPush: false, bool recursive: true}) {
+  Future startNewFeature(String featureName, {bool doPush: false}) {
     return executeTask(
         'set up project for new feature "$featureName" for project ${_project.name}',
         () async {
@@ -464,7 +448,7 @@ class ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
   }
 
   @override
-  Future init({bool doCheckout: true, bool recursive: true}) {
+  Future init({bool doCheckout: true}) {
     if (!recursive) return initCurrentProject(doCheckout);
 
     Future doInit(JefeProject project) =>
