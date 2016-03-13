@@ -168,36 +168,9 @@ class Jefe {
           String rootDirectory: '.',
       @u.Option(help: 'A project name filter. Only projects whose name contains the text will run', abbr: 'p')
           String projects}) async {
-    final CommandExecutor executor = await _load(rootDirectory);
-    final command = _setToDependencyCommand(type);
-    await executor.execute(command,
-        filter: projectNameFilter(projects),
-        concurrencyMode: CommandConcurrencyMode.serialDepthFirst);
-  }
+    final graph = await _loadGraph(rootDirectory);
+    final pubSpec = graph.pubspecCommands;
 
-  @u.SubCommand(help: 'Runs tests projects that have tests')
-  test(
-      {@u.Option(help: 'The directory that contains the root of the projecs', abbr: 'd')
-          String rootDirectory: '.',
-      @u.Option(help: 'A project name filter. Only projects whose name contains the text will run', abbr: 'p')
-          String projects}) async {
-    final CommandExecutor executor = await _load(rootDirectory);
-    await executor.execute(pub.test(), filter: projectNameFilter(projects));
-  }
-
-  Future<CommandExecutor> _loadExecutor(String rootDirectory) async =>
-      new CommandExecutor(await _load(rootDirectory));
-
-  Future<JefeProjectGraph> _loadGraph(String rootDirectory) async =>
-      await (await _load(rootDirectory)).rootJefeProjects;
-
-  Future<ProjectGroup> _load(String rootDirectory) async {
-    final Directory installDir =
-        rootDirectory == '.' ? Directory.current : new Directory(rootDirectory);
-    return ProjectGroup.load(installDir);
-  }
-
-  ProjectCommand _setToDependencyCommand(String type) {
     switch (type) {
       case 'git':
         return pubSpec.setToGitDependencies();
@@ -207,6 +180,29 @@ class Jefe {
       default:
         return pubSpec.setToPathDependencies();
     }
+  }
+
+  @u.SubCommand(help: 'Runs tests projects that have tests')
+  test(
+      {@u.Option(help: 'The directory that contains the root of the projecs', abbr: 'd')
+          String rootDirectory: '.',
+      @u.Option(help: 'A project name filter. Only projects whose name contains the text will run', abbr: 'p')
+          String projects}) async {
+    final graph = await _loadGraph(rootDirectory);
+
+    return graph.pub.test();
+  }
+
+//  Future<CommandExecutor> _loadExecutor(String rootDirectory) async =>
+//      new CommandExecutor(await _load(rootDirectory));
+
+  Future<JefeProjectGraph> _loadGraph(String rootDirectory) async =>
+      await (await _load(rootDirectory)).rootJefeProjects;
+
+  Future<ProjectGroup> _load(String rootDirectory) async {
+    final Directory installDir =
+        rootDirectory == '.' ? Directory.current : new Directory(rootDirectory);
+    return ProjectGroup.load(installDir);
   }
 }
 
