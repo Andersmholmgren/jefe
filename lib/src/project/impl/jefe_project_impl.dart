@@ -77,39 +77,20 @@ class JefeProjectImpl extends ProjectImpl
           ? new Some<JefeProject>(this)
           : directDependencies.getProjectByName(projectName);
 
-  GitCommands _git;
+  @override
+  GitCommands get git => multiProjectCommands.git;
 
   @override
-  GitCommands get git => _git ??= createGitCommands(this);
-
-//  GitCommands _gitCurrentProject;
-
-//  @override
-//  Future<GitCommands> get gitCurrentProject async => _gitCurrentProject ??=
-//      new GitCommandsSingleProjectImpl(this, await gitDir);
-
-  GitFeatureCommands _gitFeature;
+  GitFeatureCommands get gitFeature => multiProjectCommands.gitFeature;
 
   @override
-  GitFeatureCommands get gitFeature =>
-      _gitFeature ??= _gitFeatureCommandsFactory(this);
-
-  PubSpecCommands _pubspecCommands;
+  PubSpecCommands get pubspecCommands => multiProjectCommands.pubspecCommands;
 
   @override
-  PubSpecCommands get pubspecCommands =>
-      _pubspecCommands ??= new PubSpecCommandsImpl(this);
-
-  PubCommands _pub;
+  PubCommands get pub => multiProjectCommands.pub;
 
   @override
-  PubCommands get pub => _pub ??= new PubCommandsImpl(this);
-
-  ProjectLifecycle _lifecycle;
-
-  @override
-  ProjectLifecycle get lifecycle =>
-      _lifecycle ??= new ProjectLifecycleMultiProjectImpl(this);
+  ProjectLifecycle get lifecycle => multiProjectCommands.lifecycle;
 
   ProjectCommands _singleProjectCommands;
   @override
