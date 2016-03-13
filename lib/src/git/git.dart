@@ -117,13 +117,13 @@ Future gitFetch(GitDir gitDir) async {
 }
 
 Future gitMerge(GitDir gitDir, String commit, {bool ffOnly: true}) async {
-  final flags = ffOnly ? ['--ff-only'] : [];
-  final command = concat([
+  final flags = ffOnly ? <String>['--ff-only'] : <String>[];
+  final command = concat(<Iterable<String>>[
     ['merge'],
     flags,
     [commit]
   ]);
-  await gitDir.runCommand(command);
+  await gitDir.runCommand(command as Iterable<String>);
 }
 
 Future<String> currentCommitHash(GitDir gitDir) async =>
