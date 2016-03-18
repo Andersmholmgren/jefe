@@ -14,6 +14,7 @@ import 'package:jefe/src/project/pubspec_commands.dart';
 import 'package:option/option.dart';
 import 'package:jefe/src/project/docker_commands.dart';
 import 'package:jefe/src/project/process_commands.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
 
 /// A [Project] managed by Jefe
 abstract class JefeProject extends Project implements JefeProjectGraph {
@@ -93,9 +94,9 @@ abstract class JefeProjectGraph implements ProjectCommands {
   Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ command,
       {ProjectFilter filter, Combiner/*<T>*/ combine});
 
-  // ??????
-  //  Future<ProjectCommands> get multiProjectCommands;
-
+  MultiProjectCommands multiProjectCommands(
+      {CommandConcurrencyMode defaultConcurrencyMode,
+      ProjectFilter projectFilter});
 }
 
 /// A [Set] of [JefeProject] that supports [JefeProjectGraph] operations

@@ -27,6 +27,7 @@ import 'package:jefe/src/project/impl/project_lifecycle_impl.dart';
 import 'package:jefe/src/project/impl/process_commands_impl.dart';
 import 'package:jefe/src/project/impl/docker_commands_impl.dart';
 import 'package:jefe/src/project/process_commands.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
@@ -81,22 +82,24 @@ class JefeProjectImpl extends ProjectImpl
           : directDependencies.getProjectByName(projectName);
 
   @override
-  GitCommands get git => multiProjectCommands.git;
+  GitCommands get git => defaultMultiProjectCommands.git;
 
   @override
-  GitFeatureCommands get gitFeature => multiProjectCommands.gitFeature;
+  GitFeatureCommands get gitFeature => defaultMultiProjectCommands.gitFeature;
 
   @override
-  PubSpecCommands get pubspecCommands => multiProjectCommands.pubspecCommands;
+  PubSpecCommands get pubspecCommands =>
+      defaultMultiProjectCommands.pubspecCommands;
 
   @override
-  PubCommands get pub => multiProjectCommands.pub;
+  PubCommands get pub => defaultMultiProjectCommands.pub;
 
   @override
-  ProjectLifecycle get lifecycle => multiProjectCommands.lifecycle;
+  ProjectLifecycle get lifecycle => defaultMultiProjectCommands.lifecycle;
 
   @override
-  ProcessCommands get processCommands => multiProjectCommands.processCommands;
+  ProcessCommands get processCommands =>
+      defaultMultiProjectCommands.processCommands;
 
 //  ProjectCommands _createProcessCommands(bool multiProject) {
 //
@@ -118,23 +121,43 @@ class JefeProjectImpl extends ProjectImpl
     return _singleProjectCommands ??= create();
   }
 
-  MultiProjectCommands _multiProjectCommands;
+  MultiProjectCommands _defaultMultiProjectCommands;
 //  @override
-  MultiProjectCommands get multiProjectCommands {
-    MultiProjectCommands create() {
-      return new MultiProjectCommands(
-          createGitCommands(this, multiProject: true),
-          createGitFeatureCommands(this, multiProject: true),
-          createPubSpecCommands(this, multiProject: true),
-          createPubCommands(this, multiProject: true),
-          createProjectLifecycle(this, multiProject: true),
-          createProcessCommands(this, multiProject: false),
-          createDockerCommands(this,
-              installDirectory, // TODO: not sure if it is this or the container dir
-              multiProject: false));
-    }
+  MultiProjectCommands get defaultMultiProjectCommands =>
+      _defaultMultiProjectCommands ??= multiProjectCommands();
 
-    return _multiProjectCommands ??= create();
+  @override
+  MultiProjectCommands multiProjectCommands(
+      {CommandConcurrencyMode defaultConcurrencyMode,
+      ProjectFilter projectFilter}) {
+    return new MultiProjectCommands(
+        createGitCommands(this,
+            multiProject: true,
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter),
+        createGitFeatureCommands(this,
+            multiProject: true,
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter),
+        createPubSpecCommands(this,
+            multiProject: true,
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter),
+        createPubCommands(this,
+            multiProject: true,
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter),
+        createProjectLifecycle(this,
+            multiProject: true,
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter),
+        createProcessCommands(this,
+            multiProject: false,
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter),
+        createDockerCommands(this,
+            installDirectory, // TODO: not sure if it is this or the container dir
+            multiProject: false));
   }
 }
 
