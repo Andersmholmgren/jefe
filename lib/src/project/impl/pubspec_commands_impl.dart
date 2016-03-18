@@ -9,18 +9,20 @@ import 'package:jefe/src/project/impl/multi_project_command_support.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/project.dart';
 import 'package:jefe/src/project/pubspec_commands.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:jefe/src/pub/pub.dart' as pub;
 import 'package:jefe/src/pub/pub_version.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
-import 'package:jefe/src/project_commands/project_command.dart';
 
 Logger _log = new Logger('jefe.project.commands.pubspec.impl');
 
 PubSpecCommands createPubSpecCommands(JefeProjectGraph graph,
-    {bool multiProject: true}) {
+    {bool multiProject: true,
+    CommandConcurrencyMode defaultConcurrencyMode,
+    ProjectFilter projectFilter}) {
   return multiProject
       ? new PubSpecCommandsMultiProjectImpl(graph)
       : new PubSpecCommandsSingleProjectImpl(graph as JefeProject);
@@ -39,9 +41,13 @@ class PubSpecCommandsSingleProjectImpl
 class PubSpecCommandsMultiProjectImpl
     extends MultiProjectCommandSupport<PubSpecCommands>
     implements PubSpecCommands {
-  PubSpecCommandsMultiProjectImpl(JefeProjectGraph graph)
+  PubSpecCommandsMultiProjectImpl(JefeProjectGraph graph,
+      {CommandConcurrencyMode defaultConcurrencyMode,
+      ProjectFilter projectFilter})
       : super(graph,
-            (JefeProject p) async => new PubSpecCommandsSingleProjectImpl(p));
+            (JefeProject p) async => new PubSpecCommandsSingleProjectImpl(p),
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter);
 
   @override
   Future<bool> haveDependenciesChanged(DependencyType type,

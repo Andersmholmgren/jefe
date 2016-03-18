@@ -5,16 +5,16 @@ library jefe.project.jefe;
 
 import 'dart:async';
 
+import 'package:jefe/src/project/docker_commands.dart';
 import 'package:jefe/src/project/git_commands.dart';
 import 'package:jefe/src/project/git_feature.dart';
+import 'package:jefe/src/project/process_commands.dart';
 import 'package:jefe/src/project/project.dart';
 import 'package:jefe/src/project/project_lifecycle.dart';
 import 'package:jefe/src/project/pub_commands.dart';
 import 'package:jefe/src/project/pubspec_commands.dart';
-import 'package:option/option.dart';
-import 'package:jefe/src/project/docker_commands.dart';
-import 'package:jefe/src/project/process_commands.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
+import 'package:option/option.dart';
 
 /// A [Project] managed by Jefe
 abstract class JefeProject extends Project implements JefeProjectGraph {

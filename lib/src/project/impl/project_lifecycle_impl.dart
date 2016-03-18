@@ -23,7 +23,9 @@ Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 const String featureStartCommitPrefix = 'set up project for new feature';
 
 ProjectLifecycle createProjectLifecycle(JefeProjectGraph graph,
-    {bool multiProject: true}) {
+    {bool multiProject: true,
+    CommandConcurrencyMode defaultConcurrencyMode,
+    ProjectFilter projectFilter}) {
   return multiProject
       ? new ProjectLifecycleMultiProjectImpl(graph)
       : new ProjectLifecycleSingleProjectImpl(graph as JefeProject);
@@ -42,9 +44,13 @@ class ProjectLifecycleSingleProjectImpl
 class ProjectLifecycleMultiProjectImpl
     extends MultiProjectCommandSupport<ProjectLifecycle>
     implements ProjectLifecycle {
-  ProjectLifecycleMultiProjectImpl(JefeProjectGraph graph)
+  ProjectLifecycleMultiProjectImpl(JefeProjectGraph graph,
+      {CommandConcurrencyMode defaultConcurrencyMode,
+      ProjectFilter projectFilter})
       : super(graph,
-            (JefeProject p) async => new ProjectLifecycleSingleProjectImpl(p));
+            (JefeProject p) async => new ProjectLifecycleSingleProjectImpl(p),
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter);
 
   @override
   Future completeFeature({String featureName, bool doPush: false}) {

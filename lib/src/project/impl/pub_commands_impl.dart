@@ -9,14 +9,16 @@ import 'package:jefe/src/project/impl/multi_project_command_support.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/pub_commands.dart';
 import 'package:jefe/src/project_commands/project_command.dart'
-    show executeTask;
+    show CommandConcurrencyMode, executeTask;
 import 'package:jefe/src/pub/pub.dart' as pub;
 import 'package:logging/logging.dart';
 
 Logger _log = new Logger('jefe.project.commands.pub.impl');
 
 PubCommands createPubCommands(JefeProjectGraph graph,
-    {bool multiProject: true}) {
+    {bool multiProject: true,
+    CommandConcurrencyMode defaultConcurrencyMode,
+    ProjectFilter projectFilter}) {
   return multiProject
       ? new PubCommandsMultiProjectImpl(graph)
       : new PubCommandsSingleProjectImpl(graph as JefeProject);
@@ -32,9 +34,13 @@ class PubCommandsSingleProjectImpl
 
 class PubCommandsMultiProjectImpl
     extends MultiProjectCommandSupport<PubCommands> implements PubCommands {
-  PubCommandsMultiProjectImpl(JefeProjectGraph graph)
-      : super(graph,
-            (JefeProject p) async => new PubCommandsSingleProjectImpl(p));
+  PubCommandsMultiProjectImpl(JefeProjectGraph graph,
+      {CommandConcurrencyMode defaultConcurrencyMode,
+      ProjectFilter projectFilter})
+      : super(
+            graph, (JefeProject p) async => new PubCommandsSingleProjectImpl(p),
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter);
 }
 
 class _PubCommandsSingleProjectImpl implements PubCommands {

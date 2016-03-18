@@ -6,9 +6,9 @@ library jefe.project.commands.git.feature;
 import 'dart:async';
 
 import 'package:git/git.dart';
-import 'package:pub_semver/pub_semver.dart';
-import 'package:option/option.dart';
 import 'package:jefe/src/project/jefe_project.dart';
+import 'package:option/option.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 typedef GitFeatureCommands GitFeatureCommandsFactory(JefeProject project);
 

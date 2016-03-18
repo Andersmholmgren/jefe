@@ -8,13 +8,16 @@ import 'dart:async';
 import 'package:jefe/src/project/impl/multi_project_command_support.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/process_commands.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:jefe/src/util/process_utils.dart';
 import 'package:logging/logging.dart';
 
 Logger _log = new Logger('jefe.project.commands.process.impl');
 
 ProcessCommands createProcessCommands(JefeProjectGraph graph,
-    {bool multiProject: true}) {
+    {bool multiProject: true,
+    CommandConcurrencyMode defaultConcurrencyMode,
+    ProjectFilter projectFilter}) {
   return multiProject
       ? new ProcessCommandsMultiProjectImpl(graph)
       : new ProcessCommandsSingleProjectImpl(graph as JefeProject);
@@ -33,9 +36,13 @@ class ProcessCommandsSingleProjectImpl
 class ProcessCommandsMultiProjectImpl
     extends MultiProjectCommandSupport<ProcessCommands>
     implements ProcessCommands {
-  ProcessCommandsMultiProjectImpl(JefeProjectGraph graph)
+  ProcessCommandsMultiProjectImpl(JefeProjectGraph graph,
+      {CommandConcurrencyMode defaultConcurrencyMode,
+      ProjectFilter projectFilter})
       : super(graph,
-            (JefeProject p) async => new ProcessCommandsSingleProjectImpl(p));
+            (JefeProject p) async => new ProcessCommandsSingleProjectImpl(p),
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter);
 }
 
 class _ProcessCommandsSingleProjectImpl implements ProcessCommands {

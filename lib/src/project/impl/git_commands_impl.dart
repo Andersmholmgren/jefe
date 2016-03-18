@@ -10,10 +10,10 @@ import 'package:jefe/src/git/git.dart';
 import 'package:jefe/src/project/git_commands.dart';
 import 'package:jefe/src/project/impl/multi_project_command_support.dart';
 import 'package:jefe/src/project/jefe_project.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
-import 'package:jefe/src/project_commands/project_command.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.impl');
 
@@ -94,11 +94,11 @@ class _GitCommandsSingleProjectImpl implements GitCommands {
     return (await diffSummarySince(_gitDir, sinceVersion.toString())) is Some;
   }
 
-  // TODO: remove this??
-  @override
-  Future<GitCommands> singleProjectCommandFor(JefeProject project) async {
-    if (project != _project) throw new ArgumentError.value('damn');
-
-    return this;
-  }
+//  // TODO: remove this??
+//  @override
+//  Future<GitCommands> singleProjectCommandFor(JefeProject project) async {
+//    if (project != _project) throw new ArgumentError.value('damn');
+//
+//    return this;
+//  }
 }

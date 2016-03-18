@@ -1,9 +1,10 @@
-import 'package:jefe/src/project/jefe_project.dart';
 import 'dart:async';
 import 'dart:mirrors';
-import 'package:logging/logging.dart';
-import 'package:jefe/src/project_commands/project_command.dart';
+
+import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/project.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
+import 'package:logging/logging.dart';
 
 Logger _log = new Logger('jefe.project.command.multiproject');
 

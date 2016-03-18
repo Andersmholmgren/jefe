@@ -10,6 +10,7 @@ import 'package:jefe/src/git/git.dart';
 import 'package:jefe/src/project/git_feature.dart';
 import 'package:jefe/src/project/impl/multi_project_command_support.dart';
 import 'package:jefe/src/project/jefe_project.dart';
+import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
@@ -17,7 +18,9 @@ import 'package:pub_semver/pub_semver.dart';
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
 GitFeatureCommands createGitFeatureCommands(JefeProjectGraph graph,
-    {bool multiProject: true}) {
+    {bool multiProject: true,
+    CommandConcurrencyMode defaultConcurrencyMode,
+    ProjectFilter projectFilter}) {
   return multiProject
       ? new GitFeatureCommandsMultiProjectFlowImpl(graph)
       : new GitFeatureCommandsSingleProjectFlowImpl(graph as JefeProject);
@@ -37,11 +40,15 @@ class GitFeatureCommandsSingleProjectFlowImpl
 class GitFeatureCommandsMultiProjectFlowImpl
     extends MultiProjectCommandSupport<GitFeatureCommands>
     implements GitFeatureCommands {
-  GitFeatureCommandsMultiProjectFlowImpl(JefeProjectGraph graph)
+  GitFeatureCommandsMultiProjectFlowImpl(JefeProjectGraph graph,
+      {CommandConcurrencyMode defaultConcurrencyMode,
+      ProjectFilter projectFilter})
       : super(
             graph,
             (JefeProject p) async =>
-                new GitFeatureCommandsSingleProjectFlowImpl(p));
+                new GitFeatureCommandsSingleProjectFlowImpl(p),
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter);
 
   @override
   String get developBranchName => 'develop';
