@@ -7,19 +7,17 @@ import 'package:path/path.dart' as p;
 main() {
   group('', () {
     setUp(() async {
-      final projects = await createTestProjects(4);
-      print(projects);
+      final jefeDir = await createJefeWithTestProjects(4);
+      print(jefeDir);
+
+      final parentDirectory = await new Directory(p.join(jefeDir.parent.parent.path, 'installDirs')).create();
+
+      final group = await ProjectGroup.install(parentDirectory, jefeDir.path);
+      print(group);
 //      final projectDir = await copyTestProject('project1');
 //      print(projectDir);
 //      print(project.name);
 //      print(project.installDirectory);
-
-      final jefeFile = new ProjectGroupMetaData('testGroup', [], projects.map((d) {
-        final projectName = p.basename(d.path);
-        return new ProjectIdentifier(projectName, d.path);
-      }));
-
-      await jefeFile.save(projects.first.parent);
 
     });
 

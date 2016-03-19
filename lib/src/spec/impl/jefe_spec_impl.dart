@@ -35,8 +35,16 @@ class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {
   @override
   Map toJson() => (buildJson
         ..add('name', name)
-        ..add('childGroups', childGroups)
-        ..add('projects', projects))
+        ..add(
+            'childGroups',
+            new Map.fromIterable(childGroups,
+                key: (ProjectGroupIdentifier g) => g.name,
+                value: (ProjectGroupIdentifier g) => g.gitUri))
+        ..add(
+            'projects',
+            new Map.fromIterable(projects,
+                key: (ProjectIdentifier g) => g.name,
+                value: (ProjectIdentifier g) => g.gitUri)))
       .json;
 }
 

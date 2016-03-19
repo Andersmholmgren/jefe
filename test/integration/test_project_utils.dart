@@ -67,12 +67,12 @@ Future<Directory> _copyTestProject(
 
   await _copyDir(testProjectTemplateDir, testProjectRemoteDir);
 
-  await _gitInit(testProjectRemoteDir);
-
   final pubSpec = await PubSpec.load(testProjectRemoteDir);
   final newPubSpec = pubSpec.copy(name: newProjectName);
 
   await newPubSpec.save(testProjectRemoteDir);
+
+  await _gitInit(testProjectRemoteDir);
 
   return testProjectRemoteDir;
 }

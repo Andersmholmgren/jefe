@@ -8,7 +8,6 @@ import 'dart:io';
 
 import 'package:logging/logging.dart';
 import 'package:yaml/yaml.dart';
-import 'package:yamlicious/yamlicious.dart';
 
 import '../jefe_spec.dart';
 
@@ -33,4 +32,3 @@ Future<ProjectGroupMetaData> readProjectGroupYaml(File projectGroupFile) async {
   return new ProjectGroupMetaData(
       yaml['name'], childProjectGroups, childProjects);
 }
-
