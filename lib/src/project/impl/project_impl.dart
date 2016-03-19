@@ -200,4 +200,13 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
     return dependencyNames.where((n) => exported.contains(n));
   }
+
+  @override
+  bool operator ==(other) =>
+      other is ProjectImpl &&
+      other.runtimeType == runtimeType &&
+      other.id == id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

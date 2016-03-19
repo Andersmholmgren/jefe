@@ -54,10 +54,11 @@ class JefeProjectImpl extends ProjectImpl
             (JefeProject p) => createGitFeatureCommands(p)),
         super(gitUri, installDirectory, pubspec, hostedMode);
 
-  JefeProjectImpl.from(Set<JefeProject> directDependencies, Project project,
+  JefeProjectImpl.from(
+      Iterable<JefeProject> directDependencies, Project project,
       {GitFeatureCommandsFactory gitFeatureCommandsFactory})
-      : this(directDependencies, project.gitUri, project.installDirectory,
-            project.pubspec, project.hostedMode,
+      : this(new JefeProjectSetImpl(directDependencies.toSet()), project.gitUri,
+            project.installDirectory, project.pubspec, project.hostedMode,
             gitFeatureCommandsFactory: gitFeatureCommandsFactory);
 
   @override
