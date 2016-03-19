@@ -11,6 +11,7 @@ import 'test_helpers.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/dependency_graph.dart';
 import 'dart:async';
+import 'dart:io';
 
 main() async {
   Logger.root.level = Level.ALL;
@@ -125,7 +126,8 @@ expectThat(
   scheduleForProjects(Iterable<Project> projects()) async {
     theProjects = projects();
     processor = new TestProcessor();
-    final JefeProjectGraph graph = await getRootProjects(theProjects.toSet());
+    final JefeProjectGraph graph =
+        await getRootProjects(theProjects.toSet(), new Directory(''));
     return graph.processDepthFirst(processor);
   }
 

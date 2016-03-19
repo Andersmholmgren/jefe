@@ -10,25 +10,32 @@ import 'package:jefe/src/project/jefe_project.dart';
 import 'package:pubspec/pubspec.dart';
 
 import 'project.dart';
+import 'dart:io';
 
-Future<JefeProjectSet> getRootProjects(Set<Project> projects) async =>
-    (await _getDependencyGraph(projects)).rootNodes;
+Future<JefeProjectSet> getRootProjects(
+        Set<Project> projects, Directory containerDirectory) async =>
+    (await _getDependencyGraph(projects, containerDirectory)).rootNodes;
 
 /// Returns a [DependencyGraph] for the set of [projects]
-Future<_DependencyGraph> _getDependencyGraph(Set<Project> projects) async =>
-    new _DependencyGraph._(await _determineDependencies(projects));
+Future<_DependencyGraph> _getDependencyGraph(
+        Set<Project> projects, Directory containerDirectory) async =>
+    new _DependencyGraph._(
+        await _determineDependencies(projects), containerDirectory);
 
 /// Represents a graph of dependencies between [Project]s
 class _DependencyGraph {
+  final Directory _containerDirectory;
   Map<Project, _DependencyNode> _rootNodeMap = {};
 
   Map<Project, _DependencyNode> _nodeMap = {};
 
   // root nodes are those that nothing else depends on
   JefeProjectSet get rootNodes => new JefeProjectSetImpl(
-      _rootNodeMap.values.map((n) => n.toJefeProject()).toSet());
+      _rootNodeMap.values.map((n) => n.toJefeProject()).toSet(),
+      _containerDirectory);
 
-  _DependencyGraph._(Set<_ProjectDependencies> dependencySet) {
+  _DependencyGraph._(
+      Set<_ProjectDependencies> dependencySet, this._containerDirectory) {
     dependencySet.forEach((ds) => _add(ds.project, ds.directDependencies));
   }
 

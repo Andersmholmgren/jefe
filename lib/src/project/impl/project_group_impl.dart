@@ -207,7 +207,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   Future<JefeProjectSet> get dependencyGraph => rootJefeProjects;
 
   Future<JefeProjectSet> get rootJefeProjects async =>
-      getRootProjects(await allProjects);
+      getRootProjects(await allProjects, containerDirectory);
 
   String toString() =>
       'ProjectGroup: $name; gitUri: $gitUri; installed: $installDirectory\n'

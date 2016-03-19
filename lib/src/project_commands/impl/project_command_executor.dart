@@ -72,8 +72,8 @@ class CommandExecutorImpl implements CommandExecutor {
       ProjectFilter filter: _noOpFilter}) async {
     final _filter = filter != null ? filter : _noOpFilter;
     if (concurrencyMode != CommandConcurrencyMode.serialDepthFirst &&
-        composite.commands
-            .every((c) => c.concurrencyMode != CommandConcurrencyMode.serialDepthFirst)) {
+        composite.commands.every((c) =>
+            c.concurrencyMode != CommandConcurrencyMode.serialDepthFirst)) {
       return _executeAllOnConcurrentProjects/*<T>*/(composite, _filter);
     } else {
       return _executeSerially/*<T>*/(composite, _filter);
@@ -149,8 +149,8 @@ class CommandExecutorImpl implements CommandExecutor {
       ProjectDependencyGraphCommand/*<T>*/ command,
       {ProjectFilter filter: _noOpFilter}) async {
     final _filter = filter != null ? filter : _noOpFilter;
-    final JefeProjectGraph graph =
-        await getRootProjects(await _projectGroup.allProjects);
+    final JefeProjectGraph graph = await getRootProjects(
+        await _projectGroup.allProjects, _projectGroup.containerDirectory);
     return await command.process(
         graph, _projectGroup.containerDirectory, _filter);
   }

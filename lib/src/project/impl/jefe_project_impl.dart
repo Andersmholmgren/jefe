@@ -57,8 +57,13 @@ class JefeProjectImpl extends ProjectImpl
   JefeProjectImpl.from(
       Iterable<JefeProject> directDependencies, Project project,
       {GitFeatureCommandsFactory gitFeatureCommandsFactory})
-      : this(new JefeProjectSetImpl(directDependencies.toSet()), project.gitUri,
-            project.installDirectory, project.pubspec, project.hostedMode,
+      : this(
+            new JefeProjectSetImpl(
+                directDependencies.toSet(), project.installDirectory.parent),
+            project.gitUri,
+            project.installDirectory,
+            project.pubspec,
+            project.hostedMode,
             gitFeatureCommandsFactory: gitFeatureCommandsFactory);
 
   @override
@@ -102,7 +107,10 @@ class JefeProjectImpl extends ProjectImpl
 class JefeProjectSetImpl extends DelegatingSet<JefeProject>
     with _JefeProjectGraphMixin
     implements JefeProjectSet {
-  JefeProjectSetImpl(Set<JefeProject> base) : super(base);
+  final Directory _dockerRootDirectory;
+
+  JefeProjectSetImpl(Set<JefeProject> base, this._dockerRootDirectory)
+      : super(base);
 
   Option<JefeProject> getProjectByName(String projectName) =>
       map /**<Option<JefeProject>>*/ ((c) => c.getProjectByName(projectName))
@@ -115,6 +123,8 @@ class JefeProjectSetImpl extends DelegatingSet<JefeProject>
 }
 
 abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
+  Directory get _dockerRootDirectory;
+
   Iterable<JefeProject> get depthFirst => getDepthFirst(new Set<JefeProject>());
 
   Iterable<JefeProject> _filteredDepthFirst(ProjectFilter filter) =>
@@ -191,7 +201,7 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
             defaultConcurrencyMode: defaultConcurrencyMode,
             projectFilter: projectFilter),
         createDockerCommands(this,
-            installDirectory, // TODO: not sure if it is this or the container dir
+            _dockerRootDirectory, // TODO: not sure if it is this or the container dir
             multiProject: false));
   }
 
