@@ -24,7 +24,9 @@ PubSpecCommands createPubSpecCommands(JefeProjectGraph graph,
     CommandConcurrencyMode defaultConcurrencyMode,
     ProjectFilter projectFilter}) {
   return multiProject
-      ? new PubSpecCommandsMultiProjectImpl(graph)
+      ? new PubSpecCommandsMultiProjectImpl(graph,
+          defaultConcurrencyMode: defaultConcurrencyMode,
+          projectFilter: projectFilter)
       : new PubSpecCommandsSingleProjectImpl(graph as JefeProject);
 }
 

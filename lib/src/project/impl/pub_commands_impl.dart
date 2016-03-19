@@ -20,7 +20,9 @@ PubCommands createPubCommands(JefeProjectGraph graph,
     CommandConcurrencyMode defaultConcurrencyMode,
     ProjectFilter projectFilter}) {
   return multiProject
-      ? new PubCommandsMultiProjectImpl(graph)
+      ? new PubCommandsMultiProjectImpl(graph,
+          defaultConcurrencyMode: defaultConcurrencyMode,
+          projectFilter: projectFilter)
       : new PubCommandsSingleProjectImpl(graph as JefeProject);
 }
 

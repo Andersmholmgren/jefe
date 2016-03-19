@@ -27,7 +27,9 @@ ProjectLifecycle createProjectLifecycle(JefeProjectGraph graph,
     CommandConcurrencyMode defaultConcurrencyMode,
     ProjectFilter projectFilter}) {
   return multiProject
-      ? new ProjectLifecycleMultiProjectImpl(graph)
+      ? new ProjectLifecycleMultiProjectImpl(graph,
+          defaultConcurrencyMode: defaultConcurrencyMode,
+          projectFilter: projectFilter)
       : new ProjectLifecycleSingleProjectImpl(graph as JefeProject);
 }
 

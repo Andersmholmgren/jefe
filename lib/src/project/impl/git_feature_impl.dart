@@ -22,7 +22,9 @@ GitFeatureCommands createGitFeatureCommands(JefeProjectGraph graph,
     CommandConcurrencyMode defaultConcurrencyMode,
     ProjectFilter projectFilter}) {
   return multiProject
-      ? new GitFeatureCommandsMultiProjectFlowImpl(graph)
+      ? new GitFeatureCommandsMultiProjectFlowImpl(graph,
+          defaultConcurrencyMode: defaultConcurrencyMode,
+          projectFilter: projectFilter)
       : new GitFeatureCommandsSingleProjectFlowImpl(graph as JefeProject);
 }
 

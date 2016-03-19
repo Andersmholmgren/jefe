@@ -19,7 +19,9 @@ ProcessCommands createProcessCommands(JefeProjectGraph graph,
     CommandConcurrencyMode defaultConcurrencyMode,
     ProjectFilter projectFilter}) {
   return multiProject
-      ? new ProcessCommandsMultiProjectImpl(graph)
+      ? new ProcessCommandsMultiProjectImpl(graph,
+          defaultConcurrencyMode: defaultConcurrencyMode,
+          projectFilter: projectFilter)
       : new ProcessCommandsSingleProjectImpl(graph as JefeProject);
 }
 
