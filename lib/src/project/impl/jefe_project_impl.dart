@@ -82,30 +82,6 @@ class JefeProjectImpl extends ProjectImpl
           ? new Some<JefeProject>(this)
           : directDependencies.getProjectByName(projectName);
 
-  @override
-  GitCommands get git => defaultMultiProjectCommands.git;
-
-  @override
-  GitFeatureCommands get gitFeature => defaultMultiProjectCommands.gitFeature;
-
-  @override
-  PubSpecCommands get pubspecCommands =>
-      defaultMultiProjectCommands.pubspecCommands;
-
-  @override
-  PubCommands get pub => defaultMultiProjectCommands.pub;
-
-  @override
-  ProjectLifecycle get lifecycle => defaultMultiProjectCommands.lifecycle;
-
-  @override
-  ProcessCommands get processCommands =>
-      defaultMultiProjectCommands.processCommands;
-
-//  ProjectCommands _createProcessCommands(bool multiProject) {
-//
-//  }
-
   ProjectCommands _singleProjectCommands;
   @override
   ProjectCommands get singleProjectCommands {
@@ -120,45 +96,6 @@ class JefeProjectImpl extends ProjectImpl
     }
 
     return _singleProjectCommands ??= create();
-  }
-
-  MultiProjectCommands _defaultMultiProjectCommands;
-//  @override
-  MultiProjectCommands get defaultMultiProjectCommands =>
-      _defaultMultiProjectCommands ??= multiProjectCommands();
-
-  @override
-  MultiProjectCommands multiProjectCommands(
-      {CommandConcurrencyMode defaultConcurrencyMode,
-      ProjectFilter projectFilter}) {
-    return new MultiProjectCommands(
-        createGitCommands(this,
-            multiProject: true,
-            defaultConcurrencyMode: defaultConcurrencyMode,
-            projectFilter: projectFilter),
-        createGitFeatureCommands(this,
-            multiProject: true,
-            defaultConcurrencyMode: defaultConcurrencyMode,
-            projectFilter: projectFilter),
-        createPubSpecCommands(this,
-            multiProject: true,
-            defaultConcurrencyMode: defaultConcurrencyMode,
-            projectFilter: projectFilter),
-        createPubCommands(this,
-            multiProject: true,
-            defaultConcurrencyMode: defaultConcurrencyMode,
-            projectFilter: projectFilter),
-        createProjectLifecycle(this,
-            multiProject: true,
-            defaultConcurrencyMode: defaultConcurrencyMode,
-            projectFilter: projectFilter),
-        createProcessCommands(this,
-            multiProject: false,
-            defaultConcurrencyMode: defaultConcurrencyMode,
-            projectFilter: projectFilter),
-        createDockerCommands(this,
-            installDirectory, // TODO: not sure if it is this or the container dir
-            multiProject: false));
   }
 }
 
@@ -203,6 +140,65 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
   Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ command,
           {ProjectFilter filter, Combiner/*<T>*/ combine}) =>
       processDepthFirst(command, filter: filter, combine: combine);
+
+  @override
+  GitCommands get git => defaultMultiProjectCommands.git;
+
+  @override
+  GitFeatureCommands get gitFeature => defaultMultiProjectCommands.gitFeature;
+
+  @override
+  PubSpecCommands get pubspecCommands =>
+      defaultMultiProjectCommands.pubspecCommands;
+
+  @override
+  PubCommands get pub => defaultMultiProjectCommands.pub;
+
+  @override
+  ProjectLifecycle get lifecycle => defaultMultiProjectCommands.lifecycle;
+
+  @override
+  ProcessCommands get processCommands =>
+      defaultMultiProjectCommands.processCommands;
+
+  @override
+  MultiProjectCommands multiProjectCommands(
+      {CommandConcurrencyMode defaultConcurrencyMode,
+      ProjectFilter projectFilter}) {
+    return new MultiProjectCommands(
+        createGitCommands(this,
+            multiProject: true,
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter),
+        createGitFeatureCommands(this,
+            multiProject: true,
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter),
+        createPubSpecCommands(this,
+            multiProject: true,
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter),
+        createPubCommands(this,
+            multiProject: true,
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter),
+        createProjectLifecycle(this,
+            multiProject: true,
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter),
+        createProcessCommands(this,
+            multiProject: false,
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter),
+        createDockerCommands(this,
+            installDirectory, // TODO: not sure if it is this or the container dir
+            multiProject: false));
+  }
+
+  MultiProjectCommands _defaultMultiProjectCommands;
+//  @override
+  MultiProjectCommands get defaultMultiProjectCommands =>
+      _defaultMultiProjectCommands ??= multiProjectCommands();
 }
 
 bool _noOpFilter(Project p) => true;
