@@ -39,7 +39,7 @@ main() async {
       expectThat(withTheseProjects: () => [project1], weGetTheseInvocations: [
         () => new TestProcessInvocation(project1, const [])
       ]);
-    }, skip: true);
+    }, skip: false);
 
     group('for two projects with a single dependency', () {
       final project1 = aProject('project1');
@@ -54,7 +54,6 @@ main() async {
     }, skip: true);
 
     group('for 4 projects with several dependencies', () {
-      getRootProjects(aProject('project1'))
       final project1 = aProject('project1');
       final project2 = aProject('project2', dependencies: [project1]);
       final project3 = aProject('project3');
@@ -68,7 +67,7 @@ main() async {
             () => new TestProcessInvocation(project2, [project1]),
             () => new TestProcessInvocation(project4, [project2, project3])
           ]);
-    });
+    }, skip: true);
   });
 }
 
@@ -104,7 +103,7 @@ class TestProcessInvocation {
   static createTests(
       TestProcessInvocation actual(), TestProcessInvocationFactory expected) {
     test('invocation has expected project', () {
-      expect(actual().project, equals(expected().project));
+      expect(actual().project.id, equals(expected().project.id));
     });
 
     test('invocation has expected dependencies', () {

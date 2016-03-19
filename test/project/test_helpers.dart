@@ -8,19 +8,10 @@ import 'dart:io';
 import 'package:jefe/src/project/impl/project_impl.dart';
 import 'package:jefe/src/project/project.dart';
 import 'package:pubspec/pubspec.dart';
-import 'package:jefe/src/project/jefe_project.dart';
-import 'package:jefe/src/project/impl/jefe_project_impl.dart';
 
-JefeProject aProject(String name, {Iterable<Project> dependencies: const []}) {
-  final mappedDependencies =
-      dependencies.map((p) => new JefeProjectImpl.from([], p));
-
-  return new JefeProjectImpl.from(
-      mappedDependencies,
+Project aProject(String name, {Iterable<Project> dependencies: const []}) =>
       __aProject(name,
-          pathDependencies:
-              dependencies.map((p) => new PathReference(p.name))));
-}
+        pathDependencies: dependencies.map((p) => new PathReference(p.name)));
 
 Project __aProject(String name,
     {Iterable<PathReference> pathDependencies: const []}) {
@@ -33,5 +24,3 @@ Project __aProject(String name,
   return new ProjectImpl(name, new Directory(name),
       new PubSpec(name: name, dependencies: dependencies), null);
 }
-
-//JefeProjectSet
