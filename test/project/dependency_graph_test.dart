@@ -31,7 +31,8 @@ main() async {
     group(
         'when no projects provided',
         () =>
-            expectThat(withTheseProjects: () => [], weGetTheseInvocations: []));
+            expectThat(withTheseProjects: () => [], weGetTheseInvocations: []),
+        skip: false);
 
     group('for a single project that has no dependencies', () {
       final project1 = aProject('project1');
@@ -39,7 +40,7 @@ main() async {
       expectThat(withTheseProjects: () => [project1], weGetTheseInvocations: [
         () => new TestProcessInvocation(project1, const [])
       ]);
-    }, skip: true);
+    }, skip: false);
 
     group('for two projects with a single dependency', () {
       final project1 = aProject('project1');
@@ -57,7 +58,7 @@ main() async {
       final project1 = aProject('project1');
       final project2 = aProject('project2', dependencies: [project1]);
       final project3 = aProject('project3');
-      final project4 = aProject('project3', dependencies: [project3, project2]);
+      final project4 = aProject('project4', dependencies: [project3, project2]);
 
       expectThat(
           withTheseProjects: () => [project1, project4, project3, project2],
@@ -67,14 +68,15 @@ main() async {
             () => new TestProcessInvocation(project2, [project1]),
             () => new TestProcessInvocation(project4, [project2, project3])
           ]);
-    }, skip: true);
+    }, skip: false);
   });
 }
 
 class TestProcessor {
   final List<TestProcessInvocation> invocations = [];
   Future call(JefeProject project) async {
-    invocations.add(new TestProcessInvocation(project, project.directDependencies));
+    invocations
+        .add(new TestProcessInvocation(project, project.directDependencies));
   }
 
   static createTests(
@@ -108,7 +110,7 @@ class TestProcessInvocation {
 
     test('invocation has expected dependencies', () {
       expect(actual().dependencies.map((p) => p.id),
-        unorderedEquals(expected().dependencies.map((p) => p.id)));
+          unorderedEquals(expected().dependencies.map((p) => p.id)));
     });
   }
 }
@@ -123,8 +125,7 @@ expectThat(
   scheduleForProjects(Iterable<Project> projects()) async {
     theProjects = projects();
     processor = new TestProcessor();
-    final JefeProjectGraph graph =
-        await getRootProjects(theProjects.toSet());
+    final JefeProjectGraph graph = await getRootProjects(theProjects.toSet());
     return graph.processDepthFirst(processor);
   }
 
