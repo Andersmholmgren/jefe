@@ -53,7 +53,7 @@ abstract class _BaseRef<T> implements ProjectEntityIdentifier<T> {
 
   int get hashCode => name.hashCode;
 
-  Map toJson() => (buildJson..add('name', name)..add('gitUri', gitUri)).json;
+  Map toJson() => {name: gitUri};
 }
 
 class ProjectGroupIdentifierImpl extends _BaseRef<ProjectGroup>
