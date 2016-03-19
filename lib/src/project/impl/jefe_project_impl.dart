@@ -188,7 +188,7 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
     return await new Stream<JefeProject>.fromIterable(
             _filteredDepthFirst(filter))
         .asyncMap((JefeProject p) => command(p))
-        .reduce(combine ?? _takeLast) as Future/*<T>*/;
+        .fold(null, _combinerToFold(combine ?? _takeLast)) as Future/*<T>*/;
 //    return await Future.forEach(
 //        _filteredDepthFirst(filter), (JefeProject p) => command(p));
   }
@@ -197,9 +197,7 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
       {ProjectFilter filter, Combiner/*<T>*/ combine}) async {
     return new Stream/*<T>*/ .fromFutures(
             _filteredDepthFirst(filter).map/*<Future<T>>*/(command))
-        .reduce(combine ?? _takeLast) as Future/*<T>*/;
-//    return (await Future.wait(_filteredDepthFirst(filter).map(command)))
-//        .reduce(combine ?? _takeLast);
+        .fold(null, _combinerToFold(combine ?? _takeLast)) as Future/*<T>*/;
   }
 
   Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ command,
@@ -210,3 +208,26 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
 bool _noOpFilter(Project p) => true;
 
 /*=T*/ _takeLast/*<T>*/(/*=T*/ value, /*=T*/ element) => element;
+
+//const Object _marker = const Object();
+
+Combiner/*<T>*/ _combinerToFold/*<T>*/(Combiner/*<T>*/ combiner) {
+  var/*=T*/ firstValue;
+  bool seenFirst = false;
+  bool seenSecond = false;
+  return (/*=T*/ value, /*=T*/ element) {
+    if (!seenFirst) {
+      seenFirst = true;
+      firstValue = element;
+      return firstValue;
+    } else {
+      if (!seenSecond) {
+        seenSecond = true;
+        return combiner(firstValue, element);
+      } else {
+        return combiner(value, element);
+      }
+    }
+//    return element != _marker ? combiner(value, element) :
+  };
+}
