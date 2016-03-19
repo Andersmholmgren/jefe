@@ -169,7 +169,9 @@ class Jefe {
       @u.Option(help: 'A project name filter. Only projects whose name contains the text will run', abbr: 'p')
           String projects}) async {
     final graph = await _loadGraph(rootDirectory);
-    final pubSpec = graph.pubspecCommands;
+    final pubSpec = graph
+      .multiProjectCommands(projectFilter: projectNameFilter(projects))
+      .pubspecCommands;
 
     switch (type) {
       case 'git':
