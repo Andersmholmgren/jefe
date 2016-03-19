@@ -9,7 +9,7 @@ Future<Iterable<Directory>> createTestProjects(int projectCount) async {
   final testGitRemoteDir = await _setupTestDirs();
 
   return Future.wait(new Iterable.generate(projectCount)
-      .map((i) => _copyTestProject(testGitRemoteDir, 'project$i')));
+      .map((i) => _copyTestProject(testGitRemoteDir, 'project${i + 1}')));
 }
 
 Future<Directory> copyTestProject(String newProjectName) async {
