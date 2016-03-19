@@ -5,9 +5,10 @@ import 'test_project_utils.dart';
 main() {
   group('', () {
     setUp(() async {
-      final project = await copyTestProject('fred');
-      print(project.name);
-      print(project.installDirectory);
+      final projectDir = await copyTestProject('fred');
+      print(projectDir);
+//      print(project.name);
+//      print(project.installDirectory);
     });
 
     test('', () {}, skip: false);

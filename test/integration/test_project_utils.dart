@@ -3,28 +3,44 @@ import 'package:jefe/jefe.dart';
 import 'dart:async';
 import 'package:path/path.dart' as p;
 import 'package:git/git.dart';
+import 'package:pubspec/pubspec.dart';
 
-Future<Project> copyTestProject(String newProjectName) async {
+Future<Directory> copyTestProject(String newProjectName) async {
   Directory testProjectTemplateDir =
       new Directory('test/integration/test_project_template');
   print(testProjectTemplateDir.existsSync());
 
   final testRootDir = await Directory.systemTemp.createTemp('testRoot');
 
-  final testProjectDir =
-      new Directory(p.join(testRootDir.path, newProjectName));
+  final testGitRemoteDir =
+      new Directory(p.join(testRootDir.path, 'testGitRemotes'));
 
-  print(testProjectDir);
+  await testGitRemoteDir.create(recursive: true);
 
-  await _copyDir(testProjectTemplateDir, testProjectDir);
+  final testProjectRemoteDir =
+      new Directory(p.join(testGitRemoteDir.path, newProjectName));
 
-  await GitDir.init(testProjectDir, allowContent: true);
+  print(testProjectRemoteDir);
 
-  final project = await Project.load(testProjectDir);
-  await project.pubspec
-      .copy(name: newProjectName)
-      .save(project.installDirectory);
-  return project;
+  await _copyDir(testProjectTemplateDir, testProjectRemoteDir);
+
+  final gitDir = await GitDir.init(testProjectRemoteDir, allowContent: true);
+
+  await gitDir.runCommand(['add', '.']);
+  await gitDir.runCommand(['commit', '-am', 'blah']);
+
+  final pubSpec = await PubSpec.load(testProjectRemoteDir);
+  final newPubSpec = pubSpec.copy(name: newProjectName);
+
+  await newPubSpec.save(testProjectRemoteDir);
+
+  return testProjectRemoteDir;
+
+//  final project = await Project.load(testProjectRemoteDir);
+//  await project.pubspec
+//      .copy(name: newProjectName)
+//      .save(project.installDirectory);
+//  return project;
 }
 
 Future _copyDir(Directory sourceDir, Directory targetDir) async {
