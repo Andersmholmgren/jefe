@@ -187,7 +187,7 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
             defaultConcurrencyMode: defaultConcurrencyMode,
             projectFilter: projectFilter),
         createProcessCommands(this,
-            multiProject: false,
+            multiProject: true,
             defaultConcurrencyMode: defaultConcurrencyMode,
             projectFilter: projectFilter),
         createDockerCommands(this,
