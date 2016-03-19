@@ -28,6 +28,8 @@ Future projectLifecycleBasics() async {
   final ProjectGroup projectGroup = await ProjectGroup.install(
       new Directory('/Users/blah'), 'git@git.example');
 
+  // commands can be executed on any JefeProjectGraph instance such as
+  // an individual JefeProject or the set of rootJefeProjects for a ProjectGroup
   final graph = await projectGroup.rootJefeProjects;
 
   // initialise it (sets it on develop branch etc)
