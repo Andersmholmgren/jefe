@@ -10,7 +10,7 @@ import 'package:stack_trace/stack_trace.dart';
 import 'package:unscripted/unscripted.dart' as u;
 import 'package:jefe/src/project/jefe_project.dart';
 
-main(arguments) {
+main(List<String> arguments) {
   Chain.capture(() {
     new u.Script(Jefe).execute(arguments);
   }, onError: (error, stackChain) {
@@ -77,9 +77,10 @@ class Jefe {
       @u.Option(help: 'A project name filter. Only projects whose name contains the text will run', abbr: 'p')
           String projects}) async {
     final graph = await _loadGraph(rootDirectory);
-    return graph.lifecycle.startNewFeature(featureName);
-//    await executor.execute(lifecycle.startNewFeature(featureName),
-//        filter: projectNameFilter(projects));
+    return graph
+        .multiProjectCommands(projectFilter: projectNameFilter(projects))
+        .lifecycle
+        .startNewFeature(featureName);
   }
 
   @u.SubCommand(help: 'Completes feature and returns to development branch')
@@ -89,7 +90,10 @@ class Jefe {
       @u.Option(help: 'A project name filter. Only projects whose name contains the text will run', abbr: 'p')
           String projects}) async {
     final graph = await _loadGraph(rootDirectory);
-    return graph.lifecycle.completeFeature();
+    return graph
+        .multiProjectCommands(projectFilter: projectNameFilter(projects))
+        .lifecycle
+        .completeFeature();
   }
 
   @u.SubCommand(help: 'Create a release of all the projects')
@@ -108,16 +112,20 @@ class Jefe {
           bool autoUpdateHostedVersions: false}) async {
     final graph = await _loadGraph(rootDirectory);
 
-//    final executor = await _load(rootDirectory);
+    final lifecycle = graph
+        .multiProjectCommands(projectFilter: projectNameFilter(projects))
+        .lifecycle;
+
     // TODO: would be nice to leverage grinder here (command dependencies)
     // somehow
+
     if (!skipPreRelease) {
-      await graph.lifecycle.preRelease(
+      await lifecycle.preRelease(
           type: type, autoUpdateHostedVersions: autoUpdateHostedVersions);
     }
 
     if (!preReleaseOnly) {
-      await graph.lifecycle.release(
+      await lifecycle.release(
           type: type, autoUpdateHostedVersions: autoUpdateHostedVersions);
     } else {
       print('-------');
@@ -135,25 +143,17 @@ class Jefe {
           String projects,
       @u.Flag(help: 'Instead of running the commands concurrently on the projects, run only one command on one project at a time', abbr: 's')
           bool executeSerially: false}) async {
-    /**
-     * TODO: need to reintroduce ability to run serially!!!
-     */
     final graph = await _loadGraph(rootDirectory);
-    return graph.processCommands.execute(command, args);
-//    if (executeSerially) {
-//      graph.processDepthFirst()
-//
-//    }
-//    executeSerially
-//      ? CommandConcurrencyMode.serialDepthFirst
-//      : CommandConcurrencyMode.concurrentProject
-//
-//    final CommandExecutor executor = await _load(rootDirectory);
-//    await executor.execute(process.execute(command, args),
-//        filter: projectNameFilter(projects),
-//        concurrencyMode: executeSerially
-//            ? CommandConcurrencyMode.serialDepthFirst
-//            : CommandConcurrencyMode.concurrentProject);
+
+    final processCommands = graph
+        .multiProjectCommands(
+            projectFilter: projectNameFilter(projects),
+            defaultConcurrencyMode: executeSerially
+                ? CommandConcurrencyMode.serialDepthFirst
+                : CommandConcurrencyMode.concurrentProject)
+        .processCommands;
+
+    return processCommands.execute(command, args);
   }
 
   @u.SubCommand(help: 'Set dependencies between projects')
