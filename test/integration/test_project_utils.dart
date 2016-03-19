@@ -16,6 +16,10 @@ Future<Iterable<Directory>> createTestProjects(int projectCount) async {
 Future<Directory> createJefeWithTestProjects(int projectCount) async {
   final projects = await createTestProjects(projectCount);
 
+  return await createJefeGroup(projects);
+}
+
+Future<Directory> createJefeGroup(Iterable<Directory> projects) async {
   final jefeDir =
       new Directory(p.join(projects.first.parent.path, 'testGroup'));
 
