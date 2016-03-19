@@ -27,28 +27,30 @@ Future<Project> copyTestProject(String newProjectName) async {
   return project;
 }
 
-Future _copyDir(Directory sourceDir, Directory parentDir) async {
-  print('_copyDir($sourceDir, $parentDir)');
-  final targetDir =
-      new Directory(p.join(parentDir.path, p.basename(sourceDir.path)));
+Future _copyDir(Directory sourceDir, Directory targetDir) async {
+  print('_copyDir($sourceDir, $targetDir)');
 
   await targetDir.create(recursive: true);
 
   return sourceDir
-      .list(recursive: true)
+      .list(recursive: false)
       .asyncMap((sourceEntity) => _copy(sourceEntity, targetDir))
       .toList();
 }
 
-Future _copyFile(File sourceFile, Directory targetDir) async {
-  print('_copyFile($sourceFile, $targetDir)');
+Future _copyFile(File sourceFile, File targetFile) async {
+  print('_copyFile($sourceFile, $targetFile)');
 
-  final targetFile =
-      new File(p.join(targetDir.path, p.basename(sourceFile.path)));
   return sourceFile.copy(targetFile.path);
 }
 
-Future _copy(FileSystemEntity sourceEntity, Directory targetDir) =>
-    sourceEntity is Directory
-        ? _copyDir(sourceEntity, targetDir)
-        : _copyFile(sourceEntity as File, targetDir);
+Future _copy(FileSystemEntity sourceEntity, Directory targetDir) {
+  print('_copy($sourceEntity, $targetDir)');
+  final newTargetPath = p.join(targetDir.path, p.basename(sourceEntity.path));
+
+  print('newTargetPath: $newTargetPath');
+
+  return sourceEntity is Directory
+      ? _copyDir(sourceEntity, new Directory(newTargetPath))
+      : _copyFile(sourceEntity as File, new File(newTargetPath));
+}
