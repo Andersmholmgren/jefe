@@ -19,6 +19,7 @@ main() {
         return new ProjectIdentifier(projectName, d.path);
       }));
 
+      await jefeFile.save(projects.first.parent);
 
     });
 

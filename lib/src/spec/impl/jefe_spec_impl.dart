@@ -21,6 +21,7 @@ class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {
 
   ProjectGroupMetaDataImpl(this.name, this.childGroups, this.projects);
 
+  @override
   Future save(Directory projectDirectory) {
     final ioSink =
         new File(p.join(projectDirectory.path, 'jefe.yaml')).openWrite();

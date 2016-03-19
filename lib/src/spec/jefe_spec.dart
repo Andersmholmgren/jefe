@@ -34,6 +34,8 @@ abstract class ProjectGroupMetaData implements Jsonable {
   static Future<ProjectGroupMetaData> fromProjectGroupYamlFile(
           String projectGroupFile) =>
       readProjectGroupYaml(new File(projectGroupFile));
+
+  Future save(Directory projectDirectory);
 }
 
 abstract class ProjectEntityIdentifier<T> implements Jsonable {
