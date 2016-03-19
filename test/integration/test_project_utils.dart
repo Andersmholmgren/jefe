@@ -18,7 +18,7 @@ Future<Project> copyTestProject(String newProjectName) async {
 
   await _copyDir(testProjectTemplateDir, testProjectDir);
 
-  await GitDir.init(testProjectDir);
+  await GitDir.init(testProjectDir, allowContent: true);
 
   final project = await Project.load(testProjectDir);
   await project.pubspec
