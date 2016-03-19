@@ -5,17 +5,39 @@ import 'package:git/git.dart';
 import 'package:path/path.dart' as p;
 import 'package:pubspec/pubspec.dart';
 
-Future<Directory> copyTestProject(String newProjectName) async {
-  Directory testProjectTemplateDir =
-      new Directory('test/integration/test_project_template');
-  print(testProjectTemplateDir.existsSync());
+Future<Iterable<Directory>> createTestProjects(int projectCount) async {
+  final testGitRemoteDir = await _setupTestDirs();
 
+  return Future.wait(new Iterable.generate(projectCount)
+      .map((i) => _copyTestProject(testGitRemoteDir, 'project$i')));
+}
+
+Future<Directory> copyTestProject(String newProjectName) async {
+  final testGitRemoteDir = await _setupTestDirs();
+
+  return await _copyTestProject(testGitRemoteDir, newProjectName);
+
+//  final project = await Project.load(testProjectRemoteDir);
+//  await project.pubspec
+//      .copy(name: newProjectName)
+//      .save(project.installDirectory);
+//  return project;
+}
+
+Future<Directory> _setupTestDirs() async {
   final testRootDir = await Directory.systemTemp.createTemp('testRoot');
 
   final testGitRemoteDir =
       new Directory(p.join(testRootDir.path, 'testGitRemotes'));
 
   await testGitRemoteDir.create(recursive: true);
+  return testGitRemoteDir;
+}
+
+Future<Directory> _copyTestProject(
+    Directory testGitRemoteDir, String newProjectName) async {
+  Directory testProjectTemplateDir =
+      new Directory('test/integration/test_project_template');
 
   final testProjectRemoteDir =
       new Directory(p.join(testGitRemoteDir.path, newProjectName));
@@ -35,12 +57,6 @@ Future<Directory> copyTestProject(String newProjectName) async {
   await newPubSpec.save(testProjectRemoteDir);
 
   return testProjectRemoteDir;
-
-//  final project = await Project.load(testProjectRemoteDir);
-//  await project.pubspec
-//      .copy(name: newProjectName)
-//      .save(project.installDirectory);
-//  return project;
 }
 
 Future _copyDir(Directory sourceDir, Directory targetDir) async {
