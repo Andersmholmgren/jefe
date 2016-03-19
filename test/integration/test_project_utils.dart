@@ -4,12 +4,33 @@ import 'dart:io';
 import 'package:git/git.dart';
 import 'package:path/path.dart' as p;
 import 'package:pubspec/pubspec.dart';
+import 'package:jefe/jefe.dart';
 
 Future<Iterable<Directory>> createTestProjects(int projectCount) async {
   final testGitRemoteDir = await _setupTestDirs();
 
   return Future.wait(new Iterable.generate(projectCount)
       .map((i) => _copyTestProject(testGitRemoteDir, 'project${i + 1}')));
+}
+
+Future<Directory> createJefeWithTestProjects(int projectCount) async {
+  final projects = await createTestProjects(projectCount);
+
+  final jefeDir =
+      new Directory(p.join(projects.first.parent.path, 'testGroup'));
+
+  await jefeDir.create();
+
+  final jefeFile = new ProjectGroupMetaData('testGroup', [], projects.map((d) {
+    final projectName = p.basename(d.path);
+    return new ProjectIdentifier(projectName, d.path);
+  }));
+
+  await jefeFile.save(jefeDir);
+
+  await _gitInit(jefeDir);
+
+  return jefeDir;
 }
 
 Future<Directory> copyTestProject(String newProjectName) async {
@@ -46,10 +67,7 @@ Future<Directory> _copyTestProject(
 
   await _copyDir(testProjectTemplateDir, testProjectRemoteDir);
 
-  final gitDir = await GitDir.init(testProjectRemoteDir, allowContent: true);
-
-  await gitDir.runCommand(['add', '.']);
-  await gitDir.runCommand(['commit', '-am', 'blah']);
+  await _gitInit(testProjectRemoteDir);
 
   final pubSpec = await PubSpec.load(testProjectRemoteDir);
   final newPubSpec = pubSpec.copy(name: newProjectName);
@@ -57,6 +75,13 @@ Future<Directory> _copyTestProject(
   await newPubSpec.save(testProjectRemoteDir);
 
   return testProjectRemoteDir;
+}
+
+Future _gitInit(Directory testProjectRemoteDir) async {
+  final gitDir = await GitDir.init(testProjectRemoteDir, allowContent: true);
+
+  await gitDir.runCommand(['add', '.']);
+  await gitDir.runCommand(['commit', '-am', 'blah']);
 }
 
 Future _copyDir(Directory sourceDir, Directory targetDir) async {
