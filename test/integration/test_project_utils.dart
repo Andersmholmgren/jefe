@@ -1,8 +1,8 @@
-import 'dart:io';
-import 'package:jefe/jefe.dart';
 import 'dart:async';
-import 'package:path/path.dart' as p;
+import 'dart:io';
+
 import 'package:git/git.dart';
+import 'package:path/path.dart' as p;
 import 'package:pubspec/pubspec.dart';
 
 Future<Directory> copyTestProject(String newProjectName) async {
