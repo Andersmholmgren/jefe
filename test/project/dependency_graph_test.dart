@@ -8,6 +8,9 @@ import 'package:logging/logging.dart';
 import 'package:test/test.dart';
 
 import 'test_helpers.dart';
+import 'package:jefe/src/project/jefe_project.dart';
+import 'package:jefe/src/project/dependency_graph.dart';
+import 'dart:async';
 
 main() async {
   Logger.root.level = Level.ALL;
@@ -70,8 +73,8 @@ main() async {
 
 class TestProcessor {
   final List<TestProcessInvocation> invocations = [];
-  call(Project project, Iterable<Project> dependencies) {
-    invocations.add(new TestProcessInvocation(project, dependencies));
+  Future call(JefeProject project) async {
+    invocations.add(new TestProcessInvocation(project, project.directDependencies));
   }
 
   static createTests(
@@ -120,7 +123,7 @@ expectThat(
     theProjects = projects();
     processor = new TestProcessor();
     final JefeProjectGraph graph =
-        await getDependencyGraph(theProjects.toSet());
+        await getRootProjects(theProjects.toSet());
     return graph.processDepthFirst(processor);
   }
 

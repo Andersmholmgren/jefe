@@ -50,13 +50,13 @@ class JsonBuilder {
     }
     if (value is Map) {
       final result = {};
-      (value as Map).forEach((k, v) {
+      value.forEach((k, v) {
         result[k] = _transformValue(v, null);
       });
       return result;
     }
     if (value is Iterable) {
-      return (value as Iterable).map((v) => _transformValue(v, null)).toList();
+      return value.map((v) => _transformValue(v, null)).toList();
     }
     return value.toString();
   }

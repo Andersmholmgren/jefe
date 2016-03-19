@@ -15,12 +15,12 @@ Project aProject(String name, {Iterable<Project> dependencies: const []}) =>
 
 Project __aProject(String name,
     {Iterable<PathReference> pathDependencies: const []}) {
-  final dependencies = {};
+  final dependencies = <String, DependencyReference>{};
   pathDependencies.forEach((pd) {
     // WARNING: only makes sense if path == name
     dependencies[pd.path] = pd;
   });
 
   return new ProjectImpl(name, new Directory(name),
-      new PubSpec(name: name, dependencies: dependencies));
+      new PubSpec(name: name, dependencies: dependencies), null);
 }
