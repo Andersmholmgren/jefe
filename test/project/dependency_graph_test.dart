@@ -39,7 +39,7 @@ main() async {
       expectThat(withTheseProjects: () => [project1], weGetTheseInvocations: [
         () => new TestProcessInvocation(project1, const [])
       ]);
-    }, skip: false);
+    }, skip: true);
 
     group('for two projects with a single dependency', () {
       final project1 = aProject('project1');
@@ -51,7 +51,7 @@ main() async {
             () => new TestProcessInvocation(project1, []),
             () => new TestProcessInvocation(project2, [project1])
           ]);
-    }, skip: true);
+    }, skip: false);
 
     group('for 4 projects with several dependencies', () {
       final project1 = aProject('project1');
@@ -107,7 +107,8 @@ class TestProcessInvocation {
     });
 
     test('invocation has expected dependencies', () {
-      expect(actual().dependencies, unorderedEquals(expected().dependencies));
+      expect(actual().dependencies.map((p) => p.id),
+        unorderedEquals(expected().dependencies.map((p) => p.id)));
     });
   }
 }
