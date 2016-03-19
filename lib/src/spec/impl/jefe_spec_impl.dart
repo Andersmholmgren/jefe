@@ -3,8 +3,14 @@
 
 library jefe.project.spec.impl;
 
+import 'dart:async';
+import 'dart:io';
+
 import 'package:jefe/src/project/project.dart';
 import 'package:jefe/src/project/project_group.dart';
+import 'package:path/path.dart' as p;
+import 'package:stuff/stuff.dart';
+import 'package:yamlicious/yamlicious.dart';
 
 import '../jefe_spec.dart';
 
@@ -14,6 +20,23 @@ class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {
   final Iterable<ProjectIdentifier> projects;
 
   ProjectGroupMetaDataImpl(this.name, this.childGroups, this.projects);
+
+  Future save(Directory projectDirectory) {
+    final ioSink =
+        new File(p.join(projectDirectory.path, 'jefe.yaml')).openWrite();
+    try {
+      writeYamlString(toJson(), ioSink);
+    } finally {
+      return ioSink.close();
+    }
+  }
+
+  @override
+  Map toJson() => (buildJson
+        ..add('name', name)
+        ..add('childGroups', childGroups)
+        ..add('projects', projects))
+      .json;
 }
 
 abstract class _BaseRef<T> implements ProjectEntityIdentifier<T> {
@@ -22,11 +45,14 @@ abstract class _BaseRef<T> implements ProjectEntityIdentifier<T> {
 
   _BaseRef(this.name, this.gitUri);
 
-  bool operator ==(other) => other.runtimeType == runtimeType &&
+  bool operator ==(other) =>
+      other.runtimeType == runtimeType &&
       name == other.name &&
       gitUri == other.gitUri;
 
   int get hashCode => name.hashCode;
+
+  Map toJson() => (buildJson..add('name', name)..add('gitUri', gitUri)).json;
 }
 
 class ProjectGroupIdentifierImpl extends _BaseRef<ProjectGroup>

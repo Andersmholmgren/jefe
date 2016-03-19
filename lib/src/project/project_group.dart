@@ -12,6 +12,7 @@ import '../spec/jefe_spec.dart';
 import 'core.dart';
 import 'impl/project_group_impl.dart';
 import 'project.dart';
+import '../spec/jefe_spec.dart' as spec;
 
 abstract class ProjectGroupReference
     implements ProjectEntityReference<ProjectGroup> {}
@@ -20,6 +21,7 @@ abstract class ProjectGroupReference
 /// a unit and typically have dependencies between them.
 abstract class ProjectGroup implements ProjectEntity {
   ProjectGroupIdentifier get id;
+  spec.ProjectGroupMetaData get metaData;
 
   /// Install a [ProjectGroup] plus all its [Project]s and child [ProjectGroup]s
   /// recursively.
