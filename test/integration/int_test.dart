@@ -141,8 +141,10 @@ main() {
 }
 
 Future get _performLifecycle async {
+  print("============== _performLifecycle");
   final jefeDir = await createJefeWithTestProjects(4);
-  print(jefeDir);
+
+  print('--------- $jefeDir');
 
   final parentDirectory =
       await new Directory(p.join(jefeDir.parent.parent.path, 'installDirs'))
