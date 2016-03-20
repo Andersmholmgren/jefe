@@ -27,7 +27,7 @@ Future<Directory> createJefeGroup(Iterable<Directory> projects) async {
 
   final jefeFile = new ProjectGroupMetaData('testGroup', [], projects.map((d) {
     final projectName = p.basename(d.path);
-    return new ProjectIdentifier(projectName, d.path);
+    return new ProjectIdentifier(projectName, p.join(d.path, '.git'));
   }));
 
   await jefeFile.save(jefeDir);

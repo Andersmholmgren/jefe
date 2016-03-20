@@ -43,13 +43,26 @@ Future<GitDir> cloneOrPull(String gitUri, Directory containerDirectory,
   }
 }
 
-Future<GitDir> clone(String gitUri, Directory parentDirectory) async {
-  _log.info('cloning git repo $gitUri into parent directory $parentDirectory');
-  await runGit(['clone', gitUri.toString()],
+Future<GitDir> clone(String gitUri, Directory parentDirectory,
+    {String targetDirName}) async {
+  if (gitUri.endsWith("/.git")) {
+    final uri = Uri.parse(gitUri);
+    if (uri.scheme.isEmpty || uri.scheme == 'file') {
+      final pathSegments = uri.pathSegments;
+      targetDirName = pathSegments.elementAt(pathSegments.length - 1);
+    }
+  }
+
+  final extraLogMessagePart =
+      targetDirName != null ? 'with target directory $targetDirName' : '';
+  _log.info('cloning git repo $gitUri into parent directory $parentDirectory '
+      '$extraLogMessagePart');
+
+  await runGit(['clone', gitUri, targetDirName ?? ''],
       processWorkingDir: parentDirectory.path);
 
-  _log.finest(
-      'successfully cloned git repo $gitUri into parent directory $parentDirectory');
+  _log.finest('successfully cloned git repo $gitUri into parent directory '
+      '$parentDirectory $extraLogMessagePart');
 
   return gitWorkspaceDir(gitUri, parentDirectory);
 }
