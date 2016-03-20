@@ -16,7 +16,7 @@ typedef GitFeatureCommands GitFeatureCommandsFactory(JefeProject project);
 /// and releasing features
 abstract class GitFeatureCommands {
   /// The branch that features merge onto when they complete
-  String get developBranchName;
+  Future<String> get developBranchName;
 
   Future<bool> get isOnDevelopBranch;
 

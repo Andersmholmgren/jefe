@@ -140,12 +140,13 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
   Future preRelease(
       {ReleaseType type: ReleaseType.minor,
       bool autoUpdateHostedVersions: false}) async {
+    final _developBranchName = await spc.gitFeature.developBranchName;
     await spc.git.assertWorkingTreeClean();
     await spc.gitFeature.assertNoActiveReleases();
-    await spc.git.assertOnBranch(spc.gitFeature.developBranchName);
+    await spc.git.assertOnBranch(_developBranchName);
     await spc.git.fetch();
     await spc.git.updateFromRemote('master');
-    await spc.git.updateFromRemote(spc.gitFeature.developBranchName);
+    await spc.git.updateFromRemote(_developBranchName);
     await spc.git.merge('master');
     await checkReleaseVersions(
         type: type, autoUpdateHostedVersions: autoUpdateHostedVersions);

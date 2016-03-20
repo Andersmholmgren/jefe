@@ -134,8 +134,6 @@ class SingleProjectCommandSupport<C> {
   noSuchMethod(Invocation i) {
     return executeTask(
         '${MirrorSystem.getName(i.memberName)} on project ${_project.name}',
-        () async {
-      return (await _singleProjectCommandMirror).delegate(i);
-    });
+        () async => (await _singleProjectCommandMirror).delegate(i));
   }
 }
