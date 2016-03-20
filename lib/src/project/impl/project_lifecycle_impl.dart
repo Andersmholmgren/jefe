@@ -17,6 +17,7 @@ import 'package:jefe/src/project_commands/project_command.dart'
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:quiver/check.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
@@ -113,19 +114,23 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
     } else {
       final finishingFeatureName = featureName ?? currentFeatureNameOpt.get();
 
+      checkState(finishingFeatureName != null,
+          message: 'oops ended up with a null featureName somehow');
+
       if ((await spc.gitFeature.currentFeatureName()).getOrElse(() => null) !=
           finishingFeatureName) {
         throw new StateError(
             "project ${_project.name} is neither on feature branch or develop");
       }
 
-      await spc.gitFeature.featureFinish(featureName,
+      await spc.gitFeature.featureFinish(finishingFeatureName,
           excludeOnlyCommitIf: (Commit c) =>
               c.message.startsWith(featureStartCommitPrefix));
 
       await spc.pubspecCommands.setToGitDependencies();
       await spc.pub.get();
-      await spc.git.commit('completed development of feature $featureName');
+      await spc.git
+          .commit('completed development of feature $finishingFeatureName');
 
       if (doPush) await spc.git.push();
     }
@@ -219,7 +224,8 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
       _log.info('Detected existing feature - $currentFeatureName');
       await startNewFeature(currentFeatureName);
     } else {
-      if (doCheckout) await spc.git.checkout(spc.gitFeature.developBranchName);
+      if (doCheckout)
+        await spc.git.checkout(await spc.gitFeature.developBranchName);
     }
   }
 

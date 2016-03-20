@@ -14,6 +14,7 @@ import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:quiver/check.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.feature.impl');
 
@@ -103,10 +104,11 @@ class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
 
   Future featureFinish(String featureName,
       {bool excludeOnlyCommitIf(Commit commit): _dontExclude}) async {
+    checkArgument(featureName != null, message: 'featureName must be provided');
     final GitDir gitDir = _gitDir;
     final Map<String, Commit> commits =
         await gitDir.getCommits('$developBranchName..HEAD');
-    _log.info('found ${commits.length} commits on feature branch');
+    _log.info('found ${commits.length} commits on feature branch $featureName');
     if (commits.length == 1 && excludeOnlyCommitIf(commits.values.first)) {
       // TODO: we should really delete the feature branch but a bit paranoid
       // doing that for now
@@ -146,7 +148,8 @@ class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
     final releaseNames = await gitFlowReleaseNames(_gitDir);
     if (releaseNames.isNotEmpty) {
       throw new StateError(
-          '${_project.name} has an existing release branch. Must finish all active releases first');
+          '${_project.name} has an existing release branch. '
+          'Must finish all active releases first');
     }
   }
 
