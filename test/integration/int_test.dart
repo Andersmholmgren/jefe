@@ -5,6 +5,7 @@ import 'package:jefe/jefe.dart';
 import 'package:path/path.dart' as p;
 import 'package:logging/logging.dart';
 import 'dart:async';
+import 'package:git/git.dart';
 
 final Logger _log = new Logger('dd');
 
@@ -43,6 +44,66 @@ main() {
             metaData.projects.map((pi) => pi.gitUri),
             unorderedEquals(['project1', 'project2', 'project3', 'project4']
                 .map((s) => p.join(jefeDir.parent.path, s))));
+      }, skip: false);
+    }, skip: false);
+
+    group('results in remote repos in expected state', () {
+      ProjectGroupMetaData metaData;
+
+      Directory projectDirectory(int projectCount) =>
+          new Directory(metaData.projects
+              .where((pi) => pi.name == 'project$projectCount')
+              .map((pi) => pi.gitUri)
+              .first);
+
+//      Future<GitDir> projectGitDir(int projectCount) async =>
+//      GitDir.fromExisting();
+      Future<ProcessResult> runGitCommand(
+          Iterable<String> args, Directory processWorkingDir,
+          [bool throwOnError = true]) {
+        final list = args.toList();
+
+        return runGit(list,
+            throwOnError: throwOnError, processWorkingDir: processWorkingDir);
+      }
+
+      Future<Map<String, Commit>> getCommits(Directory processWorkingDir,
+          [String branchName = 'HEAD']) async {
+        var pr = await runGitCommand(
+            ['rev-list', '--format=raw', branchName], processWorkingDir);
+        return Commit.parseRawRevList(pr.stdout);
+      }
+
+      Future<Map<String, Commit>> getCommitsFor(int projectCount,
+              [String branchName = 'HEAD']) async =>
+          getCommits(projectDirectory(projectCount), branchName);
+
+      setUp(() async {
+        if (metaData == null)
+          metaData = await ProjectGroupMetaData
+              .fromDefaultProjectGroupYamlFile(jefeDir.path);
+
+//        metaData.projects.map((pi) => pi.gitUri)
+      });
+
+      group('with project2 commits', () {
+        Map<String, Commit> commits;
+        setUp(() async {
+          commits = await getCommitsFor(2, 'master');
+        });
+
+        test('with expected number', () {
+          expect(commits, hasLength(4));
+        }, skip: false);
+
+        test('with expected messages', () {
+          expect(commits.values.map((c) => c.message), [
+            "Merge branch 'release/0.0.1'",
+            "completed development of feature addDependencies",
+            "added dependency on project1",
+            "blah"
+          ]);
+        }, skip: false);
       }, skip: false);
     }, skip: false);
   }, skip: false);
