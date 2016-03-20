@@ -11,12 +11,8 @@ main() {
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen(print);
 
-  group('', () {
+  group('simple lifecycle with a dependency added', () {
     setUp(() async {
-      // final project1 = aProject('project1');
-      // final project2 = aProject('project2', dependencies: [project1]);
-      // final project3 = aProject('project3');
-      // final project4 = aProject('project4', dependencies: [project3, project2]);
 
       final jefeDir = await createJefeWithTestProjects(4);
       print(jefeDir);
@@ -46,10 +42,6 @@ main() {
       final group2 = await ProjectGroup.load(group.containerDirectory);
 
       await (await group2.rootJefeProjects).lifecycle.completeFeature(doPush: true);
-//      final projectDir = await copyTestProject('project1');
-//      print(projectDir);
-//      print(project.name);
-//      print(project.installDirectory);
     });
 
     test('', () {}, skip: false);
