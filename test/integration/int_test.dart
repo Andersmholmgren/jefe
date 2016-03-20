@@ -45,7 +45,7 @@ main() {
       // TODO: damn. Need to reload the group here as they are now stale.
       final group2 = await ProjectGroup.load(group.containerDirectory);
 
-      await (await group2.rootJefeProjects).lifecycle.completeFeature();
+      await (await group2.rootJefeProjects).lifecycle.completeFeature(doPush: true);
 //      final projectDir = await copyTestProject('project1');
 //      print(projectDir);
 //      print(project.name);
