@@ -48,7 +48,9 @@ Future<GitDir> cloneOrPull(String gitUri, Directory containerDirectory,
 }
 
 Future<GitDir> clone(String gitUri, Directory parentDirectory,
-    {String targetDirName}) async {
+    {String targetDirName, bool bareRepo}) async {
+  final options = bareRepo ? <String>['--bare'] : <String>[];
+
   if (gitUri.endsWith("/.git")) {
     final uri = Uri.parse(gitUri);
     if (uri.scheme.isEmpty || uri.scheme == 'file') {
@@ -62,7 +64,10 @@ Future<GitDir> clone(String gitUri, Directory parentDirectory,
   _log.info('cloning git repo $gitUri into parent directory $parentDirectory '
       '$extraLogMessagePart');
 
-  final basicCloneCommand = <String>['clone', gitUri];
+  final basicCloneCommand = <String>['clone']
+    ..addAll(options)
+    ..add(gitUri);
+
   final cloneCommand = targetDirName != null
       ? (<String>[]
         ..addAll(basicCloneCommand)

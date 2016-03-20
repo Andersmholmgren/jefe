@@ -5,6 +5,7 @@ import 'package:git/git.dart';
 import 'package:path/path.dart' as p;
 import 'package:pubspec/pubspec.dart';
 import 'package:jefe/jefe.dart';
+import 'package:jefe/src/git/git.dart';
 
 Future<Iterable<Directory>> createTestProjects(int projectCount) async {
   final testGitRemoteDir = await _setupTestDirs();
@@ -16,7 +17,20 @@ Future<Iterable<Directory>> createTestProjects(int projectCount) async {
 Future<Directory> createJefeWithTestProjects(int projectCount) async {
   final projects = await createTestProjects(projectCount);
 
-  return await createJefeGroup(projects);
+  final bareRepoParentDir = await new Directory(
+          p.join(projects.first.parent.parent.path, 'testBareGitRemotes'))
+      .create(recursive: true);
+
+  final bareProjects = await Future.wait(projects
+      .map((p) => createBareClone(new Directory(p.path), bareRepoParentDir)));
+
+  return await createJefeGroup(bareProjects);
+}
+
+Future<Directory> createBareClone(
+    Directory sourceRepo, Directory targetParent) async {
+  final gitDir = await clone(sourceRepo.path, targetParent, bareRepo: true);
+  return new Directory(gitDir.path);
 }
 
 Future<Directory> createJefeGroup(Iterable<Directory> projects) async {
@@ -27,7 +41,7 @@ Future<Directory> createJefeGroup(Iterable<Directory> projects) async {
 
   final jefeFile = new ProjectGroupMetaData('testGroup', [], projects.map((d) {
     final projectName = p.basename(d.path);
-    return new ProjectIdentifier(projectName, p.join(d.path, '.git'));
+    return new ProjectIdentifier(projectName, d.path);
   }));
 
   await jefeFile.save(jefeDir);
