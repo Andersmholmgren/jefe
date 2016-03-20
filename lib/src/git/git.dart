@@ -21,13 +21,23 @@ Future<GitDir> gitWorkspaceDir(String gitUri, Directory parentDirectory,
     GitDir.fromExisting(gitWorkspacePath(gitUri, parentDirectory,
         targetDirName: targetDirName));
 
-String gitWorkspaceName(String gitUri, {String targetDirName}) =>
-    targetDirName != null ? targetDirName : p.basenameWithoutExtension(gitUri);
+String gitWorkspaceName(String gitUri, {String targetDirName}) {
+  final result = targetDirName != null
+      ? targetDirName
+      : p.basenameWithoutExtension(gitUri);
+
+  print('gitWorkspaceName => $result');
+  return result;
+}
 
 String gitWorkspacePath(String gitUri, Directory parentDirectory,
-        {String targetDirName}) =>
-    p.join(parentDirectory.path,
+        {String targetDirName}) {
+  final result =  p.join(parentDirectory.path,
         gitWorkspaceName(gitUri, targetDirName: targetDirName));
+
+  print('gitWorkspacePath => $result');
+  return result;
+}
 
 enum OnExistsAction { pull, ignore }
 
