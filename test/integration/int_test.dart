@@ -7,10 +7,10 @@ import 'package:path/path.dart' as p;
 main() {
   group('', () {
     setUp(() async {
-      final project1 = aProject('project1');
-      final project2 = aProject('project2', dependencies: [project1]);
-      final project3 = aProject('project3');
-      final project4 = aProject('project4', dependencies: [project3, project2]);
+      // final project1 = aProject('project1');
+      // final project2 = aProject('project2', dependencies: [project1]);
+      // final project3 = aProject('project3');
+      // final project4 = aProject('project4', dependencies: [project3, project2]);
 
       final jefeDir = await createJefeWithTestProjects(4);
       print(jefeDir);
@@ -21,6 +21,14 @@ main() {
 
       final group = await ProjectGroup.install(parentDirectory, jefeDir.path);
       print(group);
+
+      final graph = await group.rootJefeProjects;
+
+      final project1 = graph.getProjectByName('project1').get();
+
+      final project2 = graph.getProjectByName('project2').get();
+
+      await project2.pubspecCommands.addDependencyOn(project1);
 //      final projectDir = await copyTestProject('project1');
 //      print(projectDir);
 //      print(project.name);

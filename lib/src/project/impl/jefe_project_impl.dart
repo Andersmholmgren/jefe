@@ -102,6 +102,9 @@ class JefeProjectImpl extends ProjectImpl
 
     return _singleProjectCommands ??= create();
   }
+
+  @override
+  Directory get _dockerRootDirectory => installDirectory;
 }
 
 class JefeProjectSetImpl extends DelegatingSet<JefeProject>
@@ -217,6 +220,8 @@ bool _noOpFilter(Project p) => true;
 
 //const Object _marker = const Object();
 
+// workaround the fact that reduce blows up when no results.
+// So run a fold instead but hide it from the caller
 Combiner/*<T>*/ _combinerToFold/*<T>*/(Combiner/*<T>*/ combiner) {
   var/*=T*/ firstValue;
   bool seenFirst = false;

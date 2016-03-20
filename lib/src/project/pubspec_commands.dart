@@ -6,6 +6,7 @@ library jefe.project.commands.pub.spec;
 import 'dart:async';
 
 import 'package:pubspec/pubspec.dart';
+import 'package:jefe/src/project/project.dart';
 
 /// Commands that operate on each [Project]s [PubSpec] files
 abstract class PubSpecCommands {
@@ -28,6 +29,8 @@ abstract class PubSpecCommands {
   // making it a command is kinda weird
   Future<bool> haveDependenciesChanged(DependencyType type,
       {bool useGitIfNotHosted: true});
+
+  Future addDependencyOn(Project dependee);
 }
 
 enum DependencyType { path, git, hosted }

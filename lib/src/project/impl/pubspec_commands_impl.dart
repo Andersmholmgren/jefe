@@ -208,4 +208,40 @@ class _PubSpecCommandsSingleProjectImpl implements PubSpecCommands {
           'attempt to create hosted dependency for package not hosted on pub');
     }
   }
+
+  @override
+  Future addDependencyOn(Project dependee) async {
+    final names = _project.directDependencies.map((p) => p.name);
+    final deps = _project.pubspec.dependencies;
+    final projectDependencyRefs = names.map((name) => deps[name]);
+
+    final projectDependencyTypes =
+        projectDependencyRefs.map((pd) => pd.runtimeType).toSet();
+
+    DependencyType determineDependencyType() {
+      switch (projectDependencyTypes.length) {
+        case 0:
+          return DependencyType.path;
+        case 1:
+          return DependencyType.values
+              .firstWhere((t) => t.runtimeType == projectDependencyTypes.first);
+        default:
+          throw new StateError(
+              "can't infer dependency type as there is a mixture of types "
+              "(${projectDependencyTypes}) used in the project (${_project.name})");
+      }
+    }
+    final dependencyType = determineDependencyType();
+
+    final newDependencyReference = await _createDependencyReference(dependee,
+        dependencyType, true, (await _project.exportedDependencyNames).toSet());
+
+    final newDependencies = <String, DependencyReference>{}
+      ..addAll(_project.pubspec.dependencies)
+      ..addAll({dependee.name: newDependencyReference});
+
+    final newPubspec = _project.pubspec.copy(dependencies: newDependencies);
+
+    await _project.updatePubspec(newPubspec);
+  }
 }
