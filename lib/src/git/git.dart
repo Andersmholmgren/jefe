@@ -31,9 +31,9 @@ String gitWorkspaceName(String gitUri, {String targetDirName}) {
 }
 
 String gitWorkspacePath(String gitUri, Directory parentDirectory,
-        {String targetDirName}) {
-  final result =  p.join(parentDirectory.path,
-        gitWorkspaceName(gitUri, targetDirName: targetDirName));
+    {String targetDirName}) {
+  final result = p.join(parentDirectory.path,
+      gitWorkspaceName(gitUri, targetDirName: targetDirName));
 
   print('gitWorkspacePath => $result');
   return result;
@@ -58,7 +58,15 @@ Future<GitDir> cloneOrPull(String gitUri, Directory containerDirectory,
 }
 
 Future<GitDir> clone(String gitUri, Directory parentDirectory,
-    {String targetDirName, bool bareRepo}) async {
+    {String targetDirName, bool bareRepo: false}) async {
+  await cloneInto(gitUri, parentDirectory,
+      targetDirName: targetDirName, bareRepo: bareRepo);
+
+  return gitWorkspaceDir(gitUri, parentDirectory, targetDirName: targetDirName);
+}
+
+Future<Directory> cloneInto(String gitUri, Directory parentDirectory,
+    {String targetDirName, bool bareRepo: false}) async {
   final options = bareRepo ? <String>['--bare'] : <String>[];
 
   if (gitUri.endsWith("/.git")) {
@@ -89,7 +97,8 @@ Future<GitDir> clone(String gitUri, Directory parentDirectory,
   _log.finest('successfully cloned git repo $gitUri into parent directory '
       '$parentDirectory $extraLogMessagePart');
 
-  return gitWorkspaceDir(gitUri, parentDirectory, targetDirName: targetDirName);
+  return new Directory(
+      gitWorkspacePath(gitUri, parentDirectory, targetDirName: targetDirName));
 }
 
 Future<GitDir> pull(String gitUri, Directory gitDirectory) async {

@@ -28,11 +28,9 @@ Future<Directory> createJefeWithTestProjects(int projectCount) async {
 }
 
 Future<Directory> createBareClone(
-    Directory sourceRepo, Directory targetParent) async {
-  final gitDir = await clone(sourceRepo.path, targetParent, bareRepo: true,
-    targetDirName: p.basename(sourceRepo.path));
-  return new Directory(gitDir.path);
-}
+        Directory sourceRepo, Directory targetParent) async =>
+    cloneInto(sourceRepo.path, targetParent,
+        bareRepo: true, targetDirName: p.basename(sourceRepo.path));
 
 Future<Directory> createJefeGroup(Iterable<Directory> projects) async {
   final jefeDir =

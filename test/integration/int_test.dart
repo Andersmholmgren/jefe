@@ -35,14 +35,14 @@ main() {
 
       test('with expected project names', () {
         expect(metaData.projects.map((pi) => pi.name),
-            ['project1', 'project2', 'project3', 'project4']);
+            unorderedEquals(['project1', 'project2', 'project3', 'project4']));
       }, skip: false);
 
       test('with expected project gitUri', () {
         expect(
             metaData.projects.map((pi) => pi.gitUri),
-            ['project1', 'project2', 'project3', 'project4']
-                .map((s) => p.join(jefeDir.parent.path, s)));
+            unorderedEquals(['project1', 'project2', 'project3', 'project4']
+                .map((s) => p.join(jefeDir.parent.path, s))));
       }, skip: false);
     }, skip: false);
   }, skip: false);
