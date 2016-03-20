@@ -6,6 +6,9 @@ import 'package:path/path.dart' as p;
 import 'package:logging/logging.dart';
 import 'dart:async';
 import 'package:git/git.dart';
+import 'package:pubspec/pubspec.dart';
+import 'package:yaml/yaml.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 final Logger _log = new Logger('dd');
 
@@ -90,7 +93,7 @@ main() {
       group('with project2 commits', () {
         Map<String, Commit> commits;
         setUp(() async {
-          commits = await getCommitsFor(2, 'master');
+          if (commits == null) commits = await getCommitsFor(2, 'master');
         });
 
         test('with expected number', () {
@@ -105,6 +108,33 @@ main() {
             "blah"
           ]);
         }, skip: false);
+      }, skip: false);
+
+      group('with project2 pubspec.yaml', () {
+        PubSpec pubSpec;
+        setUp(() async {
+          if (pubSpec == null) {
+            final directory = projectDirectory(2);
+            final pubSpecStr = (await runGitCommand(
+                    ['show', 'master:pubspec.yaml'], directory))
+                .stdout;
+
+            pubSpec = new PubSpec.fromJson(loadYaml(pubSpecStr));
+//            git show master:pubspec.yaml
+//            pubSpec = await PubSpec.load(directory);
+          }
+        });
+
+        test('has expected version', () {
+          expect(pubSpec.version, new Version(0, 0, 1));
+        }, skip: false);
+
+        test('has git reference to project1', () {
+          expect(pubSpec.dependencies['project1'],
+              new isInstanceOf<GitReference>());
+        }, skip: false);
+
+        // TODO: test more details on git ref
       }, skip: false);
     }, skip: false);
   }, skip: false);
