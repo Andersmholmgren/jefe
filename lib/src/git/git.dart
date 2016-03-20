@@ -16,14 +16,18 @@ import 'package:quiver/iterables.dart';
 
 Logger _log = new Logger('jefe.git');
 
-Future<GitDir> gitWorkspaceDir(String gitUri, Directory parentDirectory) =>
-    GitDir.fromExisting(gitWorkspacePath(gitUri, parentDirectory));
+Future<GitDir> gitWorkspaceDir(String gitUri, Directory parentDirectory,
+        {String targetDirName}) =>
+    GitDir.fromExisting(gitWorkspacePath(gitUri, parentDirectory,
+        targetDirName: targetDirName));
 
-String gitWorkspaceName(String gitUri) => p.basenameWithoutExtension(gitUri);
+String gitWorkspaceName(String gitUri, {String targetDirName}) =>
+    targetDirName != null ? targetDirName : p.basenameWithoutExtension(gitUri);
 
-String gitWorkspacePath(String gitUri, Directory parentDirectory) {
-  return p.join(parentDirectory.path, gitWorkspaceName(gitUri));
-}
+String gitWorkspacePath(String gitUri, Directory parentDirectory,
+        {String targetDirName}) =>
+    p.join(parentDirectory.path,
+        gitWorkspaceName(gitUri, targetDirName: targetDirName));
 
 enum OnExistsAction { pull, ignore }
 
@@ -49,7 +53,7 @@ Future<GitDir> clone(String gitUri, Directory parentDirectory,
     final uri = Uri.parse(gitUri);
     if (uri.scheme.isEmpty || uri.scheme == 'file') {
       final pathSegments = uri.pathSegments;
-      targetDirName = pathSegments.elementAt(pathSegments.length - 1);
+      targetDirName = pathSegments.elementAt(pathSegments.length - 2);
     }
   }
 
@@ -58,13 +62,19 @@ Future<GitDir> clone(String gitUri, Directory parentDirectory,
   _log.info('cloning git repo $gitUri into parent directory $parentDirectory '
       '$extraLogMessagePart');
 
-  await runGit(['clone', gitUri, targetDirName ?? ''],
-      processWorkingDir: parentDirectory.path);
+  final basicCloneCommand = <String>['clone', gitUri];
+  final cloneCommand = targetDirName != null
+      ? (<String>[]
+        ..addAll(basicCloneCommand)
+        ..add(targetDirName))
+      : basicCloneCommand;
+
+  await runGit(cloneCommand, processWorkingDir: parentDirectory.path);
 
   _log.finest('successfully cloned git repo $gitUri into parent directory '
       '$parentDirectory $extraLogMessagePart');
 
-  return gitWorkspaceDir(gitUri, parentDirectory);
+  return gitWorkspaceDir(gitUri, parentDirectory, targetDirName: targetDirName);
 }
 
 Future<GitDir> pull(String gitUri, Directory gitDirectory) async {
