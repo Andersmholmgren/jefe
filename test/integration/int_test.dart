@@ -64,7 +64,8 @@ main() {
         final list = args.toList();
 
         return runGit(list,
-            throwOnError: throwOnError, processWorkingDir: processWorkingDir);
+            throwOnError: throwOnError,
+            processWorkingDir: processWorkingDir.path);
       }
 
       Future<Map<String, Commit>> getCommits(Directory processWorkingDir,
