@@ -54,4 +54,5 @@ export 'src/project_commands/project_command_executor.dart';
 export 'src/project/project_lifecycle.dart';
 export 'src/project/pub_commands.dart';
 export 'src/project/pubspec_commands.dart';
+export 'src/project/jefe_project.dart';
 export 'src/spec/jefe_spec.dart';

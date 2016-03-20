@@ -149,10 +149,26 @@ main() {
         expect(await getCommitsFor(4, 'master'), hasLength(1));
       }, skip: false);
     }, skip: false);
+  }, skip: true);
+
+  group('process commands', () {
+    ProjectGroup group;
+    JefeProjectGraph graph;
+
+    setUp(() async {
+      if (group == null) {
+        group = await _createTestGroup();
+        graph = await group.rootJefeProjects;
+      }
+    });
+
+    test('', () async {
+      expect(await graph.processCommands.execute('ls', []), isNotNull);
+    }, skip: false);
   }, skip: false);
 }
 
-Future get _performLifecycle async {
+Future<Directory> get _performLifecycle async {
   print("============== _performLifecycle");
   final jefeDir = await createJefeWithTestProjects(4);
 
@@ -190,4 +206,42 @@ Future get _performLifecycle async {
   await (await group3.rootJefeProjects).lifecycle.release();
 
   return jefeDir;
+}
+
+//Future<Directory> _runExecCommands() async {
+//  print("============== _runExecCommands");
+//  final jefeDir = await createJefeWithTestProjects(4);
+//
+//  print('--------- $jefeDir');
+//
+//  final parentDirectory =
+//  await new Directory(p.join(jefeDir.parent.parent.path, 'installDirs'))
+//    .create();
+//
+//  final group = await ProjectGroup.install(parentDirectory, jefeDir.path);
+//  print(group);
+//
+//  final graph = await group.rootJefeProjects;
+//
+////  await graph.lifecycle.init();
+//
+////  await graph.processCommands.execute('ls', []);
+//
+//  return jefeDir;
+//}
+
+Future<ProjectGroup> _createTestGroup() async {
+  print("============== _runExecCommands");
+  final jefeDir = await createJefeWithTestProjects(4);
+
+  print('--------- $jefeDir');
+
+  final parentDirectory =
+      await new Directory(p.join(jefeDir.parent.parent.path, 'installDirs'))
+          .create();
+
+  final group = await ProjectGroup.install(parentDirectory, jefeDir.path);
+  print(group);
+
+  return group;
 }
