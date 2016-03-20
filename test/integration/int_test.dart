@@ -136,6 +136,18 @@ main() {
 
         // TODO: test more details on git ref
       }, skip: false);
+
+      test('with project1 having only the original commit', () async {
+        expect(await getCommitsFor(1, 'master'), hasLength(1));
+      }, skip: false);
+
+      test('with project3 having only the original commit', () async {
+        expect(await getCommitsFor(3, 'master'), hasLength(1));
+      }, skip: false);
+
+      test('with project4 having only the original commit', () async {
+        expect(await getCommitsFor(4, 'master'), hasLength(1));
+      }, skip: false);
     }, skip: false);
   }, skip: false);
 }
