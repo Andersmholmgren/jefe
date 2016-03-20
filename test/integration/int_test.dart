@@ -162,8 +162,19 @@ main() {
       }
     });
 
-    test('', () async {
-      expect(await graph.processCommands.execute('ls', []), isNotNull);
+    test('ls executes concurrently', () async {
+      expect(await graph.processCommands.execute('ls', []), "fred");
+    }, skip: true);
+
+    test('ls executes serially', () async {
+      expect(
+          await graph
+              .multiProjectCommands(
+                  defaultConcurrencyMode:
+                      CommandConcurrencyMode.serialDepthFirst)
+              .processCommands
+              .execute('ls', []),
+          "fred");
     }, skip: false);
   }, skip: false);
 }
