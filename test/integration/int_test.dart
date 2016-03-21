@@ -122,8 +122,6 @@ main() {
                 .stdout;
 
             pubSpec = new PubSpec.fromJson(loadYaml(pubSpecStr));
-//            git show master:pubspec.yaml
-//            pubSpec = await PubSpec.load(directory);
           }
         });
 
@@ -156,6 +154,16 @@ main() {
   group('process commands', () {
     ProjectGroup group;
     JefeProjectGraph graph;
+    final Map<String, String> _expectedResults = {
+      'project1': 'bin\npubspec.yaml\n',
+      'project2': 'bin\npubspec.yaml\n',
+      'project3': 'bin\npubspec.yaml\n',
+      'project4': 'bin\npubspec.yaml\n'
+    };
+
+    Map<String, String> process(Iterable<ProcessCommandResult> results) =>
+        new Map.fromIterable(results,
+            key: (r) => r.project.name, value: (r) => r.result.stdout);
 
     setUp(() async {
       if (group == null) {
@@ -165,19 +173,19 @@ main() {
     });
 
     test('ls executes concurrently', () async {
-      expect(
-          await graph.processCommands.execute('ls', []), "bin\npubspec.yaml");
+      expect(process(await graph.processCommands.execute('ls', [])),
+          _expectedResults);
     }, skip: false);
 
     test('ls executes serially', () async {
       expect(
-          await graph
+          process(await graph
               .multiProjectCommands(
                   defaultConcurrencyMode:
                       CommandConcurrencyMode.serialDepthFirst)
               .processCommands
-              .execute('ls', []),
-          "bin\npubspec.yaml");
+              .execute('ls', [])),
+          _expectedResults);
     }, skip: false);
   }, skip: false);
 }
