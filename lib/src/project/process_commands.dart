@@ -6,6 +6,8 @@ library jefe.project.commands.process;
 import 'dart:async';
 import 'dart:io';
 import 'package:jefe/src/project/project.dart';
+import 'package:stuff/stuff.dart';
+import 'dart:convert';
 
 abstract class ProcessCommands {
   /// Invokes the provided command with the projects directory as the processes
@@ -19,4 +21,21 @@ class ProcessCommandResult {
   final Project project;
 
   ProcessCommandResult(this.result, this.project);
+
+  Map toJson() => (buildJson
+        ..add('projectName', project.name)
+        ..add('exitCode', result.exitCode)
+        ..add('stdout', _trimToNull(result.stdout))
+        ..add('stderr', _trimToNull(result.stderr)))
+      .json;
+
+  String toString() => JSON.encode(this);
+}
+
+String _trimToNull(String s) {
+  if (s == null) {
+    return s;
+  }
+  final s1 = s.trim();
+  return s1.isEmpty ? null : s1;
 }
