@@ -163,8 +163,8 @@ main() {
     });
 
     test('ls executes concurrently', () async {
-      expect(await graph.processCommands.execute('ls', []), "fred");
-    }, skip: true);
+      expect(await graph.processCommands.execute('ls', []), "bin\npubspec.yaml");
+    }, skip: false);
 
     test('ls executes serially', () async {
       expect(
@@ -174,7 +174,7 @@ main() {
                       CommandConcurrencyMode.serialDepthFirst)
               .processCommands
               .execute('ls', []),
-          "fred");
+          "bin\npubspec.yaml");
     }, skip: false);
   }, skip: false);
 }

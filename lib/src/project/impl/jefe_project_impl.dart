@@ -138,7 +138,7 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
     return await new Stream<JefeProject>.fromIterable(
             _filteredDepthFirst(filter))
         .asyncMap((JefeProject p) => command(p))
-        .fold(null, _combinerToFold(combine ?? _takeLast)) as Future/*<T>*/;
+        .fold(null, _combinerToFold(combine ?? _takeLast));
 //    return await Future.forEach(
 //        _filteredDepthFirst(filter), (JefeProject p) => command(p));
   }
@@ -147,7 +147,7 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
       {ProjectFilter filter, Combiner/*<T>*/ combine}) async {
     return new Stream/*<T>*/ .fromFutures(
             _filteredDepthFirst(filter).map/*<Future<T>>*/(command))
-        .fold(null, _combinerToFold(combine ?? _takeLast)) as Future/*<T>*/;
+        .fold(null, _combinerToFold(combine ?? _takeLast));
   }
 
   Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ command,
