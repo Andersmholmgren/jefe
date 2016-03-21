@@ -1,14 +1,16 @@
-import 'package:test/test.dart';
-import 'dart:io';
-import 'test_project_utils.dart';
-import 'package:jefe/jefe.dart';
-import 'package:path/path.dart' as p;
-import 'package:logging/logging.dart';
 import 'dart:async';
+import 'dart:io';
+
 import 'package:git/git.dart';
-import 'package:pubspec/pubspec.dart';
-import 'package:yaml/yaml.dart';
+import 'package:jefe/jefe.dart';
+import 'package:logging/logging.dart';
+import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
+import 'package:pubspec/pubspec.dart';
+import 'package:test/test.dart';
+import 'package:yaml/yaml.dart';
+
+import 'test_project_utils.dart';
 
 final Logger _log = new Logger('dd');
 
@@ -20,7 +22,7 @@ main() {
     Directory jefeDir;
     setUp(() async {
       // too expensive to set up each test
-      if (jefeDir == null) jefeDir = await _performLifecycle;
+      if (jefeDir == null) jefeDir = await _performLifecycle();
     });
 
 //    test('', () {}, skip: false);
@@ -163,7 +165,8 @@ main() {
     });
 
     test('ls executes concurrently', () async {
-      expect(await graph.processCommands.execute('ls', []), "bin\npubspec.yaml");
+      expect(
+          await graph.processCommands.execute('ls', []), "bin\npubspec.yaml");
     }, skip: false);
 
     test('ls executes serially', () async {
@@ -179,7 +182,7 @@ main() {
   }, skip: false);
 }
 
-Future<Directory> get _performLifecycle async {
+Future<Directory> _performLifecycle() async {
   print("============== _performLifecycle");
   final jefeDir = await createJefeWithTestProjects(4);
 
