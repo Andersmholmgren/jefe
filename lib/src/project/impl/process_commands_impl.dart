@@ -11,6 +11,7 @@ import 'package:jefe/src/project/process_commands.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:jefe/src/util/process_utils.dart';
 import 'package:logging/logging.dart';
+import 'package:quiver/iterables.dart';
 
 Logger _log = new Logger('jefe.project.commands.process.impl');
 
@@ -45,6 +46,22 @@ class ProcessCommandsMultiProjectImpl
             (JefeProject p) async => new ProcessCommandsSingleProjectImpl(p),
             defaultConcurrencyMode: defaultConcurrencyMode,
             projectFilter: projectFilter);
+
+  @override
+  Future<Iterable<ProcessCommandResult>> execute(
+      String command, List<String> args) async {
+    Iterable<ProcessCommandResult> concatResults(
+        Iterable<ProcessCommandResult> previous,
+        Iterable<ProcessCommandResult> current) {
+      return concat(<Iterable<ProcessCommandResult>>[previous, current])
+          as Iterable<ProcessCommandResult>;
+    }
+    return process/*<Iterable<ProcessCommandResult>>*/(
+        'process',
+        (JefeProject p) async =>
+            (await singleProjectCommandFactory(p)).execute(command, args),
+        combine: concatResults);
+  }
 }
 
 class _ProcessCommandsSingleProjectImpl implements ProcessCommands {
@@ -53,9 +70,12 @@ class _ProcessCommandsSingleProjectImpl implements ProcessCommands {
   _ProcessCommandsSingleProjectImpl(this._project);
 
   @override
-  Future execute(String command, List<String> args) async =>
-      (await runCommand(command, args,
-              processWorkingDir: _project.installDirectory.path))
-          .stdout
-          .trim();
+  Future<Iterable<ProcessCommandResult>> execute(
+          String command, List<String> args) async =>
+      <ProcessCommandResult>[
+        new ProcessCommandResult(
+            await runCommand(command, args,
+                processWorkingDir: _project.installDirectory.path),
+            _project)
+      ];
 }
