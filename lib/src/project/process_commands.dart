@@ -30,6 +30,21 @@ class ProcessCommandResult {
       .json;
 
   String toString() => JSON.encode(this);
+
+  String toReportString() {
+    final sb = new StringBuffer()
+      ..writeln(project.name)
+      ..writeln((new List.generate(project.name.length, (_) => '-')
+          .reduce((v, e) => v + e)));
+    if (result.exitCode == 0) {
+      sb.writeln(result.stdout.trim());
+    } else {
+      sb
+        ..writeln('exitCode: ${result.exitCode}')
+        ..writeln(result.stderr.trim());
+    }
+    return sb.toString();
+  }
 }
 
 String _trimToNull(String s) {

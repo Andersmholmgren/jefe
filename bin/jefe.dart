@@ -153,7 +153,9 @@ class Jefe {
                 : CommandConcurrencyMode.concurrentProject)
         .processCommands;
 
-    return processCommands.execute(command, args);
+    final result = await processCommands.execute(command, args);
+    final output = result.map((r) => r.toReportString()).join('\n');
+    stdout.write(output);
   }
 
   @u.SubCommand(help: 'Set dependencies between projects')
