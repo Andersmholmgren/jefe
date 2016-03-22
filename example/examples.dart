@@ -3,11 +3,12 @@
 
 library example;
 
+import 'dart:async';
 import 'dart:io';
+
+import 'package:jefe/jefe.dart';
 import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
-import 'package:jefe/jefe.dart';
-import 'dart:async';
 
 main() async {
   Logger.root.level = Level.ALL;
@@ -27,16 +28,18 @@ Future projectLifecycleBasics() async {
   final ProjectGroup projectGroup = await ProjectGroup.install(
       new Directory('/Users/blah'), 'git@git.example');
 
-  final executor = new CommandExecutor(projectGroup);
+  // commands can be executed on any JefeProjectGraph instance such as
+  // an individual JefeProject or the set of rootJefeProjects for a ProjectGroup
+  final graph = await projectGroup.rootJefeProjects;
 
   // initialise it (sets it on develop branch etc)
-  await executor.execute(lifecycle.init());
+  await graph.lifecycle.init();
 
   // start a new feature
   // All projects will be on a feature branch called feacha,
   // will have the dependencies to other projects in this group set as
   // path dependencies, and will have pub get called
-  await executor.execute(lifecycle.startNewFeature('feacha'));
+  await graph.lifecycle.startNewFeature('feacha');
 
   // Code something awesome
 
@@ -46,22 +49,25 @@ Future projectLifecycleBasics() async {
   // git dependencies bashed on the current commit hash,
   // will be git pushed to their origin
   // and will have pub get called
-  await executor.execute(lifecycle.completeFeature('feacha'));
+  await graph.lifecycle.completeFeature();
 
   // now cut a release.
   // All the project pubspec versions will be bumped according to the release type
   // and git tagged with same version, will be merged to master
-  await executor.execute(lifecycle.release(type: ReleaseType.major));
+  await graph.lifecycle.release(type: ReleaseType.major);
 }
 
 Future generateProductionDockerfile() async {
-  final executor = await executorForDirectory('/Users/blah/myfoo_root');
+  final ProjectGroup projectGroup =
+      await ProjectGroup.load(new Directory('/Users/blah/myfoo_root'));
 
-  await executor.execute(docker.generateProductionDockerfile(
+  final graph = await projectGroup.rootJefeProjects;
+
+  await graph.multiProjectCommands().docker.generateProductionDockerfile(
       'my_server', 'my_client',
       outputDirectory: new Directory('/tmp'),
       dartVersion: '1.9.3',
       environment: {'MY_FOO': false},
       exposePorts: [8080, 8181, 5858],
-      entryPointOptions: ["--debug:5858/0.0.0.0"]));
+      entryPointOptions: ["--debug:5858/0.0.0.0"]);
 }

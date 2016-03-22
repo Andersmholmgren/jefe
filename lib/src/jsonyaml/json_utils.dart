@@ -3,8 +3,8 @@
 
 library util.json;
 
-import 'package:path/path.dart' as path;
 import 'package:option/option.dart';
+import 'package:path/path.dart' as path;
 
 final _p = path.url;
 
@@ -50,13 +50,13 @@ class JsonBuilder {
     }
     if (value is Map) {
       final result = {};
-      (value as Map).forEach((k, v) {
+      value.forEach((k, v) {
         result[k] = _transformValue(v, null);
       });
       return result;
     }
     if (value is Iterable) {
-      return (value as Iterable).map((v) => _transformValue(v, null)).toList();
+      return value.map((v) => _transformValue(v, null)).toList();
     }
     return value.toString();
   }

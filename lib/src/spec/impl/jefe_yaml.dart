@@ -3,11 +3,13 @@
 
 library jefe.project.metadata.yaml;
 
-import 'package:yaml/yaml.dart';
-import 'dart:io';
 import 'dart:async';
-import '../jefe_spec.dart';
+import 'dart:io';
+
 import 'package:logging/logging.dart';
+import 'package:yaml/yaml.dart';
+
+import '../jefe_spec.dart';
 
 Logger _log = new Logger('jefe.project.metadata.yaml');
 

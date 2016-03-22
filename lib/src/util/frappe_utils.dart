@@ -4,6 +4,7 @@
 library jefe.utils.frappe;
 
 import 'dart:async';
+
 import 'package:frappe/frappe.dart';
 
 class ControllableEventStream<T> {

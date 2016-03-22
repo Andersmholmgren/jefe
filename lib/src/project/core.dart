@@ -5,7 +5,9 @@ library jefe.project.core;
 
 import 'dart:async';
 import 'dart:io';
+
 import 'package:git/git.dart';
+
 import '../spec/jefe_spec.dart';
 import 'project.dart';
 

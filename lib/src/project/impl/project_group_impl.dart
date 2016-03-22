@@ -4,20 +4,23 @@
 library jefe.project.group.impl;
 
 import 'dart:async';
-import '../project.dart';
-import '../project_group.dart';
 import 'dart:io';
+
 import 'package:git/git.dart';
-import '../../git/git.dart';
-import 'package:quiver/iterables.dart';
-import 'package:quiver/streams.dart' as streamz;
+import 'package:jefe/src/project/jefe_project.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
-import '../dependency_graph.dart';
+import 'package:quiver/iterables.dart';
+import 'package:quiver/streams.dart' as streamz;
+
+import '../../git/git.dart';
 import '../../spec/jefe_spec.dart' as spec;
-import 'project_impl.dart';
 import '../../spec/jefe_spec.dart';
+import '../dependency_graph.dart';
+import '../project.dart';
+import '../project_group.dart';
 import 'core_impl.dart';
+import 'project_impl.dart';
 
 Logger _log = new Logger('jefe.project.group.impl');
 
@@ -82,7 +85,8 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 
   ProjectGroupImpl(
       String gitUri, this.metaData, GroupDirectoryLayout directoryLayout,
-      {ProjectEntityReferenceFactory referenceFactory: const DefaultProjectEntityReferenceFactory()})
+      {ProjectEntityReferenceFactory referenceFactory:
+          const DefaultProjectEntityReferenceFactory()})
       : this.directoryLayout = directoryLayout,
         this._referenceFactory = referenceFactory,
         super(gitUri, directoryLayout.groupDirectory);
@@ -136,7 +140,8 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 //    final spec.ProjectGroupMetaData metaData = await spec.ProjectGroupMetaData
 //        .fromDefaultProjectGroupYamlFile(gitDir.path);
 
-    final projectGroup = await load(directoryLayout.containerDirectory);
+    final projectGroup =
+        await load(directoryLayout.containerDirectory) as ProjectGroupImpl;
 //        new ProjectGroupImpl(gitUri, metaData, directoryLayout);
 
     final projectGroupInstallFutures = projectGroup.childGroups.map((ref) =>
@@ -144,8 +149,10 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     final projectInstallFutures = projectGroup.projects.map((ref) =>
         projectGroup._installChildProject(
             ref.name, ref.gitUri, updateIfExists));
-    await Future
-        .wait(concat([projectGroupInstallFutures, projectInstallFutures]));
+    await Future.wait(concat(<Iterable<Future>>[
+      projectGroupInstallFutures,
+      projectInstallFutures
+    ]) as Iterable<Future>);
 
     _log.info('Completed initialising group with gitUri: $gitUri and '
         'installDirectory: $dir');
@@ -180,23 +187,27 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 
   Stream<Project> get _allProjectsStream {
     final Stream<ProjectGroupImpl> childGroupStream =
-        new Stream.fromIterable(childGroups.map((ref) => ref.get()))
-            .asyncMap((pgf) => pgf);
+        new Stream<Future<ProjectGroup>>.fromIterable(
+                childGroups.map/*<Future<ProjectGroup>>*/((ref) => ref.get()))
+            .asyncMap((pgf) => pgf) as Stream<ProjectGroupImpl>;
 
-    final Stream<Project> childProjectStream =
-        childGroupStream.asyncExpand((pg) => pg._allProjectsStream);
+    final Stream<Project> childProjectStream = childGroupStream
+        .asyncExpand((pg) => pg._allProjectsStream) as Stream<Project>;
 
     final Stream<Project> projectStream =
-        new Stream.fromIterable(projects.map((p) => p.get()))
-            .asyncMap((p) => p);
+        new Stream<Future<Project>>.fromIterable(projects.map((p) => p.get()))
+            .asyncMap((p) => p) as Stream<Project>;
 
     final resultStream = streamz.concat([childProjectStream, projectStream]);
 
-    return resultStream;
+    return resultStream as Stream<Project>;
   }
 
-  Future<DependencyGraph> get dependencyGraph async =>
-      getDependencyGraph(await allProjects);
+  @deprecated
+  Future<JefeProjectSet> get dependencyGraph => rootJefeProjects;
+
+  Future<JefeProjectSet> get rootJefeProjects async =>
+      getRootProjects(await allProjects, containerDirectory);
 
   String toString() =>
       'ProjectGroup: $name; gitUri: $gitUri; installed: $installDirectory\n'

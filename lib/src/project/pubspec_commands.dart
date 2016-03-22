@@ -3,33 +3,34 @@
 
 library jefe.project.commands.pub.spec;
 
-import 'package:jefe/src/project_commands/project_command.dart';
-import 'impl/pubspec_commands_impl.dart';
+import 'dart:async';
+
 import 'package:pubspec/pubspec.dart';
+import 'package:jefe/src/project/project.dart';
 
 /// Commands that operate on each [Project]s [PubSpec] files
 abstract class PubSpecCommands {
-  factory PubSpecCommands() = PubSpecCommandsImpl;
-
   /// Sets the dependencies between [Project]s within the group to use path
   /// dependencies
-  ProjectCommand setToPathDependencies();
+  Future setToPathDependencies();
 
   /// Sets the dependencies between [Project]s within the group to use git
   /// dependencies, based on the current commit hash of the respective projects
-  ProjectCommand setToGitDependencies();
+  Future setToGitDependencies();
 
   /// Sets the dependencies between [Project]s within the group to use hosted
   /// dependencies (if the package is hosted).
   ///
   /// If not hosted then will fall back to git if [useGitIfNotHosted] is true
   /// or throw an error otherwise
-  ProjectCommand setToHostedDependencies({bool useGitIfNotHosted: true});
+  Future setToHostedDependencies({bool useGitIfNotHosted: true});
 
   // TODO: this only makes sense to run on a single project at a time, so
   // making it a command is kinda weird
-  ProjectCommand<bool> haveDependenciesChanged(DependencyType type,
+  Future<bool> haveDependenciesChanged(DependencyType type,
       {bool useGitIfNotHosted: true});
+
+  Future addDependencyOn(Project dependee);
 }
 
 enum DependencyType { path, git, hosted }

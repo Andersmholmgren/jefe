@@ -3,25 +3,40 @@
 
 library jefe.git;
 
-import 'package:git/git.dart';
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
-import 'package:path/path.dart' as p;
+
+import 'package:git/git.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
+import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:quiver/iterables.dart';
-import 'dart:convert';
 
 Logger _log = new Logger('jefe.git');
 
-Future<GitDir> gitWorkspaceDir(String gitUri, Directory parentDirectory) =>
-    GitDir.fromExisting(gitWorkspacePath(gitUri, parentDirectory));
+Future<GitDir> gitWorkspaceDir(String gitUri, Directory parentDirectory,
+        {String targetDirName}) =>
+    GitDir.fromExisting(gitWorkspacePath(gitUri, parentDirectory,
+        targetDirName: targetDirName));
 
-String gitWorkspaceName(String gitUri) => p.basenameWithoutExtension(gitUri);
+String gitWorkspaceName(String gitUri, {String targetDirName}) {
+  final result = targetDirName != null
+      ? targetDirName
+      : p.basenameWithoutExtension(gitUri);
 
-String gitWorkspacePath(String gitUri, Directory parentDirectory) {
-  return p.join(parentDirectory.path, gitWorkspaceName(gitUri));
+  print('gitWorkspaceName => $result');
+  return result;
+}
+
+String gitWorkspacePath(String gitUri, Directory parentDirectory,
+    {String targetDirName}) {
+  final result = p.join(parentDirectory.path,
+      gitWorkspaceName(gitUri, targetDirName: targetDirName));
+
+  print('gitWorkspacePath => $result');
+  return result;
 }
 
 enum OnExistsAction { pull, ignore }
@@ -42,15 +57,48 @@ Future<GitDir> cloneOrPull(String gitUri, Directory containerDirectory,
   }
 }
 
-Future<GitDir> clone(String gitUri, Directory parentDirectory) async {
-  _log.info('cloning git repo $gitUri into parent directory $parentDirectory');
-  await runGit(['clone', gitUri.toString()],
-      processWorkingDir: parentDirectory.path);
+Future<GitDir> clone(String gitUri, Directory parentDirectory,
+    {String targetDirName, bool bareRepo: false}) async {
+  await cloneInto(gitUri, parentDirectory,
+      targetDirName: targetDirName, bareRepo: bareRepo);
 
-  _log.finest(
-      'successfully cloned git repo $gitUri into parent directory $parentDirectory');
+  return gitWorkspaceDir(gitUri, parentDirectory, targetDirName: targetDirName);
+}
 
-  return gitWorkspaceDir(gitUri, parentDirectory);
+Future<Directory> cloneInto(String gitUri, Directory parentDirectory,
+    {String targetDirName, bool bareRepo: false}) async {
+  final options = bareRepo ? <String>['--bare'] : <String>[];
+
+  if (gitUri.endsWith("/.git")) {
+    final uri = Uri.parse(gitUri);
+    if (uri.scheme.isEmpty || uri.scheme == 'file') {
+      final pathSegments = uri.pathSegments;
+      targetDirName = pathSegments.elementAt(pathSegments.length - 2);
+    }
+  }
+
+  final extraLogMessagePart =
+      targetDirName != null ? 'with target directory $targetDirName' : '';
+  _log.info('cloning git repo $gitUri into parent directory $parentDirectory '
+      '$extraLogMessagePart');
+
+  final basicCloneCommand = <String>['clone']
+    ..addAll(options)
+    ..add(gitUri);
+
+  final cloneCommand = targetDirName != null
+      ? (<String>[]
+        ..addAll(basicCloneCommand)
+        ..add(targetDirName))
+      : basicCloneCommand;
+
+  await runGit(cloneCommand, processWorkingDir: parentDirectory.path);
+
+  _log.finest('successfully cloned git repo $gitUri into parent directory '
+      '$parentDirectory $extraLogMessagePart');
+
+  return new Directory(
+      gitWorkspacePath(gitUri, parentDirectory, targetDirName: targetDirName));
 }
 
 Future<GitDir> pull(String gitUri, Directory gitDirectory) async {
@@ -73,8 +121,11 @@ Future gitCommit(GitDir gitDir, String message) async {
 
 Future gitCheckout(GitDir gitDir, String branchName) async {
   await gitDir.runCommand(['checkout', branchName]);
-  await gitDir..runCommand(['branch', '-u', 'origin/$branchName']);
-  await gitDir..runCommand(['merge', 'origin/$branchName']);
+  final ref = await gitDir.getBranchReference('origin/$branchName');
+  if (ref != null) {
+    await gitDir.runCommand(['branch', '-u', 'origin/$branchName']);
+    await gitDir.runCommand(['merge', 'origin/$branchName']);
+  }
 }
 
 Future gitTag(GitDir gitDir, String tag) async =>
@@ -92,7 +143,7 @@ Future<Iterable<String>> _getTagNames(GitDir gitDir) async {
 }
 
 Iterable<Version> _extractVersions(Iterable<String> tagNames) => tagNames
-    .map((String tagName) {
+    .map/*<Option<Version>>*/((String tagName) {
       try {
         return new Some(new Version.parse(tagName));
       } on FormatException catch (_) {
@@ -100,7 +151,7 @@ Iterable<Version> _extractVersions(Iterable<String> tagNames) => tagNames
       }
     })
     .where((o) => o is Some)
-    .map((o) => o.get())
+    .map/*<Version>*/((o) => o.get())
     .toList()..sort();
 
 Future gitPush(GitDir gitDir) async {
@@ -116,13 +167,13 @@ Future gitFetch(GitDir gitDir) async {
 }
 
 Future gitMerge(GitDir gitDir, String commit, {bool ffOnly: true}) async {
-  final flags = ffOnly ? ['--ff-only'] : [];
-  final command = concat([
+  final flags = ffOnly ? <String>['--ff-only'] : <String>[];
+  final command = concat(<Iterable<String>>[
     ['merge'],
     flags,
     [commit]
   ]);
-  await gitDir.runCommand(command);
+  await gitDir.runCommand(command as Iterable<String>);
 }
 
 Future<String> currentCommitHash(GitDir gitDir) async =>
@@ -148,6 +199,10 @@ Future<Iterable<GitRemote>> getRemotes(GitDir gitDir) async {
 
 Future<int> commitCountSince(GitDir gitDir, String ref) async =>
     await gitDir.getCommitCount('$ref..HEAD');
+
+Future<bool> hasChangesSince(GitDir gitDir, Version sinceVersion) async {
+  return (await diffSummarySince(gitDir, sinceVersion.toString())) is Some;
+}
 
 Future<Option<DiffSummary>> diffSummarySince(GitDir gitDir, String ref) async {
   final line = (await gitDir.runCommand(['diff', '--shortstat', ref])).stdout;
