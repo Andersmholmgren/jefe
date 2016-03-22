@@ -225,8 +225,10 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
       _log.info('Detected existing feature - $currentFeatureName');
       await startNewFeature(currentFeatureName);
     } else {
-      if (doCheckout)
-        await spc.git.checkout(await spc.gitFeature.developBranchName);
+      if (doCheckout) {
+//        await spc.git.checkout(await spc.gitFeature.developBranchName);
+        await spc.git.updateFromRemote(await spc.gitFeature.developBranchName);
+      }
     }
   }
 
