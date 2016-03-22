@@ -56,14 +56,14 @@ class ProjectLifecycleMultiProjectImpl
             projectFilter: projectFilter);
 
   @override
-  Future completeFeature({String featureName, bool doPush: false}) {
+  Future completeFeature({String featureName}) {
     return executeTask('complete development of feature $featureName',
         () async {
       await graph.git.assertWorkingTreeClean();
       return process(
           'complete feature',
           (JefeProject p) async => p.singleProjectCommands.lifecycle
-              .completeFeature(featureName: featureName, doPush: doPush),
+              .completeFeature(featureName: featureName),
           mode: CommandConcurrencyMode.serialDepthFirst);
     });
   }
@@ -97,7 +97,7 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
   }
 
   @override
-  Future completeFeature({String featureName, bool doPush: false}) async {
+  Future completeFeature({String featureName}) async {
     if (await spc.gitFeature.isOnDevelopBranch) {
       _log.finer(
           'project ${_project.name} is already on develop branch. Nothing to do');
@@ -132,7 +132,7 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
       await spc.git
           .commit('completed development of feature $finishingFeatureName');
 
-      if (doPush) await spc.git.push();
+      await spc.git.push();
     }
   }
 

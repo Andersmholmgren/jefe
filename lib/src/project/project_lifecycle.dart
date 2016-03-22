@@ -17,9 +17,9 @@ abstract class ProjectLifecycle {
   Future startNewFeature(String featureName, {bool doPush: false});
 
   // Complete the feature by performing all the tasks necessary to return
-  // the projects to the stable development state. Includes mergine git branches,
+  // the projects to the stable development state. Includes merging git branches,
   // creating to git dependencies etc
-  Future completeFeature({String featureName, bool doPush: false});
+  Future completeFeature({String featureName});
 
   /// Performs checks that things are in a healthy state for a release. e.g.
   /// make sure all tests pass
