@@ -149,7 +149,7 @@ main() {
         expect(await getCommitsFor(4, 'master'), hasLength(1));
       }, skip: false);
     }, skip: false);
-  }, skip: true);
+  }, skip: false);
 
   group('process commands', () {
     ProjectGroup group;
@@ -214,6 +214,13 @@ Future<Directory> _performLifecycle() async {
   final project2 = graph.getProjectByName('project2').get();
 
   await project2.pubspecCommands.addDependencyOn(project1);
+
+  final pubspec = project2.pubspec;
+  final newPubspec = pubspec.copy(version: pubspec.version.nextMinor);
+
+  await newPubspec.save(project2.installDirectory);
+
+  await project2.git.tag(newPubspec.version.toString());
 
   await project2.git.commit('added dependency on project1');
 

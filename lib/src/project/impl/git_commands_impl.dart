@@ -83,7 +83,11 @@ class _GitCommandsSingleProjectImpl implements GitCommands {
   Future updateFromRemote(String branchName,
       [String remoteName = 'origin']) async {
     await gitCheckout(_gitDir, branchName);
-    await gitMerge(_gitDir, '$remoteName/$branchName');
+
+    final shaOpt = await getRemoteBranchSha(_gitDir, remoteName, branchName);
+    if (shaOpt is Some) {
+      await gitMerge(_gitDir, '$remoteName/$branchName');
+    }
   }
 
   @override
@@ -101,4 +105,8 @@ class _GitCommandsSingleProjectImpl implements GitCommands {
 //
 //    return this;
 //  }
+
+  @override
+  Future tag(String tag, {String comment}) =>
+      gitTag(_gitDir, tag, comment: comment);
 }

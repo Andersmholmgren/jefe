@@ -26,7 +26,7 @@ String gitWorkspaceName(String gitUri, {String targetDirName}) {
       ? targetDirName
       : p.basenameWithoutExtension(gitUri);
 
-  print('gitWorkspaceName => $result');
+//  print('gitWorkspaceName => $result');
   return result;
 }
 
@@ -35,7 +35,7 @@ String gitWorkspacePath(String gitUri, Directory parentDirectory,
   final result = p.join(parentDirectory.path,
       gitWorkspaceName(gitUri, targetDirName: targetDirName));
 
-  print('gitWorkspacePath => $result');
+//  print('gitWorkspacePath => $result');
   return result;
 }
 
@@ -128,8 +128,8 @@ Future gitCheckout(GitDir gitDir, String branchName) async {
   }
 }
 
-Future gitTag(GitDir gitDir, String tag) async =>
-    await gitDir.runCommand(['tag', '-a', '-m', 'release $tag', tag]);
+Future gitTag(GitDir gitDir, String tag, {String comment}) async => await gitDir
+    .runCommand(['tag', '-a', '-m', comment ?? 'release $tag', tag]);
 
 //Future<Iterable<Version>> gitFetchVersionTags(GitDir gitDir) async =>
 //    _extractVersions(await gitDir.getTags()).map((Tag tag) => tag.tag);
@@ -174,6 +174,15 @@ Future gitMerge(GitDir gitDir, String commit, {bool ffOnly: true}) async {
     [commit]
   ]);
   await gitDir.runCommand(command as Iterable<String>);
+}
+
+Future<Option<String>> getRemoteBranchSha(
+    GitDir gitDir, String remoteName, String branchName) async {
+  final refs = await gitDir.showRef();
+  return new Option<CommitReference>(refs.firstWhere(
+          (cr) => cr.reference == 'refs/remotes/$remoteName/$branchName',
+          orElse: () => null))
+      .map((cr) => cr.sha) as Option<String>;
 }
 
 Future<String> currentCommitHash(GitDir gitDir) async =>

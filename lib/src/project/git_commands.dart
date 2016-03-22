@@ -26,4 +26,6 @@ abstract class GitCommands extends JefeGroupCommand<GitCommands> {
   Future checkout(String branchName);
 
   Future<bool> hasChangesSince(Version sinceVersion);
+
+  Future tag(String tag, {String comment});
 }

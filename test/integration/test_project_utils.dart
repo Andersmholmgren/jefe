@@ -80,7 +80,7 @@ Future<Directory> _copyTestProject(
   final testProjectRemoteDir =
       new Directory(p.join(testGitRemoteDir.path, newProjectName));
 
-  print(testProjectRemoteDir);
+//  print(testProjectRemoteDir);
 
   await _copyDir(testProjectTemplateDir, testProjectRemoteDir);
 
@@ -102,7 +102,7 @@ Future _gitInit(Directory testProjectRemoteDir) async {
 }
 
 Future _copyDir(Directory sourceDir, Directory targetDir) async {
-  print('_copyDir($sourceDir, $targetDir)');
+//  print('_copyDir($sourceDir, $targetDir)');
 
   await targetDir.create(recursive: true);
 
@@ -113,16 +113,16 @@ Future _copyDir(Directory sourceDir, Directory targetDir) async {
 }
 
 Future _copyFile(File sourceFile, File targetFile) async {
-  print('_copyFile($sourceFile, $targetFile)');
+//  print('_copyFile($sourceFile, $targetFile)');
 
   return sourceFile.copy(targetFile.path);
 }
 
 Future _copy(FileSystemEntity sourceEntity, Directory targetDir) {
-  print('_copy($sourceEntity, $targetDir)');
+//  print('_copy($sourceEntity, $targetDir)');
   final newTargetPath = p.join(targetDir.path, p.basename(sourceEntity.path));
 
-  print('newTargetPath: $newTargetPath');
+//  print('newTargetPath: $newTargetPath');
 
   return sourceEntity is Directory
       ? _copyDir(sourceEntity, new Directory(newTargetPath))
