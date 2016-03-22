@@ -48,7 +48,7 @@ class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {
       .json;
 }
 
-abstract class _BaseRef<T> implements ProjectEntityIdentifier<T> {
+abstract class _BaseRef<T> implements ProjectEntityIdentifier<T>, Jsonable {
   final String name;
   final String gitUri;
 

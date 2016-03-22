@@ -38,17 +38,18 @@ abstract class ProjectGroupMetaData implements Jsonable {
   Future save(Directory projectDirectory);
 }
 
-abstract class ProjectEntityIdentifier<T> implements Jsonable {
+abstract class ProjectEntityIdentifier<T> {
   String get name;
   String get gitUri;
 }
 
 abstract class ProjectGroupIdentifier
-    implements ProjectEntityIdentifier<ProjectGroup> {
-  factory ProjectGroupIdentifier(
-      String name, String gitUri) = ProjectGroupIdentifierImpl;
+    implements ProjectEntityIdentifier<ProjectGroup>, Jsonable {
+  factory ProjectGroupIdentifier(String name, String gitUri) =
+      ProjectGroupIdentifierImpl;
 }
 
-abstract class ProjectIdentifier implements ProjectEntityIdentifier<Project> {
+abstract class ProjectIdentifier
+    implements ProjectEntityIdentifier<Project>, Jsonable {
   factory ProjectIdentifier(String name, String gitUri) = ProjectIdentifierImpl;
 }
