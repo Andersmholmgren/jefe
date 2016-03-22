@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0
+
+* Major rewrite of internals. Should be much easier to implement new features
+* Removed `featureName` from `jefe finish`
+
 ## 0.2.10
 
 * Updated pubspec dependency
