@@ -142,9 +142,6 @@ class _PubSpecCommandsSingleProjectImpl implements PubSpecCommands {
     final pubspecDependencies = _project.directDependencies
         .where((p) => pubspecProjectNames.contains(p.name));
 
-    print('-----pubspecProjectNames: $pubspecProjectNames');
-    print(pubspecDependencies.toSet());
-
     await Future.wait(pubspecDependencies.map((p) async {
       final ref = await _createDependencyReference(
           p, type, useGitIfNotHosted, exportedPackageNames);
