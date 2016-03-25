@@ -4,10 +4,11 @@
 library jefe.project.core.impl;
 
 import 'dart:async';
-import 'package:git/git.dart';
-import 'package:logging/logging.dart';
 import 'dart:io';
+
+import 'package:git/git.dart';
 import 'package:jefe/src/project/core.dart';
+import 'package:logging/logging.dart';
 
 Logger _log = new Logger('jefe.project.impl');
 
@@ -17,9 +18,9 @@ abstract class ProjectEntityImpl implements ProjectEntity {
 
   ProjectEntityImpl(this.gitUri, this.installDirectory);
 
+  GitDir _gitDir;
+
   @override
-  Future<GitDir> get gitDir {
-//    print('--- loading git dir from ${installDirectory.path}');
-    return GitDir.fromExisting(installDirectory.path);
-  }
+  Future<GitDir> get gitDir async =>
+      _gitDir ??= await GitDir.fromExisting(installDirectory.path);
 }

@@ -4,18 +4,25 @@
 library jefe.project.impl;
 
 import 'dart:async';
-import '../project.dart';
-import 'package:git/git.dart';
-import '../../git/git.dart';
-import 'package:logging/logging.dart';
-import '../../spec/jefe_spec.dart';
-import 'package:jefe/src/project/impl/project_group_impl.dart';
 import 'dart:io';
-import 'package:pubspec/pubspec.dart';
-import 'core_impl.dart';
+
 import 'package:analyzer/analyzer.dart';
-import 'package:path/path.dart' as p;
+import 'package:git/git.dart';
+import 'package:jefe/src/project/impl/project_group_impl.dart';
+import 'package:jefe/src/project_commands/project_command.dart'
+    show executeTask;
+import 'package:jefe/src/pub/pub_version.dart';
+import 'package:logging/logging.dart';
 import 'package:option/option.dart';
+import 'package:path/path.dart' as p;
+import 'package:pub_semver/pub_semver.dart';
+import 'package:pubspec/pubspec.dart';
+
+import '../../git/git.dart' as git;
+import '../../pub/pub.dart' as pub;
+import '../../spec/jefe_spec.dart';
+import '../project.dart';
+import 'core_impl.dart';
 
 Logger _log = new Logger('jefe.project.impl');
 
@@ -43,35 +50,49 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   ProjectIdentifier get id => new ProjectIdentifier(name, gitUri);
 
-  ProjectImpl(String gitUri, Directory installDirectory, this._pubspec)
+  final HostedMode _hostedMode;
+
+  HostedMode get _pubSpecHostedMode =>
+      pubspec.publishTo != null ? HostedMode.hosted : HostedMode.inferred;
+
+  @override
+  HostedMode get hostedMode => _hostedMode ?? _pubSpecHostedMode;
+
+  ProjectImpl(String gitUri, Directory installDirectory, this._pubspec,
+      this._hostedMode)
       : super(gitUri, installDirectory);
 
   static Future<ProjectImpl> install(
       Directory parentDir, String name, String gitUri,
-      {bool updateIfExists}) async {
+      {bool updateIfExists, HostedMode hostedMode}) async {
     _log.info('installing project $name from $gitUri into $parentDir');
 
     final projectParentDir = await parentDir.create(recursive: true);
 
-    final GitDir gitDir = await cloneOrPull(
+    final GitDir gitDir = await git.cloneOrPull(
         gitUri,
         projectParentDir,
         new Directory(p.join(projectParentDir.path, name)),
-        OnExistsAction.ignore);
+        git.OnExistsAction.ignore);
 
     final installDirectory = new Directory(gitDir.path);
     return new ProjectImpl(
-        gitUri, installDirectory, await PubSpec.load(installDirectory));
+        gitUri,
+        installDirectory,
+        await PubSpec.load(installDirectory),
+        hostedMode ?? HostedMode.inferred);
   }
 
-  static Future<Project> load(Directory installDirectory) async {
+  static Future<Project> load(Directory installDirectory,
+      {HostedMode hostedMode}) async {
     _log.info('loading project from install directory $installDirectory');
     final GitDir gitDir = await GitDir.fromExisting(installDirectory.path);
 
     final PubSpec pubspec = await PubSpec.load(installDirectory);
 
-    final String gitUri = await getOriginOrFirstRemote(gitDir);
-    return new ProjectImpl(gitUri, installDirectory, pubspec);
+    final String gitUri = await git.getOriginOrFirstRemote(gitDir);
+    return new ProjectImpl(
+        gitUri, installDirectory, pubspec, hostedMode ?? HostedMode.inferred);
   }
 
   @override
@@ -84,7 +105,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   @override
   Future<String> get currentGitCommitHash async =>
-      currentCommitHash(await gitDir);
+      git.currentCommitHash(await gitDir);
 
   @override
   Future<Option<CompilationUnit>> get compilationUnit async {
@@ -107,16 +128,71 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   @override
   Future<Set<String>> get exportedPackageNames async {
     final Iterable<Directive> exports = (await compilationUnit)
-        .map((cu) => cu.directives.where((d) => d is ExportDirective))
-        .getOrDefault(const []);
+        .map /**<Iterable<Directive>>*/ (
+            (cu) => cu.directives.where((d) => d is ExportDirective))
+        .getOrDefault(<Directive>[]) as Iterable<Directive>;
 
     final exportedPackageNames = await exports
-        .map((exp) => exp.uri.stringValue)
+        .map((exp) => (exp as ExportDirective).uri.stringValue)
         .where((uri) => uri.startsWith('package:'))
         .map((String uri) => uri.substring('package:'.length, uri.indexOf('/')))
         .toSet();
     return exportedPackageNames;
   }
+
+  @override
+  Future<Option<Version>> get latestTaggedGitVersion async {
+    final _taggedVersions = await taggedGitVersions;
+
+    final Option<Version> latestTaggedVersionOpt = _taggedVersions.isNotEmpty
+        ? new Some(_taggedVersions.last)
+        : const None();
+    return latestTaggedVersionOpt;
+  }
+
+  @override
+  Future<Iterable<Version>> get taggedGitVersions => executeTask(
+      'fetch git release version tags',
+      () async => git.gitFetchVersionTags(await gitDir));
+
+  @override
+  Future<Option<Version>> get latestPublishedVersion async {
+    return (await publishedVersions).map(
+            (HostedPackageVersions versions) => versions.versions.last.version)
+        as Option<Version>;
+  }
+
+  @override
+  Future<Option<HostedPackageVersions>> get publishedVersions async =>
+      executeTask(
+          'fetch package versions',
+          () async =>
+              pub.fetchPackageVersions(name, publishToUrl: pubspec.publishTo));
+
+  @override
+  Future<ProjectVersions2> get projectVersions async {
+    final _latestPublishedVersionFuture = latestPublishedVersion;
+    final isHostedFuture = _latestPublishedVersionFuture.then((o) {
+      final hasBeenPublished = o is Some;
+
+      final _hostedMode = hostedMode != HostedMode.inferred
+          ? hostedMode
+          : hasBeenPublished ? HostedMode.hosted : HostedMode.notHosted;
+
+      return _hostedMode == HostedMode.hosted;
+    });
+    final versions = await Future.wait([
+      latestTaggedGitVersion,
+      _latestPublishedVersionFuture,
+      isHostedFuture
+    ]);
+    return new ProjectVersions2(pubspec.version, versions[0] as Option<Version>,
+        versions[1] as Option<Version>, versions[2] as bool);
+  }
+
+//  @override
+//  Future<bool> get hasChangesSinceLatestTaggedVersion async=>
+//     hasChangesSince(gitDir, await latestTaggedGitVersion);
 
   Future<Iterable<String>> _exportedDependencyNames(
       Iterable<String> dependencyNames) async {
@@ -124,4 +200,13 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
     return dependencyNames.where((n) => exported.contains(n));
   }
+
+  @override
+  bool operator ==(other) =>
+      other is ProjectImpl &&
+      other.runtimeType == runtimeType &&
+      other.id == id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

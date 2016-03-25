@@ -3,15 +3,17 @@
 
 library jefe.project.group.test;
 
-import 'package:test/test.dart';
-import 'package:jefe/src/project/project.dart';
 import 'dart:async';
-import 'package:logging/logging.dart';
-import 'package:jefe/src/project/impl/project_group_impl.dart';
-import 'package:jefe/src/spec/jefe_spec.dart';
 import 'dart:io';
-import 'test_helpers.dart';
+
+import 'package:jefe/src/project/impl/project_group_impl.dart';
+import 'package:jefe/src/project/project.dart';
 import 'package:jefe/src/project/project_group.dart';
+import 'package:jefe/src/spec/jefe_spec.dart';
+import 'package:logging/logging.dart';
+import 'package:test/test.dart';
+
+import 'test_helpers.dart';
 
 main() async {
   Logger.root.level = Level.ALL;

@@ -5,19 +5,23 @@ library jefe.project.group;
 
 import 'dart:async';
 import 'dart:io';
-import 'impl/project_group_impl.dart';
+
+import 'package:jefe/src/project/jefe_project.dart';
+
 import '../spec/jefe_spec.dart';
-import 'project.dart';
 import 'core.dart';
-import 'package:jefe/src/project/dependency_graph.dart';
+import 'impl/project_group_impl.dart';
+import 'project.dart';
+import '../spec/jefe_spec.dart' as spec;
 
 abstract class ProjectGroupReference
     implements ProjectEntityReference<ProjectGroup> {}
 
 /// Represents a group of related [Project]s. These projects are managed as
 /// a unit and typically have dependencies between them.
-abstract class ProjectGroup extends ProjectEntity {
+abstract class ProjectGroup implements ProjectEntity {
   ProjectGroupIdentifier get id;
+  spec.ProjectGroupMetaData get metaData;
 
   /// Install a [ProjectGroup] plus all its [Project]s and child [ProjectGroup]s
   /// recursively.
@@ -48,7 +52,10 @@ abstract class ProjectGroup extends ProjectEntity {
   Future<Iterable<Project>> get allProjects;
 
   /// Creates a graph of the dependency relationships for [allProjects]
-  Future<DependencyGraph> get dependencyGraph;
+  @deprecated
+  Future<JefeProjectSet> get dependencyGraph;
+
+  Future<JefeProjectSet> get rootJefeProjects;
 
   /// The directory that acts as the container for all the groups project
   /// and metadata directories. These are named with a '_root' suffix

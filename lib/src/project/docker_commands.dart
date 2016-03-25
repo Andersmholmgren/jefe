@@ -3,19 +3,15 @@
 
 library jefe.project.commands.docker;
 
-import 'package:jefe/src/project_commands/project_command.dart';
+import 'dart:async';
 import 'dart:io';
-import 'impl/docker_commands_impl.dart';
 
 abstract class DockerCommands {
-  factory DockerCommands() = DockerCommandsImpl;
-
   /// Generates a Dockerfile based on the provided [serverProjectName]
   /// and [clientProjectName].
   /// If these projects have path dependencies on other projects
   /// managed by jefe then those dependent projects are added first
-  ProjectDependencyGraphCommand generateDockerfile(
-      String serverProjectName, String clientProjectName,
+  Future generateDockerfile(String serverProjectName, String clientProjectName,
       {Directory outputDirectory,
       String dartVersion: 'latest',
       Map<String, dynamic> environment: const {},
@@ -29,7 +25,7 @@ abstract class DockerCommands {
   /// and [clientProjectName] suitable for production.
   /// The client and server projects will be cloned within the docker file
   /// base on a git tag
-  ProjectDependencyGraphCommand generateProductionDockerfile(
+  Future generateProductionDockerfile(
       String serverProjectName, String clientProjectName,
       {String serverGitRef,
       String clientGitRef,

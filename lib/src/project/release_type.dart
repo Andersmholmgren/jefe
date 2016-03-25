@@ -3,8 +3,8 @@
 
 library jefe.project.release.type;
 
-import 'package:pub_semver/pub_semver.dart';
 import 'package:option/option.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 typedef Version _VersionBumper(Version current);
 

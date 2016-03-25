@@ -5,14 +5,17 @@ library jefe.project.spec;
 
 import 'dart:async';
 import 'dart:io';
+
 import 'package:jefe/jefe.dart';
 import 'package:jefe/src/spec/impl/jefe_yaml.dart';
 import 'package:path/path.dart' as p;
+
 import 'impl/jefe_spec_impl.dart';
+import 'package:stuff/stuff.dart';
 
 /// The meta data that defines a [ProjectGroup]. This is read from the group's
 /// jefe.yaml file
-abstract class ProjectGroupMetaData {
+abstract class ProjectGroupMetaData implements Jsonable {
   String get name;
 
   Iterable<ProjectGroupIdentifier> get childGroups;
@@ -31,6 +34,8 @@ abstract class ProjectGroupMetaData {
   static Future<ProjectGroupMetaData> fromProjectGroupYamlFile(
           String projectGroupFile) =>
       readProjectGroupYaml(new File(projectGroupFile));
+
+  Future save(Directory projectDirectory);
 }
 
 abstract class ProjectEntityIdentifier<T> {
@@ -39,11 +44,12 @@ abstract class ProjectEntityIdentifier<T> {
 }
 
 abstract class ProjectGroupIdentifier
-    implements ProjectEntityIdentifier<ProjectGroup> {
-  factory ProjectGroupIdentifier(
-      String name, String gitUri) = ProjectGroupIdentifierImpl;
+    implements ProjectEntityIdentifier<ProjectGroup>, Jsonable {
+  factory ProjectGroupIdentifier(String name, String gitUri) =
+      ProjectGroupIdentifierImpl;
 }
 
-abstract class ProjectIdentifier implements ProjectEntityIdentifier<Project> {
+abstract class ProjectIdentifier
+    implements ProjectEntityIdentifier<Project>, Jsonable {
   factory ProjectIdentifier(String name, String gitUri) = ProjectIdentifierImpl;
 }
