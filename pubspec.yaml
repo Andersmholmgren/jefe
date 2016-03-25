@@ -17,11 +17,11 @@ dependencies:
   unscripted: "^0.6.0"
   yaml: "^2.0.1+1"
   dockerfile: 
-    path: "/Users/blah/dart/tmp/delme/jefe_container_root/dockerfile"
+    path: "/Users/blah/dart/jefe_jefe/jefe_container_root/dockerfile"
   pubspec: 
-    path: "/Users/blah/dart/tmp/delme/jefe_container_root/pubspec"
+    path: "/Users/blah/dart/jefe_jefe/jefe_container_root/pubspec"
   yamlicious: 
-    path: "/Users/blah/dart/tmp/delme/jefe_container_root/yamlicious"
+    path: "/Users/blah/dart/jefe_jefe/jefe_container_root/yamlicious"
 dev_dependencies: 
   mockito: "^0.8.2"
   test: "^0.12.10"
