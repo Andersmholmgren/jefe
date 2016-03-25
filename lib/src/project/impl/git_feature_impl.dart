@@ -169,7 +169,7 @@ class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
   @override
   Future<bool> get hasChangesSinceLatestTaggedVersion async =>
       (await _project.latestTaggedGitVersion)
-          .map((v) => _project.git.hasChangesSince(v))
+          .map((v) => spc.git.hasChangesSince(v))
           .getOrElse(() => false);
 
   @override

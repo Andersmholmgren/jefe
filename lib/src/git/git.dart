@@ -166,7 +166,8 @@ Future gitFetch(GitDir gitDir) async {
   await gitDir.runCommand(['fetch', '--tags']);
 }
 
-Future gitMerge(GitDir gitDir, String commit, {bool ffOnly: true}) async {
+Future gitMerge(GitDir gitDir, String commit,
+    {bool ffOnly: true, bool checkExists: true}) async {
   final flags = ffOnly ? <String>['--ff-only'] : <String>[];
   final command = concat(<Iterable<String>>[
     ['merge'],
@@ -180,9 +181,8 @@ Future<Option<String>> getRemoteBranchSha(
     GitDir gitDir, String remoteName, String branchName) async {
   final refs = await gitDir.showRef();
   return new Option<CommitReference>(refs.firstWhere(
-          (cr) => cr.reference == 'refs/remotes/$remoteName/$branchName',
-          orElse: () => null))
-      .map((cr) => cr.sha) as Option<String>;
+      (cr) => cr.reference == 'refs/remotes/$remoteName/$branchName',
+      orElse: () => null)).map((cr) => cr.sha) as Option<String>;
 }
 
 Future<String> currentCommitHash(GitDir gitDir) async =>

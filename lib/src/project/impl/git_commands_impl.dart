@@ -86,7 +86,7 @@ class _GitCommandsSingleProjectImpl implements GitCommands {
 
     final shaOpt = await getRemoteBranchSha(_gitDir, remoteName, branchName);
     if (shaOpt is Some) {
-      await gitMerge(_gitDir, '$remoteName/$branchName');
+      await gitMerge(_gitDir, '$remoteName/$branchName', checkExists: true);
     }
   }
 

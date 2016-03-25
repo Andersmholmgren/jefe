@@ -99,12 +99,13 @@ main() {
         });
 
         test('with expected number', () {
-          expect(commits, hasLength(4));
+          expect(commits, hasLength(5));
         }, skip: false);
 
         test('with expected messages', () {
           expect(commits.values.map((c) => c.message), [
-            "Merge branch 'release/0.0.1'",
+            "Merge branch 'release/0.2.0'",
+            "releasing version 0.2.0",
             "completed development of feature addDependencies",
             "added dependency on project1",
             "blah"
@@ -126,7 +127,7 @@ main() {
         });
 
         test('has expected version', () {
-          expect(pubSpec.version, new Version(0, 0, 1));
+          expect(pubSpec.version, new Version(0, 2, 0));
         }, skip: false);
 
         test('has git reference to project1', () {
