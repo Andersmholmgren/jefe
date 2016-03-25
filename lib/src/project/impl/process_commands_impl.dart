@@ -60,7 +60,8 @@ class ProcessCommandsMultiProjectImpl
         'process',
         (JefeProject p) async =>
             (await singleProjectCommandFactory(p)).execute(command, args),
-        combine: concatResults);
+        combine: concatResults,
+        filter: projectFilter);
   }
 }
 

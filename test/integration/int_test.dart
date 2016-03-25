@@ -162,6 +162,10 @@ main() {
       'project4': 'bin\npubspec.yaml\n'
     };
 
+    final Map<String, String> _expectedFilteredResults = {
+      'project3': 'bin\npubspec.yaml\n'
+    };
+
     Map<String, String> process(Iterable<ProcessCommandResult> results) =>
         new Map.fromIterable(results,
             key: (r) => r.project.name, value: (r) => r.result.stdout);
@@ -187,6 +191,28 @@ main() {
               .processCommands
               .execute('ls', [])),
           _expectedResults);
+    }, skip: false);
+
+    test('ls executes with project filter concurrently', () async {
+      expect(
+          process(await graph
+              .multiProjectCommands(
+                  projectFilter: projectNameFilter('project3'))
+              .processCommands
+              .execute('ls', [])),
+        _expectedFilteredResults);
+    }, skip: false);
+
+    test('ls executes with project filter serially', () async {
+      expect(
+          process(await graph
+              .multiProjectCommands(
+                  defaultConcurrencyMode:
+                      CommandConcurrencyMode.serialDepthFirst,
+                  projectFilter: projectNameFilter('project3'))
+              .processCommands
+              .execute('ls', [])),
+        _expectedFilteredResults);
     }, skip: false);
   }, skip: false);
 }

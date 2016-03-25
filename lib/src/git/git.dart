@@ -145,9 +145,9 @@ Future<Iterable<String>> _getTagNames(GitDir gitDir) async {
 Iterable<Version> _extractVersions(Iterable<String> tagNames) => tagNames
     .map/*<Option<Version>>*/((String tagName) {
       try {
-        return new Some(new Version.parse(tagName));
+        return new Some<Version>(new Version.parse(tagName));
       } on FormatException catch (_) {
-        return const None();
+        return const None<Version>();
       }
     })
     .where((o) => o is Some)
@@ -202,8 +202,10 @@ Future<Iterable<GitRemote>> getRemotes(GitDir gitDir) async {
 
   final lines = remotesStr.split('\n');
 
-  return lines.map((l) => l.split(new RegExp(r'\s+'))).map(
-      (Iterable<String> kv) => new GitRemote(kv.elementAt(0), kv.elementAt(1)));
+  return lines.map/*<GitRemote>*/((l) {
+    final kv = l.split(new RegExp(r'\s+'));
+    return new GitRemote(kv.elementAt(0), kv.elementAt(1));
+  });
 }
 
 Future<int> commitCountSince(GitDir gitDir, String ref) async =>
