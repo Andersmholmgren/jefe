@@ -4,7 +4,7 @@ homepage: "https://github.com/Andersmholmgren/jefe"
 name: "jefe"
 version: "0.3.0-pre.2"
 dependencies: 
-  analyzer: ">=0.25.0+1"
+  analyzer: ">=0.25.0+1 <0.28.0"
   collection: "^1.4.0"
   frappe: "^0.4.0+4"
   git: "^0.4.4+1"
