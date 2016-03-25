@@ -22,7 +22,7 @@ dependencies:
       url: "git@github.com:Andersmholmgren/dockerfile.git"
   pubspec: 
     git: 
-      ref: "c62f6c592a955cf78e213e7ed410619cafce96e3"
+      ref: "3493276cbffc06ec68144a89cae71b49ea1429db"
       url: "git@github.com:Andersmholmgren/pubspec.git"
   yamlicious: 
     git: 
