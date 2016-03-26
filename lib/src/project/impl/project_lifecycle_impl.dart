@@ -197,6 +197,33 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
 
       await spc.pubspecCommands.setToHostedDependencies();
 
+      await spc.git.commit('updated to hosted dependencies');
+
+      /*
+       * TODO: would rather be able to detect this as part of the checks we do
+       * up front to determine whether a release is needed. Unfortunately this
+       * case is a bit tricky to detect there.
+       */
+      if (projectVersions.hasBeenGitTagged) {
+        final hasRealChanges = await spc.git
+            .hasChangesSince(projectVersions.taggedGitVersion.get());
+
+        if (!hasRealChanges) {
+          _log.info("${_project.name} had no real changes. "
+              "Won't release after all (derp)");
+
+          _log.info(
+              'The release branch has been left in place just in case we got it wrong. '
+              'It will need to be manually deleted before the next release');
+
+          await spc.git.checkout('master');
+
+          await spc.pub.get();
+
+          return;
+        }
+      }
+
       await spc.pub.get();
 
       await spc.pub.test();
