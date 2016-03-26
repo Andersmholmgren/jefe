@@ -108,10 +108,14 @@ class JefeProjectImpl extends ProjectImpl
   Directory get _dockerRootDirectory => installDirectory;
 
   @override
-  Future<PubSpec> pubSpecAsAt(Version version) async {
-    return new PubSpec.fromYamlString(await singleProjectCommands.git
-        .fetchFileContentsAtVersion(version, 'pubspec.yaml'));
-  }
+  Future<PubSpec> pubSpecAsAt(Version version) async =>
+      new PubSpec.fromYamlString(await singleProjectCommands.git
+          .fetchFileContentsAtVersion(version, 'pubspec.yaml'));
+
+  @override
+  Future<PubSpec> pubSpecAsAtSha(String sha) async =>
+      new PubSpec.fromYamlString(await singleProjectCommands.git
+          .fetchFileContentsAtSha(sha, 'pubspec.yaml'));
 }
 
 class JefeProjectSetImpl extends DelegatingSet<JefeProject>

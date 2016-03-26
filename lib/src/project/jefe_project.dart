@@ -28,6 +28,8 @@ abstract class JefeProject extends Project implements JefeProjectGraph {
 
   /// Fetches the [PubSpec] as it was at the given [version]
   Future<PubSpec> pubSpecAsAt(Version version);
+
+  Future<PubSpec> pubSpecAsAtSha(String sha);
 }
 
 /// Some function applied to a [JefeProject]
