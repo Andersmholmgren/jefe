@@ -157,7 +157,7 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
           {ReleaseType type: ReleaseType.minor,
           bool autoUpdateHostedVersions: false}) =>
       executeTask('check release versions', () async {
-        final ProjectVersions versions =
+        final ProjectReleaseVersions versions =
             await getCurrentProjectVersions(type, autoUpdateHostedVersions);
         if (versions.newReleaseVersion is Some) {
           _log.info(
@@ -176,7 +176,7 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
       {ReleaseType type: ReleaseType.minor,
       bool autoUpdateHostedVersions: false,
       bool recursive: true}) async {
-    final ProjectVersions projectVersions =
+    final ProjectReleaseVersions projectVersions =
         await getCurrentProjectVersions(type, autoUpdateHostedVersions);
 
     if (!projectVersions.newReleaseRequired) {
@@ -232,7 +232,7 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
     }
   }
 
-  Future<ProjectVersions> getCurrentProjectVersions(
+  Future<ProjectReleaseVersions> getCurrentProjectVersions(
       ReleaseType type, bool autoUpdateHostedVersions) async {
     final currentProjectVersions = await _project.projectVersions;
 
@@ -241,10 +241,10 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
     final Option<Version> releaseVersionOpt = await _getReleaseVersion(
         currentProjectVersions, autoUpdateHostedVersions, type);
 
-    return new ProjectVersions(currentProjectVersions, releaseVersionOpt);
+    return new ProjectReleaseVersions(currentProjectVersions, releaseVersionOpt);
   }
 
-  Future<Option<Version>> _getReleaseVersion(ProjectVersions2 currentVersions,
+  Future<Option<Version>> _getReleaseVersion(ProjectVersions currentVersions,
       bool autoUpdateHostedVersions, ReleaseType type) async {
     final hasBeenPublished = currentVersions.hasBeenPublished;
     final isHosted = currentVersions.isHosted;
@@ -301,8 +301,8 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
       ]).any((b) => b);
 }
 
-class ProjectVersions implements ProjectVersions2 {
-  final ProjectVersions2 currentVersions;
+class ProjectReleaseVersions implements ProjectVersions {
+  final ProjectVersions currentVersions;
   final Option<Version> newReleaseVersion;
 
   @override
@@ -325,5 +325,5 @@ class ProjectVersions implements ProjectVersions2 {
 
   bool get newReleaseRequired => newReleaseVersion is Some;
 
-  ProjectVersions(this.currentVersions, this.newReleaseVersion);
+  ProjectReleaseVersions(this.currentVersions, this.newReleaseVersion);
 }
