@@ -109,7 +109,7 @@ class JefeProjectImpl extends ProjectImpl
 
   @override
   Future<PubSpec> pubSpecAsAt(Version version) {
-    singleProjectCommands.git.fetchFileContentsAt(version, 'pubspec.yaml');
+    singleProjectCommands.git.fetchFileContentsAtVersion(version, 'pubspec.yaml');
   }
 }
 

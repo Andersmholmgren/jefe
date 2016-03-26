@@ -33,5 +33,7 @@ abstract class GitCommands extends JefeGroupCommand<GitCommands> {
   /// [version].
   ///
   /// Throws [ArgumentError] if no git tag is found for the version
-  Future<String> fetchFileContentsAt(Version version, String filePath);
+  Future<String> fetchFileContentsAtVersion(Version version, String filePath);
+
+  Future<String> fetchFileContentsAtSha(String sha, String filePath);
 }
