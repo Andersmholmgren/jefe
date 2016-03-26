@@ -157,7 +157,7 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
           {ReleaseType type: ReleaseType.minor,
           bool autoUpdateHostedVersions: false}) =>
       executeTask('check release versions', () async {
-        final ProjectVersions versions =
+        final ProjectReleaseVersions versions =
             await getCurrentProjectVersions(type, autoUpdateHostedVersions);
         if (versions.newReleaseVersion is Some) {
           _log.info(
@@ -176,7 +176,7 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
       {ReleaseType type: ReleaseType.minor,
       bool autoUpdateHostedVersions: false,
       bool recursive: true}) async {
-    final ProjectVersions projectVersions =
+    final ProjectReleaseVersions projectVersions =
         await getCurrentProjectVersions(type, autoUpdateHostedVersions);
 
     if (!projectVersions.newReleaseRequired) {
@@ -196,6 +196,33 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
       }
 
       await spc.pubspecCommands.setToHostedDependencies();
+
+      await spc.git.commit('updated to hosted dependencies');
+
+      /*
+       * TODO: would rather be able to detect this as part of the checks we do
+       * up front to determine whether a release is needed. Unfortunately this
+       * case is a bit tricky to detect there.
+       */
+      if (projectVersions.hasBeenGitTagged) {
+        final hasRealChanges = await spc.git
+            .hasChangesSince(projectVersions.taggedGitVersion.get());
+
+        if (!hasRealChanges) {
+          _log.info("${_project.name} had no real changes. "
+              "Won't release after all (derp)");
+
+          _log.info(
+              'The release branch has been left in place just in case we got it wrong. '
+              'It will need to be manually deleted before the next release');
+
+          await spc.git.checkout('master');
+
+          await spc.pub.get();
+
+          return;
+        }
+      }
 
       await spc.pub.get();
 
@@ -232,7 +259,7 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
     }
   }
 
-  Future<ProjectVersions> getCurrentProjectVersions(
+  Future<ProjectReleaseVersions> getCurrentProjectVersions(
       ReleaseType type, bool autoUpdateHostedVersions) async {
     final currentProjectVersions = await _project.projectVersions;
 
@@ -241,10 +268,11 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
     final Option<Version> releaseVersionOpt = await _getReleaseVersion(
         currentProjectVersions, autoUpdateHostedVersions, type);
 
-    return new ProjectVersions(currentProjectVersions, releaseVersionOpt);
+    return new ProjectReleaseVersions(
+        currentProjectVersions, releaseVersionOpt);
   }
 
-  Future<Option<Version>> _getReleaseVersion(ProjectVersions2 currentVersions,
+  Future<Option<Version>> _getReleaseVersion(ProjectVersions currentVersions,
       bool autoUpdateHostedVersions, ReleaseType type) async {
     final hasBeenPublished = currentVersions.hasBeenPublished;
     final isHosted = currentVersions.isHosted;
@@ -301,16 +329,29 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
       ]).any((b) => b);
 }
 
-class ProjectVersions {
-  final ProjectVersions2 currentVersions;
+class ProjectReleaseVersions implements ProjectVersions {
+  final ProjectVersions currentVersions;
   final Option<Version> newReleaseVersion;
 
+  ProjectReleaseVersions(this.currentVersions, this.newReleaseVersion);
+
+  @override
   Version get pubspecVersion => currentVersions.pubspecVersion;
+
+  @override
   Option<Version> get taggedGitVersion => currentVersions.taggedGitVersion;
+
+  @override
   Option<Version> get publishedVersion => currentVersions.publishedVersion;
 
-  bool get hasBeenPublished => publishedVersion is Some;
-  bool get newReleaseRequired => newReleaseVersion is Some;
+  @override
+  bool get hasBeenGitTagged => currentVersions.hasBeenGitTagged;
 
-  ProjectVersions(this.currentVersions, this.newReleaseVersion);
+  @override
+  bool get isHosted => currentVersions.isHosted;
+
+  @override
+  bool get hasBeenPublished => currentVersions.hasBeenPublished;
+
+  bool get newReleaseRequired => newReleaseVersion is Some;
 }

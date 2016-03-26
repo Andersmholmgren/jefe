@@ -109,4 +109,12 @@ class _GitCommandsSingleProjectImpl implements GitCommands {
   @override
   Future tag(String tag, {String comment}) =>
       gitTag(_gitDir, tag, comment: comment);
+
+  @override
+  Future<String> fetchFileContentsAtVersion(Version version, String filePath) =>
+      fetchFileContentsAtSha(version.toString(), filePath);
+
+  @override
+  Future<String> fetchFileContentsAtSha(String sha, String filePath) async =>
+      (await _gitDir.runCommand(['show', '$sha:$filePath'])).stdout;
 }

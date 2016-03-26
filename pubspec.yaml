@@ -17,17 +17,11 @@ dependencies:
   unscripted: "^0.6.0"
   yaml: "^2.0.1+1"
   dockerfile: 
-    git: 
-      ref: "7e9fd5008c752c54fb6f732a60938cf1ee573b8c"
-      url: "git@github.com:Andersmholmgren/dockerfile.git"
+    path: "/Users/blah/dart/jefe_jefe/jefe_container_root/dockerfile"
   pubspec: 
-    git: 
-      ref: "3493276cbffc06ec68144a89cae71b49ea1429db"
-      url: "git@github.com:Andersmholmgren/pubspec.git"
+    path: "/Users/blah/dart/jefe_jefe/jefe_container_root/pubspec"
   yamlicious: 
-    git: 
-      ref: "bad84cd0d8b8d16a244987b42cc7fb5c130ea3fe"
-      url: "git@github.com:Andersmholmgren/yamlicious.git"
+    path: "/Users/blah/dart/jefe_jefe/jefe_container_root/yamlicious"
 dev_dependencies: 
   mockito: "^0.8.2"
   test: "^0.12.10"
