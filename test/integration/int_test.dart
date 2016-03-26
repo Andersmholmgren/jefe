@@ -50,7 +50,7 @@ main() {
             unorderedEquals(['project1', 'project2', 'project3', 'project4']
                 .map((s) => p.join(jefeDir.parent.path, s))));
       }, skip: false);
-    }, skip: false);
+    }, skip: false, timeout: const Timeout(const Duration(minutes: 3)));
 
     group('results in remote repos in expected state', () {
       ProjectGroupMetaData metaData;
@@ -200,7 +200,7 @@ main() {
                   projectFilter: projectNameFilter('project3'))
               .processCommands
               .execute('ls', [])),
-        _expectedFilteredResults);
+          _expectedFilteredResults);
     }, skip: false);
 
     test('ls executes with project filter serially', () async {
@@ -212,7 +212,7 @@ main() {
                   projectFilter: projectNameFilter('project3'))
               .processCommands
               .execute('ls', [])),
-        _expectedFilteredResults);
+          _expectedFilteredResults);
     }, skip: false);
   }, skip: false);
 }
