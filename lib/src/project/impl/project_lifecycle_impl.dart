@@ -241,7 +241,8 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
     final Option<Version> releaseVersionOpt = await _getReleaseVersion(
         currentProjectVersions, autoUpdateHostedVersions, type);
 
-    return new ProjectReleaseVersions(currentProjectVersions, releaseVersionOpt);
+    return new ProjectReleaseVersions(
+        currentProjectVersions, releaseVersionOpt);
   }
 
   Future<Option<Version>> _getReleaseVersion(ProjectVersions currentVersions,
@@ -305,6 +306,8 @@ class ProjectReleaseVersions implements ProjectVersions {
   final ProjectVersions currentVersions;
   final Option<Version> newReleaseVersion;
 
+  ProjectReleaseVersions(this.currentVersions, this.newReleaseVersion);
+
   @override
   Version get pubspecVersion => currentVersions.pubspecVersion;
 
@@ -324,6 +327,4 @@ class ProjectReleaseVersions implements ProjectVersions {
   bool get hasBeenPublished => currentVersions.hasBeenPublished;
 
   bool get newReleaseRequired => newReleaseVersion is Some;
-
-  ProjectReleaseVersions(this.currentVersions, this.newReleaseVersion);
 }
