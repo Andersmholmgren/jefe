@@ -104,7 +104,8 @@ main() {
         test('with expected messages', () {
           expect(commits.values.map((c) => c.message), [
             "Merge branch 'release/0.2.0'",
-            "releasing version 0.2.0",
+            'updated to hosted dependencies',
+//            "releasing version 0.2.0",
             "completed development of feature addDependencies",
             "added dependency on project1",
             "blah"
