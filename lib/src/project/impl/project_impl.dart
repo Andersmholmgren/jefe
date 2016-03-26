@@ -26,21 +26,6 @@ import 'core_impl.dart';
 
 Logger _log = new Logger('jefe.project.impl');
 
-class ProjectReferenceImpl implements ProjectReference {
-  final ProjectGroupImpl parent;
-  final ProjectIdentifier ref;
-  ProjectReferenceImpl(this.parent, this.ref);
-
-  @override
-  Future<Project> get() => parent.getChildProject(name, gitUri);
-
-  @override
-  String get gitUri => ref.gitUri;
-
-  @override
-  String get name => ref.name;
-}
-
 class ProjectImpl extends ProjectEntityImpl implements Project {
   PubSpec _pubspec;
 
@@ -209,4 +194,19 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   @override
   int get hashCode => id.hashCode;
+}
+
+class ProjectReferenceImpl implements ProjectReference {
+  final ProjectGroupImpl parent;
+  final ProjectIdentifier ref;
+  ProjectReferenceImpl(this.parent, this.ref);
+
+  @override
+  Future<Project> get() => parent.getChildProject(name, gitUri);
+
+  @override
+  String get gitUri => ref.gitUri;
+
+  @override
+  String get name => ref.name;
 }
