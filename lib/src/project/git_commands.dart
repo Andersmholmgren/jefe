@@ -28,4 +28,10 @@ abstract class GitCommands extends JefeGroupCommand<GitCommands> {
   Future<bool> hasChangesSince(Version sinceVersion);
 
   Future tag(String tag, {String comment});
+
+  /// fetches the contents of the given [filePath] as it was at the given
+  /// [version].
+  ///
+  /// Throws [ArgumentError] if no git tag is found for the version
+  Future<String> fetchFileContentsAt(Version version, String filePath);
 }

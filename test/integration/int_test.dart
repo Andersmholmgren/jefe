@@ -8,7 +8,6 @@ import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:test/test.dart';
-import 'package:yaml/yaml.dart';
 
 import 'test_project_utils.dart';
 
@@ -122,7 +121,7 @@ main() {
                     ['show', 'master:pubspec.yaml'], directory))
                 .stdout;
 
-            pubSpec = new PubSpec.fromJson(loadYaml(pubSpecStr));
+            pubSpec = new PubSpec.fromYamlString(pubSpecStr);
           }
         });
 

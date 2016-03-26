@@ -15,6 +15,8 @@ import 'package:jefe/src/project/pub_commands.dart';
 import 'package:jefe/src/project/pubspec_commands.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:option/option.dart';
+import 'package:pubspec/pubspec.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 /// A [Project] managed by Jefe
 abstract class JefeProject extends Project implements JefeProjectGraph {
@@ -23,6 +25,9 @@ abstract class JefeProject extends Project implements JefeProjectGraph {
   Set<JefeProject> get allDependencies;
 
   ProjectCommands get singleProjectCommands;
+
+  /// Fetches the [PubSpec] as it was at the given [version]
+  Future<PubSpec> pubSpecAsAt(Version version);
 }
 
 /// Some function applied to a [JefeProject]
