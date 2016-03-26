@@ -301,15 +301,28 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
       ]).any((b) => b);
 }
 
-class ProjectVersions {
+class ProjectVersions implements ProjectVersions2 {
   final ProjectVersions2 currentVersions;
   final Option<Version> newReleaseVersion;
 
+  @override
   Version get pubspecVersion => currentVersions.pubspecVersion;
+
+  @override
   Option<Version> get taggedGitVersion => currentVersions.taggedGitVersion;
+
+  @override
   Option<Version> get publishedVersion => currentVersions.publishedVersion;
 
-  bool get hasBeenPublished => publishedVersion is Some;
+  @override
+  bool get hasBeenGitTagged => currentVersions.hasBeenGitTagged;
+
+  @override
+  bool get isHosted => currentVersions.isHosted;
+
+  @override
+  bool get hasBeenPublished => currentVersions.hasBeenPublished;
+
   bool get newReleaseRequired => newReleaseVersion is Some;
 
   ProjectVersions(this.currentVersions, this.newReleaseVersion);

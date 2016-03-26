@@ -10,6 +10,7 @@ abstract class PubCommands {
 
   Future publish();
 
+  @deprecated // now lives on Project
   Future fetchPackageVersions();
 
   Future test();

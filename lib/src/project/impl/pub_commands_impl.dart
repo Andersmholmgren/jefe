@@ -50,12 +50,10 @@ class _PubCommandsSingleProjectImpl implements PubCommands {
   _PubCommandsSingleProjectImpl(this._project);
 
   @override
-  Future get() =>
-      executeTask('pub get', () async => pub.get(_project.installDirectory));
+  Future get() async => pub.get(_project.installDirectory);
 
   @override
-  Future fetchPackageVersions() =>
-      executeTask('fetch package versions', () => _project.publishedVersions);
+  Future fetchPackageVersions() => _project.publishedVersions;
 
   @override
   Future publish() => executeTask(
