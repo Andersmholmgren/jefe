@@ -26,9 +26,9 @@ import 'package:jefe/src/project/pubspec_commands.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
+import 'package:pub_semver/src/version.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:quiver/iterables.dart';
-import 'package:pub_semver/src/version.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
@@ -108,8 +108,9 @@ class JefeProjectImpl extends ProjectImpl
   Directory get _dockerRootDirectory => installDirectory;
 
   @override
-  Future<PubSpec> pubSpecAsAt(Version version) {
-    singleProjectCommands.git.fetchFileContentsAtVersion(version, 'pubspec.yaml');
+  Future<PubSpec> pubSpecAsAt(Version version) async {
+    return new PubSpec.fromYamlString(await singleProjectCommands.git
+        .fetchFileContentsAtVersion(version, 'pubspec.yaml'));
   }
 }
 
