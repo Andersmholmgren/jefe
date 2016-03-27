@@ -70,6 +70,19 @@ main() async {
             () => new TestProcessInvocation(project4, [project2, project3])
           ]);
     }, skip: false);
+
+    group('for 2 projects with dependency loop', () {
+      final project1 = aProject('project1');
+      final project2 = aProject('project2', dependencies: [project1]);
+      final project1b = aProject('project1', dependencies: [project2]);
+
+      test('throws StateError', () async {
+        expect(
+            getRootProjects([project1b, project2].toSet(), new Directory('')),
+            throwsStateError);
+//        return graph.processDepthFirst(processor);
+      }, skip: false);
+    }, skip: false);
   });
 }
 

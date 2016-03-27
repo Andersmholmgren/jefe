@@ -30,11 +30,18 @@ class _DependencyGraph {
   Map<Project, _DependencyNode> _nodeMap = {};
 
   // root nodes are those that nothing else depends on
-  JefeProjectSet get rootNodes => new JefeProjectSetImpl(
-      _rootNodeMap.values
-          .map/*<JefeProject>*/((n) => n.toJefeProject())
-          .toSet(),
-      _containerDirectory);
+  JefeProjectSet get rootNodes {
+    if (_rootNodeMap.isEmpty && _nodeMap.isNotEmpty) {
+      throw new StateError('circular project dependencies detected in '
+          '${_nodeMap.keys.map((p) => p.name).toSet()}');
+    }
+
+    return new JefeProjectSetImpl(
+        _rootNodeMap.values
+            .map/*<JefeProject>*/((n) => n.toJefeProject())
+            .toSet(),
+        _containerDirectory);
+  }
 
   _DependencyGraph._(
       Set<_ProjectDependencies> dependencySet, this._containerDirectory) {
