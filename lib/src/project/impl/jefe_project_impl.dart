@@ -26,6 +26,7 @@ import 'package:jefe/src/project/pubspec_commands.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:logging/logging.dart';
 import 'package:option/option.dart';
+import 'package:pub_semver/src/version.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:quiver/iterables.dart';
 
@@ -105,6 +106,16 @@ class JefeProjectImpl extends ProjectImpl
 
   @override
   Directory get _dockerRootDirectory => installDirectory;
+
+  @override
+  Future<PubSpec> pubSpecAsAt(Version version) async =>
+      new PubSpec.fromYamlString(await singleProjectCommands.git
+          .fetchFileContentsAtVersion(version, 'pubspec.yaml'));
+
+  @override
+  Future<PubSpec> pubSpecAsAtSha(String sha) async =>
+      new PubSpec.fromYamlString(await singleProjectCommands.git
+          .fetchFileContentsAtSha(sha, 'pubspec.yaml'));
 }
 
 class JefeProjectSetImpl extends DelegatingSet<JefeProject>

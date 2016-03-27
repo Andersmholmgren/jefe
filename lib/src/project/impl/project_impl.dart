@@ -26,21 +26,6 @@ import 'core_impl.dart';
 
 Logger _log = new Logger('jefe.project.impl');
 
-class ProjectReferenceImpl implements ProjectReference {
-  final ProjectGroupImpl parent;
-  final ProjectIdentifier ref;
-  ProjectReferenceImpl(this.parent, this.ref);
-
-  @override
-  Future<Project> get() => parent.getChildProject(name, gitUri);
-
-  @override
-  String get gitUri => ref.gitUri;
-
-  @override
-  String get name => ref.name;
-}
-
 class ProjectImpl extends ProjectEntityImpl implements Project {
   PubSpec _pubspec;
 
@@ -170,7 +155,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
               pub.fetchPackageVersions(name, publishToUrl: pubspec.publishTo));
 
   @override
-  Future<ProjectVersions2> get projectVersions async {
+  Future<ProjectVersions> get projectVersions async {
     final _latestPublishedVersionFuture = latestPublishedVersion;
     final isHostedFuture = _latestPublishedVersionFuture.then((o) {
       final hasBeenPublished = o is Some;
@@ -186,7 +171,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
       _latestPublishedVersionFuture,
       isHostedFuture
     ]);
-    return new ProjectVersions2(pubspec.version, versions[0] as Option<Version>,
+    return new ProjectVersions(pubspec.version, versions[0] as Option<Version>,
         versions[1] as Option<Version>, versions[2] as bool);
   }
 
@@ -209,4 +194,19 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   @override
   int get hashCode => id.hashCode;
+}
+
+class ProjectReferenceImpl implements ProjectReference {
+  final ProjectGroupImpl parent;
+  final ProjectIdentifier ref;
+  ProjectReferenceImpl(this.parent, this.ref);
+
+  @override
+  Future<Project> get() => parent.getChildProject(name, gitUri);
+
+  @override
+  String get gitUri => ref.gitUri;
+
+  @override
+  String get name => ref.name;
 }

@@ -6,12 +6,16 @@ library jefe.utils;
 import 'dart:async';
 import 'dart:io';
 
+import 'package:logging/logging.dart';
+
+final Logger _log = new Logger('jefe.utils');
+
 int _processCount = 0;
 
 Future<ProcessResult> runCommand(String command, List<String> args,
     {bool throwOnError: true, String processWorkingDir}) async {
   _processCount++;
-//  print('---- num running processes: $_processCount');
+  _log.finest('> "$command ${args.join(' ')}"');
 
   final result =
       await Process.run(command, args, workingDirectory: processWorkingDir);

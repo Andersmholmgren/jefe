@@ -31,7 +31,9 @@ class _DependencyGraph {
 
   // root nodes are those that nothing else depends on
   JefeProjectSet get rootNodes => new JefeProjectSetImpl(
-      _rootNodeMap.values.map((n) => n.toJefeProject()).toSet(),
+      _rootNodeMap.values
+          .map/*<JefeProject>*/((n) => n.toJefeProject())
+          .toSet(),
       _containerDirectory);
 
   _DependencyGraph._(

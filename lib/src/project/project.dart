@@ -36,7 +36,7 @@ abstract class Project implements ProjectEntity {
   Future<Option<HostedPackageVersions>> get publishedVersions;
 
   /// Fetches versions concurrently
-  Future<ProjectVersions2> get projectVersions;
+  Future<ProjectVersions> get projectVersions;
 
   /// Installs a Project from the [gitUri] into the [parentDirectory]
   static Future<Project> install(
@@ -53,7 +53,7 @@ abstract class Project implements ProjectEntity {
 
 enum HostedMode { hosted, notHosted, inferred }
 
-class ProjectVersions2 {
+class ProjectVersions {
   final Version pubspecVersion;
   final Option<Version> taggedGitVersion;
   final Option<Version> publishedVersion;
@@ -63,7 +63,7 @@ class ProjectVersions2 {
 
   final bool isHosted; // hmmm doesn't make sense in ProjectVersions2
 
-  ProjectVersions2(this.pubspecVersion, this.taggedGitVersion,
+  ProjectVersions(this.pubspecVersion, this.taggedGitVersion,
       this.publishedVersion, this.isHosted);
 
   String toString() => 'pubspec version: $pubspecVersion; '
@@ -72,7 +72,7 @@ class ProjectVersions2 {
 }
 
 class ProjectStatus {
-  final ProjectVersions2 versions;
+  final ProjectVersions versions;
   final bool hasChangesSinceLastGitVersion;
 
   ProjectStatus(this.versions, this.hasChangesSinceLastGitVersion);

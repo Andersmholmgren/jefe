@@ -8,7 +8,6 @@ import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:test/test.dart';
-import 'package:yaml/yaml.dart';
 
 import 'test_project_utils.dart';
 
@@ -50,7 +49,7 @@ main() {
             unorderedEquals(['project1', 'project2', 'project3', 'project4']
                 .map((s) => p.join(jefeDir.parent.path, s))));
       }, skip: false);
-    }, skip: false);
+    }, skip: false, timeout: const Timeout(const Duration(minutes: 3)));
 
     group('results in remote repos in expected state', () {
       ProjectGroupMetaData metaData;
@@ -105,7 +104,8 @@ main() {
         test('with expected messages', () {
           expect(commits.values.map((c) => c.message), [
             "Merge branch 'release/0.2.0'",
-            "releasing version 0.2.0",
+            'updated to hosted dependencies',
+//            "releasing version 0.2.0",
             "completed development of feature addDependencies",
             "added dependency on project1",
             "blah"
@@ -122,7 +122,7 @@ main() {
                     ['show', 'master:pubspec.yaml'], directory))
                 .stdout;
 
-            pubSpec = new PubSpec.fromJson(loadYaml(pubSpecStr));
+            pubSpec = new PubSpec.fromYamlString(pubSpecStr);
           }
         });
 
@@ -162,6 +162,10 @@ main() {
       'project4': 'bin\npubspec.yaml\n'
     };
 
+    final Map<String, String> _expectedFilteredResults = {
+      'project3': 'bin\npubspec.yaml\n'
+    };
+
     Map<String, String> process(Iterable<ProcessCommandResult> results) =>
         new Map.fromIterable(results,
             key: (r) => r.project.name, value: (r) => r.result.stdout);
@@ -187,6 +191,28 @@ main() {
               .processCommands
               .execute('ls', [])),
           _expectedResults);
+    }, skip: false);
+
+    test('ls executes with project filter concurrently', () async {
+      expect(
+          process(await graph
+              .multiProjectCommands(
+                  projectFilter: projectNameFilter('project3'))
+              .processCommands
+              .execute('ls', [])),
+          _expectedFilteredResults);
+    }, skip: false);
+
+    test('ls executes with project filter serially', () async {
+      expect(
+          process(await graph
+              .multiProjectCommands(
+                  defaultConcurrencyMode:
+                      CommandConcurrencyMode.serialDepthFirst,
+                  projectFilter: projectNameFilter('project3'))
+              .processCommands
+              .execute('ls', [])),
+          _expectedFilteredResults);
     }, skip: false);
   }, skip: false);
 }
