@@ -29,6 +29,8 @@ import 'package:option/option.dart';
 import 'package:pub_semver/src/version.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:quiver/iterables.dart';
+import 'package:jefe/src/project/impl/intellij_commands_impl.dart';
+import 'package:jefe/src/project/intellij_commands.dart';
 
 Logger _log = new Logger('jefe.project.jefe.impl');
 
@@ -98,7 +100,8 @@ class JefeProjectImpl extends ProjectImpl
           createPubSpecCommands(this, multiProject: false),
           createPubCommands(this, multiProject: false),
           createProjectLifecycle(this, multiProject: false),
-          createProcessCommands(this, multiProject: false));
+          createProcessCommands(this, multiProject: false),
+          createIntellijCommands(this, multiProject: false));
     }
 
     return _singleProjectCommands ??= create();
@@ -186,6 +189,10 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
       defaultMultiProjectCommands.processCommands;
 
   @override
+  IntellijCommands get intellijCommands =>
+      defaultMultiProjectCommands.intellijCommands;
+
+  @override
   MultiProjectCommands multiProjectCommands(
       {CommandConcurrencyMode defaultConcurrencyMode,
       ProjectFilter projectFilter}) {
@@ -211,6 +218,10 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
             defaultConcurrencyMode: defaultConcurrencyMode,
             projectFilter: projectFilter),
         createProcessCommands(this,
+            multiProject: true,
+            defaultConcurrencyMode: defaultConcurrencyMode,
+            projectFilter: projectFilter),
+        createIntellijCommands(this,
             multiProject: true,
             defaultConcurrencyMode: defaultConcurrencyMode,
             projectFilter: projectFilter),
