@@ -9,6 +9,7 @@ import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
 import 'package:unscripted/unscripted.dart' as u;
 import 'package:jefe/src/project/jefe_project.dart';
+import 'package:path/path.dart' as p;
 
 main(List<String> arguments) {
   Chain.capture(() {
@@ -172,8 +173,8 @@ class Jefe {
           String projects}) async {
     final graph = await _loadGraph(rootDirectory);
     final pubSpec = graph
-      .multiProjectCommands(projectFilter: projectNameFilter(projects))
-      .pubspecCommands;
+        .multiProjectCommands(projectFilter: projectNameFilter(projects))
+        .pubspecCommands;
 
     switch (type) {
       case 'git':
@@ -194,10 +195,35 @@ class Jefe {
           String projects}) async {
     final graph = await _loadGraph(rootDirectory);
     final pub = graph
-      .multiProjectCommands(projectFilter: projectNameFilter(projects))
-      .pub;
+        .multiProjectCommands(projectFilter: projectNameFilter(projects))
+        .pub;
 
     return pub.test();
+  }
+
+  @u.SubCommand(help: 'Creates the Intellij vcs.xml file for project group')
+  intellijVcs(
+      {@u.Option(help: 'The directory that contains the root of the projecs', abbr: 'd')
+          String rootDirectory: '.',
+      @u.Option(help: 'A project name filter. Only projects whose name contains the text will run', abbr: 'p')
+          String projects}) async {
+    final group = await _load(rootDirectory);
+
+    final File vcsFile =
+        new File(p.join(group.containerDirectory.path, '.idea', 'vcs.xml'));
+
+    final graph = await group.rootJefeProjects;
+
+    final intellij = graph
+        .multiProjectCommands(projectFilter: projectNameFilter(projects))
+        .intellijCommands;
+
+    final mappings =
+        await intellij.generateGitMappings(group.containerDirectory.path);
+
+    final sink = vcsFile.openWrite();
+    sink.write(mappings.toXmlString());
+    return sink.close();
   }
 
 //  Future<CommandExecutor> _loadExecutor(String rootDirectory) async =>
