@@ -55,18 +55,15 @@ class IntellijVcsMappings {
         ],
         vcsDirectoryMappings.map((m) => m.toXml()));
   }
+
+  String toXmlString() =>
+      new XmlDocument([_toWrappedXml()]).toXmlString(pretty: true);
+
+  XmlNode _toWrappedXml() {
+    return new XmlElement(
+        new XmlName('project'),
+        <XmlAttribute>[new XmlAttribute(new XmlName('version'), '4')],
+        [toXml()]);
+  }
 }
 
-/*
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="VcsDirectoryMappings">
-    <mapping directory="$PROJECT_DIR$/dockerfile" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/jefe" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/jefe_container" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/pubspec" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/stuff" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/yamlicious" vcs="Git" />
-  </component>
-</project>
- */

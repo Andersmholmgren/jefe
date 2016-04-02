@@ -57,6 +57,7 @@ main() {
 
       setUp(() {
         element = mappings.toXml() as XmlElement;
+//        print(element.toXmlString(pretty: true));
       });
 
       test('with correct name', () {
@@ -74,11 +75,24 @@ main() {
 
       test('with correct name attribute', () {
         expect(
-            element.attributes
-                .firstWhere((a) => a.name.local == 'name')
-                .value,
+            element.attributes.firstWhere((a) => a.name.local == 'name').value,
             equals('VcsDirectoryMappings'));
       }, skip: false);
+    }, skip: false);
+  }, skip: false);
+
+  group('IntellijVcsMappings.toXmlString()', () {
+    final mappings = new IntellijVcsMappings([mapping1]);
+    final String expectedXmlString = r'''
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/blah" vcs="Git" />
+  </component>
+</project>''';
+
+    test('produces xml element', () {
+      expect(mappings.toXmlString(), expectedXmlString);
     }, skip: false);
   }, skip: false);
 }
