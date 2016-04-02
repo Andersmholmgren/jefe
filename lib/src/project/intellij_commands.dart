@@ -33,10 +33,10 @@ class IntellijVcsMapping {
   }
 
   XmlNode toXml() {
-    return (new XmlBuilder()
-          ..element("mapping",
-              attributes: <String, String>{'directory': directory, 'vcs': vcs}))
-        .build();
+    return new XmlElement(new XmlName('mapping'), <XmlAttribute>[
+      new XmlAttribute(new XmlName('directory'), directory),
+      new XmlAttribute(new XmlName('vcs'), vcs)
+    ], const []);
   }
 }
 
