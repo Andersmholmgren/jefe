@@ -17,6 +17,7 @@ import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:option/option.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:jefe/src/project/intellij_commands.dart';
 
 /// A [Project] managed by Jefe
 abstract class JefeProject extends Project implements JefeProjectGraph {
@@ -50,9 +51,10 @@ class ProjectCommands {
   final PubCommands pub;
   final ProjectLifecycle lifecycle;
   final ProcessCommands processCommands;
+  final IntellijCommands intellijCommands;
 
   ProjectCommands(this.git, this.gitFeature, this.pubspecCommands, this.pub,
-      this.lifecycle, this.processCommands);
+      this.lifecycle, this.processCommands, this.intellijCommands);
 }
 
 class MultiProjectCommands extends ProjectCommands {
@@ -65,9 +67,10 @@ class MultiProjectCommands extends ProjectCommands {
       PubCommands pub,
       ProjectLifecycle lifecycle,
       ProcessCommands processCommands,
+      IntellijCommands intellijCommands,
       this.docker)
-      : super(
-            git, gitFeature, pubspecCommands, pub, lifecycle, processCommands);
+      : super(git, gitFeature, pubspecCommands, pub, lifecycle, processCommands,
+            intellijCommands);
 }
 
 /// A graph of [JefeProject] ordered by their dependencies

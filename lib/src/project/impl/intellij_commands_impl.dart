@@ -53,7 +53,7 @@ class IntellijCommandsMultiProjectImpl
     IntellijVcsMappings combine(
         IntellijVcsMappings previous, IntellijVcsMappings current) {
       return new IntellijVcsMappings(
-          concat(previous.vcsDirectoryMappings, current.vcsDirectoryMappings));
+          concat([previous.vcsDirectoryMappings, current.vcsDirectoryMappings]));
     }
     return process/*<IntellijVcsMappings>*/(
         'generateGitMappings',
