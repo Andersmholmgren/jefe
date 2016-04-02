@@ -56,8 +56,10 @@ class IntellijVcsMappings {
         vcsDirectoryMappings.map((m) => m.toXml()));
   }
 
-  String toXmlString() =>
-      new XmlDocument([_toWrappedXml()]).toXmlString(pretty: true);
+  String toXmlString() => new XmlDocument([
+        new XmlProcessing('xml', 'version="1.0" encoding="UTF-8"'),
+        _toWrappedXml()
+      ]).toXmlString(pretty: true);
 
   XmlNode _toWrappedXml() {
     return new XmlElement(
@@ -66,4 +68,3 @@ class IntellijVcsMappings {
         [toXml()]);
   }
 }
-
