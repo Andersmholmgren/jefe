@@ -6,20 +6,30 @@ library jefe.project.commands.intellij;
 import 'dart:async';
 
 import 'package:jefe/src/project/jefe_project.dart';
+import 'package:path/path.dart' as p;
 import 'package:quiver/check.dart';
 import 'package:xml/xml.dart';
 
 abstract class IntellijCommands extends JefeGroupCommand<IntellijCommands> {
-  Future<IntellijVcsMappings> generateGitMappings();
+  Future<IntellijVcsMappings> generateGitMappings(
+      String intelliJProjectRootPath);
 }
 
 class IntellijVcsMapping {
   final String directory;
   final String vcs;
+  static const String projectRootVariable = r'$PROJECT_DIR$';
 
-  IntellijVcsMapping(this.directory, {this.vcs: "Git"}) {
+  IntellijVcsMapping(String directory, String projectRootPath,
+      {this.vcs: "Git"})
+      : this.directory = toIntellijProjectDir(directory, projectRootPath) {
     checkNotNull(this.directory);
     checkNotNull(this.vcs);
+  }
+
+  static String toIntellijProjectDir(String directory, String projectRootPath) {
+    final relative = p.relative(directory, from: projectRootPath);
+    return p.join(projectRootVariable, relative);
   }
 
   XmlNode toXml() {
