@@ -4,6 +4,7 @@
 
 * Major rewrite of internals. Should be much easier to implement new features
 * Removed `featureName` from `jefe finish`
+* Allow project names to differ from repo names
 
 ## 0.2.10
 
