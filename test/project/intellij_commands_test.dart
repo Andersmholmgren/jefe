@@ -44,4 +44,41 @@ main() {
       }, skip: false);
     }, skip: false);
   }, skip: false);
+
+  group('IntellijVcsMappings.toXml()', () {
+    final mappings = new IntellijVcsMappings([mapping1]);
+
+    test('produces xml element', () {
+      expect(mappings.toXml(), new isInstanceOf<XmlElement>());
+    }, skip: false);
+
+    group('produces xml element', () {
+      XmlElement element;
+
+      setUp(() {
+        element = mappings.toXml() as XmlElement;
+      });
+
+      test('with correct name', () {
+        expect(element.name.local, 'component');
+      }, skip: false);
+
+      test('with correct number of attributes', () {
+        expect(element.attributes, hasLength(1));
+      }, skip: false);
+
+      test('with correct attributes names', () {
+        expect(element.attributes.map((a) => a.name.local),
+            unorderedEquals(['name']));
+      }, skip: false);
+
+      test('with correct name attribute', () {
+        expect(
+            element.attributes
+                .firstWhere((a) => a.name.local == 'name')
+                .value,
+            equals('VcsDirectoryMappings'));
+      }, skip: false);
+    }, skip: false);
+  }, skip: false);
 }
