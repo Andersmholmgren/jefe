@@ -215,6 +215,72 @@ main() {
           _expectedFilteredResults);
     }, skip: false);
   }, skip: false);
+
+  group('jefetize', () {
+    Directory containerDir;
+    Directory groupDirectory;
+    File jefeFile;
+    String groupName;
+
+    setUp(() async {
+      Future jefetize() async {
+        Iterable<Directory> projects = await createTestProjectsWithRemotes(2,
+            bareRepo: false, cloneParentDir: 'projects');
+        final parentDir = projects.first.parent;
+
+        containerDir = await ProjectGroup.jefetize(parentDir);
+
+        groupName = p.basename(parentDir.path);
+        groupDirectory = new Directory(p.join(containerDir.path, groupName));
+        jefeFile = new File(p.join(groupDirectory.path, 'jefe.yaml'));
+      }
+
+      if (containerDir == null) await jefetize();
+    });
+
+    test('containerDirectory named correctly', () {
+      expect(containerDir.path, endsWith(ProjectGroup.containerSuffix));
+    }, skip: false);
+
+    test('creates group directory', () async {
+      expect(await groupDirectory.exists(), true);
+    }, skip: false);
+
+    test('creates jefe file', () async {
+      expect(await jefeFile.exists(), true);
+    }, skip: false);
+
+    group('created jefe file', () {
+      ProjectGroupMetaData metaData;
+      setUp(() async {
+        if (metaData == null) {
+          metaData = await ProjectGroupMetaData
+              .fromDefaultProjectGroupYamlFile(groupDirectory.path);
+        }
+      });
+
+      test('loads', () {
+        expect(metaData, isNotNull);
+      }, skip: false);
+
+      test('has expected group name', () {
+        expect(metaData.name, equals(groupName));
+      }, skip: false);
+
+      test('has no project groups', () {
+        expect(metaData.childGroups, isEmpty);
+      }, skip: false);
+
+      test('has two projects', () {
+        expect(metaData.projects, hasLength(2));
+      }, skip: false);
+
+      test('has projects with expected names', () {
+        expect(metaData.projects.map((i) => i.name),
+            unorderedEquals(['project1', 'project2']));
+      }, skip: false);
+    }, skip: false);
+  }, skip: false);
 }
 
 Future<Directory> _performLifecycle() async {

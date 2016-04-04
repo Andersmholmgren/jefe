@@ -201,7 +201,8 @@ Future<Iterable<GitRemote>> getRemotes(GitDir gitDir) async {
 
   final String remotesStr = result.stdout;
 
-  final lines = remotesStr.split('\n');
+  final lines =
+      remotesStr.split('\n').map((l) => l.trim()).where((s) => s.isNotEmpty);
 
   return lines.map/*<GitRemote>*/((l) {
     final kv = l.split(new RegExp(r'\s+'));
