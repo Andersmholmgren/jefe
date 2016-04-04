@@ -17,23 +17,24 @@ Future<Iterable<Directory>> createTestProjects(int projectCount) async {
 Future<Directory> createJefeWithTestProjects(int projectCount) async =>
     await createJefeGroup(await createTestProjectsWithRemotes(projectCount));
 
-Future<Iterable<Directory>> createTestProjectsWithRemotes(
-    int projectCount) async {
+Future<Iterable<Directory>> createTestProjectsWithRemotes(int projectCount,
+    {bool bareRepo: true, String cloneParentDir: 'testBareGitRemotes'}) async {
   final projects = await createTestProjects(projectCount);
 
   final bareRepoParentDir = await new Directory(
-          p.join(projects.first.parent.parent.path, 'testBareGitRemotes'))
+          p.join(projects.first.parent.parent.path, cloneParentDir))
       .create(recursive: true);
 
-  final bareProjects = await Future.wait(projects
-      .map((p) => createBareClone(new Directory(p.path), bareRepoParentDir)));
+  final bareProjects = await Future.wait(projects.map((p) => createClone(
+      new Directory(p.path), bareRepoParentDir,
+      bareRepo: bareRepo)));
   return bareProjects;
 }
 
-Future<Directory> createBareClone(
-        Directory sourceRepo, Directory targetParent) async =>
+Future<Directory> createClone(Directory sourceRepo, Directory targetParent,
+        {bool bareRepo: true}) async =>
     cloneInto(sourceRepo.path, targetParent,
-        bareRepo: true, targetDirName: p.basename(sourceRepo.path));
+        bareRepo: bareRepo, targetDirName: p.basename(sourceRepo.path));
 
 Future<Directory> createJefeGroup(Iterable<Directory> projects) async {
   final jefeDir =

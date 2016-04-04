@@ -126,6 +126,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
         .asyncMap(Project.load)
         .toSet() as Set<Project>;
 
+    print(projects);
 //    new ProjectGroupImpl()
 
     final metaData = new ProjectGroupMetaData(
@@ -349,8 +350,12 @@ Stream<Directory> _projectSubDirectories(Directory parentDirectory) {
   return parentDirectory
       .list(followLinks: false)
       .where((e) => e is Directory)
-      .asyncMap((e) async => await new File(p.join(e.path, 'pubspec.yaml'))
-          .exists() ? new Some(e) : const None())
+      .asyncMap((e) async {
+        var file = new File(p.join(e.path, 'pubspec.yaml'));
+        print('checking if exists on $file');
+        return await file
+          .exists() ? new Some(e) : const None();
+      })
       .where((o) => o is Some)
       .map((o) => o.get());
 }

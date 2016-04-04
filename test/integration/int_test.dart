@@ -220,14 +220,17 @@ main() {
     Directory containerDir;
     Directory groupDirectory;
     File jefeFile;
+    String groupName;
+
     setUp(() async {
       Future jefetize() async {
-        Iterable<Directory> projects = await createTestProjectsWithRemotes(2);
+        Iterable<Directory> projects = await createTestProjectsWithRemotes(2,
+            bareRepo: false, cloneParentDir: 'projects');
         final parentDir = projects.first.parent;
 
         containerDir = await ProjectGroup.jefetize(parentDir);
 
-        final groupName = p.basename(parentDir.path);
+        groupName = p.basename(parentDir.path);
         groupDirectory = new Directory(p.join(containerDir.path, groupName));
         jefeFile = new File(p.join(groupDirectory.path, 'jefe.yaml'));
       }
@@ -258,6 +261,23 @@ main() {
 
       test('loads', () {
         expect(metaData, isNotNull);
+      }, skip: false);
+
+      test('has expected group name', () {
+        expect(metaData.name, equals(groupName));
+      }, skip: false);
+
+      test('has no project groups', () {
+        expect(metaData.childGroups, isEmpty);
+      }, skip: false);
+
+      test('has two projects', () {
+        expect(metaData.projects, hasLength(2));
+      }, skip: false);
+
+      test('has projects with expected names', () {
+        expect(metaData.projects.map((i) => i.name),
+            unorderedEquals(['project1', 'project2']));
       }, skip: false);
     }, skip: false);
   }, skip: false);
