@@ -21,6 +21,7 @@ import '../project.dart';
 import '../project_group.dart';
 import 'core_impl.dart';
 import 'project_impl.dart';
+import 'package:option/option.dart';
 
 Logger _log = new Logger('jefe.project.group.impl');
 
@@ -119,6 +120,42 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   static Future<ProjectGroup> init(Directory parentDir, String gitUri,
           {String name}) =>
       _installOrUpdate(parentDir, gitUri, name: name, updateIfExists: true);
+
+  static Future<Directory> jefetize(Directory parentDirectory) async {
+    Future<Directory> massageContainerDirectory() async {
+      if (!parentDirectory.path
+          .endsWith(GroupDirectoryLayout._containerSuffix)) {
+        final containerPath =
+            parentDirectory.path + GroupDirectoryLayout._containerSuffix;
+        final containerDirectory = await parentDirectory.rename(containerPath);
+        _log.warning("moving project container to $containerDirectory");
+        return containerDirectory;
+      } else {
+        return parentDirectory;
+      }
+    }
+
+    final containerDirectory = await massageContainerDirectory();
+    final layout = new GroupDirectoryLayout.withDefaultName(containerDirectory);
+
+    await layout.groupDirectory.create(recursive: true);
+
+    final projects = await _projectSubDirectories(containerDirectory)
+        .asyncMap(Project.load)
+        .toSet() as Set<Project>;
+
+    print(projects);
+//    new ProjectGroupImpl()
+
+    final metaData = new ProjectGroupMetaData(
+        p.basename(parentDirectory.path), const [], projects.map((p) => p.id));
+
+    await metaData.save(layout.groupDirectory);
+
+    return layout.containerDirectory;
+
+//    final groupDir
+  }
 
   static Future<ProjectGroup> _installOrUpdate(Directory dir, String gitUri,
       {String name, bool updateIfExists: true}) async {
@@ -236,7 +273,7 @@ class GroupDirectoryLayout {
   GroupDirectoryLayout childGroup(String childGroupName) =>
       new GroupDirectoryLayout.fromParent(containerDirectory, childGroupName);
 
-  static const String _containerSuffix = '_root';
+  static const String _containerSuffix = ProjectGroup.containerSuffix;
 
   static String _containerName(String groupName) =>
       groupName + _containerSuffix;
@@ -308,3 +345,16 @@ Directory _tweakDirectory(Directory directory) => _toDirectory(directory.path);
 
 Directory _toDirectory(String path) =>
     path == '.' ? Directory.current : new Directory(path);
+
+Stream<Directory> _projectSubDirectories(Directory parentDirectory) {
+  return parentDirectory
+      .list(followLinks: false)
+      .where((e) => e is Directory)
+      .asyncMap((e) async {
+        var file = new File(p.join(e.path, 'pubspec.yaml'));
+        print('checking if exists on $file');
+        return await file.exists() ? new Some(e) : const None();
+      })
+      .where((o) => o is Some)
+      .map((o) => o.get());
+}
