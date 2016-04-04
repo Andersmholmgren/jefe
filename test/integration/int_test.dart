@@ -238,10 +238,6 @@ main() {
       if (containerDir == null) await jefetize();
     });
 
-    test('containerDirectory named correctly', () {
-      expect(containerDir.path, endsWith(ProjectGroup.containerSuffix));
-    }, skip: false);
-
     test('creates group directory', () async {
       expect(await groupDirectory.exists(), true);
     }, skip: false);

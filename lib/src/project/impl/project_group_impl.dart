@@ -122,20 +122,21 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
       _installOrUpdate(parentDir, gitUri, name: name, updateIfExists: true);
 
   static Future<Directory> jefetize(Directory parentDirectory) async {
-    Future<Directory> massageContainerDirectory() async {
-      if (!parentDirectory.path
-          .endsWith(GroupDirectoryLayout._containerSuffix)) {
-        final containerPath =
-            parentDirectory.path + GroupDirectoryLayout._containerSuffix;
-        final containerDirectory = await parentDirectory.rename(containerPath);
-        _log.warning("moving project container to $containerDirectory");
-        return containerDirectory;
-      } else {
-        return parentDirectory;
-      }
-    }
+//    Future<Directory> massageContainerDirectory() async {
+//      if (!parentDirectory.path
+//          .endsWith(GroupDirectoryLayout._containerSuffix)) {
+//        final containerPath =
+//            parentDirectory.path + GroupDirectoryLayout._containerSuffix;
+//        final containerDirectory = await parentDirectory.rename(containerPath);
+//        _log.warning("moving project container to $containerDirectory");
+//        return containerDirectory;
+//      } else {
+//        return parentDirectory;
+//      }
+//    }
 
-    final containerDirectory = await massageContainerDirectory();
+    final containerDirectory = parentDirectory;
+//    await massageContainerDirectory();
     final layout = new GroupDirectoryLayout.withDefaultName(containerDirectory);
 
     await layout.groupDirectory.create(recursive: true);
@@ -281,9 +282,12 @@ class GroupDirectoryLayout {
   static String _defaultGroupName(Directory containerDirectory) {
     final basename = p.basename(containerDirectory.path);
     if (!basename.endsWith(_containerSuffix)) {
-      throw new ArgumentError(
-          'Invalid container directory ($containerDirectory). '
-          'Must start with $_containerSuffix');
+//      throw new ArgumentError(
+//          'Invalid container directory ($containerDirectory). '
+//          'Must start with $_containerSuffix');
+      _log.info('container directory $basename does not conform with'
+          ' standard naming convention');
+      return basename;
     }
 
     return basename.replaceAll(_containerSuffix, '');
@@ -308,8 +312,7 @@ class GroupDirectoryLayout {
   }
 
   static Future<bool> isExistingContainerDirectory(Directory directory) async {
-    bool looksLikeAContainer = (await directory.exists() &&
-        p.basename(directory.path).endsWith(_containerSuffix));
+    bool looksLikeAContainer = await _looksLikeAContainer(directory);
 
     if (!looksLikeAContainer) {
       _log.finest(
@@ -336,6 +339,18 @@ class GroupDirectoryLayout {
 
     return isAContainer;
   }
+
+  static Future<bool> _looksLikeAContainer(Directory directory) async {
+    final looksLikeAContainerName = (await directory.exists() &&
+        p.basename(directory.path).endsWith(_containerSuffix));
+
+    return looksLikeAContainerName ||
+        await _containsASingleChildGroupDirectory(directory);
+  }
+
+  static Future<bool> _containsASingleChildGroupDirectory(
+          Directory directory) async =>
+      await _projectGroupSubDirectories(directory).length == 1;
 }
 
 Directory _childDir(Directory parent, String childName) =>
@@ -346,12 +361,19 @@ Directory _tweakDirectory(Directory directory) => _toDirectory(directory.path);
 Directory _toDirectory(String path) =>
     path == '.' ? Directory.current : new Directory(path);
 
-Stream<Directory> _projectSubDirectories(Directory parentDirectory) {
+Stream<Directory> _projectSubDirectories(Directory parentDirectory) =>
+    _subDirsContainingFile(parentDirectory, 'pubspec.yaml');
+
+Stream<Directory> _projectGroupSubDirectories(Directory parentDirectory) =>
+    _subDirsContainingFile(parentDirectory, 'jefe.yaml');
+
+Stream<Directory> _subDirsContainingFile(
+    Directory parentDirectory, String filename) {
   return parentDirectory
       .list(followLinks: false)
       .where((e) => e is Directory)
       .asyncMap((e) async {
-        var file = new File(p.join(e.path, 'pubspec.yaml'));
+        var file = new File(p.join(e.path, filename));
         print('checking if exists on $file');
         return await file.exists() ? new Some(e) : const None();
       })
