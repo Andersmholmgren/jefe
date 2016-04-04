@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1
+
+* Added `jefetize` sub command to turn an existing directory into a `jefe` 
+container directory
+
 ## 0.3.0
 
 * Major rewrite of internals. Should be much easier to implement new features
