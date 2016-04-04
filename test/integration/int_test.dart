@@ -218,12 +218,18 @@ main() {
 
   group('jefetize', () {
     Directory containerDir;
+    Directory groupDirectory;
+    File jefeFile;
     setUp(() async {
       Future jefetize() async {
-        Iterable<Directory> projects = await createTestProjects(2);
+        Iterable<Directory> projects = await createTestProjectsWithRemotes(2);
         final parentDir = projects.first.parent;
 
         containerDir = await ProjectGroup.jefetize(parentDir);
+
+        final groupName = p.basename(parentDir.path);
+        groupDirectory = new Directory(p.join(containerDir.path, groupName));
+        jefeFile = new File(p.join(groupDirectory.path, 'jefe.yaml'));
       }
 
       if (containerDir == null) await jefetize();
@@ -233,8 +239,26 @@ main() {
       expect(containerDir.path, endsWith(ProjectGroup.containerSuffix));
     }, skip: false);
 
-    test('creates group directory', () {
-      expect(new Directory(p.join(containerDir.path, 'shit')).exists(), true);
+    test('creates group directory', () async {
+      expect(await groupDirectory.exists(), true);
+    }, skip: false);
+
+    test('creates jefe file', () async {
+      expect(await jefeFile.exists(), true);
+    }, skip: false);
+
+    group('created jefe file', () {
+      ProjectGroupMetaData metaData;
+      setUp(() async {
+        if (metaData == null) {
+          metaData = await ProjectGroupMetaData
+              .fromDefaultProjectGroupYamlFile(groupDirectory.path);
+        }
+      });
+
+      test('loads', () {
+        expect(metaData, isNotNull);
+      }, skip: false);
     }, skip: false);
   }, skip: false);
 }

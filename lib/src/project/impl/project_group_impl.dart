@@ -147,6 +147,8 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     final containerDirectory = await massageContainerDirectory();
     final layout = new GroupDirectoryLayout.withDefaultName(containerDirectory);
 
+    await layout.groupDirectory.create(recursive: true);
+
     await metaData.save(layout.groupDirectory);
 
     return layout.containerDirectory;

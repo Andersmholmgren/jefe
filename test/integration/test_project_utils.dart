@@ -14,7 +14,11 @@ Future<Iterable<Directory>> createTestProjects(int projectCount) async {
       .map((i) => _copyTestProject(testGitRemoteDir, 'project${i + 1}')));
 }
 
-Future<Directory> createJefeWithTestProjects(int projectCount) async {
+Future<Directory> createJefeWithTestProjects(int projectCount) async =>
+    await createJefeGroup(await createTestProjectsWithRemotes(projectCount));
+
+Future<Iterable<Directory>> createTestProjectsWithRemotes(
+    int projectCount) async {
   final projects = await createTestProjects(projectCount);
 
   final bareRepoParentDir = await new Directory(
@@ -23,8 +27,7 @@ Future<Directory> createJefeWithTestProjects(int projectCount) async {
 
   final bareProjects = await Future.wait(projects
       .map((p) => createBareClone(new Directory(p.path), bareRepoParentDir)));
-
-  return await createJefeGroup(bareProjects);
+  return bareProjects;
 }
 
 Future<Directory> createBareClone(
