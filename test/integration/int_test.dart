@@ -215,6 +215,28 @@ main() {
           _expectedFilteredResults);
     }, skip: false);
   }, skip: false);
+
+  group('jefetize', () {
+    Directory containerDir;
+    setUp(() async {
+      Future jefetize() async {
+        Iterable<Directory> projects = await createTestProjects(2);
+        final parentDir = projects.first.parent;
+
+        containerDir = await ProjectGroup.jefetize(parentDir);
+      }
+
+      if (containerDir == null) await jefetize();
+    });
+
+    test('containerDirectory named correctly', () {
+      expect(containerDir.path, endsWith(ProjectGroup.containerSuffix));
+    }, skip: false);
+
+    test('creates group directory', () {
+      expect(new Directory(p.join(containerDir.path, 'shit')).exists(), true);
+    }, skip: false);
+  }, skip: false);
 }
 
 Future<Directory> _performLifecycle() async {

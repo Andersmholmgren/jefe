@@ -121,7 +121,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
           {String name}) =>
       _installOrUpdate(parentDir, gitUri, name: name, updateIfExists: true);
 
-  static Future jefetize(Directory parentDirectory) async {
+  static Future<Directory> jefetize(Directory parentDirectory) async {
     final projects = await _projectSubDirectories(parentDirectory)
         .asyncMap(Project.load)
         .toSet() as Set<Project>;
@@ -148,6 +148,8 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     final layout = new GroupDirectoryLayout.withDefaultName(containerDirectory);
 
     await metaData.save(layout.groupDirectory);
+
+    return layout.containerDirectory;
 
 //    final groupDir
   }
@@ -268,7 +270,7 @@ class GroupDirectoryLayout {
   GroupDirectoryLayout childGroup(String childGroupName) =>
       new GroupDirectoryLayout.fromParent(containerDirectory, childGroupName);
 
-  static const String _containerSuffix = '_root';
+  static const String _containerSuffix = ProjectGroup.containerSuffix;
 
   static String _containerName(String groupName) =>
       groupName + _containerSuffix;

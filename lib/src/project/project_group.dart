@@ -23,6 +23,9 @@ abstract class ProjectGroup implements ProjectEntity {
   ProjectGroupIdentifier get id;
   spec.ProjectGroupMetaData get metaData;
 
+  static const String containerSuffix = '_root';
+
+
   /// Install a [ProjectGroup] plus all its [Project]s and child [ProjectGroup]s
   /// recursively.
   /// The [gitUri] is the git repository that contains the metadata file for
@@ -40,8 +43,9 @@ abstract class ProjectGroup implements ProjectEntity {
           {String name}) =>
       ProjectGroupImpl.init(parentDirectory, gitUri, name: name);
 
-  /// turns current directory into a Jefe Project container
-  static Future jefetize(Directory parentDirectory) =>
+  /// turns current directory into a Jefe Project container.
+  /// Returns the container directory which may have been renamed
+  static Future<Directory> jefetize(Directory parentDirectory) =>
       ProjectGroupImpl.jefetize(parentDirectory);
 
   /// References to the [Project]s contained directly within this group.
