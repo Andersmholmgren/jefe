@@ -6,29 +6,20 @@ version: "0.3.1"
 dependencies: 
   analyzer: ">=0.25.0+1 <0.28.0"
   collection: "^1.4.0"
+  dockerfile: "^0.0.4"
   frappe: "^0.4.0+4"
   git: "^0.4.4+1"
   http: "^0.11.2"
   logging: "^0.10.0"
   option: "^1.1.0"
   pub_semver: "^1.1.0"
+  pubspec: "^0.0.13"
   quiver: "^0.21.3"
   stack_trace: "^1.6.1"
   unscripted: "^0.6.0"
   xml: "^2.4.2"
   yaml: "^2.0.1+1"
-  dockerfile: 
-    git: 
-      ref: "7e9fd5008c752c54fb6f732a60938cf1ee573b8c"
-      url: "git@github.com:Andersmholmgren/dockerfile.git"
-  pubspec: 
-    git: 
-      ref: "2544c82e48f592c7846a816ddb1c43f34692e81d"
-      url: "git@github.com:Andersmholmgren/pubspec.git"
-  yamlicious: 
-    git: 
-      ref: "bad84cd0d8b8d16a244987b42cc7fb5c130ea3fe"
-      url: "git@github.com:Andersmholmgren/yamlicious.git"
+  yamlicious: "^0.0.4"
 dev_dependencies: 
   mockito: "^0.8.2"
   test: "^0.12.10"
