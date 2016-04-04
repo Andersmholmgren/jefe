@@ -47,8 +47,14 @@ class Jefe {
         await ProjectGroup.install(installDir, gitUri);
 
     await (await projectGroup.rootJefeProjects).lifecycle.init();
-//    final executor = new CommandExecutor(projectGroup);
-//    await executor.execute(lifecycle.init());
+  }
+
+  @u.SubCommand(help: 'Converts a directory of projects into a jefe group')
+  jefetise(
+    {@u.Option(help: 'The directory that contains the projects', abbr: 'd')
+    String containerDirectory: '.'}) async {
+    final Directory parentDir = new Directory(containerDirectory);
+    await ProjectGroup.jefetize(parentDir);
   }
 
   @u.SubCommand(help: 'Installs or updates a group of projects')
