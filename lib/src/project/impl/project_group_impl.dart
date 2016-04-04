@@ -122,16 +122,6 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
       _installOrUpdate(parentDir, gitUri, name: name, updateIfExists: true);
 
   static Future<Directory> jefetize(Directory parentDirectory) async {
-    final projects = await _projectSubDirectories(parentDirectory)
-        .asyncMap(Project.load)
-        .toSet() as Set<Project>;
-
-    print(projects);
-//    new ProjectGroupImpl()
-
-    final metaData = new ProjectGroupMetaData(
-        p.basename(parentDirectory.path), const [], projects.map((p) => p.id));
-
     Future<Directory> massageContainerDirectory() async {
       if (!parentDirectory.path
           .endsWith(GroupDirectoryLayout._containerSuffix)) {
@@ -149,6 +139,16 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     final layout = new GroupDirectoryLayout.withDefaultName(containerDirectory);
 
     await layout.groupDirectory.create(recursive: true);
+
+    final projects = await _projectSubDirectories(containerDirectory)
+        .asyncMap(Project.load)
+        .toSet() as Set<Project>;
+
+    print(projects);
+//    new ProjectGroupImpl()
+
+    final metaData = new ProjectGroupMetaData(
+        p.basename(parentDirectory.path), const [], projects.map((p) => p.id));
 
     await metaData.save(layout.groupDirectory);
 
@@ -353,8 +353,7 @@ Stream<Directory> _projectSubDirectories(Directory parentDirectory) {
       .asyncMap((e) async {
         var file = new File(p.join(e.path, 'pubspec.yaml'));
         print('checking if exists on $file');
-        return await file
-          .exists() ? new Some(e) : const None();
+        return await file.exists() ? new Some(e) : const None();
       })
       .where((o) => o is Some)
       .map((o) => o.get());
