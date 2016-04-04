@@ -5,11 +5,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:jefe/jefe.dart';
+import 'package:jefe/src/project/jefe_project.dart';
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as p;
 import 'package:stack_trace/stack_trace.dart';
 import 'package:unscripted/unscripted.dart' as u;
-import 'package:jefe/src/project/jefe_project.dart';
-import 'package:path/path.dart' as p;
 
 main(List<String> arguments) {
   Chain.capture(() {
@@ -49,10 +49,11 @@ class Jefe {
     await (await projectGroup.rootJefeProjects).lifecycle.init();
   }
 
-  @u.SubCommand(help: 'Converts a directory of projects into a jefe group')
+  @u.SubCommand(help: 'Converts a directory of projects into a jefe group. '
+      'WARNING renames the current directory to append _root to name')
   jefetise(
-    {@u.Option(help: 'The directory that contains the projects', abbr: 'd')
-    String containerDirectory: '.'}) async {
+      {@u.Option(help: 'The directory that contains the projects', abbr: 'd')
+          String containerDirectory: '.'}) async {
     final Directory parentDir = new Directory(containerDirectory);
     await ProjectGroup.jefetize(parentDir);
   }
