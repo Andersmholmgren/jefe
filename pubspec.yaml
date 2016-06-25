@@ -18,11 +18,11 @@ dependencies:
   xml: "^2.4.2"
   yaml: "^2.0.1+1"
   dockerfile: 
-    path: "/Users/blah/dart/jefe_jefe/jefe_container_root/dockerfile"
+    path: "../dockerfile"
   pubspec: 
-    path: "/Users/blah/dart/jefe_jefe/jefe_container_root/pubspec"
+    path: "../pubspec"
   yamlicious: 
-    path: "/Users/blah/dart/jefe_jefe/jefe_container_root/yamlicious"
+    path: "../yamlicious"
 dev_dependencies: 
   mockito: "^0.8.2"
   test: "^0.12.10"
