@@ -18,11 +18,17 @@ dependencies:
   xml: "^2.4.2"
   yaml: "^2.0.1+1"
   dockerfile: 
-    path: "../dockerfile"
+    git: 
+      ref: "7e9fd5008c752c54fb6f732a60938cf1ee573b8c"
+      url: "git@github.com:Andersmholmgren/dockerfile.git"
   pubspec: 
-    path: "../pubspec"
+    git: 
+      ref: "e7323766b0b31a797ff679b00373ce7cd42aef1b"
+      url: "git@github.com:Andersmholmgren/pubspec.git"
   yamlicious: 
-    path: "../yamlicious"
+    git: 
+      ref: "bad84cd0d8b8d16a244987b42cc7fb5c130ea3fe"
+      url: "git@github.com:Andersmholmgren/yamlicious.git"
 dev_dependencies: 
   mockito: "^0.8.2"
   test: "^0.12.10"
