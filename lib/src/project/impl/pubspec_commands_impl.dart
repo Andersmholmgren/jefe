@@ -17,6 +17,8 @@ import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
 
+import 'package:path/path.dart' as p;
+
 Logger _log = new Logger('jefe.project.commands.pubspec.impl');
 
 PubSpecCommands createPubSpecCommands(JefeProjectGraph graph,
@@ -90,10 +92,7 @@ class _PubSpecCommandsSingleProjectImpl implements PubSpecCommands {
     final actualDependencies = _project.pubspec.allDependencies;
 
     final expectedDependencies = await _createDependencyReferences(
-        actualDependencies,
-        exportedPackageNames,
-        type,
-        useGitIfNotHosted);
+        actualDependencies, exportedPackageNames, type, useGitIfNotHosted);
 
     final dependenciesChanged = expectedDependencies.keys
         .any((k) => expectedDependencies[k] != actualDependencies[k]);
@@ -159,7 +158,8 @@ class _PubSpecCommandsSingleProjectImpl implements PubSpecCommands {
       Set<String> exportedDependencyNames) async {
     switch (type) {
       case DependencyType.path:
-        return new PathReference(project.installDirectory.path);
+        return new PathReference(p.relative(project.installDirectory.path,
+            from: _project.installDirectory.path));
 
       case DependencyType.git:
         return new GitReference(

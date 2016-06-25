@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0
+
+* Use relative paths in path dependencies
+
 ## 0.3.1
 
 * Added `jefetize` sub command to turn an existing directory into a `jefe` 
