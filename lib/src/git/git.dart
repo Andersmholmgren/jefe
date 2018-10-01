@@ -9,9 +9,9 @@ import 'dart:io';
 
 import 'package:git/git.dart';
 import 'package:logging/logging.dart';
-import 'package:option/option.dart';
 import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
+import 'package:quiver/core.dart';
 import 'package:quiver/iterables.dart';
 
 Logger _log = new Logger('jefe.git');
@@ -144,16 +144,17 @@ Future<Iterable<String>> _getTagNames(GitDir gitDir) async {
 }
 
 Iterable<Version> _extractVersions(Iterable<String> tagNames) => tagNames
-    .map/*<Option<Version>>*/((String tagName) {
+    .map<Optional<Version>>((String tagName) {
       try {
-        return new Some<Version>(new Version.parse(tagName));
+        return Optional.of(new Version.parse(tagName));
       } on FormatException catch (_) {
-        return const None<Version>();
+        return Optional.absent();
       }
     })
-    .where((o) => o is Some)
-    .map/*<Version>*/((o) => o.get())
-    .toList()..sort();
+    .where((o) => o != null)
+    .map((o) => o.value)
+    .toList()
+      ..sort();
 
 Future gitPush(GitDir gitDir) async {
   final BranchReference current = await gitDir.getCurrentBranch();
@@ -175,15 +176,15 @@ Future gitMerge(GitDir gitDir, String commit,
     flags,
     [commit]
   ]);
-  await gitDir.runCommand(command as Iterable<String>);
+  await gitDir.runCommand(command);
 }
 
-Future<Option<String>> getRemoteBranchSha(
+Future<Optional<String>> getRemoteBranchSha(
     GitDir gitDir, String remoteName, String branchName) async {
   final refs = await gitDir.showRef();
-  return new Option<CommitReference>(refs.firstWhere(
+  return Optional<CommitReference>.fromNullable(refs.firstWhere(
       (cr) => cr.reference == 'refs/remotes/$remoteName/$branchName',
-      orElse: () => null)).map((cr) => cr.sha) as Option<String>;
+      orElse: () => null)).map((cr) => cr.sha);
 }
 
 Future<String> currentCommitHash(GitDir gitDir) async =>
@@ -204,7 +205,7 @@ Future<Iterable<GitRemote>> getRemotes(GitDir gitDir) async {
   final lines =
       remotesStr.split('\n').map((l) => l.trim()).where((s) => s.isNotEmpty);
 
-  return lines.map/*<GitRemote>*/((l) {
+  return lines.map<GitRemote>((l) {
     final kv = l.split(new RegExp(r'\s+'));
     return new GitRemote(kv.elementAt(0), kv.elementAt(1));
   });
@@ -214,14 +215,15 @@ Future<int> commitCountSince(GitDir gitDir, String ref) async =>
     await gitDir.getCommitCount('$ref..HEAD');
 
 Future<bool> hasChangesSince(GitDir gitDir, Version sinceVersion) async {
-  return (await diffSummarySince(gitDir, sinceVersion.toString())) is Some;
+  return (await diffSummarySince(gitDir, sinceVersion.toString())).isPresent;
 }
 
-Future<Option<DiffSummary>> diffSummarySince(GitDir gitDir, String ref) async {
+Future<Optional<DiffSummary>> diffSummarySince(
+    GitDir gitDir, String ref) async {
   final line = (await gitDir.runCommand(['diff', '--shortstat', ref])).stdout;
   return line != null && line.trim().isNotEmpty
-      ? new Some(new DiffSummary.parse(line))
-      : const None();
+      ? Optional.of(new DiffSummary.parse(line))
+      : Optional.absent();
 }
 
 class DiffSummary {
@@ -279,12 +281,12 @@ Future gitFlowReleaseFinish(GitDir gitDir, String version) async =>
 Future<String> gitCurrentBranchName(GitDir gitDir) async =>
     (await gitDir.getCurrentBranch()).branchName;
 
-Future<Option<String>> gitFlowCurrentFeatureName(GitDir gitDir) async {
+Future<Optional<String>> gitFlowCurrentFeatureName(GitDir gitDir) async {
   final branchName = await gitCurrentBranchName(gitDir);
   if (branchName.startsWith(featureBranchPrefix)) {
-    return new Some(branchName.replaceFirst(featureBranchPrefix, ''));
+    return Optional.of(branchName.replaceFirst(featureBranchPrefix, ''));
   } else {
-    return const None();
+    return Optional.absent();
   }
 }
 
@@ -302,15 +304,15 @@ Future<Iterable<String>> _gitFlowBranchNames(
       .map((n) => n.substring(branchPrefix.length));
 }
 
-Future<Option<String>> gitCurrentTagName(GitDir gitDir) async {
+Future<Optional<String>> gitCurrentTagName(GitDir gitDir) async {
   final currentTagOpt = await _gitCurrentTagName(gitDir);
 
-  if (currentTagOpt is None) {
-    return const None();
+  if (currentTagOpt.isEmpty) {
+    return Optional.absent();
   }
 
   // to complicated with futures inside options for my little brain
-  final String currentTag = currentTagOpt.get();
+  final String currentTag = currentTagOpt.value;
 
   final versionTags = await gitFetchVersionTags(gitDir);
 
@@ -322,12 +324,15 @@ Future<Option<String>> gitCurrentTagName(GitDir gitDir) async {
             v1.toString().length.compareTo(v2.toString().length));
 
   return matchingVersions.isNotEmpty
-      ? new Some(matchingVersions.first.toString())
-      : const None();
+      ? Optional.of(matchingVersions.first.toString())
+      : Optional.absent();
 }
 
-Future<Option<String>> _gitCurrentTagName(GitDir gitDir) async => new Option(
-    (await gitDir.runCommand(['describe', 'HEAD', '--tags'])).stdout.trim());
+Future<Optional<String>> _gitCurrentTagName(GitDir gitDir) async =>
+    Optional.fromNullable(
+        (await gitDir.runCommand(['describe', 'HEAD', '--tags']))
+            .stdout
+            .trim());
 
 const String featureBranchPrefix = 'feature/';
 const String releaseBranchPrefix = 'release/';

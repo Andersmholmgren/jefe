@@ -56,7 +56,7 @@ class ProcessCommandsMultiProjectImpl
       return concat(<Iterable<ProcessCommandResult>>[previous, current])
           as Iterable<ProcessCommandResult>;
     }
-    return process/*<Iterable<ProcessCommandResult>>*/(
+    return process<Iterable<ProcessCommandResult>>(
         'process',
         (JefeProject p) async =>
             (await singleProjectCommandFactory(p)).execute(command, args),

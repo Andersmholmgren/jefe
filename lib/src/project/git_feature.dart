@@ -7,8 +7,8 @@ import 'dart:async';
 
 import 'package:git/git.dart';
 import 'package:jefe/src/project/jefe_project.dart';
-import 'package:option/option.dart';
 import 'package:pub_semver/pub_semver.dart';
+import 'package:quiver/core.dart';
 
 typedef GitFeatureCommands GitFeatureCommandsFactory(JefeProject project);
 
@@ -32,7 +32,7 @@ abstract class GitFeatureCommands {
   Future featureStart(String featureName, {bool throwIfExists: false});
 
   /// Merges the feature branch back on to the [developBranchName].
-  /// Optionally [excludeOnlyCommitIf] may be passed to exclude an automatically
+  /// Optionalally [excludeOnlyCommitIf] may be passed to exclude an automatically
   /// generated commit on feature start if that is the only commit on the
   /// feature branch
   Future featureFinish(String featureName,
@@ -40,7 +40,7 @@ abstract class GitFeatureCommands {
 
   /// Looks up the name of the current feature branch if any. Note it is an
   /// error if different projects are on different feature branches
-  Future<Option<String>> currentFeatureName();
+  Future<Optional<String>> currentFeatureName();
 
   /// Initiates a release which may involve creating a release branch
   Future releaseStart(String version);

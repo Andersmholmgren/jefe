@@ -14,10 +14,10 @@ import 'package:jefe/src/project/project_lifecycle.dart';
 import 'package:jefe/src/project/pub_commands.dart';
 import 'package:jefe/src/project/pubspec_commands.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
-import 'package:option/option.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:jefe/src/project/intellij_commands.dart';
+import 'package:quiver/core.dart';
 
 /// A [Project] managed by Jefe
 abstract class JefeProject extends Project implements JefeProjectGraph {
@@ -84,25 +84,25 @@ abstract class JefeProjectGraph implements ProjectCommands {
 
   /// returns a [JefeProject] with matching name that is either this project
   /// or one of it's dependencies (direct or indirect)
-  Option<JefeProject> getProjectByName(String projectName);
+  Optional<JefeProject> getProjectByName(String projectName);
 
   /// Iterates over [depthFirst] invoking [command] for each
-  Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ command,
-      {ProjectFilter filter, Combiner/*<T>*/ combine});
+  Future<T> processDepthFirst<T>(ProjectFunction<T> command,
+      {ProjectFilter filter, Combiner<T> combine});
 
   /// Invokes [command] on this project and all reachable dependencies.
   /// [command] is executed concurrently on all projects.
   /// An optional [filter] can be provided to limit which projects the [command]
   /// is executed on.
-  Future/*<T>*/ processAllConcurrently/*<T>*/(ProjectFunction/*<T>*/ command,
-      {ProjectFilter filter, Combiner/*<T>*/ combine});
+  Future<T> processAllConcurrently<T>(ProjectFunction<T> command,
+      {ProjectFilter filter, Combiner<T> combine});
 
   /// Invokes [command] on this project and all reachable dependencies
   /// [command] is executed one project at a time.
   /// An optional [filter] can be provided to limit which projects the [command]
   /// is executed on.
-  Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ command,
-      {ProjectFilter filter, Combiner/*<T>*/ combine});
+  Future<T> processAllSerially<T>(ProjectFunction<T> command,
+      {ProjectFilter filter, Combiner<T> combine});
 
   MultiProjectCommands multiProjectCommands(
       {CommandConcurrencyMode defaultConcurrencyMode,

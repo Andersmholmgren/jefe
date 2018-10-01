@@ -12,7 +12,7 @@ import 'package:jefe/src/project/impl/multi_project_command_support.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:logging/logging.dart';
-import 'package:option/option.dart';
+import 'package:quiver/core.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:quiver/check.dart';
 
@@ -57,17 +57,18 @@ class GitFeatureCommandsMultiProjectFlowImpl
   Future<String> get developBranchName async => 'develop';
 
   @override
-  Future<Option<String>> currentFeatureName() async {
-    Option<String> extractName(
-        Option<String> previous, Option<String> current) {
+  Future<Optional<String>> currentFeatureName() async {
+    Optional<String> extractName(
+        Optional<String> previous, Optional<String> current) {
       if (previous.runtimeType != current.runtimeType ||
-          (previous.getOrElse(() => null) != current.getOrElse(() => null))) {
+          (previous.orNull != current.orNull)) {
         throw new StateError(
             'found more than one feature name $previous and $current');
       }
       return current;
     }
-    return process/*<Option<String>>*/(
+
+    return process<Optional<String>>(
         'current feature name',
         (JefeProject p) async =>
             (await singleProjectCommandFactory(p)).currentFeatureName(),
@@ -137,7 +138,7 @@ class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
   Future<String> get developBranchName async => 'develop';
 
   @override
-  Future<Option<String>> currentFeatureName() =>
+  Future<Optional<String>> currentFeatureName() =>
       gitFlowCurrentFeatureName(_gitDir);
 
   @override
@@ -148,8 +149,7 @@ class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
   Future assertNoActiveReleases() async {
     final releaseNames = await gitFlowReleaseNames(_gitDir);
     if (releaseNames.isNotEmpty) {
-      throw new StateError(
-          '${_project.name} has an existing release branch. '
+      throw new StateError('${_project.name} has an existing release branch. '
           'Must finish all active releases first');
     }
   }
@@ -162,15 +162,16 @@ class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
     final results = await Future.wait(
         [gitFlowFeatureNames(_gitDir), gitFlowCurrentFeatureName(_gitDir)]);
 
-    return new FeatureNames(
-        (results[0] as Iterable<String>).toSet(), results[1] as Option<String>);
+    return new FeatureNames(results[0].toSet(), results[1] as Optional<String>);
   }
 
   @override
-  Future<bool> get hasChangesSinceLatestTaggedVersion async =>
-      (await _project.latestTaggedGitVersion)
-          .map((v) => spc.git.hasChangesSince(v))
-          .getOrElse(() => false);
+  Future<bool> get hasChangesSinceLatestTaggedVersion async {
+    final latestTaggedGitVersion = await _project.latestTaggedGitVersion;
+    final x = await (latestTaggedGitVersion.map((v) => spc.git.hasChangesSince(v)))
+        as Optional<bool>;
+    return x.or(false);
+  }
 
   @override
   Future<bool> get isOnDevelopBranch async =>
@@ -181,12 +182,12 @@ bool _dontExclude(Commit c) => false;
 
 class FeatureNames {
   final Set<String> featureNames;
-  final Option<String> currentFeatureName;
+  final Optional<String> currentFeatureName;
 
   FeatureNames(this.featureNames, this.currentFeatureName);
 
   bool currentFeatureIs(String featureName) =>
-      currentFeatureName is Some && currentFeatureName.get() == featureName;
+      currentFeatureName.isPresent && currentFeatureName.value == featureName;
 
   bool featureExists(String featureName) => featureNames.contains(featureName);
 }

@@ -3,7 +3,7 @@
 
 library jefe.project.release.type;
 
-import 'package:option/option.dart';
+import 'package:quiver/core.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 typedef Version _VersionBumper(Version current);
@@ -53,6 +53,6 @@ class ReleaseType {
 
   String toString() => _literal;
 
-  static Option<ReleaseType> fromLiteral(String str) =>
-      new Option(all.firstWhere((t) => t._literal == str, orElse: () => null));
+  static Optional<ReleaseType> fromLiteral(String str) =>
+      Optional.fromNullable(all.firstWhere((t) => t._literal == str, orElse: () => null));
 }

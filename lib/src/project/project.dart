@@ -8,7 +8,7 @@ import 'dart:io';
 
 import 'package:analyzer/analyzer.dart';
 import 'package:jefe/src/pub/pub_version.dart';
-import 'package:option/option.dart';
+import 'package:quiver/core.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
 
@@ -23,17 +23,17 @@ abstract class ProjectReference implements ProjectEntityReference<Project> {}
 abstract class Project implements ProjectEntity {
   PubSpec get pubspec;
   ProjectIdentifier get id;
-  Future<Option<CompilationUnit>> get compilationUnit;
+  Future<Optional<CompilationUnit>> get compilationUnit;
   Future<Set<String>> get exportedPackageNames;
   Future<Iterable<String>> get exportedDependencyNames;
   Future<Iterable<String>> get exportedDevDependencyNames;
   HostedMode get hostedMode;
 
-  Future<Option<Version>> get latestTaggedGitVersion;
+  Future<Optional<Version>> get latestTaggedGitVersion;
   Future<Iterable<Version>> get taggedGitVersions;
 
-  Future<Option<Version>> get latestPublishedVersion;
-  Future<Option<HostedPackageVersions>> get publishedVersions;
+  Future<Optional<Version>> get latestPublishedVersion;
+  Future<Optional<HostedPackageVersions>> get publishedVersions;
 
   /// Fetches versions concurrently
   Future<ProjectVersions> get projectVersions;
@@ -55,11 +55,11 @@ enum HostedMode { hosted, notHosted, inferred }
 
 class ProjectVersions {
   final Version pubspecVersion;
-  final Option<Version> taggedGitVersion;
-  final Option<Version> publishedVersion;
+  final Optional<Version> taggedGitVersion;
+  final Optional<Version> publishedVersion;
 
-  bool get hasBeenGitTagged => taggedGitVersion is Some;
-  bool get hasBeenPublished => publishedVersion is Some;
+  bool get hasBeenGitTagged => taggedGitVersion .isPresent;
+  bool get hasBeenPublished => publishedVersion .isPresent;
 
   final bool isHosted; // hmmm doesn't make sense in ProjectVersions2
 

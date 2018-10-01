@@ -3,10 +3,7 @@
 
 library util.json;
 
-import 'package:option/option.dart';
-import 'package:path/path.dart' as path;
-
-final _p = path.url;
+import 'package:quiver/core.dart';
 
 abstract class Jsonable {
   toJson();
@@ -19,7 +16,7 @@ JsonParser parseJson(Map j, {bool consumeMap: false}) =>
 class JsonBuilder {
   final Map json = {};
 
-  void addOption(String fieldName, Option o) {
+  void addOption(String fieldName, Optional o) {
     o.map((v) => v.toJson()).map((j) {
       json[fieldName] = j;
     });
@@ -97,8 +94,8 @@ class JsonParser {
     return result;
   }
 
-  Option option(String fieldName, [create(i) = _identity]) =>
-      new Option(single(fieldName, create));
+  Optional option(String fieldName, [create(i) = _identity]) =>
+      Optional.fromNullable(single(fieldName, create));
 
   _getField(String fieldName) =>
       _consumeMap ? _json.remove(fieldName) : _json[fieldName];

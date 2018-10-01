@@ -13,7 +13,7 @@ import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:jefe/src/pub/pub.dart' as pub;
 import 'package:jefe/src/pub/pub_version.dart';
 import 'package:logging/logging.dart';
-import 'package:option/option.dart';
+import 'package:quiver/core.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
 
@@ -56,7 +56,7 @@ class PubSpecCommandsMultiProjectImpl
   @override
   Future<bool> haveDependenciesChanged(DependencyType type,
       {bool useGitIfNotHosted: true}) {
-    return process/*<bool>*/(
+    return process<bool>(
         'have dependencies changed',
         (JefeProject p) async => p.pubspecCommands.haveDependenciesChanged(type,
             useGitIfNotHosted: useGitIfNotHosted),
@@ -176,12 +176,12 @@ class _PubSpecCommandsSingleProjectImpl implements PubSpecCommands {
 
   Future<DependencyReference> _getHostedReference(Project project,
       bool useGitIfNotHosted, Set<String> exportedDependencyNames) async {
-    final Option<HostedPackageVersions> packageVersionsOpt =
+    final Optional<HostedPackageVersions> packageVersionsOpt =
         await pub.fetchPackageVersions(project.name,
             publishToUrl: project.pubspec.publishTo);
 
-    if (packageVersionsOpt is Some) {
-      final Version version = packageVersionsOpt.get().versions.last.version;
+    if (packageVersionsOpt .isPresent) {
+      final Version version = packageVersionsOpt.value.versions.last.version;
       final isExported = exportedDependencyNames.contains(project.name);
       final versionConstraint = isExported
           ? new VersionRange(

@@ -10,7 +10,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:jefe/src/pub/pub_version.dart';
 import 'package:logging/logging.dart';
-import 'package:option/option.dart';
+import 'package:quiver/core.dart';
 import 'package:path/path.dart' as p;
 
 import '../util/process_utils.dart';
@@ -31,7 +31,7 @@ Future publish(Directory projectDirectory) =>
     runCommand('pub', ['publish', '--force'],
         processWorkingDir: projectDirectory.path);
 
-Future<Option<HostedPackageVersions>> fetchPackageVersions(String packageName,
+Future<Optional<HostedPackageVersions>> fetchPackageVersions(String packageName,
     {Uri publishToUrl}) async {
   final baseUrl = publishToUrl?.toString() ?? 'https://pub.dartlang.org';
 
@@ -48,13 +48,13 @@ Future<Option<HostedPackageVersions>> fetchPackageVersions(String packageName,
     case 200:
       _log.finer('Found published package versions. '
           'Assuming package $packageName is hosted');
-      return new Some(
-          new HostedPackageVersions.fromJson(JSON.decode(response.body)));
+      return Optional.of(
+          new HostedPackageVersions.fromJson(json.decode(response.body)));
 
     case 404:
       _log.finer('Found NO published package versions. '
           'Assuming package $packageName is NOT hosted');
-      return const None();
+      return Optional.absent();
 
     default:
       throw new StateError('unexpected status code ${response.statusCode}');

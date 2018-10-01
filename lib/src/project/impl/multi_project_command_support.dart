@@ -10,8 +10,8 @@ Logger _log = new Logger('jefe.project.command.multiproject');
 
 typedef Future<T> SingleProjectCommandFactory<T>(JefeProject project);
 typedef Future<T> SingleProjectCommand<S, T>(S single);
-typedef Callable<T> _Processor<T>(ProjectFunction/*<T>*/ command,
-    {ProjectFilter filter, Combiner/*<T>*/ combine});
+typedef Callable<T> _Processor<T>(ProjectFunction<T> command,
+    {ProjectFilter filter, Combiner<T> combine});
 
 /**
  * TODO: we could build a default mode into JefeProject / JefeProjectGraph etc
@@ -41,12 +41,12 @@ class MultiProjectCommandSupport<C> extends Object with CommandSupport {
      * can still have all that goodness with it in a standard way. Yay
      */
 
-    Future/*<T>*/ projectFunction/*<T>*/(JefeProject project) async {
+    Future<T> projectFunction<T>(JefeProject project) async {
 //      _log.fine('Executing ${i.memberName}');
       final C singleProjectCommand = await singleProjectCommandFactory(project);
       final InstanceMirror singleProjectCommandMirror =
           reflect(singleProjectCommand);
-      return singleProjectCommandMirror.delegate(i) as Future/*<T>*/;
+      return singleProjectCommandMirror.delegate(i) as Future<T>;
     }
 
     /**
@@ -63,38 +63,38 @@ class MultiProjectCommandSupport<C> extends Object with CommandSupport {
 abstract class CommandSupport {
   JefeProjectGraph get graph;
 
-  Future/*<T>*/ process/*<T>*/(
+  Future<T> process<T>(
       String taskDescription,
 //    SingleProjectCommand<S, dynamic/*=T*/ > command,
-      ProjectFunction/*<T>*/ command,
+      ProjectFunction<T> command,
       {ProjectFilter filter,
-      Combiner/*<T>*/ combine,
+      Combiner<T> combine,
       CommandConcurrencyMode mode: CommandConcurrencyMode.concurrentCommand}) {
     final processor =
-        _processor/*<T>*/(mode ?? CommandConcurrencyMode.concurrentCommand);
+        _processor<T>(mode ?? CommandConcurrencyMode.concurrentCommand);
 
-    return executeTask/*<T>*/(
+    return executeTask<T>(
         taskDescription, processor(command, filter: filter, combine: combine));
   }
 
-//  Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ command,
-//          {ProjectFilter filter, Combiner/*<T>*/ combine}) =>
+//  Future<T> processDepthFirst<T>(ProjectFunction<T> command,
+//          {ProjectFilter filter, Combiner<T> combine}) =>
 //      graph.processDepthFirst(command, filter: filter, combine: combine);
 
-  Callable/*<T>*/ _concurrentProcessor/*<T>*/(ProjectFunction/*<T>*/ command,
-      {ProjectFilter filter, Combiner/*<T>*/ combine}) {
+  Callable<T> _concurrentProcessor<T>(ProjectFunction<T> command,
+      {ProjectFilter filter, Combiner<T> combine}) {
     return () =>
         graph.processAllConcurrently(command, filter: filter, combine: combine);
   }
 
-  Callable/*<T>*/ _serialProcessor/*<T>*/(ProjectFunction/*<T>*/ command,
-      {ProjectFilter filter, Combiner/*<T>*/ combine}) {
+  Callable<T> _serialProcessor<T>(ProjectFunction<T> command,
+      {ProjectFilter filter, Combiner<T> combine}) {
     return () =>
         graph.processDepthFirst(command, filter: filter, combine: combine);
   }
 
-//  Callable/*<T>*/ _singleProjectProcessor/*<T>*/(ProjectFunction/*<T>*/ command,
-//      {ProjectFilter filter, Combiner/*<T>*/ combine}) {
+//  Callable<T> _singleProjectProcessor<T>(ProjectFunction<T> command,
+//      {ProjectFilter filter, Combiner<T> combine}) {
 //    return () {
 //      final project = graph as JefeProject;
 //      if (!filter(project)) {
@@ -104,7 +104,7 @@ abstract class CommandSupport {
 //    };
 //  }
 
-  _Processor/*<T>*/ _processor/*<T>*/(CommandConcurrencyMode mode) {
+  _Processor<T> _processor<T>(CommandConcurrencyMode mode) {
 //    if (isSingleProjectMode) {
 //      return _singleProjectProcessor;
 //    }

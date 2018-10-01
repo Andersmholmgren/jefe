@@ -15,7 +15,7 @@ import 'package:jefe/src/project/release_type.dart';
 import 'package:jefe/src/project_commands/project_command.dart'
     show CommandConcurrencyMode, executeTask;
 import 'package:logging/logging.dart';
-import 'package:option/option.dart';
+import 'package:quiver/core.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:quiver/check.dart';
 
@@ -105,19 +105,19 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
     }
 
     final currentFeatureNameOpt = await spc.gitFeature.currentFeatureName();
-    if (currentFeatureNameOpt is Some &&
+    if (currentFeatureNameOpt .isPresent &&
         featureName != null &&
-        currentFeatureNameOpt.get() != featureName) {
+        currentFeatureNameOpt.value != featureName) {
       throw new StateError(
           'project ${_project.name} is on a different feature branch '
-          '(${currentFeatureNameOpt.get()}) to that specified ($featureName');
+          '(${currentFeatureNameOpt.value}) to that specified ($featureName');
     } else {
-      final finishingFeatureName = featureName ?? currentFeatureNameOpt.get();
+      final finishingFeatureName = featureName ?? currentFeatureNameOpt.value;
 
       checkState(finishingFeatureName != null,
           message: 'oops ended up with a null featureName somehow');
 
-      if ((await spc.gitFeature.currentFeatureName()).getOrElse(() => null) !=
+      if ((await spc.gitFeature.currentFeatureName()).orNull !=
           finishingFeatureName) {
         throw new StateError(
             "project ${_project.name} is neither on feature branch or develop");
@@ -159,11 +159,11 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
       executeTask('check release versions', () async {
         final ProjectReleaseVersions versions =
             await getCurrentProjectVersions(type, autoUpdateHostedVersions);
-        if (versions.newReleaseVersion is Some) {
+        if (versions.newReleaseVersion .isPresent) {
           _log.info(
               '==> project ${_project.name} will be upgraded from version: '
               '${versions.taggedGitVersion} '
-              'to: ${versions.newReleaseVersion.get()}. '
+              'to: ${versions.newReleaseVersion.value}. '
               'It will ${versions.hasBeenPublished ? "" : "NOT "}be published to pub');
         } else {
           _log.info('project ${_project.name} will NOT be upgraded. '
@@ -184,7 +184,7 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
       _log.fine('no changes needing release for ${_project.name}');
       return;
     } else {
-      final releaseVersion = projectVersions.newReleaseVersion.get();
+      final releaseVersion = projectVersions.newReleaseVersion.value;
 
       _log.fine('new release version $releaseVersion');
 
@@ -206,7 +206,7 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
        */
       if (projectVersions.hasBeenGitTagged) {
         final hasRealChanges = await spc.git
-            .hasChangesSince(projectVersions.taggedGitVersion.get());
+            .hasChangesSince(projectVersions.taggedGitVersion.value);
 
         if (!hasRealChanges) {
           _log.info("${_project.name} had no real changes. "
@@ -247,8 +247,8 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
 
     final currentFeatureNameOpt = await spc.gitFeature.currentFeatureName();
 
-    if (currentFeatureNameOpt is Some) {
-      final currentFeatureName = currentFeatureNameOpt.get();
+    if (currentFeatureNameOpt .isPresent) {
+      final currentFeatureName = currentFeatureNameOpt.value;
       _log.info('Detected existing feature - $currentFeatureName');
       await startNewFeature(currentFeatureName);
     } else {
@@ -265,27 +265,27 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
 
     _log.fine('${_project.name}: $currentProjectVersions');
 
-    final Option<Version> releaseVersionOpt = await _getReleaseVersion(
+    final Optional<Version> releaseVersionOpt = await _getReleaseVersion(
         currentProjectVersions, autoUpdateHostedVersions, type);
 
     return new ProjectReleaseVersions(
         currentProjectVersions, releaseVersionOpt);
   }
 
-  Future<Option<Version>> _getReleaseVersion(ProjectVersions currentVersions,
+  Future<Optional<Version>> _getReleaseVersion(ProjectVersions currentVersions,
       bool autoUpdateHostedVersions, ReleaseType type) async {
     final hasBeenPublished = currentVersions.hasBeenPublished;
     final isHosted = currentVersions.isHosted;
     final currentPubspecVersion = currentVersions.pubspecVersion;
 
     if (currentVersions.hasBeenGitTagged) {
-      final latestTaggedVersion = currentVersions.taggedGitVersion.get();
+      final latestTaggedVersion = currentVersions.taggedGitVersion.value;
       if (latestTaggedVersion > currentPubspecVersion) {
         throw new StateError('the latest tagged version $latestTaggedVersion'
             ' is greater than the current pubspec version $currentPubspecVersion');
       } else if (latestTaggedVersion < currentPubspecVersion) {
         // manually bumped version
-        return new Some<Version>(currentPubspecVersion);
+        return Optional.of(currentPubspecVersion);
       } else {
         // latest released version is same as pubspec version
         if (await hasChanges) {
@@ -297,27 +297,27 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
                 '${_project.name} is hosted and has changes. '
                 'The version must be manually changed for hosted packages');
           } else {
-            return new Some(type.bump(currentPubspecVersion));
+            return Optional.of(type.bump(currentPubspecVersion));
           }
         } else {
-          return const None();
+          return Optional.absent();
         }
       }
     } else {
       // never been tagged
       if (hasBeenPublished) {
-        if (currentPubspecVersion > currentVersions.publishedVersion.get()) {
-          return new Some(currentPubspecVersion);
+        if (currentPubspecVersion > currentVersions.publishedVersion.value) {
+          return Optional.of(currentPubspecVersion);
         } else {
           _log.warning(() =>
               "Project ${_project.name} is hosted but has never been tagged in git. "
               "Can't tell if there are unpublished changes. "
               "Will not release as pubspec version is not greater than hosted version");
-          return const None();
+          return Optional.absent();
         }
       } else {
         // never tagged and never published. Assume it needs releasing
-        return new Some(currentPubspecVersion);
+        return Optional.of(currentPubspecVersion);
       }
     }
   }
@@ -331,7 +331,7 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
 
 class ProjectReleaseVersions implements ProjectVersions {
   final ProjectVersions currentVersions;
-  final Option<Version> newReleaseVersion;
+  final Optional<Version> newReleaseVersion;
 
   ProjectReleaseVersions(this.currentVersions, this.newReleaseVersion);
 
@@ -339,10 +339,10 @@ class ProjectReleaseVersions implements ProjectVersions {
   Version get pubspecVersion => currentVersions.pubspecVersion;
 
   @override
-  Option<Version> get taggedGitVersion => currentVersions.taggedGitVersion;
+  Optional<Version> get taggedGitVersion => currentVersions.taggedGitVersion;
 
   @override
-  Option<Version> get publishedVersion => currentVersions.publishedVersion;
+  Optional<Version> get publishedVersion => currentVersions.publishedVersion;
 
   @override
   bool get hasBeenGitTagged => currentVersions.hasBeenGitTagged;
@@ -353,5 +353,5 @@ class ProjectReleaseVersions implements ProjectVersions {
   @override
   bool get hasBeenPublished => currentVersions.hasBeenPublished;
 
-  bool get newReleaseRequired => newReleaseVersion is Some;
+  bool get newReleaseRequired => newReleaseVersion .isPresent;
 }

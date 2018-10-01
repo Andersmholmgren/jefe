@@ -11,12 +11,12 @@ import 'package:jefe/src/git/git.dart';
 import 'package:jefe/src/project/docker_commands.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project/project.dart';
-import 'package:logging/logging.dart';
+//import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'package:pubspec/pubspec.dart';
 import 'package:quiver/iterables.dart';
 
-Logger _log = new Logger('jefe.project.commands.docker.impl');
+//Logger _log = new Logger('jefe.project.commands.docker.impl');
 
 DockerCommands createDockerCommands(
     JefeProjectGraph graph, Directory rootDirectory,
@@ -120,12 +120,13 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
         args: concat(<Iterable<String>>[
           entryPointOptions,
           [pathHandler.targetPath(serverMain)]
-        ]) as Iterable<String>);
+        ]));
 
     final saveDirectory =
         outputDirectory != null ? outputDirectory : _rootDirectory;
     await dockerfile.save(saveDirectory);
   }
+
 //      return executeTask('generate Dockerfile', () => foo()
 //);
 
@@ -173,7 +174,7 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
         args: concat(<Iterable<String>>[
           entryPointOptions,
           [pathHandler.targetPath(serverMain)]
-        ]) as Iterable<String>);
+        ]));
 
     final saveDirectory =
         outputDirectory != null ? outputDirectory : _rootDirectory;
@@ -187,7 +188,7 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
       _PathHandler pathHandler) async {
     final ref = gitRef != null
         ? gitRef
-        : (await gitCurrentTagName(await topLevelProject.gitDir)).get();
+        : (await gitCurrentTagName(await topLevelProject.gitDir)).value;
 
     final dir = topLevelProject.installDirectory;
     final dirPath = dir.path;
@@ -232,8 +233,10 @@ class DockerCommandsMultiProjectImpl implements DockerCommands {
   }
 
   JefeProject _getProjectByName(String type, String name) =>
-      _graph.getProjectByName(name).getOrElse(
-          () => throw new ArgumentError('$type project $name does not exist'));
+      (_graph.getProjectByName(name)
+            ..ifAbsent(() =>
+                throw new ArgumentError('$type project $name does not exist')))
+          .value;
 }
 
 class _PathHandler {
@@ -260,6 +263,7 @@ class _PathHandler {
 class _AddHelper {
   final _PathHandler pathHandler;
   final Dockerfile dockerfile;
+
   _AddHelper(this.pathHandler, this.dockerfile);
 
   void add(String path) {
@@ -299,14 +303,14 @@ class _TopLevelProjectFiles {
     final allProjects = jefeProject.allDependencies;
 
     final Iterable<String> pathKeys =
-        allProjects.expand/*<String>*/((Project project) {
+        allProjects.expand<String>((Project project) {
       final dependencies = project.pubspec.allDependencies;
       return dependencies.keys.where((key) =>
           dependencies[key] is PathReference &&
           dependencyMap.keys.contains(key));
     });
 
-    return pathKeys.map/*<Project>*/((key) => dependencyMap[key]).toSet();
+    return pathKeys.map<Project>((key) => dependencyMap[key]).toSet();
   }
 
   void addPathDependentProjects(
@@ -357,6 +361,6 @@ class _TopLevelProjectFiles {
     pubGetOffline();
     return concat(
             <Iterable<Project>>[excludeDependencies, pathDependentProjects])
-        .toSet() as Set<Project>;
+        .toSet();
   }
 }

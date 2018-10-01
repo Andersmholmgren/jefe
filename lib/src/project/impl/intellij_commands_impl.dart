@@ -55,7 +55,7 @@ class IntellijCommandsMultiProjectImpl
       return new IntellijVcsMappings(
           concat([previous.vcsDirectoryMappings, current.vcsDirectoryMappings]));
     }
-    return process/*<IntellijVcsMappings>*/(
+    return process<IntellijVcsMappings>(
         'generateGitMappings',
         (JefeProject p) async => (await singleProjectCommandFactory(p))
             .generateGitMappings(intelliJProjectRootPath),

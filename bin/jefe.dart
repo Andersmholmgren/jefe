@@ -9,7 +9,7 @@ import 'package:jefe/src/project/jefe_project.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'package:stack_trace/stack_trace.dart';
-import 'package:unscripted/unscripted.dart' as u;
+//import 'package:unscripted/unscripted.dart' as u;
 
 main(List<String> arguments) {
   Chain.capture(() {

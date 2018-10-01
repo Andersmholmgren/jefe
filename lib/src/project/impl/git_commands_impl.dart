@@ -12,7 +12,7 @@ import 'package:jefe/src/project/impl/multi_project_command_support.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:logging/logging.dart';
-import 'package:option/option.dart';
+import 'package:quiver/core.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.impl');
@@ -85,7 +85,7 @@ class _GitCommandsSingleProjectImpl implements GitCommands {
     await gitCheckout(_gitDir, branchName);
 
     final shaOpt = await getRemoteBranchSha(_gitDir, remoteName, branchName);
-    if (shaOpt is Some) {
+    if (shaOpt .isPresent) {
       await gitMerge(_gitDir, '$remoteName/$branchName', checkExists: true);
     }
   }
@@ -95,7 +95,7 @@ class _GitCommandsSingleProjectImpl implements GitCommands {
 
   @override
   Future<bool> hasChangesSince(Version sinceVersion) async {
-    return (await diffSummarySince(_gitDir, sinceVersion.toString())) is Some;
+    return (await diffSummarySince(_gitDir, sinceVersion.toString())).isPresent;
   }
 
 //  // TODO: remove this??

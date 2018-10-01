@@ -31,44 +31,44 @@ enum CommandConcurrencyMode {
 }
 
 /// A command that operates on a single [Project]
-ProjectCommand/*<T>*/ projectCommand/*<T>*/(
-        String name, ProjectFunction/*<T>*/ function,
+ProjectCommand<T> projectCommand<T>(
+        String name, ProjectFunction<T> function,
         {CommandConcurrencyMode concurrencyMode:
             CommandConcurrencyMode.concurrentCommand,
         Condition condition: _alwaysYes}) =>
-    new _DefaultCommand/*<T>*/(name, function, concurrencyMode, condition);
+    new _DefaultCommand<T>(name, function, concurrencyMode, condition);
 
 /// A command that operates on a single [Project] and the projects it depends on
-ProjectCommand/*<T>*/ projectCommandWithDependencies/*<T>*/(
-        String name, ProjectFunction/*<T>*/ function,
+ProjectCommand<T> projectCommandWithDependencies<T>(
+        String name, ProjectFunction<T> function,
         {CommandConcurrencyMode concurrencyMode:
             CommandConcurrencyMode.serialDepthFirst,
         Condition condition: _alwaysYes}) =>
-    new _DefaultCommand/*<T>*/(name, function, concurrencyMode, condition);
+    new _DefaultCommand<T>(name, function, concurrencyMode, condition);
 
 /// A command that is made up of an ordered list of other commands.
 /// For a given [Project] the commands will be executed one at a time in the
 /// order provided. Depending on the [concurrencyMode] of the composite command
 /// and that of the individual commands, commands may be executing on other
 /// [Project]s in the group simultaneously
-CompositeProjectCommand/*<T>*/ projectCommandGroup/*<T>*/(
-    String name, Iterable<ProjectCommand/*<T>*/ > commands,
+CompositeProjectCommand<T> projectCommandGroup<T>(
+    String name, Iterable<ProjectCommand<T> > commands,
     {CommandConcurrencyMode concurrencyMode:
         CommandConcurrencyMode.concurrentCommand}) {
-  return new _DefaultCompositeProjectCommand/*<T>*/(
+  return new _DefaultCompositeProjectCommand<T>(
       name, commands, concurrencyMode);
 }
 
 /// A command that operates on a [JefeProjectGraph]. Unlike the other commands,
 /// a ProjectDependencyGraphCommand is for tasks that require interacting with
 /// several projects at once
-ProjectDependencyGraphCommand/*<T>*/ dependencyGraphCommand/*<T>*/(
-        String name, ProjectDependencyGraphFunction/*<T>*/ function) =>
-    new _DefaultProjectDependencyGraphCommand/*<T>*/(name, function);
+ProjectDependencyGraphCommand<T> dependencyGraphCommand<T>(
+        String name, ProjectDependencyGraphFunction<T> function) =>
+    new _DefaultProjectDependencyGraphCommand<T>(name, function);
 
-ExecutorAwareProjectCommand/*<T>*/ executorAwareCommand/*<T>*/(
-        String name, ExecutorAwareProjectFunction/*<T>*/ function) =>
-    new _DefaultExecutorAwareProjectCommand/*<T>*/(name, function);
+ExecutorAwareProjectCommand<T> executorAwareCommand<T>(
+        String name, ExecutorAwareProjectFunction<T> function) =>
+    new _DefaultExecutorAwareProjectCommand<T>(name, function);
 
 ///// Some function applied to a [Project]
 //typedef Future<T> ProjectFunction<T>(Project project);
@@ -153,8 +153,8 @@ class ProjectCommandError {
 
 typedef Future<T> Callable<T>();
 
-Future/*<T>*/ executeTask/*<T>*/(
-    String taskDescription, Callable/*<T>*/ callable) async {
+Future<T> executeTask<T>(
+    String taskDescription, Callable<T> callable) async {
   _log.info('Executing command "$taskDescription"');
   final stopWatch = new Stopwatch();
   stopWatch.start();
