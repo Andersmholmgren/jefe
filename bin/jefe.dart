@@ -7,9 +7,16 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:jefe/jefe.dart' hide Command;
 import 'package:jefe/src/project/jefe_project.dart';
+import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 main(List<String> arguments) {
+  Logger.root.level = Level.FINEST;
+  Logger.root.onRecord.listen((cr) {
+    print('${cr.time}: ${cr.message}');
+  });
+  hierarchicalLoggingEnabled = true;
+
   final runner =
       CommandRunner('jefe', 'Manages a set of related Dart projects');
   runner
