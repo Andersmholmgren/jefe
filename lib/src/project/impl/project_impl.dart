@@ -115,7 +115,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   @override
   Future<Set<String>> get exportedPackageNames async {
     final Iterable<Directive> exports = (await compilationUnit)
-        .map<Iterable<Directive>>(
+        .transform<Iterable<Directive>>(
             (cu) => cu.directives.where((d) => d is ExportDirective))
         .expand((e) => e);
 //        .or(<Directive>[]) as Iterable<Directive>;
@@ -145,9 +145,8 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 
   @override
   Future<Optional<Version>> get latestPublishedVersion async {
-    return (await publishedVersions).map(
-            (HostedPackageVersions versions) => versions.versions.last.version)
-        as Optional<Version>;
+    return (await publishedVersions).transform(
+            (HostedPackageVersions versions) => versions.versions.last.version);
   }
 
   @override
