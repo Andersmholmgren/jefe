@@ -151,7 +151,7 @@ Iterable<Version> _extractVersions(Iterable<String> tagNames) => tagNames
         return Optional.absent();
       }
     })
-    .where((o) => o != null)
+    .where((o) => o.isPresent)
     .map((o) => o.value)
     .toList()
       ..sort();
