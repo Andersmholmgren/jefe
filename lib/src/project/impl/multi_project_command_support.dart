@@ -120,20 +120,44 @@ abstract class CommandSupport {
   }
 }
 
-class SingleProjectCommandSupport<C> {
-  final JefeProject _project;
+// can't get this to work in Dart 2
+//class SingleProjectCommandSupport<C> {
+//  final JefeProject _project;
+//  final SingleProjectCommandFactory<C> _singleProjectCommandFactory;
+//  InstanceMirror __singleProjectCommandMirror;
+//
+//  Future<InstanceMirror> get _singleProjectCommandMirror async =>
+//      __singleProjectCommandMirror ??=
+//          reflect(await _singleProjectCommandFactory(_project));
+//
+//  SingleProjectCommandSupport(this._singleProjectCommandFactory, this._project);
+//
+//  noSuchMethod(Invocation i) {
+//    return executeTask(
+//        '${MirrorSystem.getName(i.memberName)} on project ${_project.name}',
+//        () async => (await _singleProjectCommandMirror).delegate(i));
+//  }
+//}
+
+abstract class SingleProjectCommandSupport<C> {
+  final JefeProject project;
   final SingleProjectCommandFactory<C> _singleProjectCommandFactory;
-  InstanceMirror __singleProjectCommandMirror;
 
-  Future<InstanceMirror> get _singleProjectCommandMirror async =>
-      __singleProjectCommandMirror ??=
-          reflect(await _singleProjectCommandFactory(_project));
+//  Future<InstanceMirror> get _singleProjectCommandMirror async =>
+//      __singleProjectCommandMirror ??=
+//          reflect(await _singleProjectCommandFactory(project));
 
-  SingleProjectCommandSupport(this._singleProjectCommandFactory, this._project);
+  Future<C> get decoratee async => _singleProjectCommandFactory(project);
 
-  noSuchMethod(Invocation i) {
-    return executeTask(
-        '${MirrorSystem.getName(i.memberName)} on project ${_project.name}',
-        () async => (await _singleProjectCommandMirror).delegate(i));
-  }
+  SingleProjectCommandSupport(this._singleProjectCommandFactory, this.project);
+
+  Future<T> doExecuteTask<T>(String functionName, Future<T> f(C c)) =>
+      executeTask<T>(
+          '$functionName on project ${project.name}', () => decoratee.then(f));
+
+//  noSuchMethod(Invocation i) {
+//    return executeTask(
+//        '${MirrorSystem.getName(i.memberName)} on project ${project.name}',
+//        () async => (await _singleProjectCommandMirror).delegate(i));
+//  }
 }

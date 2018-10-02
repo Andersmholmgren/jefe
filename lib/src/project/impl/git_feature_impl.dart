@@ -38,6 +38,55 @@ class GitFeatureCommandsSingleProjectFlowImpl
                 new _GitFeatureCommandsSingleProjectFlowImpl(
                     project, await p.gitDir),
             project);
+
+  @override
+  Future assertNoActiveReleases() => doExecuteTask(
+      'assertNoActiveReleases', (c) => c.assertNoActiveReleases());
+
+  @override
+  Future<Optional<String>> currentFeatureName() =>
+      doExecuteTask('currentFeatureName', (c) => c.currentFeatureName());
+
+  @override
+  Future<String> get developBranchName =>
+      doExecuteTask('developBranchName', (c) => c.developBranchName);
+
+  @override
+  Future featureFinish(String featureName,
+          {bool Function(Commit commit) excludeOnlyCommitIf}) =>
+      doExecuteTask(
+          'featureFinish',
+          (c) => c.featureFinish(featureName,
+              excludeOnlyCommitIf: excludeOnlyCommitIf));
+
+  @override
+  Future featureStart(String featureName, {bool throwIfExists: false}) =>
+      doExecuteTask('featureStart',
+          (c) => c.featureStart(featureName, throwIfExists: throwIfExists));
+
+  @override
+  Future<Iterable<Version>> getReleaseVersionTags() =>
+      doExecuteTask('getReleaseVersionTags', (c) => c.getReleaseVersionTags());
+
+  @override
+  Future<bool> get hasChangesSinceLatestTaggedVersion => doExecuteTask(
+      'hasChangesSinceLatestTaggedVersion',
+      (c) => c.hasChangesSinceLatestTaggedVersion);
+
+  @override
+  Future init() => doExecuteTask('init', (c) => c.init());
+
+  @override
+  Future<bool> get isOnDevelopBranch =>
+      doExecuteTask('isOnDevelopBranch', (c) => c.isOnDevelopBranch);
+
+  @override
+  Future releaseFinish(String version) =>
+      doExecuteTask('releaseFinish', (c) => c.releaseFinish(version));
+
+  @override
+  Future releaseStart(String version) =>
+      doExecuteTask('releaseStart', (c) => c.releaseStart(version));
 }
 
 class GitFeatureCommandsMultiProjectFlowImpl
@@ -168,8 +217,8 @@ class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
   @override
   Future<bool> get hasChangesSinceLatestTaggedVersion async {
     final latestTaggedGitVersion = await _project.latestTaggedGitVersion;
-    final x = await (latestTaggedGitVersion.map((v) => spc.git.hasChangesSince(v)))
-        as Optional<bool>;
+    final x = await (latestTaggedGitVersion
+        .map((v) => spc.git.hasChangesSince(v))) as Optional<bool>;
     return x.or(false);
   }
 

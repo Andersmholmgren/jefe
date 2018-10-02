@@ -32,6 +32,19 @@ class PubCommandsSingleProjectImpl
       : super(
             (JefeProject p) async => new _PubCommandsSingleProjectImpl(project),
             project);
+
+  @override
+  Future fetchPackageVersions() =>
+      doExecuteTask('fetchPackageVersions', (c) => c.fetchPackageVersions());
+
+  @override
+  Future get() => doExecuteTask('get', (c) => c.get());
+
+  @override
+  Future publish() => doExecuteTask('publish', (c) => c.publish());
+
+  @override
+  Future test() => doExecuteTask('test', (c) => c.test());
 }
 
 class PubCommandsMultiProjectImpl
@@ -47,6 +60,7 @@ class PubCommandsMultiProjectImpl
 
 class _PubCommandsSingleProjectImpl implements PubCommands {
   final JefeProject _project;
+
   _PubCommandsSingleProjectImpl(this._project);
 
   @override

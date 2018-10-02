@@ -184,7 +184,7 @@ Future<Optional<String>> getRemoteBranchSha(
   final refs = await gitDir.showRef();
   return Optional<CommitReference>.fromNullable(refs.firstWhere(
       (cr) => cr.reference == 'refs/remotes/$remoteName/$branchName',
-      orElse: () => null)).map((cr) => cr.sha);
+      orElse: () => null)).transform((cr) => cr.sha);
 }
 
 Future<String> currentCommitHash(GitDir gitDir) async =>

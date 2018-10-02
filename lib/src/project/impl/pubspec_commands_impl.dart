@@ -40,6 +40,34 @@ class PubSpecCommandsSingleProjectImpl
             (JefeProject p) async =>
                 new _PubSpecCommandsSingleProjectImpl(project),
             project);
+
+  @override
+  Future addDependencyOn(Project dependee) =>
+      doExecuteTask('addDependencyOn', (c) => c.addDependencyOn(dependee));
+
+  @override
+  Future<bool> haveDependenciesChanged(DependencyType type,
+          {bool useGitIfNotHosted: true}) =>
+      doExecuteTask(
+          'haveDependenciesChanged',
+          (c) => c.haveDependenciesChanged(type,
+              useGitIfNotHosted: useGitIfNotHosted));
+
+  @override
+  Future setToGitDependencies() =>
+      doExecuteTask('setToGitDependencies', (c) => c.setToGitDependencies());
+
+  @override
+  Future setToHostedDependencies(
+          {bool useGitIfNotHosted: true}) =>
+      doExecuteTask(
+          'setToHostedDependencies',
+          (c) =>
+              c.setToHostedDependencies(useGitIfNotHosted: useGitIfNotHosted));
+
+  @override
+  Future setToPathDependencies() =>
+      doExecuteTask('setToPathDependencies', (c) => c.setToPathDependencies());
 }
 
 class PubSpecCommandsMultiProjectImpl
@@ -180,7 +208,7 @@ class _PubSpecCommandsSingleProjectImpl implements PubSpecCommands {
         await pub.fetchPackageVersions(project.name,
             publishToUrl: project.pubspec.publishTo);
 
-    if (packageVersionsOpt .isPresent) {
+    if (packageVersionsOpt.isPresent) {
       final Version version = packageVersionsOpt.value.versions.last.version;
       final isExported = exportedDependencyNames.contains(project.name);
       final versionConstraint = isExported
@@ -219,6 +247,7 @@ class _PubSpecCommandsSingleProjectImpl implements PubSpecCommands {
               "(${projectDependencyTypes}) used in the project (${_project.name})");
       }
     }
+
     final dependencyType = determineDependencyType();
 
     final newDependencyReference = await _createDependencyReference(dependee,

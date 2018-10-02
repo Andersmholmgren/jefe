@@ -10,6 +10,7 @@ import 'package:jefe/src/project/intellij_commands.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:logging/logging.dart';
+
 //import 'package:stuff/stuff.dart';
 import 'package:quiver/iterables.dart';
 
@@ -34,6 +35,12 @@ class IntellijCommandsSingleProjectImpl
             (JefeProject p) async =>
                 new _IntellijCommandsSingleProjectImpl(project),
             project);
+
+  @override
+  Future<IntellijVcsMappings> generateGitMappings(
+          String intelliJProjectRootPath) =>
+      doExecuteTask('generateGitMappings',
+          (c) => c.generateGitMappings(intelliJProjectRootPath));
 }
 
 class IntellijCommandsMultiProjectImpl
@@ -52,9 +59,10 @@ class IntellijCommandsMultiProjectImpl
       String intelliJProjectRootPath) async {
     IntellijVcsMappings combine(
         IntellijVcsMappings previous, IntellijVcsMappings current) {
-      return new IntellijVcsMappings(
-          concat([previous.vcsDirectoryMappings, current.vcsDirectoryMappings]));
+      return new IntellijVcsMappings(concat(
+          [previous.vcsDirectoryMappings, current.vcsDirectoryMappings]));
     }
+
     return process<IntellijVcsMappings>(
         'generateGitMappings',
         (JefeProject p) async => (await singleProjectCommandFactory(p))

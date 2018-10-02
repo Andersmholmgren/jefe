@@ -42,6 +42,37 @@ class ProjectLifecycleSingleProjectImpl
             (JefeProject p) async =>
                 new _ProjectLifecycleSingleProjectImpl(project),
             project);
+
+  @override
+  Future completeFeature({String featureName}) => doExecuteTask(
+      'completeFeature', (c) => c.completeFeature(featureName: featureName));
+
+  @override
+  Future init({bool doCheckout: true}) =>
+      doExecuteTask('init', (c) => c.init(doCheckout: doCheckout));
+
+  @override
+  Future preRelease(
+          {ReleaseType type: ReleaseType.minor,
+          bool autoUpdateHostedVersions: false}) =>
+      doExecuteTask(
+          'preRelease',
+          (c) => c.preRelease(
+              type: type, autoUpdateHostedVersions: autoUpdateHostedVersions));
+
+  @override
+  Future release(
+          {ReleaseType type: ReleaseType.minor,
+          bool autoUpdateHostedVersions: false}) =>
+      doExecuteTask(
+          'release',
+          (c) => c.release(
+              type: type, autoUpdateHostedVersions: autoUpdateHostedVersions));
+
+  @override
+  Future startNewFeature(String featureName, {bool doPush: false}) =>
+      doExecuteTask('startNewFeature',
+          (c) => c.startNewFeature(featureName, doPush: doPush));
 }
 
 class ProjectLifecycleMultiProjectImpl
@@ -105,7 +136,7 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
     }
 
     final currentFeatureNameOpt = await spc.gitFeature.currentFeatureName();
-    if (currentFeatureNameOpt .isPresent &&
+    if (currentFeatureNameOpt.isPresent &&
         featureName != null &&
         currentFeatureNameOpt.value != featureName) {
       throw new StateError(
@@ -159,7 +190,7 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
       executeTask('check release versions', () async {
         final ProjectReleaseVersions versions =
             await getCurrentProjectVersions(type, autoUpdateHostedVersions);
-        if (versions.newReleaseVersion .isPresent) {
+        if (versions.newReleaseVersion.isPresent) {
           _log.info(
               '==> project ${_project.name} will be upgraded from version: '
               '${versions.taggedGitVersion} '
@@ -247,7 +278,7 @@ class _ProjectLifecycleSingleProjectImpl implements ProjectLifecycle {
 
     final currentFeatureNameOpt = await spc.gitFeature.currentFeatureName();
 
-    if (currentFeatureNameOpt .isPresent) {
+    if (currentFeatureNameOpt.isPresent) {
       final currentFeatureName = currentFeatureNameOpt.value;
       _log.info('Detected existing feature - $currentFeatureName');
       await startNewFeature(currentFeatureName);
@@ -353,5 +384,5 @@ class ProjectReleaseVersions implements ProjectVersions {
   @override
   bool get hasBeenPublished => currentVersions.hasBeenPublished;
 
-  bool get newReleaseRequired => newReleaseVersion .isPresent;
+  bool get newReleaseRequired => newReleaseVersion.isPresent;
 }
