@@ -15,10 +15,15 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 
 main(List<String> arguments) {
-  final runner = CommandRunner(
-      'jefe', 'Manages a set of related Dart projects');
-  runner..addCommand(Install())..addCommand(Init())..addCommand(Jefetise());
-
+  final runner =
+      CommandRunner('jefe', 'Manages a set of related Dart projects');
+  runner
+    ..addCommand(Install())
+    ..addCommand(Init())
+    ..addCommand(Jefetise())
+    ..addCommand(Start())
+    ..addCommand(Finish())
+    ..addCommand(Exec());
 
   Chain.capture(() {
     runner.run(arguments);
@@ -49,11 +54,10 @@ class Install extends Command {
     return install(gitUri, installDirectory: installDirectory);
   }
 
-  Future install(String gitUri,
-      {String installDirectory: '.'}) async {
+  Future install(String gitUri, {String installDirectory: '.'}) async {
     final Directory installDir = new Directory(installDirectory);
     final ProjectGroup projectGroup =
-    await ProjectGroup.install(installDir, gitUri);
+        await ProjectGroup.install(installDir, gitUri);
 
     await (await projectGroup.rootJefeProjects).lifecycle.init();
   }
@@ -63,7 +67,6 @@ class Jefetise extends Command {
   final name = "jefetise";
   final description = 'Converts a directory of projects into a jefe group. '
       'WARNING renames the current directory to append _root to name';
-
 
   Jefetise() {
     argParser.addOption('containerDirectory',
@@ -87,7 +90,6 @@ class Init extends Command {
   final name = "init";
   final description = 'Installs or updates a group of projects';
 
-
   Init() {
     argParser.addOption('gitUri',
         help: 'The git Uri containing the jefe.yaml.', abbr: 'g');
@@ -95,24 +97,27 @@ class Init extends Command {
         help: 'The directory to install into', abbr: 'd', defaultsTo: '.');
     argParser.addFlag('skipCheckout',
         help: 'Skips the checkout of the develop branch',
-        abbr: 's', defaultsTo: false);
+        abbr: 's',
+        defaultsTo: false);
   }
 
   Future run() {
     final gitUri = argResults['gitUri'];
     final installDirectory = argResults['installDirectory'];
     final skipCheckout = argResults['skipCheckout'];
-    return init(gitUri: gitUri,
+    return init(
+        gitUri: gitUri,
         installDirectory: installDirectory,
         skipCheckout: skipCheckout);
   }
 
-  init({String gitUri,
-    String installDirectory: '.',
-    bool skipCheckout: false}) async {
+  init(
+      {String gitUri,
+      String installDirectory: '.',
+      bool skipCheckout: false}) async {
     final Directory installDir = new Directory(installDirectory);
     final ProjectGroup projectGroup =
-    await ProjectGroup.init(installDir, gitUri);
+        await ProjectGroup.init(installDir, gitUri);
 
 //    final executor = new CommandExecutor(projectGroup);
 //    await executor.execute(lifecycle.init(doCheckout: !skipCheckout));
@@ -120,7 +125,125 @@ class Init extends Command {
         .lifecycle
         .init(doCheckout: !skipCheckout);
   }
+}
 
+class Start extends Command {
+  final name = "start";
+  final description = 'Sets up for the start of development on a new feature';
+
+  Start() {
+    argParser.addOption('featureName',
+        help: 'The name of the feature to start', abbr: 'f');
+    argParser.addOption('rootDirectory',
+        help: 'The directory that contains the root of the projecs',
+        abbr: 'd',
+        defaultsTo: '.');
+    argParser.addOption('projects',
+        help:
+            'A project name filter. Only projects whose name contains the text will run',
+        abbr: 'p');
+  }
+
+  Future run() {
+    final featureName = argResults['featureName'];
+    final rootDirectory = argResults['rootDirectory'];
+    final projects = argResults['projects'];
+    return start(featureName, rootDirectory: rootDirectory, projects: projects);
+  }
+
+  start(String featureName,
+      {String rootDirectory: '.', String projects}) async {
+    final graph = await _loadGraph(rootDirectory);
+    return graph
+        .multiProjectCommands(projectFilter: projectNameFilter(projects))
+        .lifecycle
+        .startNewFeature(featureName);
+  }
+}
+
+class Finish extends Command {
+  final name = "finish";
+  final description = 'Completes feature and returns to development branch';
+
+  Finish() {
+    argParser.addOption('rootDirectory',
+        help: 'The directory that contains the root of the projecs',
+        abbr: 'd',
+        defaultsTo: '.');
+    argParser.addOption('projects',
+        help:
+            'A project name filter. Only projects whose name contains the text will run',
+        abbr: 'p');
+  }
+
+  Future run() {
+    final rootDirectory = argResults['rootDirectory'];
+    final projects = argResults['projects'];
+    return finish(rootDirectory: rootDirectory, projects: projects);
+  }
+
+  finish({String rootDirectory: '.', String projects}) async {
+    final graph = await _loadGraph(rootDirectory);
+    return graph
+        .multiProjectCommands(projectFilter: projectNameFilter(projects))
+        .lifecycle
+        .completeFeature();
+  }
+}
+
+class Exec extends Command {
+  final name = "exec";
+  final description = 'Runs the given command in all projects';
+
+  Exec() {
+    argParser.addOption('command', help: 'The command to execute', abbr: 'c');
+    argParser.addOption('rootDirectory',
+        help: 'The directory that contains the root of the projecs',
+        abbr: 'd',
+        defaultsTo: '.');
+    argParser.addOption('projects',
+        help:
+            'A project name filter. Only projects whose name contains the text will run',
+        abbr: 'p');
+    argParser.addFlag('executeSerially',
+        help:
+            'Instead of running the commands concurrently on the projects, run only one command on one project at a time',
+        abbr: 's',
+        defaultsTo: false);
+  }
+
+  Future run() {
+    final commandArgs = argResults.rest.toList();
+    final command = argResults['command'];
+    final rootDirectory = argResults['rootDirectory'];
+    final projects = argResults['projects'];
+    final executeSerially = argResults['executeSerially'];
+    final fred = 'fuck';
+
+    return exec(command, commandArgs,
+        rootDirectory: rootDirectory,
+        projects: projects,
+        executeSerially: executeSerially);
+  }
+
+  exec(String command, List<String> args,
+      {String rootDirectory: '.',
+      String projects,
+      bool executeSerially: false}) async {
+    final graph = await _loadGraph(rootDirectory);
+
+    final processCommands = graph
+        .multiProjectCommands(
+            projectFilter: projectNameFilter(projects),
+            defaultConcurrencyMode: executeSerially
+                ? CommandConcurrencyMode.serialDepthFirst
+                : CommandConcurrencyMode.concurrentProject)
+        .processCommands;
+
+    final result = await processCommands.execute(command, args);
+    final output = result.map((r) => r.toReportString()).join('\n');
+    stdout.write(output);
+  }
 }
 
 //class Jefe extends Command {
@@ -179,8 +302,6 @@ class Init extends Command {
 //        .init(doCheckout: !skipCheckout);
 //  }
 
-  // ------- up to
-
 //  @u.SubCommand(help: 'Sets up for the start of development on a new feature')
 //  start(String featureName,
 //      {@u.Option(help: 'The directory that contains the root of the projecs',
@@ -209,6 +330,8 @@ class Init extends Command {
 //        .completeFeature();
 //  }
 //
+// ------- up to
+
 //  @u.SubCommand(help: 'Create a release of all the projects')
 //  release({@u.Option(
 //      help: 'The directory that contains the root of the projecs',
@@ -344,18 +467,17 @@ class Init extends Command {
 //    return sink.close();
 //  }
 //
-////  Future<CommandExecutor> _loadExecutor(String rootDirectory) async =>
-////      new CommandExecutor(await _load(rootDirectory));
-//
-//  Future<JefeProjectGraph> _loadGraph(String rootDirectory) async =>
-//      await (await _load(rootDirectory)).rootJefeProjects;
-//
-//  Future<ProjectGroup> _load(String rootDirectory) async {
-//    final Directory installDir =
-//    rootDirectory == '.' ? Directory.current : new Directory(rootDirectory);
-//    return ProjectGroup.load(installDir);
-//  }
-//}
 
-  ReleaseType _parseReleaseType(String str) =>
-      ReleaseType.fromLiteral(str).value;
+Future<CommandExecutor> _loadExecutor(String rootDirectory) async =>
+    new CommandExecutor(await _load(rootDirectory));
+
+Future<JefeProjectGraph> _loadGraph(String rootDirectory) async =>
+    await (await _load(rootDirectory)).rootJefeProjects;
+
+Future<ProjectGroup> _load(String rootDirectory) async {
+  final Directory installDir =
+      rootDirectory == '.' ? Directory.current : new Directory(rootDirectory);
+  return ProjectGroup.load(installDir);
+}
+
+ReleaseType _parseReleaseType(String str) => ReleaseType.fromLiteral(str).value;
