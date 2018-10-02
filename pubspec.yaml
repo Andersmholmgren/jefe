@@ -5,6 +5,7 @@ name: "jefe"
 version: "0.4.0"
 dependencies: 
   analyzer: ">=0.25.0+1"
+  args: any
   collection: ">=1.4.0"
   dockerfile:
     path: ../dockerfile
@@ -18,7 +19,8 @@ dependencies:
     path: ../pubspec
   quiver: ">=0.21.3"
   stack_trace: ">=1.6.1"
-#  unscripted: ">=0.6.0"
+#  unscripted:
+#    git: https://github.com/Dart2WebRTC/unscripted.git
   xml: ">=2.4.2"
   yaml: ">=2.0.1+1"
   yamlicious:
