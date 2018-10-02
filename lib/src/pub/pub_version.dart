@@ -3,9 +3,9 @@
 
 library jefe.pub.version;
 
-import 'package:jefe/src/jsonyaml/json_utils.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
+import 'package:stuff/stuff.dart';
 
 class PubVersion {
   final Uri archiveUrl;
@@ -38,8 +38,7 @@ class HostedPackageVersions {
     final p = parseJson(json);
     final packageName = p.single('name');
     final latest = p.single('latest', (v) => new PubVersion.fromJson(v));
-    final versions = p.list('versions', (v) => new PubVersion.fromJson(v))
-        as Iterable<PubVersion>;
+    final versions = p.list('versions', (v) => new PubVersion.fromJson(v));
 
     return new HostedPackageVersions(packageName, latest, versions);
   }

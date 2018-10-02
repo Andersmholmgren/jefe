@@ -314,6 +314,7 @@ class Release extends BaseJefeCommand {
     argParser.addOption('type',
         help: 'The type of release',
         abbr: 't',
+        allowed: ReleaseType.all.map((r) => r.toString()),
         defaultsTo: ReleaseType.lowest.toString());
     argParser.addFlag('preReleaseOnly',
         help: 'if true then only pre release verification steps are executed',
