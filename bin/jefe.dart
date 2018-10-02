@@ -250,6 +250,7 @@ class SetDependencies extends BaseJefeCommand {
   SetDependencies() {
     argParser.addOption('type',
         help: 'The type of dependency to set',
+        abbr: 't',
         allowed: const ['git', 'path', 'hosted']);
     addRootDirectory();
     addProjects();
