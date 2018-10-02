@@ -8,6 +8,7 @@ import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:test/test.dart';
+import 'package:stack_trace/stack_trace.dart';
 
 import 'test_project_utils.dart';
 
@@ -15,7 +16,13 @@ final Logger _log = new Logger('dd');
 
 main() {
   Logger.root.level = Level.ALL;
-  Logger.root.onRecord.listen(print);
+  Logger.root.onRecord.listen((r) {
+    print(r);
+    if (r.error != null) {
+      print(r.error);
+      print(Trace.from(r.stackTrace).terse);
+    }
+  });
 
   group('simple lifecycle with a dependency added', () {
     Directory jefeDir;
@@ -302,9 +309,9 @@ Future<Directory> _performLifecycle() async {
 
   await graph.lifecycle.startNewFeature('addDependencies');
 
-  final project1 = graph.getProjectByName('project1').get();
+  final project1 = graph.getProjectByName('project1').value;
 
-  final project2 = graph.getProjectByName('project2').get();
+  final project2 = graph.getProjectByName('project2').value;
 
   await project2.pubspecCommands.addDependencyOn(project1);
 
@@ -326,6 +333,8 @@ Future<Directory> _performLifecycle() async {
   final group3 = await ProjectGroup.load(group.containerDirectory);
 
   await (await group3.rootJefeProjects).lifecycle.release();
+
+  print("============== COMPLETED _performLifecycle");
 
   return jefeDir;
 }

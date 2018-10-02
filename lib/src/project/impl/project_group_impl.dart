@@ -197,7 +197,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     return projectGroup;
   }
 
-  Future<ProjectGroupImpl> _getChildGroup(String childName, String gitUri) {
+  Future<ProjectGroup> _getChildGroup(String childName, String gitUri) {
     final childContainer =
         directoryLayout.childGroup(childName).containerDirectory;
     _log.finer('loading child group $childName of $name contained in '
@@ -206,15 +206,15 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     return load(childContainer);
   }
 
-  Future<ProjectImpl> getChildProject(String name, String gitUri) =>
+  Future<Project> getChildProject(String name, String gitUri) =>
       ProjectImpl.load(directoryLayout.projectDirectory(name));
 
-  Future<ProjectGroupImpl> _installChildGroup(
+  Future<ProjectGroup> _installChildGroup(
           String name, String gitUri, bool updateIfExists) =>
       _installOrUpdate(directoryLayout.containerDirectory, gitUri,
           name: name, updateIfExists: updateIfExists);
 
-  Future<ProjectImpl> _installChildProject(
+  Future<Project> _installChildProject(
           String name, String gitUri, bool updateIfExists) =>
       ProjectImpl.install(directoryLayout.containerDirectory, name, gitUri,
           updateIfExists: updateIfExists);

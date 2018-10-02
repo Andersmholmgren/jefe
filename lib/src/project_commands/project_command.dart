@@ -163,9 +163,9 @@ Future<T> executeTask<T>(
     final result = await callable();
     _log.info('Completed command "$taskDescription" in ${stopWatch.elapsed}');
     return result;
-  } catch (e) {
+  } catch (e, s) {
     _log.warning('Failed command "$taskDescription" in ${stopWatch.elapsed}. '
-        'Exception thrown: $e');
+        'Exception thrown: $e', e, s);
     rethrow;
   } finally {
     stopWatch.stop();

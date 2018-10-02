@@ -32,7 +32,7 @@ abstract class GitFeatureCommands {
   Future featureStart(String featureName, {bool throwIfExists: false});
 
   /// Merges the feature branch back on to the [developBranchName].
-  /// Optionalally [excludeOnlyCommitIf] may be passed to exclude an automatically
+  /// Optionally [excludeOnlyCommitIf] may be passed to exclude an automatically
   /// generated commit on feature start if that is the only commit on the
   /// feature branch
   Future featureFinish(String featureName,
