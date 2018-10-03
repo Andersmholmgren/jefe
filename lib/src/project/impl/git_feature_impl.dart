@@ -179,7 +179,7 @@ class _GitFeatureCommandsSingleProjectFlowImpl implements GitFeatureCommands {
     await gitTag(_gitDir, releaseName);
     await gitPush(_gitDir);
     await gitCheckout(_gitDir, await developBranchName);
-    await gitMerge(_gitDir, 'master', ffOnly: false);
+    await gitMerge(_gitDir, 'origin/master', ffOnly: false);
     await _gitDir.runCommand(['push', 'origin', 'master']);
   }
 
