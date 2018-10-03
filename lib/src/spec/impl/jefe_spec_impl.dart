@@ -38,13 +38,13 @@ class ProjectGroupMetaDataImpl implements ProjectGroupMetaData {
         ..add(
             'childGroups',
             new Map.fromIterable(childGroups,
-                key: (ProjectGroupIdentifier g) => g.name,
-                value: (ProjectGroupIdentifier g) => g.gitUri))
+                key: (g) => g.name,
+                value: (g) => g.gitUri))
         ..add(
             'projects',
             new Map.fromIterable(projects,
-                key: (ProjectIdentifier g) => g.name,
-                value: (ProjectIdentifier g) => g.gitUri)))
+                key: (g) => g.name,
+                value: (g) => g.gitUri)))
       .json;
 }
 

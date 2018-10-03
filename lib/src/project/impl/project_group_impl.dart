@@ -11,7 +11,7 @@ import 'package:jefe/src/project/jefe_project.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'package:quiver/iterables.dart';
-import 'package:quiver/streams.dart' as streamz;
+import 'package:quiver/async.dart' as streamz;
 
 import '../../git/git.dart';
 import '../../spec/jefe_spec.dart' as spec;
@@ -21,7 +21,7 @@ import '../project.dart';
 import '../project_group.dart';
 import 'core_impl.dart';
 import 'project_impl.dart';
-import 'package:option/option.dart';
+import 'package:quiver/core.dart';
 
 Logger _log = new Logger('jefe.project.group.impl');
 
@@ -142,7 +142,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
 
     final projects = await _projectSubDirectories(containerDirectory)
         .asyncMap(Project.load)
-        .toSet() as Set<Project>;
+        .toSet();
 
     print(projects);
 //    new ProjectGroupImpl()
@@ -189,7 +189,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     await Future.wait(concat(<Iterable<Future>>[
       projectGroupInstallFutures,
       projectInstallFutures
-    ]) as Iterable<Future>);
+    ]));
 
     _log.info('Completed initialising group with gitUri: $gitUri and '
         'installDirectory: $dir');
@@ -197,7 +197,7 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     return projectGroup;
   }
 
-  Future<ProjectGroupImpl> _getChildGroup(String childName, String gitUri) {
+  Future<ProjectGroup> _getChildGroup(String childName, String gitUri) {
     final childContainer =
         directoryLayout.childGroup(childName).containerDirectory;
     _log.finer('loading child group $childName of $name contained in '
@@ -206,15 +206,15 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
     return load(childContainer);
   }
 
-  Future<ProjectImpl> getChildProject(String name, String gitUri) =>
+  Future<Project> getChildProject(String name, String gitUri) =>
       ProjectImpl.load(directoryLayout.projectDirectory(name));
 
-  Future<ProjectGroupImpl> _installChildGroup(
+  Future<ProjectGroup> _installChildGroup(
           String name, String gitUri, bool updateIfExists) =>
       _installOrUpdate(directoryLayout.containerDirectory, gitUri,
           name: name, updateIfExists: updateIfExists);
 
-  Future<ProjectImpl> _installChildProject(
+  Future<Project> _installChildProject(
           String name, String gitUri, bool updateIfExists) =>
       ProjectImpl.install(directoryLayout.containerDirectory, name, gitUri,
           updateIfExists: updateIfExists);
@@ -223,21 +223,21 @@ class ProjectGroupImpl extends ProjectEntityImpl implements ProjectGroup {
   Future<Set<Project>> get allProjects => _allProjectsStream.toSet();
 
   Stream<Project> get _allProjectsStream {
-    final Stream<ProjectGroupImpl> childGroupStream =
+    final Stream<ProjectGroup> childGroupStream =
         new Stream<Future<ProjectGroup>>.fromIterable(
-                childGroups.map/*<Future<ProjectGroup>>*/((ref) => ref.get()))
-            .asyncMap((pgf) => pgf) as Stream<ProjectGroupImpl>;
+                childGroups.map<Future<ProjectGroup>>((ref) => ref.get()))
+            .asyncMap((pgf) => pgf);
 
     final Stream<Project> childProjectStream = childGroupStream
-        .asyncExpand((pg) => pg._allProjectsStream) as Stream<Project>;
+        .asyncExpand((pg) => (pg as ProjectGroupImpl)._allProjectsStream);
 
     final Stream<Project> projectStream =
         new Stream<Future<Project>>.fromIterable(projects.map((p) => p.get()))
-            .asyncMap((p) => p) as Stream<Project>;
+            .asyncMap((p) => p);
 
     final resultStream = streamz.concat([childProjectStream, projectStream]);
 
-    return resultStream as Stream<Project>;
+    return resultStream;
   }
 
   @deprecated
@@ -353,8 +353,8 @@ Stream<Directory> _projectSubDirectories(Directory parentDirectory) {
       .asyncMap((e) async {
         var file = new File(p.join(e.path, 'pubspec.yaml'));
         print('checking if exists on $file');
-        return await file.exists() ? new Some(e) : const None();
+        return await file.exists() ? Optional.of(e) : Optional.absent();
       })
-      .where((o) => o is Some)
-      .map((o) => o.get());
+      .where((o) => o .isPresent)
+      .map((o) => o.value);
 }

@@ -13,7 +13,7 @@ import 'package:jefe/src/project_commands/project_command.dart'
     show executeTask;
 import 'package:jefe/src/pub/pub_version.dart';
 import 'package:logging/logging.dart';
-import 'package:option/option.dart';
+import 'package:quiver/core.dart';
 import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
@@ -93,11 +93,13 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
       git.currentCommitHash(await gitDir);
 
   @override
-  Future<Option<CompilationUnit>> get compilationUnit async {
+  Future<Optional<CompilationUnit>> get compilationUnit async {
     final mainLibraryPath =
         p.join(installDirectory.path, 'lib', '${name}.dart');
     final exists = await new File(mainLibraryPath).exists();
-    return exists ? new Some(parseDartFile(mainLibraryPath)) : const None();
+    return exists
+        ? Optional.of(parseDartFile(mainLibraryPath))
+        : Optional.absent();
   }
 
   String toString() => 'Project($name, $gitUri)';
@@ -113,9 +115,10 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   @override
   Future<Set<String>> get exportedPackageNames async {
     final Iterable<Directive> exports = (await compilationUnit)
-        .map /**<Iterable<Directive>>*/ (
+        .transform<Iterable<Directive>>(
             (cu) => cu.directives.where((d) => d is ExportDirective))
-        .getOrDefault(<Directive>[]) as Iterable<Directive>;
+        .expand((e) => e);
+//        .or(<Directive>[]) as Iterable<Directive>;
 
     final exportedPackageNames = await exports
         .map((exp) => (exp as ExportDirective).uri.stringValue)
@@ -126,12 +129,12 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   }
 
   @override
-  Future<Option<Version>> get latestTaggedGitVersion async {
+  Future<Optional<Version>> get latestTaggedGitVersion async {
     final _taggedVersions = await taggedGitVersions;
 
-    final Option<Version> latestTaggedVersionOpt = _taggedVersions.isNotEmpty
-        ? new Some(_taggedVersions.last)
-        : const None();
+    final Optional<Version> latestTaggedVersionOpt = _taggedVersions.isNotEmpty
+        ? Optional.of(_taggedVersions.last)
+        : Optional.absent();
     return latestTaggedVersionOpt;
   }
 
@@ -141,14 +144,13 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
       () async => git.gitFetchVersionTags(await gitDir));
 
   @override
-  Future<Option<Version>> get latestPublishedVersion async {
-    return (await publishedVersions).map(
-            (HostedPackageVersions versions) => versions.versions.last.version)
-        as Option<Version>;
+  Future<Optional<Version>> get latestPublishedVersion async {
+    return (await publishedVersions).transform(
+            (HostedPackageVersions versions) => versions.versions.last.version);
   }
 
   @override
-  Future<Option<HostedPackageVersions>> get publishedVersions async =>
+  Future<Optional<HostedPackageVersions>> get publishedVersions async =>
       executeTask(
           'fetch package versions',
           () async =>
@@ -158,7 +160,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
   Future<ProjectVersions> get projectVersions async {
     final _latestPublishedVersionFuture = latestPublishedVersion;
     final isHostedFuture = _latestPublishedVersionFuture.then((o) {
-      final hasBeenPublished = o is Some;
+      final hasBeenPublished = o.isPresent;
 
       final _hostedMode = hostedMode != HostedMode.inferred
           ? hostedMode
@@ -171,8 +173,11 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
       _latestPublishedVersionFuture,
       isHostedFuture
     ]);
-    return new ProjectVersions(pubspec.version, versions[0] as Option<Version>,
-        versions[1] as Option<Version>, versions[2] as bool);
+    return new ProjectVersions(
+        pubspec.version,
+        versions[0] as Optional<Version>,
+        versions[1] as Optional<Version>,
+        versions[2] as bool);
   }
 
 //  @override
@@ -199,6 +204,7 @@ class ProjectImpl extends ProjectEntityImpl implements Project {
 class ProjectReferenceImpl implements ProjectReference {
   final ProjectGroupImpl parent;
   final ProjectIdentifier ref;
+
   ProjectReferenceImpl(this.parent, this.ref);
 
   @override

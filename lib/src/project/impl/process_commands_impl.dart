@@ -34,6 +34,11 @@ class ProcessCommandsSingleProjectImpl
             (JefeProject p) async =>
                 new _ProcessCommandsSingleProjectImpl(project),
             project);
+
+  @override
+  Future<Iterable<ProcessCommandResult>> execute(
+          String command, List<String> args) =>
+      doExecuteTask('execute', (c) => c.execute(command, args));
 }
 
 class ProcessCommandsMultiProjectImpl
@@ -56,7 +61,8 @@ class ProcessCommandsMultiProjectImpl
       return concat(<Iterable<ProcessCommandResult>>[previous, current])
           as Iterable<ProcessCommandResult>;
     }
-    return process/*<Iterable<ProcessCommandResult>>*/(
+
+    return process<Iterable<ProcessCommandResult>>(
         'process',
         (JefeProject p) async =>
             (await singleProjectCommandFactory(p)).execute(command, args),

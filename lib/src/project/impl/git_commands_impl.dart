@@ -12,7 +12,7 @@ import 'package:jefe/src/project/impl/multi_project_command_support.dart';
 import 'package:jefe/src/project/jefe_project.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:logging/logging.dart';
-import 'package:option/option.dart';
+import 'package:quiver/core.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 Logger _log = new Logger('jefe.project.commands.git.impl');
@@ -35,6 +35,53 @@ class GitCommandsSingleProjectImpl
             (JefeProject p) async =>
                 new _GitCommandsSingleProjectImpl(project, await p.gitDir),
             project);
+
+  @override
+  Future assertOnBranch(String branchName) =>
+      doExecuteTask('assertOnBranch', (c) => c.assertOnBranch(branchName));
+
+  @override
+  Future assertWorkingTreeClean() => doExecuteTask(
+      'assertWorkingTreeClean', (c) => c.assertWorkingTreeClean());
+
+  @override
+  Future checkout(String branchName) =>
+      doExecuteTask('checkout', (c) => c.checkout(branchName));
+
+  @override
+  Future commit(String message) =>
+      doExecuteTask('commit', (c) => c.commit(message));
+
+  @override
+  Future fetch() => doExecuteTask('fetch', (c) => c.fetch());
+
+  @override
+  Future<String> fetchFileContentsAtSha(String sha, String filePath) =>
+      doExecuteTask('fetchFileContentsAtSha',
+          (c) => c.fetchFileContentsAtSha(sha, filePath));
+
+  @override
+  Future<String> fetchFileContentsAtVersion(Version version, String filePath) =>
+      doExecuteTask('fetchFileContentsAtVersion',
+          (c) => c.fetchFileContentsAtVersion(version, filePath));
+
+  @override
+  Future<bool> hasChangesSince(Version sinceVersion) =>
+      doExecuteTask('hasChangesSince', (c) => c.hasChangesSince(sinceVersion));
+
+  @override
+  Future merge(String commit) => doExecuteTask('merge', (c) => c.merge(commit));
+
+  @override
+  Future push() => doExecuteTask('push', (c) => c.push());
+
+  @override
+  Future tag(String tag, {String comment}) =>
+      doExecuteTask('tag', (c) => c.tag(tag, comment: comment));
+
+  @override
+  Future updateFromRemote(String branchName, [String remoteName = 'origin']) =>
+      doExecuteTask('updateFromRemote', (c) => c.updateFromRemote(branchName, remoteName));
 }
 
 class GitCommandsMultiProjectImpl
@@ -85,7 +132,7 @@ class _GitCommandsSingleProjectImpl implements GitCommands {
     await gitCheckout(_gitDir, branchName);
 
     final shaOpt = await getRemoteBranchSha(_gitDir, remoteName, branchName);
-    if (shaOpt is Some) {
+    if (shaOpt.isPresent) {
       await gitMerge(_gitDir, '$remoteName/$branchName', checkExists: true);
     }
   }
@@ -95,7 +142,7 @@ class _GitCommandsSingleProjectImpl implements GitCommands {
 
   @override
   Future<bool> hasChangesSince(Version sinceVersion) async {
-    return (await diffSummarySince(_gitDir, sinceVersion.toString())) is Some;
+    return (await diffSummarySince(_gitDir, sinceVersion.toString())).isPresent;
   }
 
 //  // TODO: remove this??

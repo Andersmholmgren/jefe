@@ -25,7 +25,7 @@ import 'package:jefe/src/project/pub_commands.dart';
 import 'package:jefe/src/project/pubspec_commands.dart';
 import 'package:jefe/src/project_commands/project_command.dart';
 import 'package:logging/logging.dart';
-import 'package:option/option.dart';
+import 'package:quiver/core.dart';
 import 'package:pub_semver/src/version.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:quiver/iterables.dart';
@@ -80,14 +80,13 @@ class JefeProjectImpl extends ProjectImpl
       }
     }
 
-    return concat(<Iterable<JefeProject>>[children, us()])
-        as Iterable<JefeProject>;
+    return concat(<Iterable<JefeProject>>[children, us()]);
   }
 
   @override
-  Option<JefeProject> getProjectByName(String projectName) =>
+  Optional<JefeProject> getProjectByName(String projectName) =>
       name == projectName
-          ? new Some<JefeProject>(this)
+          ? Optional.fromNullable(this)
           : directDependencies.getProjectByName(projectName);
 
   ProjectCommands _singleProjectCommands;
@@ -129,14 +128,12 @@ class JefeProjectSetImpl extends DelegatingSet<JefeProject>
   JefeProjectSetImpl(Set<JefeProject> base, this._dockerRootDirectory)
       : super(base);
 
-  Option<JefeProject> getProjectByName(String projectName) =>
-      map /**<Option<JefeProject>>*/ ((c) => c.getProjectByName(projectName))
-          .firstWhere((o) => o is Some, orElse: () => const None())
-      as Option<JefeProject>;
+  Optional<JefeProject> getProjectByName(String projectName) =>
+      map<Optional<JefeProject>> ((c) => c.getProjectByName(projectName))
+          .firstWhere((o) => o .isPresent, orElse: () => Optional.absent());
 
   Iterable<JefeProject> getDepthFirst(Set<JefeProject> visited) =>
-      expand /**<JefeProject>*/ ((n) => n.getDepthFirst(visited))
-      as Iterable<JefeProject>;
+      expand<JefeProject> ((n) => n.getDepthFirst(visited));
 }
 
 abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
@@ -147,8 +144,8 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
   Iterable<JefeProject> _filteredDepthFirst(ProjectFilter filter) =>
       depthFirst.where(filter ?? _noOpFilter);
 
-  Future/*<T>*/ processDepthFirst/*<T>*/(ProjectFunction/*<T>*/ command,
-      {ProjectFilter filter, Combiner/*<T>*/ combine}) async {
+  Future<T> processDepthFirst<T>(ProjectFunction<T> command,
+      {ProjectFilter filter, Combiner<T> combine}) async {
     return await new Stream<JefeProject>.fromIterable(
             _filteredDepthFirst(filter))
         .asyncMap((JefeProject p) => command(p))
@@ -157,15 +154,15 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
 //        _filteredDepthFirst(filter), (JefeProject p) => command(p));
   }
 
-  Future/*<T>*/ processAllConcurrently/*<T>*/(ProjectFunction/*<T>*/ command,
-      {ProjectFilter filter, Combiner/*<T>*/ combine}) async {
-    return new Stream/*<T>*/ .fromFutures(
-            _filteredDepthFirst(filter).map/*<Future<T>>*/(command))
+  Future<T> processAllConcurrently<T>(ProjectFunction<T> command,
+      {ProjectFilter filter, Combiner<T> combine}) async {
+    return new Stream<T> .fromFutures(
+            _filteredDepthFirst(filter).map<Future<T>>(command))
         .fold(null, _combinerToFold(combine ?? _takeLast));
   }
 
-  Future/*<T>*/ processAllSerially/*<T>*/(ProjectFunction/*<T>*/ command,
-          {ProjectFilter filter, Combiner/*<T>*/ combine}) =>
+  Future<T> processAllSerially<T>(ProjectFunction<T> command,
+          {ProjectFilter filter, Combiner<T> combine}) =>
       processDepthFirst(command, filter: filter, combine: combine);
 
   @override
@@ -238,17 +235,17 @@ abstract class _JefeProjectGraphMixin implements JefeProjectGraph {
 
 bool _noOpFilter(Project p) => true;
 
-/*=T*/ _takeLast/*<T>*/(/*=T*/ value, /*=T*/ element) => element;
+T _takeLast<T>(T value, T element) => element;
 
 //const Object _marker = const Object();
 
 // workaround the fact that reduce blows up when no results.
 // So run a fold instead but hide it from the caller
-Combiner/*<T>*/ _combinerToFold/*<T>*/(Combiner/*<T>*/ combiner) {
-  var/*=T*/ firstValue;
+Combiner<T> _combinerToFold<T>(Combiner<T> combiner) {
+  T firstValue;
   bool seenFirst = false;
   bool seenSecond = false;
-  return (/*=T*/ value, /*=T*/ element) {
+  return (T value, T element) {
     if (!seenFirst) {
       seenFirst = true;
       firstValue = element;

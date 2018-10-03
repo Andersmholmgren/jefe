@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0
+
+- Dart 2
+
 ## 0.4.0
 
 * Use relative paths in path dependencies

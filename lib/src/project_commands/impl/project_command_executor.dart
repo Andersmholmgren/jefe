@@ -44,7 +44,7 @@ class CommandExecutorImpl implements CommandExecutor {
     }
   }
 
-  Future/*<T>*/ executeOnProject/*<T>*/(ProjectCommand/*<T>*/ command,
+  Future<T> executeOnProject<T>(ProjectCommand<T> command,
       {CommandConcurrencyMode concurrencyMode:
           CommandConcurrencyMode.concurrentProject,
       ProjectFilter filter: _noOpFilter}) async {
@@ -60,13 +60,13 @@ class CommandExecutorImpl implements CommandExecutor {
     }
   }
 
-  Future/*<T>*/ _processDependenciesDepthFirst/*<T>*/(
-      Future/*<T>*/ process(JefeProject project), ProjectFilter filter) async {
+  Future<T> _processDependenciesDepthFirst<T>(
+      Future<T> process(JefeProject project), ProjectFilter filter) async {
     return (await _projectGroup.rootJefeProjects)
-        .processDepthFirst/*<T>*/(process, filter: filter);
+        .processDepthFirst<T>(process, filter: filter);
   }
 
-  Future/*<T>*/ executeAll/*<T>*/(CompositeProjectCommand/*<T>*/ composite,
+  Future<T> executeAll<T>(CompositeProjectCommand<T> composite,
       {CommandConcurrencyMode concurrencyMode:
           CommandConcurrencyMode.concurrentCommand,
       ProjectFilter filter: _noOpFilter}) async {
@@ -74,16 +74,16 @@ class CommandExecutorImpl implements CommandExecutor {
     if (concurrencyMode != CommandConcurrencyMode.serialDepthFirst &&
         composite.commands.every((c) =>
             c.concurrencyMode != CommandConcurrencyMode.serialDepthFirst)) {
-      return _executeAllOnConcurrentProjects/*<T>*/(composite, _filter);
+      return _executeAllOnConcurrentProjects<T>(composite, _filter);
     } else {
-      return _executeSerially/*<T>*/(composite, _filter);
+      return _executeSerially<T>(composite, _filter);
     }
 
     // TODO: add support for concurrentCommand
   }
 
-  Future/*<T>*/ _executeSerially/*<T>*/(
-      CompositeProjectCommand/*<T>*/ composite, ProjectFilter filter) async {
+  Future<T> _executeSerially<T>(
+      CompositeProjectCommand<T> composite, ProjectFilter filter) async {
     _log.info('Executing composite command "${composite.name} serially"');
 
 //    final result = await Future.forEach(
@@ -95,10 +95,10 @@ class CommandExecutorImpl implements CommandExecutor {
     final projectGraph = await _projectGroup.rootJefeProjects;
 
     final result =
-        new Stream<ProjectCommand/*<T>*/ >.fromIterable(composite.commands)
-            .asyncMap((ProjectCommand/*<T>*/ c) =>
-                projectGraph.processAllSerially/*<T>*/(c, filter: filter))
-            .reduce((/*=T*/ value, /*=T*/ element) => element) as Future/*<T>*/;
+        new Stream<ProjectCommand<T> >.fromIterable(composite.commands)
+            .asyncMap((ProjectCommand<T> c) =>
+                projectGraph.processAllSerially<T>(c, filter: filter))
+            .reduce((T value, T element) => element);
 
     _log.finer('Completed composite command "${composite.name}"');
     return result;
@@ -106,22 +106,22 @@ class CommandExecutorImpl implements CommandExecutor {
 
   // executes concurrently on all projects but each command must complete on all
   // projects before moving on to next
-  Future/*<T>*/ _executeAllOnConcurrentProjects/*<T>*/(
-      CompositeProjectCommand/*<T>*/ composite, ProjectFilter filter) async {
+  Future<T> _executeAllOnConcurrentProjects<T>(
+      CompositeProjectCommand<T> composite, ProjectFilter filter) async {
     _log.info('Executing composite command "${composite.name} '
         'concurrently on all projects"');
     final projectGraph = await _projectGroup.rootJefeProjects;
 
     final result =
-        new Stream<ProjectCommand/*<T>*/ >.fromIterable(composite.commands)
-            .asyncMap((ProjectCommand/*<T>*/ c) =>
-                projectGraph.processAllConcurrently/*<T>*/(c, filter: filter))
-            .reduce((/*=T*/ value, /*=T*/ element) => element) as Future/*<T>*/;
+        new Stream<ProjectCommand<T> >.fromIterable(composite.commands)
+            .asyncMap((ProjectCommand<T> c) =>
+                projectGraph.processAllConcurrently<T>(c, filter: filter))
+            .reduce((T value, T element) => element);
 
-//    return projectGraph.processAllConcurrently/*<T>*/(composite.commands);
+//    return projectGraph.processAllConcurrently<T>(composite.commands);
 
 //    await Future.forEach(composite.commands, (command) async {
-//      await _executeOnConcurrentProjects/*<T>*/(projectGraph, command, filter);
+//      await _executeOnConcurrentProjects<T>(projectGraph, command, filter);
 //    });
 
     _log.finer(
@@ -129,24 +129,24 @@ class CommandExecutorImpl implements CommandExecutor {
     return result;
   }
 
-  Future/*<T>*/ _executeOnConcurrentProjects/*<T>*/(
+  Future<T> _executeOnConcurrentProjects<T>(
           JefeProjectGraph projectGraph,
-          ProjectCommand/*<T>*/ command,
+          ProjectCommand<T> command,
           ProjectFilter filter) =>
-      projectGraph.processAllConcurrently/*<T>*/(command, filter: filter);
+      projectGraph.processAllConcurrently<T>(command, filter: filter);
 
-  Future/*<T>*/ _executeOnAllConcurrentProjects/*<T>*/(
-          ProjectCommand/*<T>*/ command, ProjectFilter filter) async =>
-      _executeOnConcurrentProjects/*<T>*/(
+  Future<T> _executeOnAllConcurrentProjects<T>(
+          ProjectCommand<T> command, ProjectFilter filter) async =>
+      _executeOnConcurrentProjects<T>(
           await _projectGroup.rootJefeProjects, command, filter);
 
-  Future/*<T>*/ executeOn/*<T>*/(
-          ProjectCommand/*<T>*/ command, String projectName) =>
-      _executeOnAllConcurrentProjects/*<T>*/(
+  Future<T> executeOn<T>(
+          ProjectCommand<T> command, String projectName) =>
+      _executeOnAllConcurrentProjects<T>(
           command, projectNameFilter(projectName));
 
-  Future/*<T>*/ executeOnGraph/*<T>*/(
-      ProjectDependencyGraphCommand/*<T>*/ command,
+  Future<T> executeOnGraph<T>(
+      ProjectDependencyGraphCommand<T> command,
       {ProjectFilter filter: _noOpFilter}) async {
     final _filter = filter != null ? filter : _noOpFilter;
     final JefeProjectGraph graph = await getRootProjects(
@@ -155,8 +155,8 @@ class CommandExecutorImpl implements CommandExecutor {
         graph, _projectGroup.containerDirectory, _filter);
   }
 
-  Future/*<T>*/ executeWithExecutor/*<T>*/(
-          ExecutorAwareProjectCommand/*<T>*/ command,
+  Future<T> executeWithExecutor<T>(
+          ExecutorAwareProjectCommand<T> command,
           {ProjectFilter filter}) =>
       command.process(this, filter: filter);
 }
@@ -176,7 +176,7 @@ class ConcurrentCommandExecutor {
   Future<Iterable<ProjectDependencies>> get depthFirst async =>
       (await getDependencyGraph(projects)).depthFirst;
 
-  Option<ProjectCommandQueue> getQueue(Project project) =>
+  Optional<ProjectCommandQueue> getQueue(Project project) =>
       new Option(_projectQueues[project.name]);
 
   Future awaitQueuesEmpty() {
@@ -198,7 +198,7 @@ class ConcurrentCommandExecutor {
           await Future.forEach(projectDeps, (ProjectDependencies pd) async {
             final qOpt = getQueue(pd.project);
 //            qOpt.map((q) )
-            if (qOpt is Some) {
+            if (qOpt .isPresent) {
               // TODO: assuming has depends
               await qOpt.get().add(() => command.process(pd.project,
                   dependencies: pd.directDependencies));
@@ -221,7 +221,7 @@ typedef ProjectCommandExecution();
 
 class ProjectCommandQueue {
   final Queue<ProjectCommandExecution> _queue = new Queue();
-  Option<ProjectCommandExecution> _pending = const None();
+  Optional<ProjectCommandExecution> _pending = Optional.absent();
   final ControllableProperty<bool> _queueIsEmpty =
       new ControllableProperty(true);
   Property<bool> get queueIsEmpty => _queueIsEmpty.distinctProperty;
@@ -237,7 +237,7 @@ class ProjectCommandQueue {
   Future _check() async {
     if (_pending is None && _queue.isNotEmpty) {
       final command = _queue.removeFirst();
-      _pending = new Some(command);
+      _pending = Optional.of(command);
       // TODO: should we attempt to catch exceptions?
       await command();
       _check();

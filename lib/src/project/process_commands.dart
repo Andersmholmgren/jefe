@@ -29,7 +29,7 @@ class ProcessCommandResult {
         ..add('stderr', _trimToNull(result.stderr)))
       .json;
 
-  String toString() => JSON.encode(this);
+  String toString() => json.encode(this);
 
   String toReportString() {
     final sb = new StringBuffer()

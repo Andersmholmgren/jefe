@@ -1,3 +1,5 @@
 description: "A simple console application."
 name: "test_project_template"
 version: "0.0.1"
+environment:
+  sdk: "<3.0.0"

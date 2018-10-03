@@ -38,7 +38,7 @@ class _DependencyGraph {
 
     return new JefeProjectSetImpl(
         _rootNodeMap.values
-            .map/*<JefeProject>*/((n) => n.toJefeProject())
+            .map<JefeProject>((n) => n.toJefeProject())
             .toSet(),
         _containerDirectory);
   }
@@ -48,10 +48,10 @@ class _DependencyGraph {
     dependencySet.forEach((ds) => _add(ds.project, ds.directDependencies));
   }
 
-//  Option<JefeProject> getProjectByName(String projectName) =>
+//  Optional<JefeProject> getProjectByName(String projectName) =>
 //      rootNodes.getProjectByName(projectName);
 
-//  Option<JefeProject> getProjectByName(String projectName) =>
+//  Optional<JefeProject> getProjectByName(String projectName) =>
 
   void _add(Project project, Set<Project> dependencies) {
     final node = _getOrCreateNode(project);
